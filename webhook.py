@@ -12,11 +12,48 @@ def webhook():
 
     print("Webhookを受信しました")
 
+    # StripeイベントID
+    event_id = data["id"]
+
     # Stripeの購入情報
     session = data["data"]["object"]
 
     # Stripe APIの認証
     stripe.api_key = os.environ["STRIPE_SECRET_KEY"]
+
+    # PostgreSQLへ接続
+    conn = psycopg2.connect(os.environ["DATABASE_URL"])
+    cur = conn.cursor()
+
+    # Webhookの処理済みイベントを管理するテーブル
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS webhook_events (
+            event_id VARCHAR(255) PRIMARY KEY,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
+    # このWebhookを初めて処理するか確認
+    cur.execute("""
+        INSERT INTO webhook_events (event_id)
+        VALUES (%s)
+        ON CONFLICT (event_id) DO NOTHING
+        RETURNING event_id
+    """, (event_id,))
+
+    new_event = cur.fetchone()
+
+    # すでに処理済みなら何もしない
+    if new_event is None:
+        conn.rollback()
+        cur.close()
+        conn.close()
+
+        print("このWebhookは処理済みです:", event_id)
+
+        return "OK", 200
+
+    print("新しいWebhookです:", event_id)
 
     # Stripeから購入商品の情報を取得
     line_items = stripe.checkout.Session.list_line_items(
@@ -30,10 +67,6 @@ def webhook():
         quantity += item.quantity
 
     print("商品数量:", quantity)
-
-    # PostgreSQLへ接続
-    conn = psycopg2.connect(os.environ["DATABASE_URL"])
-    cur = conn.cursor()
 
     # ticketsテーブルを作成（存在しない場合）
     cur.execute("""
@@ -96,6 +129,7 @@ def webhook():
             session["amount_total"] // quantity
         ))
 
+    # ここでWebhook処理全体を確定
     conn.commit()
 
     print("チケットをDBに保存しました")
