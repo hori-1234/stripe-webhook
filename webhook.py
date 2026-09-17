@@ -15,6 +15,9 @@ def webhook():
     # Stripeの購入情報
     session = data["data"]["object"]
 
+    # Stripe APIの認証
+    stripe.api_key = os.environ["STRIPE_SECRET_KEY"]
+
     # Stripeから購入商品の情報を取得
     line_items = stripe.checkout.Session.list_line_items(
         session["id"]
