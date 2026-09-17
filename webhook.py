@@ -23,11 +23,13 @@ def webhook():
         session["id"]
     )
 
-    for item in line_items.data:
-        print("商品数量:", item.quantity)
+    # 購入数量を取得
+    quantity = 0
 
-    # チケットIDを生成
-    ticket_id = "TKT-" + secrets.token_hex(8).upper()
+    for item in line_items.data:
+        quantity += item.quantity
+
+    print("商品数量:", quantity)
 
     # PostgreSQLへ接続
     conn = psycopg2.connect(os.environ["DATABASE_URL"])
@@ -54,65 +56,72 @@ def webhook():
         )
     """)
 
-    # チケットの連番を取得
-    cur.execute("""
-        INSERT INTO ticket_counters (ticket_type, next_number)
-        VALUES (%s, 2)
-        ON CONFLICT (ticket_type)
-        DO UPDATE SET next_number = ticket_counters.next_number + 1
-        RETURNING next_number
-    """, ("ライブチケット",))
+    # 数量分のチケットを発行
+    for i in range(quantity):
 
-    next_number = cur.fetchone()[0]
+        # チケットの連番を取得
+        cur.execute("""
+            INSERT INTO ticket_counters (ticket_type, next_number)
+            VALUES (%s, 2)
+            ON CONFLICT (ticket_type)
+            DO UPDATE SET next_number = ticket_counters.next_number + 1
+            RETURNING next_number
+        """, ("ライブチケット",))
 
-    issue_number = next_number - 1
+        next_number = cur.fetchone()[0]
 
-    print("発行番号:", issue_number)
+        issue_number = next_number - 1
 
-    # チケット情報をDBへ保存
-    cur.execute("""
-        INSERT INTO tickets (
-            ticket_type,
+        # チケットIDを生成
+        ticket_id = "TKT-" + secrets.token_hex(8).upper()
+
+        print("発行番号:", issue_number)
+        print("チケットID:", ticket_id)
+
+        # チケット情報をDBへ保存
+        cur.execute("""
+            INSERT INTO tickets (
+                ticket_type,
+                issue_number,
+                ticket_id,
+                purchaser_name,
+                amount
+            )
+            VALUES (%s, %s, %s, %s, %s)
+        """, (
+            "ライブチケット",
             issue_number,
             ticket_id,
-            purchaser_name,
-            amount
-        )
-        VALUES (%s, %s, %s, %s, %s)
-    """, (
-        "ライブチケット",
-        issue_number,
-        ticket_id,
-        session.get("customer_details", {}).get("name"),
-        session["amount_total"]
-    ))
+            session.get("customer_details", {}).get("name"),
+            session["amount_total"] // quantity
+        ))
 
     conn.commit()
 
     print("チケットをDBに保存しました")
 
-    # DBに保存された最新のチケットを確認
+    # DBに保存されたチケットを確認
     cur.execute("""
         SELECT ticket_type, issue_number, ticket_id, purchaser_name, amount
         FROM tickets
         ORDER BY id DESC
-        LIMIT 1
-    """)
+        LIMIT %s
+    """, (quantity,))
 
-    row = cur.fetchone()
+    rows = cur.fetchall()
 
-    print("DBの最新チケット:", row)
+    for row in reversed(rows):
+        print("DBのチケット:", row)
 
     cur.close()
     conn.close()
 
     print("購入金額:", session["amount_total"], "円")
     print("決済状態:", session["payment_status"])
-    print("チケットID:", ticket_id)
 
     return "OK", 200
+
 
 @app.route("/")
 def home():
     return "Webhook server is running"
-
