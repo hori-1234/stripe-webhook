@@ -34,6 +34,14 @@ def webhook():
         )
     """)
 
+    # チケットごとの連番管理テーブルを作成
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS ticket_counters (
+            ticket_type VARCHAR(100) PRIMARY KEY,
+            next_number INTEGER NOT NULL
+        )
+    """)
+
     # 次の発行番号を取得
     cur.execute("""
         SELECT COALESCE(MAX(issue_number), 0) + 1
