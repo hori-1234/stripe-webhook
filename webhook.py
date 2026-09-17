@@ -1,5 +1,7 @@
 from flask import Flask, request
 import secrets
+import os
+import psycopg2
 
 app = Flask(__name__)
 
@@ -8,6 +10,11 @@ def webhook():
     data = request.json
 
     print("Webhookを受信しました")
+
+    # PostgreSQLへ接続
+    conn = psycopg2.connect(os.environ["DATABASE_URL"])
+    print("PostgreSQLへの接続に成功しました")
+    conn.close()
 
     # Stripeの購入情報
     session = data["data"]["object"]
