@@ -34,6 +34,17 @@ def webhook():
         )
     """)
 
+    # 次の発行番号を取得
+    cur.execute("""
+        SELECT COALESCE(MAX(issue_number), 0) + 1
+        FROM tickets
+        WHERE ticket_type = %s
+    """, ("ライブチケット",))
+
+    issue_number = cur.fetchone()[0]
+
+    print("発行番号:", issue_number)
+
     # チケット情報をDBへ保存
     cur.execute("""
         INSERT INTO tickets (
@@ -46,7 +57,7 @@ def webhook():
         VALUES (%s, %s, %s, %s, %s)
     """, (
         "ライブチケット",
-        1,
+        issue_number,
         ticket_id,
         session.get("customer_details", {}).get("name"),
         session["amount_total"]
