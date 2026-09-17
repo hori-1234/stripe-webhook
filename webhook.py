@@ -15,6 +15,14 @@ def webhook():
     # Stripeの購入情報
     session = data["data"]["object"]
 
+    # Stripeから購入商品の情報を取得
+    line_items = stripe.checkout.Session.list_line_items(
+        session["id"]
+    )
+
+    for item in line_items.data:
+        print("商品数量:", item.quantity)
+
     # チケットIDを生成
     ticket_id = "TKT-" + secrets.token_hex(8).upper()
 
