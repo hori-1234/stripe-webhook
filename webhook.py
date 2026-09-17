@@ -13,8 +13,25 @@ def webhook():
 
     # PostgreSQLへ接続
     conn = psycopg2.connect(os.environ["DATABASE_URL"])
-    print("PostgreSQLへの接続に成功しました")
+    cur = conn.cursor()
+
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS tickets (
+            id SERIAL PRIMARY KEY,
+            ticket_type VARCHAR(100) NOT NULL,
+            issue_number INTEGER NOT NULL,
+            ticket_id VARCHAR(100) NOT NULL UNIQUE,
+            purchaser_name VARCHAR(200),
+            amount INTEGER,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
+    conn.commit()
+    cur.close()
     conn.close()
+
+    print("ticketsテーブルを確認しました")
 
     # Stripeの購入情報
     session = data["data"]["object"]
