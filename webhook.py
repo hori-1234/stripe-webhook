@@ -104,19 +104,3 @@ def webhook():
 @app.route("/")
 def home():
     return "Webhook server is running"
-
-# DB初期化
-@app.route("/reset-db")
-def reset_db():
-    conn = psycopg2.connect(os.environ["DATABASE_URL"])
-    cur = conn.cursor()
-
-    cur.execute("DROP TABLE IF EXISTS tickets")
-    cur.execute("DROP TABLE IF EXISTS ticket_counters")
-
-    conn.commit()
-
-    cur.close()
-    conn.close()
-
-    return "DBを初期化しました"
