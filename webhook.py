@@ -42,14 +42,18 @@ def webhook():
         )
     """)
 
-    # 次の発行番号を取得
+    # チケットの連番を取得
     cur.execute("""
-        SELECT COALESCE(MAX(issue_number), 0) + 1
-        FROM tickets
-        WHERE ticket_type = %s
+        INSERT INTO ticket_counters (ticket_type, next_number)
+        VALUES (%s, 2)
+        ON CONFLICT (ticket_type)
+        DO UPDATE SET next_number = ticket_counters.next_number + 1
+        RETURNING next_number
     """, ("ライブチケット",))
 
-    issue_number = cur.fetchone()[0]
+    next_number = cur.fetchone()[0]
+
+    issue_number = next_number - 1
 
     print("発行番号:", issue_number)
 
