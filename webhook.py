@@ -2,6 +2,7 @@ from flask import Flask, request
 import os
 import psycopg2
 import stripe
+import resend
 from types import SimpleNamespace
 
 from ticket import issue_tickets
@@ -11,6 +12,9 @@ app = Flask(__name__)
 
 # Stripe API認証
 stripe.api_key = os.environ["STRIPE_SECRET_KEY"]
+
+# Resend API認証
+resend.api_key = os.environ["RESEND_API_KEY"]
 
 
 @app.route("/webhook", methods=["POST"])
@@ -185,6 +189,30 @@ def webhook():
     finally:
         cur.close()
         conn.close()
+
+
+# Resendテストメール
+@app.route("/test-email")
+def test_email():
+
+    try:
+
+        response = resend.Emails.send({
+            "from": "onboarding@resend.dev",
+            "to": ["delivered@resend.dev"],
+            "subject": "マイマケ テストメール",
+            "text": "Resendからのテストメールです。"
+        })
+
+        print("テストメール送信成功:", response)
+
+        return "テストメール送信成功"
+
+    except Exception as e:
+
+        print("テストメール送信失敗:", e)
+
+        return "テストメール送信失敗", 500
 
 
 @app.route("/")
