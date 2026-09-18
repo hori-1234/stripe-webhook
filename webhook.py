@@ -78,49 +78,45 @@ def webhook():
 
     print("新しいWebhookです:", event_id)
 
+    # チケット商品とPrice IDの対応表
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS ticket_products (
+            price_id VARCHAR(255) PRIMARY KEY,
+            ticket_type VARCHAR(100) NOT NULL
+        )
+    """)
+
+    # 環境変数からPrice IDを取得
+    live_ticket_price_id = os.environ["LIVE_TICKET_PRICE_ID"]
+    live_ticket_b_price_id = os.environ["LIVE_TICKET_B_PRICE_ID"]
+
+    # Price IDとチケット種類を登録
+    cur.execute("""
+        INSERT INTO ticket_products (price_id, ticket_type)
+        VALUES (%s, %s)
+        ON CONFLICT (price_id)
+        DO UPDATE SET ticket_type = EXCLUDED.ticket_type
+    """, (
+        live_ticket_price_id,
+        "ライブチケット"
+    ))
+
+    cur.execute("""
+        INSERT INTO ticket_products (price_id, ticket_type)
+        VALUES (%s, %s)
+        ON CONFLICT (price_id)
+        DO UPDATE SET ticket_type = EXCLUDED.ticket_type
+    """, (
+        live_ticket_b_price_id,
+        "ライブチケットB"
+    ))
+
     # Stripeから購入商品の情報を取得
     line_items = stripe.checkout.Session.list_line_items(
         session["id"]
     )
 
-    # 登録してあるライブチケットのPrice ID
-    live_ticket_price_id = os.environ["LIVE_TICKET_PRICE_ID"]
-
-    # 購入数量
-    quantity = 0
-
-    for item in line_items.data:
-
-        price_id = item.price.id
-
-        print("購入されたPrice ID:", price_id)
-
-        # ライブチケットか確認
-        if price_id == live_ticket_price_id:
-
-            quantity += item.quantity
-
-            print("ライブチケットを確認しました")
-            print("数量:", item.quantity)
-
-        else:
-
-            print("未登録の商品です:", price_id)
-
-    # ライブチケットが0枚なら処理しない
-    if quantity == 0:
-
-        conn.rollback()
-        cur.close()
-        conn.close()
-
-        print("発行対象のライブチケットがありません")
-
-        return "OK", 200
-
-    print("ライブチケット合計数量:", quantity)
-
-    # ticketsテーブルを作成（存在しない場合）
+    # ticketsテーブルを作成
     cur.execute("""
         CREATE TABLE IF NOT EXISTS tickets (
             id SERIAL PRIMARY KEY,
@@ -133,7 +129,7 @@ def webhook():
         )
     """)
 
-    # チケットごとの連番管理テーブルを作成
+    # チケットごとの連番管理テーブル
     cur.execute("""
         CREATE TABLE IF NOT EXISTS ticket_counters (
             ticket_type VARCHAR(100) PRIMARY KEY,
@@ -141,58 +137,87 @@ def webhook():
         )
     """)
 
-    # 数量分のチケットを発行
-    for i in range(quantity):
+    # 商品ごとに処理
+    for item in line_items.data:
 
-        # チケットの連番を取得
+        price_id = item.price.id
+        quantity = item.quantity
+
+        print("購入されたPrice ID:", price_id)
+        print("購入数量:", quantity)
+
+        # Price IDからチケット種類を検索
         cur.execute("""
-            INSERT INTO ticket_counters (ticket_type, next_number)
-            VALUES (%s, 2)
-            ON CONFLICT (ticket_type)
-            DO UPDATE SET next_number = ticket_counters.next_number + 1
-            RETURNING next_number
-        """, ("ライブチケット",))
+            SELECT ticket_type
+            FROM ticket_products
+            WHERE price_id = %s
+        """, (price_id,))
 
-        next_number = cur.fetchone()[0]
+        result = cur.fetchone()
 
-        issue_number = next_number - 1
+        # 未登録の商品
+        if result is None:
 
-        # チケットIDを生成
-        ticket_id = "TKT-" + secrets.token_hex(8).upper()
+            print("未登録の商品です:", price_id)
 
-        print("発行番号:", issue_number)
-        print("チケットID:", ticket_id)
+            continue
 
-        # チケット情報をDBへ保存
-        cur.execute("""
-            INSERT INTO tickets (
+        ticket_type = result[0]
+
+        print("チケット種類:", ticket_type)
+
+        # 数量分のチケットを発行
+        for i in range(quantity):
+
+            # チケット種類ごとの連番を取得
+            cur.execute("""
+                INSERT INTO ticket_counters (ticket_type, next_number)
+                VALUES (%s, 2)
+                ON CONFLICT (ticket_type)
+                DO UPDATE SET next_number = ticket_counters.next_number + 1
+                RETURNING next_number
+            """, (ticket_type,))
+
+            next_number = cur.fetchone()[0]
+
+            issue_number = next_number - 1
+
+            # チケットIDを生成
+            ticket_id = "TKT-" + secrets.token_hex(8).upper()
+
+            print("発行番号:", issue_number)
+            print("チケットID:", ticket_id)
+
+            # チケット情報をDBへ保存
+            cur.execute("""
+                INSERT INTO tickets (
+                    ticket_type,
+                    issue_number,
+                    ticket_id,
+                    purchaser_name,
+                    amount
+                )
+                VALUES (%s, %s, %s, %s, %s)
+            """, (
                 ticket_type,
                 issue_number,
                 ticket_id,
-                purchaser_name,
-                amount
-            )
-            VALUES (%s, %s, %s, %s, %s)
-        """, (
-            "ライブチケット",
-            issue_number,
-            ticket_id,
-            session.get("customer_details", {}).get("name"),
-            session["amount_total"] // quantity
-        ))
+                session.get("customer_details", {}).get("name"),
+                item.amount_total // quantity
+            ))
 
     # Webhook処理全体を確定
     conn.commit()
 
     print("チケットをDBに保存しました")
 
-    # DBに保存されたチケットを確認
+    # 今回発行されたチケットを確認
     cur.execute("""
         SELECT ticket_type, issue_number, ticket_id, purchaser_name, amount
         FROM tickets
         ORDER BY id DESC
-        LIMIT %s
-    """, (quantity,))
+        LIMIT 10
+    """)
 
     rows = cur.fetchall()
 
