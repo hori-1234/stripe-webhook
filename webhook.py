@@ -118,7 +118,8 @@ def webhook():
         product = item.price.product
 
         # 商品メタデータからチケット種類を取得
-        ticket_type = product.metadata.get("ticket_type")
+        metadata = product.metadata.to_dict()
+        ticket_type = metadata.get("ticket_type")
 
         # ticket_typeが設定されていない商品
         if not ticket_type:
