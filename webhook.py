@@ -2,8 +2,10 @@ from flask import Flask, request
 import os
 import psycopg2
 import stripe
+from types import SimpleNamespace
 
 from ticket import issue_tickets
+from goods import save_goods
 
 app = Flask(__name__)
 
@@ -85,12 +87,59 @@ def webhook():
             expand=["data.price.product"]
         )
 
-        # 現在はチケット処理を実行
-        issue_tickets(
-            cur,
-            line_items,
-            session
-        )
+        # チケットと物販を分ける
+        ticket_items = []
+        goods_items = []
+
+        for item in line_items.data:
+
+            product = item.price.product
+
+            metadata = product.metadata.to_dict()
+
+            product_type = metadata.get("product_type")
+
+            print("商品名:", product.name)
+            print("product_type:", product_type)
+
+            if product_type == "ticket":
+                ticket_items.append(item)
+
+            elif product_type == "goods":
+                goods_items.append(item)
+
+            else:
+                print("product_typeが設定されていない商品です:", product.id)
+
+        # チケット処理
+        if ticket_items:
+
+            print("チケット処理を開始します")
+
+            ticket_line_items = SimpleNamespace(
+                data=ticket_items
+            )
+
+            issue_tickets(
+                cur,
+                ticket_line_items,
+                session
+            )
+
+        # 物販処理
+        if goods_items:
+
+            print("物販処理を開始します")
+
+            goods_line_items = SimpleNamespace(
+                data=goods_items
+            )
+
+            save_goods(
+                cur,
+                goods_line_items,
+                session
+            )
 
         # Webhook処理全体を確定
         conn.commit()
