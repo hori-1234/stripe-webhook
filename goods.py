@@ -3,6 +3,7 @@ def save_goods(cur, line_items, session):
     cur.execute("""
         CREATE TABLE IF NOT EXISTS goods (
             id SERIAL PRIMARY KEY,
+            goods_type VARCHAR(200) NOT NULL,
             product_name VARCHAR(200) NOT NULL,
             purchaser_name VARCHAR(200),
             email VARCHAR(320),
@@ -22,6 +23,12 @@ def save_goods(cur, line_items, session):
         # 商品名
         product_name = product.name
 
+        # 商品メタデータ
+        metadata = product.metadata.to_dict()
+
+        # 物販の種類
+        goods_type = metadata.get("goods_type")
+
         # 購入数量
         quantity = item.quantity
 
@@ -37,6 +44,7 @@ def save_goods(cur, line_items, session):
         # Stripeの決済ID
         payment_intent_id = session.get("payment_intent")
 
+        print("物販種類:", goods_type)
         print("商品名:", product_name)
         print("購入者名:", purchaser_name)
         print("メールアドレス:", email)
@@ -47,6 +55,7 @@ def save_goods(cur, line_items, session):
         # DBへ保存
         cur.execute("""
             INSERT INTO goods (
+                goods_type,
                 product_name,
                 purchaser_name,
                 email,
@@ -54,8 +63,9 @@ def save_goods(cur, line_items, session):
                 amount,
                 payment_intent_id
             )
-            VALUES (%s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
         """, (
+            goods_type,
             product_name,
             purchaser_name,
             email,
