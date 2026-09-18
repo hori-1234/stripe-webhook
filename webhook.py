@@ -83,13 +83,42 @@ def webhook():
         session["id"]
     )
 
-    # 購入数量を取得
+    # 登録してあるライブチケットのPrice ID
+    live_ticket_price_id = os.environ["LIVE_TICKET_PRICE_ID"]
+
+    # 購入数量
     quantity = 0
 
     for item in line_items.data:
-        quantity += item.quantity
 
-    print("商品数量:", quantity)
+        price_id = item.price.id
+
+        print("購入されたPrice ID:", price_id)
+
+        # ライブチケットか確認
+        if price_id == live_ticket_price_id:
+
+            quantity += item.quantity
+
+            print("ライブチケットを確認しました")
+            print("数量:", item.quantity)
+
+        else:
+
+            print("未登録の商品です:", price_id)
+
+    # ライブチケットが0枚なら処理しない
+    if quantity == 0:
+
+        conn.rollback()
+        cur.close()
+        conn.close()
+
+        print("発行対象のライブチケットがありません")
+
+        return "OK", 200
+
+    print("ライブチケット合計数量:", quantity)
 
     # ticketsテーブルを作成（存在しない場合）
     cur.execute("""
