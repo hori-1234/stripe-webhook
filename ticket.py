@@ -1,4 +1,6 @@
 import secrets
+import qrcode
+from io import BytesIO
 
 
 def issue_tickets(cur, line_items, session):
@@ -67,6 +69,19 @@ def issue_tickets(cur, line_items, session):
 
             print("発行番号:", issue_number)
             print("チケットID:", ticket_id)
+
+            # QRコードを生成
+            qr = qrcode.make(ticket_id)
+
+            # QR画像をメモリ上に作成
+            qr_buffer = BytesIO()
+            qr.save(qr_buffer, format="PNG")
+
+            # 画像データを取得
+            qr_bytes = qr_buffer.getvalue()
+
+            print("QRコードを生成しました")
+            print("QRデータサイズ:", len(qr_bytes), "bytes")
 
             # チケット情報をDBへ保存
             cur.execute("""
