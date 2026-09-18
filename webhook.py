@@ -8,7 +8,24 @@ app = Flask(__name__)
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
-    data = request.json
+
+payload = request.data
+sig_header = request.headers.get("Stripe-Signature")
+
+try:
+    event = stripe.Webhook.construct_event(
+        payload,
+        sig_header,
+        os.environ["STRIPE_WEBHOOK_SECRET"]
+    )
+except ValueError:
+    print("Webhookのデータが不正です")
+    return "Invalid payload", 400
+except stripe.error.SignatureVerificationError:
+    print("Webhookの署名が不正です")
+    return "Invalid signature", 400
+
+data = event.to_dict_recursive()
 
     print("Webhookを受信しました")
 
