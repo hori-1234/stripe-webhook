@@ -1,4 +1,3 @@
-```python
 from flask import Flask, request
 import secrets
 import os
