@@ -1,3 +1,4 @@
+```python
 from flask import Flask, request
 import secrets
 import os
@@ -5,6 +6,9 @@ import psycopg2
 import stripe
 
 app = Flask(__name__)
+
+# Stripe API認証
+stripe.api_key = os.environ["STRIPE_SECRET_KEY"]
 
 
 @app.route("/webhook", methods=["POST"])
@@ -41,9 +45,6 @@ def webhook():
     # Stripeの購入情報
     session = data["data"]["object"]
 
-    # Stripe APIの認証
-    stripe.api_key = os.environ["STRIPE_SECRET_KEY"]
-
     # PostgreSQLへ接続
     conn = psycopg2.connect(os.environ["DATABASE_URL"])
     cur = conn.cursor()
@@ -78,42 +79,10 @@ def webhook():
 
     print("新しいWebhookです:", event_id)
 
-    # チケット商品とPrice IDの対応表
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS ticket_products (
-            price_id VARCHAR(255) PRIMARY KEY,
-            ticket_type VARCHAR(100) NOT NULL
-        )
-    """)
-
-    # 環境変数からPrice IDを取得
-    live_ticket_price_id = os.environ["LIVE_TICKET_PRICE_ID"]
-    live_ticket_b_price_id = os.environ["LIVE_TICKET_B_PRICE_ID"]
-
-    # Price IDとチケット種類を登録
-    cur.execute("""
-        INSERT INTO ticket_products (price_id, ticket_type)
-        VALUES (%s, %s)
-        ON CONFLICT (price_id)
-        DO UPDATE SET ticket_type = EXCLUDED.ticket_type
-    """, (
-        live_ticket_price_id,
-        "ライブチケット"
-    ))
-
-    cur.execute("""
-        INSERT INTO ticket_products (price_id, ticket_type)
-        VALUES (%s, %s)
-        ON CONFLICT (price_id)
-        DO UPDATE SET ticket_type = EXCLUDED.ticket_type
-    """, (
-        live_ticket_b_price_id,
-        "ライブチケットB"
-    ))
-
     # Stripeから購入商品の情報を取得
     line_items = stripe.checkout.Session.list_line_items(
-        session["id"]
+        session["id"],
+        expand=["data.price.product"]
     )
 
     # ticketsテーブルを作成
@@ -146,23 +115,16 @@ def webhook():
         print("購入されたPrice ID:", price_id)
         print("購入数量:", quantity)
 
-        # Price IDからチケット種類を検索
-        cur.execute("""
-            SELECT ticket_type
-            FROM ticket_products
-            WHERE price_id = %s
-        """, (price_id,))
+        # Stripeの商品を取得
+        product = item.price.product
 
-        result = cur.fetchone()
+        # 商品メタデータからチケット種類を取得
+        ticket_type = product.metadata.get("ticket_type")
 
-        # 未登録の商品
-        if result is None:
-
-            print("未登録の商品です:", price_id)
-
+        # ticket_typeが設定されていない商品
+        if not ticket_type:
+            print("ticket_typeが設定されていない商品です:", product.id)
             continue
-
-        ticket_type = result[0]
 
         print("チケット種類:", ticket_type)
 
@@ -236,3 +198,4 @@ def webhook():
 @app.route("/")
 def home():
     return "Webhook server is running"
+```
