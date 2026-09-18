@@ -111,6 +111,9 @@ def webhook():
             else:
                 print("product_typeが設定されていない商品です:", product.id)
 
+        # 発行されたチケットを保持
+        issued_tickets = []
+
         # チケット処理
         if ticket_items:
 
@@ -120,11 +123,21 @@ def webhook():
                 data=ticket_items
             )
 
-            issue_tickets(
+            issued_tickets = issue_tickets(
                 cur,
                 ticket_line_items,
                 session
             )
+
+            print("発行されたチケット数:", len(issued_tickets))
+
+            for ticket in issued_tickets:
+                print(
+                    "発行チケット:",
+                    ticket["ticket_type"],
+                    ticket["issue_number"],
+                    ticket["ticket_id"]
+                )
 
         # 物販処理
         if goods_items:
