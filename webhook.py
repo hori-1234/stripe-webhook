@@ -7,6 +7,7 @@ from types import SimpleNamespace
 
 from ticket import issue_tickets
 from goods import save_goods
+from mail import send_ticket_email
 
 app = Flask(__name__)
 
@@ -113,7 +114,10 @@ def webhook():
                 goods_items.append(item)
 
             else:
-                print("product_typeが設定されていない商品です:", product.id)
+                print(
+                    "product_typeが設定されていない商品です:",
+                    product.id
+                )
 
         # 発行されたチケットを保持
         issued_tickets = []
@@ -133,9 +137,13 @@ def webhook():
                 session
             )
 
-            print("発行されたチケット数:", len(issued_tickets))
+            print(
+                "発行されたチケット数:",
+                len(issued_tickets)
+            )
 
             for ticket in issued_tickets:
+
                 print(
                     "発行チケット:",
                     ticket["ticket_type"],
@@ -161,6 +169,16 @@ def webhook():
         # Webhook処理全体を確定
         conn.commit()
 
+        # チケットメール送信
+        if issued_tickets:
+
+            print("チケットメール送信を開始します")
+
+            send_ticket_email(
+                session,
+                issued_tickets
+            )
+
         # 今回発行されたチケットを確認
         cur.execute("""
             SELECT ticket_type, issue_number, ticket_id, purchaser_name, amount
@@ -172,21 +190,37 @@ def webhook():
         rows = cur.fetchall()
 
         for row in reversed(rows):
-            print("DBのチケット:", row)
 
-        print("購入金額:", session["amount_total"], "円")
-        print("決済状態:", session["payment_status"])
+            print(
+                "DBのチケット:",
+                row
+            )
+
+        print(
+            "購入金額:",
+            session["amount_total"],
+            "円"
+        )
+
+        print(
+            "決済状態:",
+            session["payment_status"]
+        )
 
         return "OK", 200
 
     except Exception:
+
         conn.rollback()
 
-        print("Webhook処理中にエラーが発生しました")
+        print(
+            "Webhook処理中にエラーが発生しました"
+        )
 
         raise
 
     finally:
+
         cur.close()
         conn.close()
 
@@ -204,17 +238,24 @@ def test_email():
             "text": "Resendからのテストメールです。"
         })
 
-        print("テストメール送信成功:", response)
+        print(
+            "テストメール送信成功:",
+            response
+        )
 
         return "テストメール送信成功"
 
     except Exception as e:
 
-        print("テストメール送信失敗:", e)
+        print(
+            "テストメール送信失敗:",
+            e
+        )
 
         return "テストメール送信失敗", 500
 
 
 @app.route("/")
 def home():
+
     return "Webhook server is running"
