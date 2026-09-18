@@ -6,27 +6,33 @@ import stripe
 
 app = Flask(__name__)
 
+
 @app.route("/webhook", methods=["POST"])
 def webhook():
 
-payload = request.data
-sig_header = request.headers.get("Stripe-Signature")
+    # Stripe Webhookの署名を検証
+    payload = request.data
+    sig_header = request.headers.get("Stripe-Signature")
 
-try:
-    event = stripe.Webhook.construct_event(
-        payload,
-        sig_header,
-        os.environ["STRIPE_WEBHOOK_SECRET"]
-    )
-except ValueError:
-    print("Webhookのデータが不正です")
-    return "Invalid payload", 400
-except stripe.error.SignatureVerificationError:
-    print("Webhookの署名が不正です")
-    return "Invalid signature", 400
+    try:
+        event = stripe.Webhook.construct_event(
+            payload,
+            sig_header,
+            os.environ["STRIPE_WEBHOOK_SECRET"]
+        )
 
-data = event.to_dict_recursive()
+    except ValueError:
+        print("Webhookのデータが不正です")
+        return "Invalid payload", 400
 
+    except stripe.error.SignatureVerificationError:
+        print("Webhookの署名が不正です")
+        return "Invalid signature", 400
+
+    # 検証済みのStripeイベントを取得
+    data = event.to_dict_recursive()
+
+    print("Webhookの署名検証に成功しました")
     print("Webhookを受信しました")
 
     # StripeイベントID
@@ -146,7 +152,7 @@ data = event.to_dict_recursive()
             session["amount_total"] // quantity
         ))
 
-    # ここでWebhook処理全体を確定
+    # Webhook処理全体を確定
     conn.commit()
 
     print("チケットをDBに保存しました")
