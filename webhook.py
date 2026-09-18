@@ -30,7 +30,7 @@ def webhook():
         return "Invalid signature", 400
 
     # 検証済みのStripeイベントを取得
-    data = event.to_dict_recursive()
+    data = event.to_dict()
 
     print("Webhookの署名検証に成功しました")
     print("Webhookを受信しました")
