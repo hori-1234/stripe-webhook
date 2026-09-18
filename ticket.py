@@ -25,6 +25,9 @@ def issue_tickets(cur, line_items, session):
         )
     """)
 
+    # 発行したチケット情報を保存するリスト
+    issued_tickets = []
+
     # 商品ごとに処理
     for item in line_items.data:
 
@@ -83,6 +86,9 @@ def issue_tickets(cur, line_items, session):
             print("QRコードを生成しました")
             print("QRデータサイズ:", len(qr_bytes), "bytes")
 
+            # 購入者名
+            purchaser_name = session.get("customer_details", {}).get("name")
+
             # チケット情報をDBへ保存
             cur.execute("""
                 INSERT INTO tickets (
@@ -97,8 +103,21 @@ def issue_tickets(cur, line_items, session):
                 ticket_type,
                 issue_number,
                 ticket_id,
-                session.get("customer_details", {}).get("name"),
+                purchaser_name,
                 item.amount_total // quantity
             ))
 
+            # 発行したチケット情報を保存
+            issued_tickets.append({
+                "ticket_type": ticket_type,
+                "issue_number": issue_number,
+                "ticket_id": ticket_id,
+                "purchaser_name": purchaser_name,
+                "amount": item.amount_total // quantity,
+                "qr_bytes": qr_bytes
+            })
+
     print("チケットをDBに保存しました")
+
+    # 発行したチケット情報を返す
+    return issued_tickets
