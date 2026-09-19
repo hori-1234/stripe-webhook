@@ -58,17 +58,30 @@ def check_ticket(ticket_id):
 
             <body style="
                 font-family: sans-serif;
-                padding: 30px 20px;
-                text-align: center;
+                margin: 0;
+                padding: 20px;
+                background: #f5f5f5;
             ">
 
-                <h1 style="font-size: 32px;">
-                    チケット無効
-                </h1>
+                <div style="
+                    max-width: 500px;
+                    margin: 0 auto;
+                    background: white;
+                    padding: 30px 20px;
+                    border-radius: 15px;
+                    box-sizing: border-box;
+                    text-align: center;
+                ">
 
-                <p style="font-size: 20px;">
-                    このチケットは存在しません。
-                </p>
+                    <h1 style="font-size: 32px;">
+                        チケット無効
+                    </h1>
+
+                    <p style="font-size: 20px;">
+                        このチケットは存在しません。
+                    </p>
+
+                </div>
 
             </body>
             </html>
@@ -115,12 +128,12 @@ def check_ticket(ticket_id):
             used
         )
 
-        # 使用済み
         if used:
 
             return f"""
             <!DOCTYPE html>
             <html lang="ja">
+
             <head>
                 <meta charset="UTF-8">
                 <meta name="viewport"
@@ -145,9 +158,9 @@ def check_ticket(ticket_id):
                 ">
 
                     <h1 style="
-                        font-size: 32px;
+                        font-size: 34px;
                         text-align: center;
-                        margin-bottom: 30px;
+                        margin-bottom: 25px;
                     ">
                         使用済み
                     </h1>
@@ -162,7 +175,7 @@ def check_ticket(ticket_id):
 
                     <div style="
                         font-size: 20px;
-                        line-height: 2;
+                        line-height: 1.8;
                     ">
 
                         <p>
@@ -198,7 +211,6 @@ def check_ticket(ticket_id):
             </html>
             """, 400
 
-        # 有効
         return f"""
         <!DOCTYPE html>
         <html lang="ja">
@@ -207,7 +219,6 @@ def check_ticket(ticket_id):
             <meta charset="UTF-8">
             <meta name="viewport"
                   content="width=device-width, initial-scale=1.0">
-
             <title>チケット確認</title>
         </head>
 
@@ -246,7 +257,7 @@ def check_ticket(ticket_id):
 
                 <div style="
                     font-size: 21px;
-                    line-height: 2;
+                    line-height: 1.8;
                 ">
 
                     <p>
@@ -276,11 +287,14 @@ def check_ticket(ticket_id):
 
                 </div>
 
-                <form method="POST"
-                      action="/ticket/{ticket_id}/use"
-                      style="margin-top: 35px;">
+                <form
+                    method="POST"
+                    action="/ticket/{ticket_id}/use"
+                    style="margin-top: 35px;"
+                >
 
-                    <button type="submit"
+                    <button
+                        type="submit"
                         style="
                             width: 100%;
                             padding: 18px;
@@ -289,7 +303,8 @@ def check_ticket(ticket_id):
                             border: none;
                             border-radius: 10px;
                             cursor: pointer;
-                        ">
+                        "
+                    >
                         入場OK
                     </button>
 
@@ -298,9 +313,31 @@ def check_ticket(ticket_id):
             </div>
 
         </body>
-
         </html>
         """
+
+    except Exception as e:
+
+        conn.rollback()
+
+        print(
+            "チケット確認中にエラーが発生しました"
+        )
+
+        print(
+            "エラー内容:",
+            repr(e)
+        )
+
+        return (
+            "チケット確認中にエラーが発生しました",
+            500
+        )
+
+    finally:
+
+        cur.close()
+        conn.close()
 
 
 def use_ticket(ticket_id):
@@ -352,21 +389,35 @@ def use_ticket(ticket_id):
                 <meta charset="UTF-8">
                 <meta name="viewport"
                       content="width=device-width, initial-scale=1.0">
+                <title>チケット確認</title>
             </head>
 
             <body style="
                 font-family: sans-serif;
-                padding: 30px 20px;
-                text-align: center;
+                margin: 0;
+                padding: 20px;
+                background: #f5f5f5;
             ">
 
-                <h1 style="font-size: 32px;">
-                    チケット無効
-                </h1>
+                <div style="
+                    max-width: 500px;
+                    margin: 0 auto;
+                    background: white;
+                    padding: 30px 20px;
+                    border-radius: 15px;
+                    box-sizing: border-box;
+                    text-align: center;
+                ">
 
-                <p style="font-size: 20px;">
-                    このチケットは存在しません。
-                </p>
+                    <h1 style="font-size: 32px;">
+                        チケット無効
+                    </h1>
+
+                    <p style="font-size: 20px;">
+                        このチケットは存在しません。
+                    </p>
+
+                </div>
 
             </body>
             </html>
@@ -396,6 +447,7 @@ def use_ticket(ticket_id):
                 <meta charset="UTF-8">
                 <meta name="viewport"
                       content="width=device-width, initial-scale=1.0">
+                <title>チケット確認</title>
             </head>
 
             <body style="
@@ -415,7 +467,7 @@ def use_ticket(ticket_id):
                 ">
 
                     <h1 style="
-                        font-size: 32px;
+                        font-size: 34px;
                         text-align: center;
                     ">
                         使用済み
@@ -430,7 +482,7 @@ def use_ticket(ticket_id):
 
                     <div style="
                         font-size: 20px;
-                        line-height: 2;
+                        line-height: 1.8;
                     ">
 
                         <p>
@@ -482,6 +534,7 @@ def use_ticket(ticket_id):
             <meta charset="UTF-8">
             <meta name="viewport"
                   content="width=device-width, initial-scale=1.0">
+            <title>入場OK</title>
         </head>
 
         <body style="
@@ -518,7 +571,7 @@ def use_ticket(ticket_id):
 
                 <div style="
                     font-size: 20px;
-                    line-height: 2;
+                    line-height: 1.8;
                 ">
 
                     <p>
