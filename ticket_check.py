@@ -18,12 +18,21 @@ def check_ticket(ticket_id):
     try:
 
         cur.execute("""
+            ALTER TABLE tickets
+            ADD COLUMN IF NOT EXISTS used
+            BOOLEAN NOT NULL DEFAULT FALSE
+        """)
+
+        conn.commit()
+
+        cur.execute("""
             SELECT
                 ticket_type,
                 issue_number,
                 ticket_id,
                 purchaser_name,
-                amount
+                amount,
+                used
             FROM tickets
             WHERE ticket_id = %s
         """, (ticket_id,))
@@ -47,6 +56,7 @@ def check_ticket(ticket_id):
         ticket_id = row[2]
         purchaser_name = row[3]
         amount = row[4]
+        used = row[5]
 
         print(
             "チケットが見つかりました"
@@ -77,10 +87,29 @@ def check_ticket(ticket_id):
             amount
         )
 
+        print(
+            "使用済み:",
+            used
+        )
+
+        if used:
+
+            return f"""
+            <h1>使用済み</h1>
+
+            <p>このチケットはすでに使用されています。</p>
+
+            <p>チケット種類：{ticket_type}</p>
+            <p>発行番号：{issue_number}</p>
+            <p>チケットID：{ticket_id}</p>
+            <p>購入者：{purchaser_name}</p>
+            """, 400
+
         return f"""
         <h1>チケット確認</h1>
 
         <p>チケット：有効</p>
+
         <p>チケット種類：{ticket_type}</p>
         <p>発行番号：{issue_number}</p>
         <p>チケットID：{ticket_id}</p>
@@ -98,6 +127,8 @@ def check_ticket(ticket_id):
         """
 
     except Exception as e:
+
+        conn.rollback()
 
         print(
             "チケット確認中にエラーが発生しました"
@@ -139,6 +170,8 @@ def use_ticket(ticket_id):
             ADD COLUMN IF NOT EXISTS used
             BOOLEAN NOT NULL DEFAULT FALSE
         """)
+
+        conn.commit()
 
         cur.execute("""
             SELECT
