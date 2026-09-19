@@ -10,17 +10,13 @@ from ticket_check import check_ticket
 
 app = Flask(__name__)
 
-# Stripe API認証
 stripe.api_key = os.environ["STRIPE_SECRET_KEY"]
-
-# Resend API認証
 resend.api_key = os.environ["RESEND_API_KEY"]
 
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
 
-    # Stripe Webhookの署名を検証
     payload = request.data
     sig_header = request.headers.get("Stripe-Signature")
 
@@ -34,29 +30,33 @@ def webhook():
 
     except ValueError:
 
-        print("Webhookのデータが不正です")
+        print(
+            "Webhookのデータが不正です"
+        )
 
         return "Invalid payload", 400
 
     except stripe.error.SignatureVerificationError:
 
-        print("Webhookの署名が不正です")
+        print(
+            "Webhookの署名が不正です"
+        )
 
         return "Invalid signature", 400
 
-    # 検証済みのStripeイベント
     data = event.to_dict()
 
-    print("Webhookの署名検証に成功しました")
-    print("Webhookを受信しました")
+    print(
+        "Webhookの署名検証に成功しました"
+    )
 
-    # StripeイベントID
+    print(
+        "Webhookを受信しました"
+    )
+
     event_id = data["id"]
-
-    # Stripe Checkout Session
     session = data["data"]["object"]
 
-    # PostgreSQLへ接続
     conn = psycopg2.connect(
         os.environ["DATABASE_URL"]
     )
@@ -65,7 +65,6 @@ def webhook():
 
     try:
 
-        # Webhook処理済みイベント管理
         cur.execute("""
             CREATE TABLE IF NOT EXISTS webhook_events (
                 event_id VARCHAR(255) PRIMARY KEY,
@@ -73,7 +72,6 @@ def webhook():
             )
         """)
 
-        # 初回Webhookか確認
         cur.execute("""
             INSERT INTO webhook_events (event_id)
             VALUES (%s)
@@ -83,7 +81,6 @@ def webhook():
 
         new_event = cur.fetchone()
 
-        # すでに処理済み
         if new_event is None:
 
             conn.rollback()
@@ -100,13 +97,49 @@ def webhook():
             event_id
         )
 
-        # Stripeから購入商品の情報を取得
         line_items = stripe.checkout.Session.list_line_items(
             session["id"],
             expand=["data.price.product"]
         )
 
-        # 商品処理をproduct.pyへ渡す
+        # 商品タイプを確認
+        ticket_items = []
+        goods_items = []
+
+        for item in line_items.data:
+
+            product = item.price.product
+
+            metadata = product.metadata.to_dict()
+
+            product_type = metadata.get("product_type")
+
+            print(
+                "商品名:",
+                product.name
+            )
+
+            print(
+                "product_type:",
+                product_type
+            )
+
+            if product_type == "ticket":
+
+                ticket_items.append(item)
+
+            elif product_type == "goods":
+
+                goods_items.append(item)
+
+            else:
+
+                print(
+                    "product_typeが設定されていない商品です:",
+                    product.id
+                )
+
+        # 商品処理
         issued_tickets = process_products(
             cur,
             line_items,
@@ -116,12 +149,10 @@ def webhook():
         # DB処理を確定
         conn.commit()
 
-        # チケットが発行された場合
-        # ticket.py側から返されたチケット情報を
-        # mail.pyへ渡す
+        # チケットメール
         if issued_tickets:
 
-            from mail import send_ticket_email
+            from mail_ticket import send_ticket_email
 
             print(
                 "チケットメール送信を開始します"
@@ -130,6 +161,20 @@ def webhook():
             send_ticket_email(
                 session,
                 issued_tickets
+            )
+
+        # 物販メール
+        if goods_items:
+
+            from mail_goods import send_goods_email
+
+            print(
+                "物販購入確認メール送信を開始します"
+            )
+
+            send_goods_email(
+                session,
+                goods_items
             )
 
         print(
@@ -161,11 +206,11 @@ def webhook():
         conn.close()
 
 
-# QR・チケット確認
 @app.route("/ticket/<ticket_id>")
 def ticket_check(ticket_id):
 
     return check_ticket(ticket_id)
+
 
 @app.route("/ticket/<ticket_id>/use", methods=["POST"])
 def ticket_use(ticket_id):
@@ -174,7 +219,7 @@ def ticket_use(ticket_id):
 
     return use_ticket(ticket_id)
 
-# Resendテストメール
+
 @app.route("/test-email")
 def test_email():
 
