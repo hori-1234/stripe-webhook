@@ -1,5 +1,7 @@
 import psycopg2
 import os
+import secrets
+import resend
 from datetime import timezone, timedelta
 
 
@@ -257,23 +259,22 @@ def check_ticket(ticket_id):
                             style="margin-top: 35px;"
                         >
 
-                        <button
-                            type="submit"
-                            style="
-                                width: 100%;
-                                padding: 18px;
-                                font-size: 23px;
-                                font-weight: bold;
-                                border: none;
-                                border-radius: 10px;
-                                cursor: pointer;
-                            "
-                        >
-                            使用取消
-                        </button>
+                            <button
+                                type="submit"
+                                style="
+                                    width: 100%;
+                                    padding: 18px;
+                                    font-size: 23px;
+                                    font-weight: bold;
+                                    border: none;
+                                    border-radius: 10px;
+                                    cursor: pointer;
+                                "
+                            >
+                                使用取消
+                            </button>
 
-                    </form>
-
+                        </form>
 
                     </div>
 
@@ -988,96 +989,334 @@ def cancel_ticket_request(ticket_id):
         ticket_id
     )
 
-    return f"""
-    <!DOCTYPE html>
-    <html lang="ja">
+    conn = psycopg2.connect(
+        os.environ["DATABASE_URL"]
+    )
 
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport"
-              content="width=device-width, initial-scale=1.0">
-        <title>使用取消依頼</title>
-    </head>
+    cur = conn.cursor()
 
-    <body style="
-        font-family: sans-serif;
-        margin: 0;
-        padding: 20px;
-        background: #f5f5f5;
-    ">
+    try:
 
-        <div style="
-            max-width: 500px;
-            margin: 0 auto;
-            background: white;
-            padding: 30px 20px;
-            border-radius: 15px;
-            box-sizing: border-box;
-            text-align: center;
+        cur.execute("""
+            SELECT
+                ticket_type,
+                issue_number,
+                ticket_id,
+                purchaser_name,
+                amount,
+                used
+            FROM tickets
+            WHERE ticket_id = %s
+        """, (ticket_id,))
+
+        row = cur.fetchone()
+
+        if row is None:
+
+            return (
+                "チケットが見つかりません",
+                404
+            )
+
+        ticket_type = row[0]
+        issue_number = row[1]
+        ticket_id = row[2]
+        purchaser_name = row[3]
+        amount = row[4]
+        used = row[5]
+
+        if not used:
+
+            return """
+            <!DOCTYPE html>
+            <html lang="ja">
+
+            <head>
+                <meta charset="UTF-8">
+                <title>使用取消</title>
+            </head>
+
+            <body style="
+                font-family: sans-serif;
+                text-align: center;
+                padding: 40px;
+            ">
+
+                <h1>使用取消</h1>
+
+                <p style="font-size: 20px;">
+                    このチケットは使用済みではありません。
+                </p>
+
+            </body>
+            </html>
+            """, 400
+
+        token = secrets.token_urlsafe(32)
+
+        cur.execute("""
+            ALTER TABLE tickets
+            ADD COLUMN IF NOT EXISTS cancel_token
+            VARCHAR(255)
+        """)
+
+        cur.execute("""
+            UPDATE tickets
+            SET cancel_token = %s
+            WHERE ticket_id = %s
+        """, (
+            token,
+            ticket_id
+        ))
+
+        conn.commit()
+
+        cancel_url = (
+            "https://stripe-webhook-t3xu.onrender.com"
+            "/ticket/"
+            + ticket_id
+            + "/cancel-confirm/"
+            + token
+        )
+
+        text = f"""
+チケット使用キャンセル依頼
+
+チケット種類: {ticket_type}
+発行番号: {issue_number}
+チケットID: {ticket_id}
+購入者: {purchaser_name}
+料金: {amount:,}円
+
+下記URLを開くと、チケットの使用を取り消します。
+
+{cancel_url}
+"""
+
+        resend.Emails.send({
+            "from": "onboarding@resend.dev",
+            "to": ["m27ac49764jfgvn@t.vodafone.ne.jp"],
+            "subject": "チケット使用キャンセル依頼",
+            "text": text
+        })
+
+        return """
+        <!DOCTYPE html>
+        <html lang="ja">
+
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport"
+                  content="width=device-width, initial-scale=1.0">
+            <title>使用取消依頼</title>
+        </head>
+
+        <body style="
+            font-family: sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
         ">
 
-            <h1 style="
-                font-size: 32px;
-                margin-bottom: 30px;
+            <div style="
+                max-width: 500px;
+                margin: 0 auto;
+                background: white;
+                padding: 30px 20px;
+                border-radius: 15px;
+                box-sizing: border-box;
+                text-align: center;
             ">
-                使用取消
-            </h1>
 
-            <p style="
-                font-size: 21px;
-                line-height: 1.8;
+                <h1 style="
+                    font-size: 32px;
+                    margin-bottom: 30px;
+                ">
+                    送信完了
+                </h1>
+
+                <p style="
+                    font-size: 21px;
+                    line-height: 1.8;
+                ">
+                    使用取消依頼を運営へ送信しました。
+                </p>
+
+            </div>
+
+        </body>
+        </html>
+        """
+
+    except Exception as e:
+
+        conn.rollback()
+
+        print(
+            "使用取消依頼送信中にエラーが発生しました"
+        )
+
+        print(
+            "エラー内容:",
+            repr(e)
+        )
+
+        return (
+            "使用取消依頼の送信中にエラーが発生しました",
+            500
+        )
+
+    finally:
+
+        cur.close()
+        conn.close()
+
+
+def cancel_ticket_confirm(ticket_id, token):
+
+    conn = psycopg2.connect(
+        os.environ["DATABASE_URL"]
+    )
+
+    cur = conn.cursor()
+
+    try:
+
+        cur.execute("""
+            SELECT
+                ticket_type,
+                issue_number,
+                ticket_id,
+                purchaser_name,
+                amount,
+                used,
+                cancel_token
+            FROM tickets
+            WHERE ticket_id = %s
+        """, (ticket_id,))
+
+        row = cur.fetchone()
+
+        if row is None:
+
+            return (
+                "チケットが見つかりません",
+                404
+            )
+
+        ticket_type = row[0]
+        issue_number = row[1]
+        ticket_id = row[2]
+        purchaser_name = row[3]
+        amount = row[4]
+        used = row[5]
+        cancel_token = row[6]
+
+        if cancel_token != token:
+
+            return (
+                "この使用取消URLは無効です。",
+                403
+            )
+
+        if not used:
+
+            return (
+                "このチケットはすでに使用取消されています。",
+                400
+            )
+
+        cur.execute("""
+            UPDATE tickets
+            SET
+                used = FALSE,
+                used_at = NULL,
+                cancel_token = NULL
+            WHERE ticket_id = %s
+              AND cancel_token = %s
+              AND used = TRUE
+        """, (
+            ticket_id,
+            token
+        ))
+
+        conn.commit()
+
+        return f"""
+        <!DOCTYPE html>
+        <html lang="ja">
+
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport"
+                  content="width=device-width, initial-scale=1.0">
+            <title>使用取消完了</title>
+        </head>
+
+        <body style="
+            font-family: sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        ">
+
+            <div style="
+                max-width: 500px;
+                margin: 0 auto;
+                background: white;
+                padding: 30px 20px;
+                border-radius: 15px;
+                box-sizing: border-box;
+                text-align: center;
             ">
-                使用取消依頼を運営へ送信しますか？
-            </p>
 
-            <form
-                method="POST"
-                action="/ticket/{ticket_id}/cancel"
-                style="margin-top: 35px;"
-            >
+                <h1 style="
+                    font-size: 32px;
+                    margin-bottom: 30px;
+                ">
+                    使用取消完了
+                </h1>
 
-                <button
-                    type="submit"
-                    style="
-                        width: 100%;
-                        padding: 18px;
-                        font-size: 25px;
-                        font-weight: bold;
-                        border: none;
-                        border-radius: 10px;
-                        cursor: pointer;
-                        margin-bottom: 15px;
-                    "
-                >
-                    送信
-                </button>
+                <p style="
+                    font-size: 21px;
+                    line-height: 1.8;
+                ">
+                    チケットの使用を取り消しました。
+                </p>
 
-            </form>
+                <p style="
+                    font-size: 20px;
+                    line-height: 1.8;
+                ">
+                    発行番号: {issue_number}<br>
+                    チケットID: {ticket_id}
+                </p>
 
-            <form
-                method="GET"
-                action="/ticket/{ticket_id}"
-            >
+            </div>
 
-                <button
-                    type="submit"
-                    style="
-                        width: 100%;
-                        padding: 18px;
-                        font-size: 25px;
-                        font-weight: bold;
-                        border: none;
-                        border-radius: 10px;
-                        cursor: pointer;
-                    "
-                >
-                    キャンセル
-                </button>
+        </body>
+        </html>
+        """
 
-            </form>
+    except Exception as e:
 
-        </div>
+        conn.rollback()
 
-    </body>
-    </html>
-    """
+        print(
+            "使用取消処理中にエラーが発生しました"
+        )
+
+        print(
+            "エラー内容:",
+            repr(e)
+        )
+
+        return (
+            "使用取消処理中にエラーが発生しました",
+            500
+        )
+
+    finally:
+
+        cur.close()
+        conn.close()
