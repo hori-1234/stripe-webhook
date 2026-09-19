@@ -8,6 +8,7 @@ from product import process_products
 from ticket_check import (
     check_ticket,
     cancel_ticket_request,
+    cancel_ticket_send,
     cancel_ticket_confirm
 )
 
@@ -231,6 +232,12 @@ def ticket_confirm_use(ticket_id):
 def ticket_cancel_request(ticket_id):
 
     return cancel_ticket_request(ticket_id)
+
+
+@app.route("/ticket/<ticket_id>/cancel-send", methods=["POST"])
+def ticket_cancel_send(ticket_id):
+
+    return cancel_ticket_send(ticket_id)
 
 
 @app.route(
