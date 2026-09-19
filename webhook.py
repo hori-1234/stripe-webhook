@@ -3,11 +3,10 @@ import os
 import psycopg2
 import stripe
 import resend
-from types import SimpleNamespace
 
-from ticket import issue_tickets
-from goods import save_goods
-from mail import send_ticket_email
+from product import process_products
+from ticket_check import check_ticket
+
 
 app = Flask(__name__)
 
@@ -26,6 +25,7 @@ def webhook():
     sig_header = request.headers.get("Stripe-Signature")
 
     try:
+
         event = stripe.Webhook.construct_event(
             payload,
             sig_header,
@@ -33,14 +33,18 @@ def webhook():
         )
 
     except ValueError:
+
         print("Webhookのデータが不正です")
+
         return "Invalid payload", 400
 
     except stripe.error.SignatureVerificationError:
+
         print("Webhookの署名が不正です")
+
         return "Invalid signature", 400
 
-    # 検証済みのStripeイベントを取得
+    # 検証済みのStripeイベント
     data = event.to_dict()
 
     print("Webhookの署名検証に成功しました")
@@ -49,16 +53,19 @@ def webhook():
     # StripeイベントID
     event_id = data["id"]
 
-    # Stripeの購入情報
+    # Stripe Checkout Session
     session = data["data"]["object"]
 
     # PostgreSQLへ接続
-    conn = psycopg2.connect(os.environ["DATABASE_URL"])
+    conn = psycopg2.connect(
+        os.environ["DATABASE_URL"]
+    )
+
     cur = conn.cursor()
 
     try:
 
-        # Webhookの処理済みイベントを管理するテーブル
+        # Webhook処理済みイベント管理
         cur.execute("""
             CREATE TABLE IF NOT EXISTS webhook_events (
                 event_id VARCHAR(255) PRIMARY KEY,
@@ -66,7 +73,7 @@ def webhook():
             )
         """)
 
-        # このWebhookを初めて処理するか確認
+        # 初回Webhookか確認
         cur.execute("""
             INSERT INTO webhook_events (event_id)
             VALUES (%s)
@@ -76,15 +83,22 @@ def webhook():
 
         new_event = cur.fetchone()
 
-        # すでに処理済みなら何もしない
+        # すでに処理済み
         if new_event is None:
+
             conn.rollback()
 
-            print("このWebhookは処理済みです:", event_id)
+            print(
+                "このWebhookは処理済みです:",
+                event_id
+            )
 
             return "OK", 200
 
-        print("新しいWebhookです:", event_id)
+        print(
+            "新しいWebhookです:",
+            event_id
+        )
 
         # Stripeから購入商品の情報を取得
         line_items = stripe.checkout.Session.list_line_items(
@@ -92,108 +106,30 @@ def webhook():
             expand=["data.price.product"]
         )
 
-        # チケットと物販を分ける
-        ticket_items = []
-        goods_items = []
+        # 商品処理をproduct.pyへ渡す
+        issued_tickets = process_products(
+            cur,
+            line_items,
+            session
+        )
 
-        for item in line_items.data:
-
-            product = item.price.product
-
-            metadata = product.metadata.to_dict()
-
-            product_type = metadata.get("product_type")
-
-            print("商品名:", product.name)
-            print("product_type:", product_type)
-
-            if product_type == "ticket":
-                ticket_items.append(item)
-
-            elif product_type == "goods":
-                goods_items.append(item)
-
-            else:
-                print(
-                    "product_typeが設定されていない商品です:",
-                    product.id
-                )
-
-        # 発行されたチケットを保持
-        issued_tickets = []
-
-        # チケット処理
-        if ticket_items:
-
-            print("チケット処理を開始します")
-
-            ticket_line_items = SimpleNamespace(
-                data=ticket_items
-            )
-
-            issued_tickets = issue_tickets(
-                cur,
-                ticket_line_items,
-                session
-            )
-
-            print(
-                "発行されたチケット数:",
-                len(issued_tickets)
-            )
-
-            for ticket in issued_tickets:
-
-                print(
-                    "発行チケット:",
-                    ticket["ticket_type"],
-                    ticket["issue_number"],
-                    ticket["ticket_id"]
-                )
-
-        # 物販処理
-        if goods_items:
-
-            print("物販処理を開始します")
-
-            goods_line_items = SimpleNamespace(
-                data=goods_items
-            )
-
-            save_goods(
-                cur,
-                goods_line_items,
-                session
-            )
-
-        # Webhook処理全体を確定
+        # DB処理を確定
         conn.commit()
 
-        # チケットメール送信
+        # チケットが発行された場合
+        # ticket.py側から返されたチケット情報を
+        # mail.pyへ渡す
         if issued_tickets:
 
-            print("チケットメール送信を開始します")
+            from mail import send_ticket_email
+
+            print(
+                "チケットメール送信を開始します"
+            )
 
             send_ticket_email(
                 session,
                 issued_tickets
-            )
-
-        # 今回発行されたチケットを確認
-        cur.execute("""
-            SELECT ticket_type, issue_number, ticket_id, purchaser_name, amount
-            FROM tickets
-            ORDER BY id DESC
-            LIMIT 10
-        """)
-
-        rows = cur.fetchall()
-
-        for row in reversed(rows):
-
-            print(
-                "DBのチケット:",
-                row
             )
 
         print(
@@ -223,6 +159,13 @@ def webhook():
 
         cur.close()
         conn.close()
+
+
+# QR・チケット確認
+@app.route("/ticket/<ticket_id>")
+def ticket_check(ticket_id):
+
+    return check_ticket(ticket_id)
 
 
 # Resendテストメール
