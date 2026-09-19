@@ -167,6 +167,12 @@ def ticket_check(ticket_id):
 
     return check_ticket(ticket_id)
 
+@app.route("/ticket/<ticket_id>/use", methods=["POST"])
+def ticket_use(ticket_id):
+
+    from ticket_check import use_ticket
+
+    return use_ticket(ticket_id)
 
 # Resendテストメール
 @app.route("/test-email")
