@@ -227,6 +227,12 @@ def ticket_confirm_use(ticket_id):
 
     return use_ticket(ticket_id)
 
+@app.route("/ticket/<ticket_id>/cancel")
+def ticket_cancel_request(ticket_id):
+
+    from ticket_check import cancel_ticket_request
+
+    return cancel_ticket_request(ticket_id)
 
 @app.route("/test-email")
 def test_email():
