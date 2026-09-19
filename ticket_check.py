@@ -1,5 +1,22 @@
 import psycopg2
 import os
+from datetime import timezone, timedelta
+
+
+JST = timezone(timedelta(hours=9))
+
+
+def format_used_at(used_at):
+
+    if used_at is None:
+        return None
+
+    if used_at.tzinfo is None:
+        used_at = used_at.replace(tzinfo=timezone.utc)
+
+    used_at = used_at.astimezone(JST)
+
+    return used_at.strftime("%Y年%-m月%-d日 %H:%M")
 
 
 def check_ticket(ticket_id):
@@ -23,6 +40,12 @@ def check_ticket(ticket_id):
             BOOLEAN NOT NULL DEFAULT FALSE
         """)
 
+        cur.execute("""
+            ALTER TABLE tickets
+            ADD COLUMN IF NOT EXISTS used_at
+            TIMESTAMP WITH TIME ZONE
+        """)
+
         conn.commit()
 
         cur.execute("""
@@ -32,7 +55,8 @@ def check_ticket(ticket_id):
                 ticket_id,
                 purchaser_name,
                 amount,
-                used
+                used,
+                used_at
             FROM tickets
             WHERE ticket_id = %s
         """, (ticket_id,))
@@ -49,6 +73,7 @@ def check_ticket(ticket_id):
             return """
             <!DOCTYPE html>
             <html lang="ja">
+
             <head>
                 <meta charset="UTF-8">
                 <meta name="viewport"
@@ -93,6 +118,7 @@ def check_ticket(ticket_id):
         purchaser_name = row[3]
         amount = row[4]
         used = row[5]
+        used_at = row[6]
 
         print(
             "チケットが見つかりました"
@@ -128,7 +154,27 @@ def check_ticket(ticket_id):
             used
         )
 
+        print(
+            "使用日時:",
+            used_at
+        )
+
         if used:
+
+            used_at_text = format_used_at(used_at)
+
+            if used_at_text:
+
+                used_at_html = f"""
+                <p>
+                    <strong>使用日時</strong><br>
+                    {used_at_text}
+                </p>
+                """
+
+            else:
+
+                used_at_html = ""
 
             return f"""
             <!DOCTYPE html>
@@ -202,6 +248,8 @@ def check_ticket(ticket_id):
                             <strong>料金</strong><br>
                             {amount:,}円
                         </p>
+
+                        {used_at_html}
 
                     </div>
 
@@ -361,6 +409,12 @@ def use_ticket(ticket_id):
             BOOLEAN NOT NULL DEFAULT FALSE
         """)
 
+        cur.execute("""
+            ALTER TABLE tickets
+            ADD COLUMN IF NOT EXISTS used_at
+            TIMESTAMP WITH TIME ZONE
+        """)
+
         conn.commit()
 
         cur.execute("""
@@ -370,7 +424,8 @@ def use_ticket(ticket_id):
                 ticket_id,
                 purchaser_name,
                 amount,
-                used
+                used,
+                used_at
             FROM tickets
             WHERE ticket_id = %s
         """, (ticket_id,))
@@ -429,6 +484,7 @@ def use_ticket(ticket_id):
         purchaser_name = row[3]
         amount = row[4]
         used = row[5]
+        used_at = row[6]
 
         if used:
 
@@ -438,6 +494,21 @@ def use_ticket(ticket_id):
                 "このチケットは使用済みです:",
                 ticket_id
             )
+
+            used_at_text = format_used_at(used_at)
+
+            if used_at_text:
+
+                used_at_html = f"""
+                <p>
+                    <strong>使用日時</strong><br>
+                    {used_at_text}
+                </p>
+                """
+
+            else:
+
+                used_at_html = ""
 
             return f"""
             <!DOCTYPE html>
@@ -501,9 +572,16 @@ def use_ticket(ticket_id):
                         </p>
 
                         <p>
+                            <strong>購入者</strong><br>
+                            {purchaser_name}
+                        </p>
+
+                        <p>
                             <strong>料金</strong><br>
                             {amount:,}円
                         </p>
+
+                        {used_at_html}
 
                     </div>
 
@@ -515,7 +593,9 @@ def use_ticket(ticket_id):
 
         cur.execute("""
             UPDATE tickets
-            SET used = TRUE
+            SET
+                used = TRUE,
+                used_at = CURRENT_TIMESTAMP
             WHERE ticket_id = %s
         """, (ticket_id,))
 
@@ -597,6 +677,11 @@ def use_ticket(ticket_id):
                     <p>
                         <strong>料金</strong><br>
                         {amount:,}円
+                    </p>
+
+                    <p>
+                        <strong>使用日時</strong><br>
+                        入場処理済み
                     </p>
 
                 </div>
