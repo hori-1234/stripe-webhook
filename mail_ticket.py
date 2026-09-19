@@ -38,6 +38,7 @@ def send_ticket_email(session, issued_tickets):
 チケット種類: {ticket["ticket_type"]}
 発行番号: {ticket["issue_number"]}
 チケットID: {ticket["ticket_id"]}
+料金: {ticket["amount"]:,}円
 
 """
 
