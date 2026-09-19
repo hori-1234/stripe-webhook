@@ -979,3 +979,105 @@ def use_ticket(ticket_id):
 
         cur.close()
         conn.close()
+
+
+def cancel_ticket_request(ticket_id):
+
+    print(
+        "使用取消依頼:",
+        ticket_id
+    )
+
+    return f"""
+    <!DOCTYPE html>
+    <html lang="ja">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport"
+              content="width=device-width, initial-scale=1.0">
+        <title>使用取消依頼</title>
+    </head>
+
+    <body style="
+        font-family: sans-serif;
+        margin: 0;
+        padding: 20px;
+        background: #f5f5f5;
+    ">
+
+        <div style="
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px 20px;
+            border-radius: 15px;
+            box-sizing: border-box;
+            text-align: center;
+        ">
+
+            <h1 style="
+                font-size: 32px;
+                margin-bottom: 30px;
+            ">
+                使用取消
+            </h1>
+
+            <p style="
+                font-size: 21px;
+                line-height: 1.8;
+            ">
+                使用取消依頼を運営へ送信しますか？
+            </p>
+
+            <form
+                method="POST"
+                action="/ticket/{ticket_id}/cancel"
+                style="margin-top: 35px;"
+            >
+
+                <button
+                    type="submit"
+                    style="
+                        width: 100%;
+                        padding: 18px;
+                        font-size: 25px;
+                        font-weight: bold;
+                        border: none;
+                        border-radius: 10px;
+                        cursor: pointer;
+                        margin-bottom: 15px;
+                    "
+                >
+                    送信
+                </button>
+
+            </form>
+
+            <form
+                method="GET"
+                action="/ticket/{ticket_id}"
+            >
+
+                <button
+                    type="submit"
+                    style="
+                        width: 100%;
+                        padding: 18px;
+                        font-size: 25px;
+                        font-weight: bold;
+                        border: none;
+                        border-radius: 10px;
+                        cursor: pointer;
+                    "
+                >
+                    キャンセル
+                </button>
+
+            </form>
+
+        </div>
+
+    </body>
+    </html>
+    """
