@@ -1320,6 +1320,7 @@ def cancel_ticket_send(ticket_id):
 
         resend.Emails.send({
             "from": "onboarding@resend.dev",
+            # ドメイン後修正
             "to": ["onboarding@resend.dev"],
             "subject": "チケット使用キャンセル依頼",
             "text": text
