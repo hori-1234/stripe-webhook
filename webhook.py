@@ -4,6 +4,7 @@ import psycopg2
 import stripe
 import resend
 
+
 from product import process_products
 from ticket_check import (
     check_ticket,
