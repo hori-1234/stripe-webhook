@@ -48,6 +48,12 @@ def check_ticket(ticket_id):
             TIMESTAMP WITH TIME ZONE
         """)
 
+        cur.execute("""
+            ALTER TABLE tickets
+            ADD COLUMN IF NOT EXISTS cancel_token
+            VARCHAR(255)
+        """)
+
         conn.commit()
 
         cur.execute("""
@@ -680,6 +686,12 @@ def use_ticket(ticket_id):
             TIMESTAMP WITH TIME ZONE
         """)
 
+        cur.execute("""
+            ALTER TABLE tickets
+            ADD COLUMN IF NOT EXISTS cancel_token
+            VARCHAR(255)
+        """)
+
         conn.commit()
 
         cur.execute("""
@@ -985,7 +997,7 @@ def use_ticket(ticket_id):
 def cancel_ticket_request(ticket_id):
 
     print(
-        "使用取消依頼:",
+        "使用取消画面:",
         ticket_id
     )
 
@@ -1033,6 +1045,8 @@ def cancel_ticket_request(ticket_id):
 
             <head>
                 <meta charset="UTF-8">
+                <meta name="viewport"
+                      content="width=device-width, initial-scale=1.0">
                 <title>使用取消</title>
             </head>
 
@@ -1052,7 +1066,210 @@ def cancel_ticket_request(ticket_id):
             </html>
             """, 400
 
-        token = secrets.token_urlsafe(32)
+        return f"""
+        <!DOCTYPE html>
+        <html lang="ja">
+
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport"
+                  content="width=device-width, initial-scale=1.0">
+            <title>使用取消依頼</title>
+        </head>
+
+        <body style="
+            font-family: sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        ">
+
+            <div style="
+                max-width: 500px;
+                margin: 0 auto;
+                background: white;
+                padding: 30px 20px;
+                border-radius: 15px;
+                box-sizing: border-box;
+                text-align: center;
+            ">
+
+                <h1 style="
+                    font-size: 32px;
+                    margin-bottom: 30px;
+                ">
+                    使用取消
+                </h1>
+
+                <p style="
+                    font-size: 19px;
+                    line-height: 1.8;
+                    text-align: left;
+                ">
+                    ※誤って入場OKを押してしまった場合<br>
+                    Xの運営アカウントまで連絡後、<br>
+                    下記ボタンで処理を進めてください。
+                </p>
+
+                <div style="
+                    text-align: left;
+                    font-size: 20px;
+                    line-height: 1.8;
+                    margin-top: 30px;
+                ">
+
+                    <p>
+                        <strong>チケット種類</strong><br>
+                        {ticket_type}
+                    </p>
+
+                    <p>
+                        <strong>発行番号</strong><br>
+                        {issue_number}
+                    </p>
+
+                    <p>
+                        <strong>チケットID</strong><br>
+                        {ticket_id}
+                    </p>
+
+                    <p>
+                        <strong>購入者</strong><br>
+                        {purchaser_name}
+                    </p>
+
+                    <p>
+                        <strong>料金</strong><br>
+                        {amount:,}円
+                    </p>
+
+                </div>
+
+                <form
+                    method="POST"
+                    action="/ticket/{ticket_id}/cancel-send"
+                    style="margin-top: 35px;"
+                >
+
+                    <button
+                        type="submit"
+                        style="
+                            width: 100%;
+                            padding: 18px;
+                            font-size: 23px;
+                            font-weight: bold;
+                            border: none;
+                            border-radius: 10px;
+                            cursor: pointer;
+                        "
+                    >
+                        送信
+                    </button>
+
+                </form>
+
+                <form
+                    method="GET"
+                    action="/ticket/{ticket_id}"
+                    style="margin-top: 15px;"
+                >
+
+                    <button
+                        type="submit"
+                        style="
+                            width: 100%;
+                            padding: 18px;
+                            font-size: 23px;
+                            font-weight: bold;
+                            border: none;
+                            border-radius: 10px;
+                            cursor: pointer;
+                        "
+                    >
+                        キャンセル
+                    </button>
+
+                </form>
+
+            </div>
+
+        </body>
+        </html>
+        """
+
+    except Exception as e:
+
+        conn.rollback()
+
+        print(
+            "使用取消画面でエラーが発生しました"
+        )
+
+        print(
+            "エラー内容:",
+            repr(e)
+        )
+
+        return (
+            "使用取消画面でエラーが発生しました",
+            500
+        )
+
+    finally:
+
+        cur.close()
+        conn.close()
+
+
+def cancel_ticket_send(ticket_id):
+
+    print(
+        "使用取消依頼送信:",
+        ticket_id
+    )
+
+    conn = psycopg2.connect(
+        os.environ["DATABASE_URL"]
+    )
+
+    cur = conn.cursor()
+
+    try:
+
+        cur.execute("""
+            SELECT
+                ticket_type,
+                issue_number,
+                ticket_id,
+                purchaser_name,
+                amount,
+                used
+            FROM tickets
+            WHERE ticket_id = %s
+        """, (ticket_id,))
+
+        row = cur.fetchone()
+
+        if row is None:
+
+            return (
+                "チケットが見つかりません",
+                404
+            )
+
+        ticket_type = row[0]
+        issue_number = row[1]
+        ticket_id = row[2]
+        purchaser_name = row[3]
+        amount = row[4]
+        used = row[5]
+
+        if not used:
+
+            return (
+                "このチケットは使用済みではありません。",
+                400
+            )
 
         cur.execute("""
             ALTER TABLE tickets
@@ -1060,10 +1277,13 @@ def cancel_ticket_request(ticket_id):
             VARCHAR(255)
         """)
 
+        token = secrets.token_urlsafe(32)
+
         cur.execute("""
             UPDATE tickets
             SET cancel_token = %s
             WHERE ticket_id = %s
+              AND used = TRUE
         """, (
             token,
             ticket_id
@@ -1092,6 +1312,11 @@ def cancel_ticket_request(ticket_id):
 
 {cancel_url}
 """
+
+        print(
+            "キャンセル依頼メール送信先:",
+            "m27ac49764jfgvn@t.vodafone.ne.jp"
+        )
 
         resend.Emails.send({
             "from": "onboarding@resend.dev",
