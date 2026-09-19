@@ -5,7 +5,11 @@ import stripe
 import resend
 
 from product import process_products
-from ticket_check import check_ticket
+from ticket_check import (
+    check_ticket,
+    cancel_ticket_request,
+    cancel_ticket_confirm
+)
 
 
 app = Flask(__name__)
@@ -102,7 +106,6 @@ def webhook():
             expand=["data.price.product"]
         )
 
-        # 商品タイプを確認
         ticket_items = []
         goods_items = []
 
@@ -139,17 +142,14 @@ def webhook():
                     product.id
                 )
 
-        # 商品処理
         issued_tickets = process_products(
             cur,
             line_items,
             session
         )
 
-        # DB処理を確定
         conn.commit()
 
-        # チケットメール
         if issued_tickets:
 
             from mail_ticket import send_ticket_email
@@ -163,7 +163,6 @@ def webhook():
                 issued_tickets
             )
 
-        # 物販メール
         if goods_items:
 
             from mail_goods import send_goods_email
@@ -227,12 +226,23 @@ def ticket_confirm_use(ticket_id):
 
     return use_ticket(ticket_id)
 
+
 @app.route("/ticket/<ticket_id>/cancel")
 def ticket_cancel_request(ticket_id):
 
-    from ticket_check import cancel_ticket_request
-
     return cancel_ticket_request(ticket_id)
+
+
+@app.route(
+    "/ticket/<ticket_id>/cancel-confirm/<token>"
+)
+def ticket_cancel_confirm(ticket_id, token):
+
+    return cancel_ticket_confirm(
+        ticket_id,
+        token
+    )
+
 
 @app.route("/test-email")
 def test_email():
