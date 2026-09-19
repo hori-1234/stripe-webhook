@@ -251,6 +251,30 @@ def check_ticket(ticket_id):
 
                         {used_at_html}
 
+                        <form
+                            method="GET"
+                            action="/ticket/{ticket_id}/cancel"
+                            style="margin-top: 35px;"
+                        >
+
+                        <button
+                            type="submit"
+                            style="
+                                width: 100%;
+                                padding: 18px;
+                                font-size: 23px;
+                                font-weight: bold;
+                                border: none;
+                                border-radius: 10px;
+                                cursor: pointer;
+                            "
+                        >
+                            使用取消
+                        </button>
+
+                    </form>
+
+
                     </div>
 
                 </div>
