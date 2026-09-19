@@ -1320,7 +1320,7 @@ def cancel_ticket_send(ticket_id):
 
         resend.Emails.send({
             "from": "onboarding@resend.dev",
-            "to": ["m27ac49764jfgvn@t.vodafone.ne.jp"],
+            "to": ["onboarding@resend.dev"],
             "subject": "チケット使用キャンセル依頼",
             "text": text
         })
