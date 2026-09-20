@@ -1319,9 +1319,9 @@ def cancel_ticket_send(ticket_id):
         )
 
         resend.Emails.send({
-            "from": "onboarding@resend.dev",
+            "from": "shop@nwoshi.com",
             # ドメイン後修正
-            "to": ["onboarding@resend.dev"],
+            "to": ["m27ac49764jfgvn@t.vodafone.ne.jp"],
             "subject": "チケット使用キャンセル依頼",
             "text": text
         })
