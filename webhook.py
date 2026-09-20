@@ -8,6 +8,7 @@ import resend
 
 from product import process_products
 from admin_auth import admin_required
+from admin_export import export_excel
 from ticket_check import (
     check_ticket,
     cancel_ticket_request,
@@ -331,6 +332,12 @@ def test_r2():
 def home():
 
     return "Webhook server is running"
+
+
+@app.route("/admin/export")
+@admin_required
+def admin_export():
+    return export_excel()
 
 
 @app.route("/admin")
