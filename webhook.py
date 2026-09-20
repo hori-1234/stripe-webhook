@@ -7,6 +7,7 @@ import resend
 
 
 from product import process_products
+from admin_auth import admin_required
 from ticket_check import (
     check_ticket,
     cancel_ticket_request,
@@ -333,6 +334,7 @@ def home():
 
 
 @app.route("/admin")
+@admin_required
 def admin():
 
     conn = psycopg2.connect(
