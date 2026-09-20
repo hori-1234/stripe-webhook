@@ -75,7 +75,7 @@ def send_ticket_email(session, issued_tickets):
         )
 
         response = resend.Emails.send({
-            "from": "onboarding@resend.dev",
+            "from": "shop@nwoshi.com",
             "to": [email],
             "subject": "マイマケ｜チケットのご購入ありがとうございます",
             "text": text,
