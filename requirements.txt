@@ -5,3 +5,4 @@ stripe
 qrcode[pil]
 resend
 boto3
+openpyxl
