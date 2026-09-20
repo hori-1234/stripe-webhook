@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, render_template_string
 import os
 import boto3
 import psycopg2
@@ -331,3 +331,300 @@ def home():
 
     return "Webhook server is running"
 
+
+@app.route("/admin")
+def admin():
+
+    conn = psycopg2.connect(
+        os.environ["DATABASE_URL"]
+    )
+
+    cur = conn.cursor()
+
+    # =========================
+    # ticketsテーブルの存在確認
+    # =========================
+
+    cur.execute("""
+        SELECT to_regclass('public.tickets')
+    """)
+
+    tickets_exists = cur.fetchone()[0] is not None
+
+    ticket_rows = []
+
+    if tickets_exists:
+
+        cur.execute("""
+            SELECT
+                created_at,
+                ticket_type,
+                purchaser_name,
+                1,
+                amount
+            FROM tickets
+            ORDER BY created_at DESC
+        """)
+
+        ticket_rows = cur.fetchall()
+
+    # =========================
+    # goodsテーブルの存在確認
+    # =========================
+
+    cur.execute("""
+        SELECT to_regclass('public.goods')
+    """)
+
+    goods_exists = cur.fetchone()[0] is not None
+
+    goods_rows = []
+
+    if goods_exists:
+
+        cur.execute("""
+            SELECT
+                purchased_at,
+                goods_type,
+                product_name,
+                purchaser_name,
+                quantity,
+                amount
+            FROM goods
+            ORDER BY purchased_at DESC
+        """)
+
+        goods_rows = cur.fetchall()
+
+    # =========================
+    # 売上集計
+    # =========================
+
+    ticket_count = len(ticket_rows)
+
+    ticket_sales = sum(
+        row[4] or 0
+        for row in ticket_rows
+    )
+
+    goods_count = sum(
+        row[4] or 0
+        for row in goods_rows
+    )
+
+    goods_sales = sum(
+        row[5] or 0
+        for row in goods_rows
+    )
+
+    total_sales = (
+        ticket_sales
+        + goods_sales
+    )
+
+    # =========================
+    # HTML
+    # =========================
+
+    html = """
+
+    <!DOCTYPE html>
+
+    <html lang="ja">
+
+    <head>
+
+        <meta charset="UTF-8">
+
+        <title>マイマケ 管理画面</title>
+
+        <style>
+
+            body {
+                font-family: Arial, sans-serif;
+                margin: 30px;
+                background: #f5f5f5;
+            }
+
+            h1 {
+                margin-bottom: 30px;
+            }
+
+            .summary {
+                display: flex;
+                gap: 20px;
+                margin-bottom: 40px;
+                flex-wrap: wrap;
+            }
+
+            .box {
+                background: white;
+                border: 1px solid #ccc;
+                padding: 20px;
+                min-width: 150px;
+            }
+
+            .number {
+                font-size: 24px;
+                font-weight: bold;
+                margin-top: 10px;
+            }
+
+            table {
+                border-collapse: collapse;
+                width: 100%;
+                background: white;
+            }
+
+            th,
+            td {
+                border: 1px solid #ccc;
+                padding: 10px;
+                text-align: left;
+            }
+
+            th {
+                background: #f2f2f2;
+            }
+
+            .empty {
+                background: white;
+                padding: 30px;
+                text-align: center;
+                color: #666;
+            }
+
+        </style>
+
+    </head>
+
+    <body>
+
+        <h1>マイマケ 管理画面</h1>
+
+
+        <h2>売上概要</h2>
+
+        <div class="summary">
+
+            <div class="box">
+
+                チケット販売
+
+                <div class="number">
+                    {{ ticket_count }}枚
+                </div>
+
+            </div>
+
+
+            <div class="box">
+
+                物販販売
+
+                <div class="number">
+                    {{ goods_count }}個
+                </div>
+
+            </div>
+
+
+            <div class="box">
+
+                売上合計
+
+                <div class="number">
+                    {{ "{:,}".format(total_sales) }}円
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <h2>購入履歴</h2>
+
+        {% if ticket_rows or goods_rows %}
+
+        <table>
+
+            <tr>
+
+                <th>日時</th>
+                <th>種類</th>
+                <th>商品</th>
+                <th>購入者</th>
+                <th>数量</th>
+                <th>金額</th>
+
+            </tr>
+
+
+            {% for row in ticket_rows %}
+
+            <tr>
+
+                <td>{{ row[0] }}</td>
+
+                <td>チケット</td>
+
+                <td>{{ row[1] }}</td>
+
+                <td>{{ row[2] or "" }}</td>
+
+                <td>1</td>
+
+                <td>{{ "{:,}".format(row[4]) }}円</td>
+
+            </tr>
+
+            {% endfor %}
+
+
+            {% for row in goods_rows %}
+
+            <tr>
+
+                <td>{{ row[0] }}</td>
+
+                <td>{{ row[1] }}</td>
+
+                <td>{{ row[2] }}</td>
+
+                <td>{{ row[3] or "" }}</td>
+
+                <td>{{ row[4] }}</td>
+
+                <td>{{ "{:,}".format(row[5]) }}円</td>
+
+            </tr>
+
+            {% endfor %}
+
+        </table>
+
+        {% else %}
+
+        <div class="empty">
+            まだ購入履歴はありません。
+        </div>
+
+        {% endif %}
+
+    </body>
+
+    </html>
+
+    """
+
+    cur.close()
+    conn.close()
+
+    return render_template_string(
+        html,
+        ticket_rows=ticket_rows,
+        goods_rows=goods_rows,
+        ticket_count=ticket_count,
+        goods_count=goods_count,
+        total_sales=total_sales
+    )
