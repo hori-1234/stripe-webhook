@@ -1,7 +1,7 @@
 import secrets
 import qrcode
 from io import BytesIO
-
+from PIL import Image, ImageDraw, ImageFont
 
 def issue_tickets(cur, line_items, session):
     # ticketsテーブルを作成
@@ -80,12 +80,75 @@ def issue_tickets(cur, line_items, session):
                 + ticket_id
             )
 
-            # QRコードには確認URLを入れる
-            qr = qrcode.make(ticket_url)
 
+            # QRコードには確認URLを入れる
+            qr = qrcode.make(ticket_url).convert("RGB")
+
+            # QRコード上部に表示する文字
+            title_text = ticket_type
+            number_text = f"発行番号：{issue_number}"
+
+            # フォント
+            font_path = "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"
+
+            title_font = ImageFont.truetype(font_path, 40)
+            number_font = ImageFont.truetype(font_path, 36)
+
+            # 文字部分の高さ
+            header_height = 110
+
+            # QRコードのサイズ
+            qr_width, qr_height = qr.size
+
+            # 上部に文字領域を追加
+            ticket_image = Image.new(
+                "RGB",
+                (qr_width, qr_height + header_height),
+                "white"
+            )
+
+            # QRコードを下に配置
+            ticket_image.paste(qr, (0, header_height))
+
+            draw = ImageDraw.Draw(ticket_image)
+
+            # チケット名
+            title_bbox = draw.textbbox(
+                (0, 0),
+                title_text,
+                font=title_font
+            )
+
+            title_width = title_bbox[2] - title_bbox[0]
+
+            draw.text(
+                ((qr_width - title_width) // 2, 8),
+                title_text,
+                fill="black",
+                font=title_font
+            )
+
+            # 発行番号
+            number_bbox = draw.textbbox(
+                (0, 0),
+                number_text,
+                font=number_font
+            )
+
+            number_width = number_bbox[2] - number_bbox[0]
+
+            draw.text(
+                ((qr_width - number_width) // 2, 55),
+                number_text,
+                fill="black",
+                font=number_font
+            )
+
+            # PNG化
             qr_buffer = BytesIO()
-            qr.save(qr_buffer, format="PNG")
+            ticket_image.save(qr_buffer, format="PNG")
             qr_bytes = qr_buffer.getvalue()
+
 
             print("QRコードを生成しました")
             print("QRデータサイズ:", len(qr_bytes), "bytes")
