@@ -11,8 +11,15 @@ def save_goods(cur, line_items, session):
             amount INTEGER NOT NULL,
             purchased_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             payment_intent_id VARCHAR(255),
+            pdf_key VARCHAR(500),
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
+    """)
+
+    # 既存テーブルにpdf_keyがない場合に追加
+    cur.execute("""
+        ALTER TABLE goods
+        ADD COLUMN IF NOT EXISTS pdf_key VARCHAR(500)
     """)
 
     # 商品ごとに処理
@@ -28,6 +35,9 @@ def save_goods(cur, line_items, session):
 
         # 物販の種類
         goods_type = metadata.get("goods_type")
+
+        # PDFファイル名
+        pdf_key = metadata.get("pdf_key")
 
         # 購入数量
         quantity = item.quantity
@@ -46,6 +56,7 @@ def save_goods(cur, line_items, session):
 
         print("物販種類:", goods_type)
         print("商品名:", product_name)
+        print("PDFキー:", pdf_key)
         print("購入者名:", purchaser_name)
         print("メールアドレス:", email)
         print("購入数量:", quantity)
@@ -61,9 +72,10 @@ def save_goods(cur, line_items, session):
                 email,
                 quantity,
                 amount,
-                payment_intent_id
+                payment_intent_id,
+                pdf_key
             )
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         """, (
             goods_type,
             product_name,
@@ -71,7 +83,8 @@ def save_goods(cur, line_items, session):
             email,
             quantity,
             amount,
-            payment_intent_id
+            payment_intent_id,
+            pdf_key
         ))
 
     print("物販情報をDBに保存しました")
