@@ -1,10 +1,17 @@
 import os
 from io import BytesIO
+from datetime import datetime
 
 import psycopg2
 from flask import send_file
 from openpyxl import Workbook
 
+def excel_datetime(value):
+
+    if isinstance(value, datetime):
+        return value.replace(tzinfo=None)
+
+    return value
 
 def export_excel():
 
@@ -84,13 +91,13 @@ def export_excel():
             status = "有効"
 
         ws.append([
-            row[0],
+            excel_datetime(row[0]),
             "チケット",
             row[1],
             row[2],
             row[3],
             status,
-            row[5],
+            excel_datetime(row[5]),
             1,
             row[7]
         ])
@@ -99,7 +106,7 @@ def export_excel():
     for row in goods_rows:
 
         ws.append([
-            row[0],
+            excel_datetime(row[0]),
             row[1],
             row[2],
             row[3],
