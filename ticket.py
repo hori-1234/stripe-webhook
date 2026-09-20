@@ -89,7 +89,7 @@ def issue_tickets(cur, line_items, session):
             number_text = f"発行番号：{issue_number}"
 
             # フォント
-            font_path = "fonts/NotoSansJP-Regular.ttf"
+            font_path = "NotoSansJP-Regular.ttf"
 
             title_font = ImageFont.truetype(font_path, 40)
             number_font = ImageFont.truetype(font_path, 36)
