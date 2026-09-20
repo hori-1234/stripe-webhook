@@ -579,11 +579,13 @@ def admin():
 
         {% if ticket_rows or goods_rows %}
 
-        <table>
+        <table id="purchaseTable">
 
             <tr>
 
-                <th>日時</th>
+                <th onclick="sortTable(0)" style="cursor: pointer;">
+                    日時 ↕
+                </th>
                 <th>種類</th>
                 <th>商品</th>
                 <th>購入者</th>
@@ -664,6 +666,38 @@ def admin():
         </div>
 
         {% endif %}
+
+        <script>
+            let sortAscending = true;
+
+            function sortTable(columnIndex) {
+
+                const table = document.getElementById("purchaseTable");
+
+                const rows = Array.from(table.rows).slice(1);
+
+                rows.sort(function(a, b) {
+
+                    const aValue = a.cells[columnIndex].innerText.trim();
+                    const bValue = b.cells[columnIndex].innerText.trim();
+
+                    const aDate = new Date(aValue);
+                    const bDate = new Date(bValue);
+
+                    if (sortAscending) {
+                        return aDate - bDate;
+                    } else {
+                        return bDate - aDate;
+                    }
+                });
+
+                rows.forEach(function(row) {
+                    table.appendChild(row);
+                });
+
+                sortAscending = !sortAscending;
+            }
+        </script>
 
     </body>
 
