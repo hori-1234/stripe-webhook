@@ -57,7 +57,7 @@ def send_goods_email(session, goods_items):
         )
 
         response = resend.Emails.send({
-            "from": "onboarding@resend.dev",
+            "from": "shop@nwoshi.com",
             "to": [email],
             "subject": "マイマケ｜商品のご購入ありがとうございます",
             "text": text
