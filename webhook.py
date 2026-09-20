@@ -568,6 +568,12 @@ def admin():
 
         </div>
 
+        <a href="/admin/export">
+            <button type="button">
+                Excelをダウンロード
+            </button>
+        </a>
+
 
         <h2>購入履歴</h2>
 
