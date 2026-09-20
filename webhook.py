@@ -77,6 +77,11 @@ def webhook():
     event_id = data["id"]
     session = data["data"]["object"]
 
+    print(
+        "Stripeカスタムフィールド:",
+        session.get("custom_fields")
+    )
+    
     conn = psycopg2.connect(
         os.environ["DATABASE_URL"]
     )
