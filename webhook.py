@@ -1,5 +1,6 @@
 from flask import Flask, request
 import os
+import boto3
 import psycopg2
 import stripe
 import resend
@@ -15,6 +16,15 @@ from ticket_check import (
 
 
 app = Flask(__name__)
+
+r2 = boto3.client(
+    "s3",
+    endpoint_url=os.environ["R2_ENDPOINT"],
+    aws_access_key_id=os.environ["R2_ACCESS_KEY_ID"],
+    aws_secret_access_key=os.environ["R2_SECRET_ACCESS_KEY"]
+)
+
+R2_BUCKET = os.environ["R2_BUCKET_NAME"]
 
 stripe.api_key = os.environ["STRIPE_SECRET_KEY"]
 resend.api_key = os.environ["RESEND_API_KEY"]
@@ -280,6 +290,30 @@ def test_email():
 
         return "テストメール送信失敗", 500
 
+
+@app.route("/test-r2")
+def test_r2():
+
+    try:
+
+        response = r2.get_object(
+            Bucket=R2_BUCKET,
+            Key="サンプルPDF.pdf"
+        )
+
+        return response["Body"].read(), 200, {
+            "Content-Type": "application/pdf",
+            "Content-Disposition": "attachment; filename=sample.pdf"
+        }
+
+    except Exception as e:
+
+        print(
+            "R2取得エラー:",
+            repr(e)
+        )
+
+        return "R2取得失敗", 500
 
 @app.route("/")
 def home():
