@@ -360,6 +360,9 @@ def admin():
                 created_at,
                 ticket_type,
                 purchaser_name,
+                email,
+                used,
+                used_at,
                 1,
                 amount
             FROM tickets
@@ -388,6 +391,7 @@ def admin():
                 goods_type,
                 product_name,
                 purchaser_name,
+                email,
                 quantity,
                 amount
             FROM goods
@@ -403,17 +407,17 @@ def admin():
     ticket_count = len(ticket_rows)
 
     ticket_sales = sum(
-        row[4] or 0
+        row[7] or 0
         for row in ticket_rows
     )
 
     goods_count = sum(
-        row[4] or 0
+        row[5] or 0
         for row in goods_rows
     )
 
     goods_sales = sum(
-        row[5] or 0
+        row[6] or 0
         for row in goods_rows
     )
 
@@ -554,6 +558,9 @@ def admin():
                 <th>種類</th>
                 <th>商品</th>
                 <th>購入者</th>
+                <th>メールアドレス</th>
+                <th>状態</th>
+                <th>無効になった日時</th>
                 <th>数量</th>
                 <th>金額</th>
 
@@ -561,23 +568,30 @@ def admin():
 
 
             {% for row in ticket_rows %}
-
             <tr>
-
                 <td>{{ row[0] }}</td>
-
                 <td>チケット</td>
-
                 <td>{{ row[1] }}</td>
-
                 <td>{{ row[2] or "" }}</td>
+                <td>{{ row[3] or "" }}</td>
+
+                {% if row[4] %}
+                <td>無効</td>
+                {% else %}
+                <td>有効</td>
+                {% endif %}
+
+                <td>
+                    {% if row[5] %}
+                        {{ row[5] }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
 
                 <td>1</td>
-
-                <td>{{ "{:,}".format(row[4]) }}円</td>
-
+                <td>{{ "{:,}".format(row[7]) }}円</td>
             </tr>
-
             {% endfor %}
 
 
@@ -593,9 +607,15 @@ def admin():
 
                 <td>{{ row[3] or "" }}</td>
 
-                <td>{{ row[4] }}</td>
+                <td>{{ row[4] or "" }}</td>
 
-                <td>{{ "{:,}".format(row[5]) }}円</td>
+                <td>-</td>
+
+                <td>-</td>
+
+                <td>{{ row[5] }}</td>
+
+                <td>{{ "{:,}".format(row[6]) }}円</td>
 
             </tr>
 
