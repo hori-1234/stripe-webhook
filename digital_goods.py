@@ -19,6 +19,29 @@ R2_BUCKET = os.environ["R2_BUCKET_NAME"]
 
 def save_digital_goods(cur, line_items, session):
 
+    # goodsテーブルが存在しない場合に作成
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS goods (
+            id SERIAL PRIMARY KEY,
+            goods_type VARCHAR(200) NOT NULL,
+            product_name VARCHAR(200) NOT NULL,
+            purchaser_name VARCHAR(200),
+            email VARCHAR(320),
+            quantity INTEGER NOT NULL,
+            amount INTEGER NOT NULL,
+            purchased_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            payment_intent_id VARCHAR(255),
+            pdf_key VARCHAR(500),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
+    # 既存テーブルにpdf_keyがない場合に追加
+    cur.execute("""
+        ALTER TABLE goods
+        ADD COLUMN IF NOT EXISTS pdf_key VARCHAR(500)
+    """)
+
     for item in line_items.data:
 
         product = item.price.product
@@ -51,6 +74,41 @@ def save_digital_goods(cur, line_items, session):
         print("購入数量:", quantity)
         print("購入金額:", amount)
         print("Stripe決済ID:", payment_intent_id)
+
+        # =========================
+        # PDF購入履歴をDBへ保存
+        # =========================
+
+        cur.execute("""
+            INSERT INTO goods (
+                goods_type,
+                product_name,
+                purchaser_name,
+                email,
+                quantity,
+                amount,
+                payment_intent_id,
+                pdf_key
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        """, (
+            goods_type,
+            product_name,
+            purchaser_name,
+            email,
+            quantity,
+            amount,
+            payment_intent_id,
+            pdf_key
+        ))
+
+        print(
+            "PDF購入履歴をgoodsテーブルに保存しました"
+        )
+
+        # =========================
+        # ここから既存のPDF配送処理
+        # =========================
 
         if not pdf_key:
 
