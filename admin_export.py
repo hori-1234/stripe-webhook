@@ -35,6 +35,7 @@ def export_excel():
             ticket_type,
             purchaser_name,
             email,
+            reservation_name,
             used,
             used_at,
             1,
@@ -76,6 +77,7 @@ def export_excel():
         "商品",
         "購入者",
         "メールアドレス",
+        "お取り置き名",
         "状態",
         "無効になった日時",
         "数量",
@@ -85,7 +87,7 @@ def export_excel():
     # チケット
     for row in ticket_rows:
 
-        if row[4]:
+        if row[5]:
             status = "無効"
         else:
             status = "有効"
@@ -96,10 +98,11 @@ def export_excel():
             row[1],
             row[2],
             row[3],
+            row[4],
             status,
-            excel_datetime(row[5]),
+            excel_datetime(row[6]),
             1,
-            row[7]
+            row[8]
         ])
 
     # 物販
@@ -111,8 +114,9 @@ def export_excel():
             row[2],
             row[3],
             row[4],
-            "-",
-            "-",
+            "-",  # お取り置き名
+            "-",  # 状態
+            "-",  # 無効になった日時
             row[5],
             row[6]
         ])
