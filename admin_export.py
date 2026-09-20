@@ -14,6 +14,13 @@ def export_excel():
 
     cur = conn.cursor()
 
+    # 既存ticketsテーブルにemailカラムがなければ追加
+    cur.execute("""
+        ALTER TABLE tickets
+        ADD COLUMN IF NOT EXISTS email VARCHAR(320)
+    """)
+
+    
     # チケット取得
     cur.execute("""
         SELECT
