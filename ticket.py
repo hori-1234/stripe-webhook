@@ -22,7 +22,30 @@ def issue_tickets(cur, line_items, session):
         ALTER TABLE tickets
         ADD COLUMN IF NOT EXISTS email VARCHAR(320)
     """)
-    
+
+
+    # お取り置き名列を追加
+    cur.execute("""
+        ALTER TABLE tickets
+        ADD COLUMN IF NOT EXISTS reservation_name VARCHAR(200)
+    """)
+
+    # Stripeのお取り置き名を取得
+    custom_fields = session.get("custom_fields") or []
+
+    reservation_name = None
+
+    for field in custom_fields:
+        label = field.get("label") or {}
+
+        if label.get("custom") == "お取り置き(出演者名)":
+            text_data = field.get("text") or {}
+            reservation_name = text_data.get("value")
+            break
+
+    print("お取り置き名:", reservation_name)
+
+
     # チケットごとの連番管理テーブル
     cur.execute("""
         CREATE TABLE IF NOT EXISTS ticket_counters (
@@ -176,15 +199,17 @@ def issue_tickets(cur, line_items, session):
                     ticket_id,
                     purchaser_name,
                     email,
+                    reservation_name,
                     amount
                 )
-                VALUES (%s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
             """, (
                 ticket_type,
                 issue_number,
                 ticket_id,
                 purchaser_name,
                 email,
+                reservation_name,
                 amount
             ))
             
@@ -194,6 +219,7 @@ def issue_tickets(cur, line_items, session):
                 "ticket_id": ticket_id,
                 "purchaser_name": purchaser_name,
                 "email": email,
+                "reservation_name": reservation_name,
                 "amount": amount,
                 "qr_bytes": qr_bytes
             })
