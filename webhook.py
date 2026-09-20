@@ -1,3 +1,4 @@
+```python
 from flask import Flask, request
 import os
 import boto3
@@ -17,6 +18,7 @@ from ticket_check import (
 
 app = Flask(__name__)
 
+
 r2 = boto3.client(
     "s3",
     endpoint_url=os.environ["R2_ENDPOINT"],
@@ -25,6 +27,7 @@ r2 = boto3.client(
 )
 
 R2_BUCKET = os.environ["R2_BUCKET_NAME"]
+
 
 stripe.api_key = os.environ["STRIPE_SECRET_KEY"]
 resend.api_key = os.environ["RESEND_API_KEY"]
@@ -120,6 +123,7 @@ def webhook():
 
         ticket_items = []
         goods_items = []
+        digital_goods_items = []
 
         for item in line_items.data:
 
@@ -128,6 +132,7 @@ def webhook():
             metadata = product.metadata.to_dict()
 
             product_type = metadata.get("product_type")
+            goods_type = metadata.get("goods_type")
 
             print(
                 "商品名:",
@@ -145,7 +150,13 @@ def webhook():
 
             elif product_type == "goods":
 
-                goods_items.append(item)
+                if goods_type == "物販　PDF":
+
+                    digital_goods_items.append(item)
+
+                else:
+
+                    goods_items.append(item)
 
             else:
 
@@ -315,7 +326,9 @@ def test_r2():
 
         return "R2取得失敗", 500
 
+
 @app.route("/")
 def home():
 
     return "Webhook server is running"
+```
