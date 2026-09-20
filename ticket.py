@@ -17,6 +17,12 @@ def issue_tickets(cur, line_items, session):
         )
     """)
 
+    # メールアドレス列を追加
+    cur.execute("""
+        ALTER TABLE tickets
+        ADD COLUMN IF NOT EXISTS email VARCHAR(320)
+    """)
+    
     # チケットごとの連番管理テーブル
     cur.execute("""
         CREATE TABLE IF NOT EXISTS ticket_counters (
@@ -154,35 +160,40 @@ def issue_tickets(cur, line_items, session):
             print("QRデータサイズ:", len(qr_bytes), "bytes")
             print("QR確認URL:", ticket_url)
 
-            purchaser_name = session.get(
-                "customer_details",
-                {}
-            ).get("name")
+            customer_details = session.get(
+                "customer_details"
+            ) or {}
+
+            purchaser_name = customer_details.get("name")
+            email = customer_details.get("email")
 
             amount = item.amount_total // quantity
-
+            
             cur.execute("""
                 INSERT INTO tickets (
                     ticket_type,
                     issue_number,
                     ticket_id,
                     purchaser_name,
+                    email,
                     amount
                 )
-                VALUES (%s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s)
             """, (
                 ticket_type,
                 issue_number,
                 ticket_id,
                 purchaser_name,
+                email,
                 amount
             ))
-
+            
             issued_tickets.append({
                 "ticket_type": ticket_type,
                 "issue_number": issue_number,
                 "ticket_id": ticket_id,
                 "purchaser_name": purchaser_name,
+                "email": email,
                 "amount": amount,
                 "qr_bytes": qr_bytes
             })
