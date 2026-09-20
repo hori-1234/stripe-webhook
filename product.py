@@ -2,6 +2,7 @@ from types import SimpleNamespace
 
 from ticket import issue_tickets
 from goods import save_goods
+from digital_goods import save_digital_goods
 
 
 def process_products(cur, line_items, session):
@@ -9,8 +10,11 @@ def process_products(cur, line_items, session):
     # チケット商品
     ticket_items = []
 
-    # 物販商品
+    # 現物物販
     goods_items = []
+
+    # PDF物販
+    digital_goods_items = []
 
     # Stripeの商品を分類
     for item in line_items.data:
@@ -20,6 +24,7 @@ def process_products(cur, line_items, session):
         metadata = product.metadata.to_dict()
 
         product_type = metadata.get("product_type")
+        goods_type = metadata.get("goods_type")
 
         print(
             "商品名:",
@@ -39,7 +44,13 @@ def process_products(cur, line_items, session):
         # 物販
         elif product_type == "goods":
 
-            goods_items.append(item)
+            if goods_type == "物販　PDF":
+
+                digital_goods_items.append(item)
+
+            else:
+
+                goods_items.append(item)
 
         # product_typeがない商品
         else:
@@ -83,11 +94,11 @@ def process_products(cur, line_items, session):
                 ticket["ticket_id"]
             )
 
-    # 物販処理
+    # 現物物販処理
     if goods_items:
 
         print(
-            "物販処理を開始します"
+            "現物物販処理を開始します"
         )
 
         goods_line_items = SimpleNamespace(
@@ -97,6 +108,23 @@ def process_products(cur, line_items, session):
         save_goods(
             cur,
             goods_line_items,
+            session
+        )
+
+    # PDF物販処理
+    if digital_goods_items:
+
+        print(
+            "PDF物販処理を開始します"
+        )
+
+        digital_goods_line_items = SimpleNamespace(
+            data=digital_goods_items
+        )
+
+        save_digital_goods(
+            cur,
+            digital_goods_line_items,
             session
         )
 
