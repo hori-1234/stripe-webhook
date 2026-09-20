@@ -356,6 +356,14 @@ def admin():
     if tickets_exists:
 
         cur.execute("""
+
+            ALTER TABLE tickets
+
+            ADD COLUMN IF NOT EXISTS email VARCHAR(320)
+
+            """)
+
+        cur.execute("""
             SELECT
                 created_at,
                 ticket_type,
