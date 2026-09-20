@@ -1,4 +1,3 @@
-```python
 from flask import Flask, request
 import os
 import boto3
@@ -331,4 +330,4 @@ def test_r2():
 def home():
 
     return "Webhook server is running"
-```
+
