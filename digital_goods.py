@@ -132,7 +132,7 @@ PDF商品をご購入いただきありがとうございます。
             )
 
             resend_response = resend.Emails.send({
-                "from": "onboarding@resend.dev",
+                "from": "shop@nwoshi.com",
                 "to": [email],
                 "subject": "マイマケ｜PDF商品のご購入ありがとうございます",
                 "text": text,
