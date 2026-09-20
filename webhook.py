@@ -383,6 +383,7 @@ def admin():
                 ticket_type,
                 purchaser_name,
                 email,
+                reservation_name,
                 used,
                 used_at,
                 1,
@@ -429,7 +430,7 @@ def admin():
     ticket_count = len(ticket_rows)
 
     ticket_sales = sum(
-        row[7] or 0
+        row[8] or 0
         for row in ticket_rows
     )
 
@@ -581,6 +582,7 @@ def admin():
                 <th>商品</th>
                 <th>購入者</th>
                 <th>メールアドレス</th>
+                <th>お取り置き名</th>
                 <th>状態</th>
                 <th>無効になった日時</th>
                 <th>数量</th>
@@ -597,22 +599,24 @@ def admin():
                 <td>{{ row[2] or "" }}</td>
                 <td>{{ row[3] or "" }}</td>
 
-                {% if row[4] %}
+                <td>{{ row[4] or "" }}</td>
+
+                {% if row[5] %}
                 <td>無効</td>
                 {% else %}
                 <td>有効</td>
                 {% endif %}
 
                 <td>
-                    {% if row[5] %}
-                        {{ row[5] }}
+                    {% if row[6] %}
+                        {{ row[6] }}
                     {% else %}
                         -
                     {% endif %}
                 </td>
 
                 <td>1</td>
-                <td>{{ "{:,}".format(row[7]) }}円</td>
+                <td>{{ "{:,}".format(row[8]) }}円</td>
             </tr>
             {% endfor %}
 
@@ -631,9 +635,11 @@ def admin():
 
                 <td>{{ row[4] or "" }}</td>
 
-                <td>-</td>
+                <td>-</td>  <!-- お取り置き名 -->
 
-                <td>-</td>
+                <td>-</td>  <!-- 状態 -->
+
+                <td>-</td>　<!-- 無効になった日時 -->
 
                 <td>{{ row[5] }}</td>
 
