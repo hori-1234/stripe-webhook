@@ -1,4 +1,3 @@
-```python
 import os
 import base64
 import boto3
@@ -161,4 +160,3 @@ PDF商品をご購入いただきありがとうございます。
             )
 
             raise
-```
