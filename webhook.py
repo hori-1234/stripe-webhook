@@ -357,6 +357,8 @@ def admin():
     email = request.args.get("email", "")
     reservation = request.args.get("reservation", "")
     status = request.args.get("status", "")
+    page = request.args.get("page", 1, type=int)
+    per_page = 50
 
     conn = psycopg2.connect(
         os.environ["DATABASE_URL"]
@@ -516,32 +518,81 @@ def admin():
 
         goods_rows = cur.fetchall()
 
-        
+
+    all_ticket_rows = ticket_rows
+    all_goods_rows = goods_rows
+
     # =========================
     # 売上集計
     # =========================
 
-    ticket_count = len(ticket_rows)
+    ticket_count = len(all_ticket_rows)
 
     ticket_sales = sum(
         row[8] or 0
-        for row in ticket_rows
+        for row in all_ticket_rows
     )
 
     goods_count = sum(
         row[5] or 0
-        for row in goods_rows
+        for row in all_goods_rows
     )
 
     goods_sales = sum(
         row[6] or 0
-        for row in goods_rows
+        for row in all_goods_rows
     )
 
     total_sales = (
         ticket_sales
         + goods_sales
     )
+
+    # =========================
+    # ページ分割用データ作成
+    # =========================
+
+    combined_rows = []
+
+    for row in all_ticket_rows:
+        combined_rows.append({
+            "kind": "ticket",
+            "date": row[0],
+            "row": row
+        })
+
+    for row in all_goods_rows:
+        combined_rows.append({
+            "kind": "goods",
+            "date": row[0],
+            "row": row
+        })
+
+    # 日時の新しい順
+    combined_rows.sort(
+        key=lambda x: x["date"],
+        reverse=True
+    )
+
+
+    total_rows = len(combined_rows)
+    total_pages = max(
+        1,
+        (total_rows + per_page - 1) // per_page
+    )
+
+    # 不正なページ番号対策
+    if page < 1:
+        page = 1
+
+    if page > total_pages:
+        page = total_pages
+
+    start = (page - 1) * per_page
+    end = start + per_page
+
+    page_rows = combined_rows[start:end]
+
 
     # =========================
     # HTML
@@ -733,56 +784,87 @@ def admin():
             </tr>
 
 
-            {% for row in ticket_rows %}
-            <tr>
-                <td>{{ row[0].strftime("%Y-%m-%d %H:%M:%S") }}</td>
-                <td>チケット</td>
-                <td>{{ row[1] }}</td>
-                <td>{{ row[2] or "" }}</td>
-                <td>{{ row[3] or "" }}</td>
+            {% for item in page_rows %}
 
-                <td>{{ row[4] or "" }}</td>
+                {% if item.kind == "ticket" %}
 
-                {% if row[5] %}
-                <td>無効</td>
-                {% else %}
-                <td>有効</td>
+                    {% set row = item.row %}
+
+                    <tr>
+                        <td>{{ row[0].strftime("%Y-%m-%d %H:%M:%S") }}</td>
+                        <td>チケット</td>
+                        <td>{{ row[1] }}</td>
+                        <td>{{ row[2] or "" }}</td>
+                        <td>{{ row[3] or "" }}</td>
+
+                        <td>{{ row[4] or "" }}</td>
+
+                        {% if row[5] %}
+                        <td>無効</td>
+                        {% else %}
+                        <td>有効</td>
+                        {% endif %}
+
+                        <td>
+                            {% if row[6] %}
+                                {{ row[6].strftime("%Y-%m-%d %H:%M:%S") }}
+                            {% else %}
+                    -
+                            {% endif %}
+                        </td>
+
+                        <td>1</td>
+                        <td>{{ "{:,}".format(row[8]) }}円</td>
+                    </tr>
+
+                {% endif %}            
+
+
+                {% if item.kind == "goods" %}
+
+                    {% set row = item.row %}
+
+                    <tr>
+
+                        <td>{{ row[0].strftime("%Y-%m-%d %H:%M:%S") }}</td>
+                        <td>{{ row[1] }}</td>
+                        <td>{{ row[2] }}</td>
+                        <td>{{ row[3] or "" }}</td>
+                        <td>{{ row[4] or "" }}</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>{{ row[5] }}</td>
+                        <td>{{ "{:,}".format(row[6]) }}円</td>
+
+                    </tr>
+
                 {% endif %}
 
-                <td>
-                    {% if row[6] %}
-                        {{ row[6].strftime("%Y-%m-%d %H:%M:%S") }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </td>
-
-                <td>1</td>
-                <td>{{ "{:,}".format(row[8]) }}円</td>
-            </tr>
             {% endfor %}
 
-
-            {% for row in goods_rows %}
-
-            <tr>
-
-                <td>{{ row[0].strftime("%Y-%m-%d %H:%M:%S") }}</td>
-                <td>{{ row[1] }}</td>
-                <td>{{ row[2] }}</td>
-                <td>{{ row[3] or "" }}</td>
-                <td>{{ row[4] or "" }}</td>
-                <td>-</td>  <!-- お取り置き名 -->
-                <td>-</td>  <!-- 状態 -->
-                <td>-</td>　<!-- 無効になった日時 -->
-                <td>{{ row[5] }}</td>
-                <td>{{ "{:,}".format(row[6]) }}円</td>
-
-            </tr>
-
-            {% endfor %}
 
         </table>
+
+        <div style="margin-top: 20px;">
+
+            {% if page > 1 %}
+                <a href="?page={{ page - 1 }}&date_from={{ date_from }}&date_to={{ date_to }}&type={{ search_type }}&product={{ product }}&purchaser={{ purchaser }}&email={{ email }}&reservation={{ reservation }}&status={{ status }}">
+                    ← 前へ
+                </a>
+            {% endif %}
+
+            <span style="margin: 0 15px;">
+                {{ page }} / {{ total_pages }} ページ
+            </span>
+
+            {% if page < total_pages %}
+                <a href="?page={{ page + 1 }}&date_from={{ date_from }}&date_to={{ date_to }}&type={{ search_type }}&product={{ product }}&purchaser={{ purchaser }}&email={{ email }}&reservation={{ reservation }}&status={{ status }}">
+                    次へ →
+                </a>
+            {% endif %}
+
+        </div>
 
         {% else %}
 
@@ -837,6 +919,9 @@ def admin():
         html,
         ticket_rows=ticket_rows,
         goods_rows=goods_rows,
+        page_rows=page_rows,
+        page=page,
+        total_pages=total_pages,
         ticket_count=ticket_count,
         goods_count=goods_count,
         total_sales=total_sales,
