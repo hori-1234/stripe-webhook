@@ -764,7 +764,28 @@ def admin():
         {% if ticket_rows or goods_rows %}
 
 
+        <div style="text-align: right; margin-bottom: 10px;">
+
+            {% if page > 1 %}
+                <a href="?page={{ page - 1 }}&date_from={{ date_from }}&date_to={{ date_to }}&type={{ search_type }}&product={{ product }}&purchaser={{ purchaser }}&email={{ email }}&reservation={{ reservation }}&status={{ status }}">
+                    ← 前へ
+                </a>
+            {% endif %}
+
+            <span style="margin: 0 15px;">
+                {{ page }} / {{ total_pages }} ページ
+            </span>
+
+            {% if page < total_pages %}
+                <a href="?page={{ page + 1 }}&date_from={{ date_from }}&date_to={{ date_to }}&type={{ search_type }}&product={{ product }}&purchaser={{ purchaser }}&email={{ email }}&reservation={{ reservation }}&status={{ status }}">
+                    次へ →
+                </a>
+            {% endif %}
+
+        </div>
+
         <table id="purchaseTable">
+
 
             <tr>
 
@@ -846,25 +867,6 @@ def admin():
 
         </table>
 
-        <div style="margin-top: 20px;">
-
-            {% if page > 1 %}
-                <a href="?page={{ page - 1 }}&date_from={{ date_from }}&date_to={{ date_to }}&type={{ search_type }}&product={{ product }}&purchaser={{ purchaser }}&email={{ email }}&reservation={{ reservation }}&status={{ status }}">
-                    ← 前へ
-                </a>
-            {% endif %}
-
-            <span style="margin: 0 15px;">
-                {{ page }} / {{ total_pages }} ページ
-            </span>
-
-            {% if page < total_pages %}
-                <a href="?page={{ page + 1 }}&date_from={{ date_from }}&date_to={{ date_to }}&type={{ search_type }}&product={{ product }}&purchaser={{ purchaser }}&email={{ email }}&reservation={{ reservation }}&status={{ status }}">
-                    次へ →
-                </a>
-            {% endif %}
-
-        </div>
 
         {% else %}
 
