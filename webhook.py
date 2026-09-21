@@ -349,6 +349,15 @@ def admin_export():
 @admin_required
 def admin():
 
+    date_from = request.args.get("date_from", "")
+    date_to = request.args.get("date_to", "")
+    search_type = request.args.get("type", "")
+    product = request.args.get("product", "")
+    purchaser = request.args.get("purchaser", "")
+    email = request.args.get("email", "")
+    reservation = request.args.get("reservation", "")
+    status = request.args.get("status", "")
+
     conn = psycopg2.connect(
         os.environ["DATABASE_URL"]
     )
@@ -377,8 +386,9 @@ def admin():
 
             """)
 
-        cur.execute("""
-            SELECT
+        
+        ticket_query = """
+        SELECT
                 created_at,
                 ticket_type,
                 purchaser_name,
@@ -389,11 +399,57 @@ def admin():
                 1,
                 amount
             FROM tickets
-            ORDER BY created_at DESC
-        """)
+            WHERE 1=1
+        """
+
+        ticket_params = []
+
+        if date_from:
+            ticket_query += " AND created_at >= %s"
+            ticket_params.append(date_from)
+
+        if date_to:
+            ticket_query += " AND created_at < (%s::date + INTERVAL '1 day')"
+            ticket_params.append(date_to)
+
+        if search_type:
+            ticket_query += " AND %s ILIKE %s"
+            ticket_params.extend([
+                "チケット",
+                f"%{search_type}%"
+            ])
+
+        if product:
+            ticket_query += " AND ticket_type ILIKE %s"
+            ticket_params.append(f"%{product}%")
+
+        if purchaser:
+            ticket_query += " AND purchaser_name ILIKE %s"
+            ticket_params.append(f"%{purchaser}%")
+
+        if email:
+            ticket_query += " AND email ILIKE %s"
+            ticket_params.append(f"%{email}%")
+
+        if reservation:
+            ticket_query += " AND reservation_name ILIKE %s"
+            ticket_params.append(f"%{reservation}%")
+
+        if status == "valid":
+            ticket_query += " AND used = FALSE"
+
+        elif status == "invalid":
+            ticket_query += " AND used = TRUE"
+
+        ticket_query += " ORDER BY created_at DESC"
+
+        cur.execute(
+            ticket_query,
+            ticket_params
+        )
 
         ticket_rows = cur.fetchall()
-
+    
     # =========================
     # goodsテーブルの存在確認
     # =========================
@@ -408,7 +464,7 @@ def admin():
 
     if goods_exists:
 
-        cur.execute("""
+        goods_query = """
             SELECT
                 purchased_at,
                 goods_type,
@@ -418,11 +474,49 @@ def admin():
                 quantity,
                 amount
             FROM goods
-            ORDER BY purchased_at DESC
-        """)
+            WHERE 1=1
+        """
+
+        goods_params = []
+
+        if date_from:
+            goods_query += " AND purchased_at >= %s"
+            goods_params.append(date_from)
+
+        if date_to:
+            goods_query += " AND purchased_at < (%s::date + INTERVAL '1 day')"
+            goods_params.append(date_to)
+
+        if search_type:
+            goods_query += " AND goods_type ILIKE %s"
+            goods_params.append(f"%{search_type}%")
+
+        if product:
+            goods_query += " AND product_name ILIKE %s"
+            goods_params.append(f"%{product}%")
+
+        if purchaser:
+            goods_query += " AND purchaser_name ILIKE %s"
+            goods_params.append(f"%{purchaser}%")
+
+        if email:
+            goods_query += " AND email ILIKE %s"
+            goods_params.append(f"%{email}%")
+
+        # お取り置き名・状態はチケット専用
+        if reservation or status:
+            goods_query += " AND FALSE"
+
+        goods_query += " ORDER BY purchased_at DESC"
+
+        cur.execute(
+            goods_query,
+            goods_params
+        )
 
         goods_rows = cur.fetchall()
 
+        
     # =========================
     # 売上集計
     # =========================
@@ -576,8 +670,48 @@ def admin():
 
 
         <h2>購入履歴</h2>
+        
+        <form method="GET" action="/admin">
+
+            日時：
+            <input type="date" name="date_from" value="{{ date_from }}">
+            ～
+            <input type="date" name="date_to" value="{{ date_to }}">
+
+            <br><br>
+
+            種類：
+            <input type="text" name="type" value="{{ search_type }}">
+
+            商品名：
+            <input type="text" name="product" value="{{ product }}">
+
+            購入者：
+            <input type="text" name="purchaser" value="{{ purchaser }}">
+
+            <br><br>
+
+            メールアドレス：
+            <input type="text" name="email" value="{{ email }}">
+
+            お取り置き名：
+            <input type="text" name="reservation" value="{{ reservation }}">
+
+            状態：
+            <select name="status">
+                <option value="" {% if status == "" %}selected{% endif %}>すべて</option>
+                <option value="valid" {% if status == "valid" %}selected{% endif %}>有効</option>
+                <option value="invalid" {% if status == "invalid" %}selected{% endif %}>無効</option>
+            </select>
+
+            <button type="submit">検索</button>
+
+        </form>
+
+        <br>
 
         {% if ticket_rows or goods_rows %}
+
 
         <table id="purchaseTable">
 
@@ -714,5 +848,13 @@ def admin():
         goods_rows=goods_rows,
         ticket_count=ticket_count,
         goods_count=goods_count,
-        total_sales=total_sales
+        total_sales=total_sales,
+        date_from=date_from,
+        date_to=date_to,
+        search_type=search_type,
+        product=product,
+        purchaser=purchaser,
+        email=email,
+        reservation=reservation,
+        status=status
     )
