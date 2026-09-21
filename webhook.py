@@ -735,7 +735,7 @@ def admin():
 
             {% for row in ticket_rows %}
             <tr>
-                <td>{{ row[0] }}</td>
+                <td>{{ row[0].strftime("%Y-%m-%d %H:%M:%S") }}</td>
                 <td>チケット</td>
                 <td>{{ row[1] }}</td>
                 <td>{{ row[2] or "" }}</td>
@@ -767,24 +767,15 @@ def admin():
 
             <tr>
 
-                <td>{{ row[0] }}</td>
-
+                <td>{{ row[0].strftime("%Y-%m-%d %H:%M:%S") }}</td>
                 <td>{{ row[1] }}</td>
-
                 <td>{{ row[2] }}</td>
-
                 <td>{{ row[3] or "" }}</td>
-
                 <td>{{ row[4] or "" }}</td>
-
                 <td>-</td>  <!-- お取り置き名 -->
-
                 <td>-</td>  <!-- 状態 -->
-
                 <td>-</td>　<!-- 無効になった日時 -->
-
                 <td>{{ row[5] }}</td>
-
                 <td>{{ "{:,}".format(row[6]) }}円</td>
 
             </tr>
