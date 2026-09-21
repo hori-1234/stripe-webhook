@@ -751,7 +751,7 @@ def admin():
 
                 <td>
                     {% if row[6] %}
-                        {{ row[6] }}
+                        {{ row[6].strftime("%Y-%m-%d %H:%M:%S") }}
                     {% else %}
                         -
                     {% endif %}
