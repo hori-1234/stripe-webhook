@@ -167,11 +167,12 @@ def webhook():
 
         else:
 
-            stripe_fee = None
-            stripe_net = None
-
             print(
                 "BalanceTransactionはまだ作成されていません"
+            )
+
+            raise Exception(
+                "BalanceTransaction未作成のためWebhookを再試行します"
             )
 
     
@@ -465,7 +466,7 @@ def admin():
         
         ticket_query = """
         SELECT
-                created_at,
+                tickets.created_at,
                 ticket_type,
                 purchaser_name,
                 email,
@@ -473,19 +474,24 @@ def admin():
                 used,
                 used_at,
                 1,
-                amount
+                tickets.amount,
+                tickets.payment_intent_id,
+                payments.stripe_fee,
+                payments.stripe_net                
             FROM tickets
+            LEFT JOIN payments
+                ON tickets.payment_intent_id = payments.payment_intent_id
             WHERE 1=1
         """
 
         ticket_params = []
 
         if date_from:
-            ticket_query += " AND created_at >= %s"
+            ticket_query += " AND tickets.created_at >= %s"
             ticket_params.append(date_from)
 
         if date_to:
-            ticket_query += " AND created_at < (%s::date + INTERVAL '1 day')"
+            ticket_query += " AND tickets.created_at < (%s::date + INTERVAL '1 day')"
             ticket_params.append(date_to)
 
         if search_type:
@@ -517,7 +523,7 @@ def admin():
         elif status == "invalid":
             ticket_query += " AND used = TRUE"
 
-        ticket_query += " ORDER BY created_at DESC"
+        ticket_query += " ORDER BY tickets.created_at DESC"
 
         cur.execute(
             ticket_query,
@@ -548,19 +554,24 @@ def admin():
                 purchaser_name,
                 email,
                 quantity,
-                amount
+                goods.amount,
+                goods.payment_intent_id,
+                payments.stripe_fee,
+                payments.stripe_net            
             FROM goods
+            LEFT JOIN payments
+                ON goods.payment_intent_id = payments.payment_intent_id
             WHERE 1=1
         """
 
         goods_params = []
 
         if date_from:
-            goods_query += " AND purchased_at >= %s"
+            goods_query += " AND goods.purchased_at >= %s"
             goods_params.append(date_from)
 
         if date_to:
-            goods_query += " AND purchased_at < (%s::date + INTERVAL '1 day')"
+            goods_query += " AND goods.purchased_at < (%s::date + INTERVAL '1 day')"
             goods_params.append(date_to)
 
         if search_type:
@@ -583,7 +594,7 @@ def admin():
         if reservation or status:
             goods_query += " AND FALSE"
 
-        goods_query += " ORDER BY purchased_at DESC"
+        goods_query += " ORDER BY goods.purchased_at DESC"
 
         cur.execute(
             goods_query,
@@ -874,10 +885,12 @@ def admin():
                 <th>状態</th>
                 <th>無効になった日時</th>
                 <th>数量</th>
-                <th>金額</th>
+                <th>売上金額</th>
+                <th>S手数料</th>
+                <th>販売利益</th>
+                <th>決済ID</th>
 
             </tr>
-
 
             {% for item in page_rows %}
 
@@ -910,6 +923,31 @@ def admin():
 
                         <td>1</td>
                         <td>{{ "{:,}".format(row[8]) }}円</td>
+
+                        <td>
+                            {% if row[10] is not none %}
+                            {{ "{:,}".format(row[10]) }}円
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if row[11] is not none %}
+                            {{ "{:,}".format(row[11]) }}円
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        
+                        <td>
+                            {% if row[9] %}
+                                {{ row[9] }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                          
                     </tr>
 
                 {% endif %}            
@@ -931,6 +969,30 @@ def admin():
                         <td>-</td>
                         <td>{{ row[5] }}</td>
                         <td>{{ "{:,}".format(row[6]) }}円</td>
+
+                        <td>
+                            {% if row[8] is not none %}
+                                {{ "{:,}".format(row[8]) }}円
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if row[9] is not none %}
+                                {{ "{:,}".format(row[9]) }}円
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if row[7] %}
+                                {{ row[7] }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
 
                     </tr>
 
