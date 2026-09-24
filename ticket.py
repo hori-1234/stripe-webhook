@@ -1,5 +1,6 @@
 import secrets
 import qrcode
+import requests
 from io import BytesIO
 from PIL import Image, ImageDraw, ImageFont
 
@@ -71,7 +72,15 @@ def issue_tickets(cur, line_items, session):
 
         product = item.price.product
 
+        product_image_url = None
+
+        if product.images:
+            product_image_url = product.images[0]
+
+        print("商品画像URL:", product_image_url)
+
         metadata = product.metadata.to_dict()
+        
         ticket_type = metadata.get("ticket_type")
 
         if not ticket_type:
@@ -115,8 +124,32 @@ def issue_tickets(cur, line_items, session):
             )
 
 
+            # Stripeの商品画像を取得
+            product_image = None
+
+            if product_image_url:
+                try:
+                    response = requests.get(
+                        product_image_url,
+                        timeout=10
+                    )
+                    response.raise_for_status()
+
+                    product_image = Image.open(
+                        BytesIO(response.content)
+                    ).convert("RGB")
+
+                except Exception as e:
+                    print("商品画像取得エラー:", e)
+
             # QRコードには確認URLを入れる
             qr = qrcode.make(ticket_url).convert("RGB")
+
+
+            if product_image:
+                product_image.thumbnail(
+                    (300, 300)
+                )
 
             # QRコード上部に表示する文字
             title_text = ticket_type
@@ -126,12 +159,27 @@ def issue_tickets(cur, line_items, session):
             # フォント
             font_path = "NotoSansJP-Regular.ttf"
 
-            title_font = ImageFont.truetype(font_path, 40)
+            title_font_size = 40
+            title_font = ImageFont.truetype(font_path, title_font_size)
+
+            while True:
+                title_bbox = title_font.getbbox(title_text)
+                title_width = title_bbox[2] - title_bbox[0]
+
+                if title_width <= 330 or title_font_size <= 20:
+                    break
+
+                title_font_size -= 2
+                title_font = ImageFont.truetype(
+                    font_path,
+                    title_font_size
+                )
+            
             number_font = ImageFont.truetype(font_path, 36)
             reservation_font = ImageFont.truetype(font_path, 30)
 
             # 文字部分の高さ
-            header_height = 155
+            header_height = 475
 
             # QRコードのサイズ
             qr_width, qr_height = qr.size
@@ -146,6 +194,17 @@ def issue_tickets(cur, line_items, session):
             # QRコードを下に配置
             ticket_image.paste(qr, (0, header_height))
 
+            # 商品画像を上部中央に配置
+            if product_image:
+                image_width, image_height = product_image.size
+
+                image_x = (qr_width - image_width) // 2
+
+                ticket_image.paste(
+                    product_image,
+                    (image_x, 10)
+                )
+
             draw = ImageDraw.Draw(ticket_image)
 
             # チケット名
@@ -158,7 +217,7 @@ def issue_tickets(cur, line_items, session):
             title_width = title_bbox[2] - title_bbox[0]
 
             draw.text(
-                ((qr_width - title_width) // 2, 8),
+                ((qr_width - title_width) // 2, 320),
                 title_text,
                 fill="black",
                 font=title_font
@@ -174,7 +233,7 @@ def issue_tickets(cur, line_items, session):
             number_width = number_bbox[2] - number_bbox[0]
 
             draw.text(
-                ((qr_width - number_width) // 2, 55),
+                ((qr_width - number_width) // 2, 370),
                 number_text,
                 fill="black",
                 font=number_font
@@ -190,7 +249,7 @@ def issue_tickets(cur, line_items, session):
             reservation_width = reservation_bbox[2] - reservation_bbox[0]
 
             draw.text(
-                ((qr_width - reservation_width) // 2, 100),
+                ((qr_width - reservation_width) // 2, 420),
                 reservation_text,
                 fill="black",
                 font=reservation_font
