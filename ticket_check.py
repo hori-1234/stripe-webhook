@@ -1169,7 +1169,7 @@ def cancel_ticket_request(ticket_id):
                 </h1>
 
                 <p style="
-                    font-size: 19px;
+                    font-size: 26px;
                     line-height: 1.8;
                     text-align: left;
                 ">
@@ -1180,7 +1180,7 @@ def cancel_ticket_request(ticket_id):
 
                 <div style="
                     text-align: left;
-                    font-size: 20px;
+                    font-size: 26px;
                     line-height: 1.8;
                     margin-top: 30px;
                 ">
