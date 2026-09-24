@@ -1,1 +1,728 @@
+from flask import Blueprint, request, render_template_string
+import os
+import psycopg2
+from admin_auth import admin_required
+from admin_export import export_excel
 
+unei_kanri_bp = Blueprint(
+    "unei_kanri",
+    __name__
+)
+
+@unei_kanri_bp.route("/unei-kanri")
+@admin_required
+def admin():
+
+    date_from = request.args.get("date_from", "")
+    date_to = request.args.get("date_to", "")
+    search_type = request.args.get("type", "")
+    product = request.args.get("product", "")
+    purchaser = request.args.get("purchaser", "")
+    email = request.args.get("email", "")
+    reservation = request.args.get("reservation", "")
+    status = request.args.get("status", "")
+    page = request.args.get("page", 1, type=int)
+    per_page = 50
+
+    conn = psycopg2.connect(
+        os.environ["DATABASE_URL"]
+    )
+
+    cur = conn.cursor()
+
+    # =========================
+    # ticketsテーブルの存在確認
+    # =========================
+
+    cur.execute("""
+        SELECT to_regclass('public.tickets')
+    """)
+
+    tickets_exists = cur.fetchone()[0] is not None
+
+    ticket_rows = []
+
+    if tickets_exists:
+
+        cur.execute("""
+
+            ALTER TABLE tickets
+
+            ADD COLUMN IF NOT EXISTS email VARCHAR(320)
+        """)
+        
+        cur.execute("""
+            ALTER TABLE tickets
+            ADD COLUMN IF NOT EXISTS payment_intent_id VARCHAR(255)
+
+        """)
+
+        
+        ticket_query = """
+        SELECT
+                tickets.created_at,
+                ticket_type,
+                purchaser_name,
+                email,
+                reservation_name,
+                used,
+                used_at,
+                1,
+                tickets.amount,
+                tickets.payment_intent_id,
+                payments.stripe_fee,
+                payments.stripe_net                
+            FROM tickets
+            LEFT JOIN payments
+                ON tickets.payment_intent_id = payments.payment_intent_id
+            WHERE 1=1
+        """
+
+        ticket_params = []
+
+        if date_from:
+            ticket_query += " AND tickets.created_at >= %s"
+            ticket_params.append(date_from)
+
+        if date_to:
+            ticket_query += " AND tickets.created_at < (%s::date + INTERVAL '1 day')"
+            ticket_params.append(date_to)
+
+        if search_type:
+            ticket_query += " AND %s ILIKE %s"
+            ticket_params.extend([
+                "チケット",
+                f"%{search_type}%"
+            ])
+
+        if product:
+            ticket_query += " AND ticket_type ILIKE %s"
+            ticket_params.append(f"%{product}%")
+
+        if purchaser:
+            ticket_query += " AND purchaser_name ILIKE %s"
+            ticket_params.append(f"%{purchaser}%")
+
+        if email:
+            ticket_query += " AND email ILIKE %s"
+            ticket_params.append(f"%{email}%")
+
+        if reservation:
+            ticket_query += " AND reservation_name ILIKE %s"
+            ticket_params.append(f"%{reservation}%")
+
+        if status == "valid":
+            ticket_query += " AND used = FALSE"
+
+        elif status == "invalid":
+            ticket_query += " AND used = TRUE"
+
+        ticket_query += " ORDER BY tickets.created_at DESC"
+
+        cur.execute(
+            ticket_query,
+            ticket_params
+        )
+
+        ticket_rows = cur.fetchall()
+    
+    # =========================
+    # goodsテーブルの存在確認
+    # =========================
+
+    cur.execute("""
+        SELECT to_regclass('public.goods')
+    """)
+
+    goods_exists = cur.fetchone()[0] is not None
+
+    goods_rows = []
+
+    if goods_exists:
+
+        goods_query = """
+            SELECT
+                purchased_at,
+                goods_type,
+                product_name,
+                purchaser_name,
+                email,
+                quantity,
+                goods.amount,
+                goods.payment_intent_id,
+                payments.stripe_fee,
+                payments.stripe_net            
+            FROM goods
+            LEFT JOIN payments
+                ON goods.payment_intent_id = payments.payment_intent_id
+            WHERE 1=1
+        """
+
+        goods_params = []
+
+        if date_from:
+            goods_query += " AND goods.purchased_at >= %s"
+            goods_params.append(date_from)
+
+        if date_to:
+            goods_query += " AND goods.purchased_at < (%s::date + INTERVAL '1 day')"
+            goods_params.append(date_to)
+
+        if search_type:
+            goods_query += " AND goods_type ILIKE %s"
+            goods_params.append(f"%{search_type}%")
+
+        if product:
+            goods_query += " AND product_name ILIKE %s"
+            goods_params.append(f"%{product}%")
+
+        if purchaser:
+            goods_query += " AND purchaser_name ILIKE %s"
+            goods_params.append(f"%{purchaser}%")
+
+        if email:
+            goods_query += " AND email ILIKE %s"
+            goods_params.append(f"%{email}%")
+
+        # お取り置き名・状態はチケット専用
+        if reservation or status:
+            goods_query += " AND FALSE"
+
+        goods_query += " ORDER BY goods.purchased_at DESC"
+
+        cur.execute(
+            goods_query,
+            goods_params
+        )
+
+        goods_rows = cur.fetchall()
+
+
+    all_ticket_rows = ticket_rows
+    all_goods_rows = goods_rows
+
+    # =========================
+    # 売上集計
+    # =========================
+
+    ticket_count = len(all_ticket_rows)
+
+    ticket_sales = sum(
+        row[8] or 0
+        for row in all_ticket_rows
+    )
+
+    goods_count = sum(
+        row[5] or 0
+        for row in all_goods_rows
+    )
+
+    goods_sales = sum(
+        row[6] or 0
+        for row in all_goods_rows
+    )
+
+    total_sales = (
+        ticket_sales
+        + goods_sales
+    )
+
+    # =========================
+    # ページ分割用データ作成
+    # =========================
+
+    combined_rows = []
+
+    for row in all_ticket_rows:
+        combined_rows.append({
+            "kind": "ticket",
+            "date": row[0],
+            "row": row
+        })
+
+    for row in all_goods_rows:
+        combined_rows.append({
+            "kind": "goods",
+            "date": row[0],
+            "row": row
+        })
+
+    # 日時の新しい順
+    combined_rows.sort(
+        key=lambda x: x["date"],
+        reverse=True
+    )
+
+
+    total_rows = len(combined_rows)
+    total_pages = max(
+        1,
+        (total_rows + per_page - 1) // per_page
+    )
+
+    # 不正なページ番号対策
+    if page < 1:
+        page = 1
+
+    if page > total_pages:
+        page = total_pages
+
+    start = (page - 1) * per_page
+    end = start + per_page
+
+    page_rows = combined_rows[start:end]
+
+
+    # =========================
+    # HTML
+    # =========================
+
+    html = """
+
+    <!DOCTYPE html>
+
+    <html lang="ja">
+
+    <head>
+
+        <meta charset="UTF-8">
+
+        <title>マイマケ 管理画面</title>
+
+        <style>
+
+            body {
+                font-family: Arial, sans-serif;
+                margin: 30px;
+                background: #f5f5f5;
+            }
+
+            h1 {
+                margin-bottom: 30px;
+            }
+
+            .summary {
+                display: flex;
+                gap: 20px;
+                margin-bottom: 40px;
+                flex-wrap: wrap;
+            }
+
+            .box {
+                background: white;
+                border: 1px solid #ccc;
+                padding: 20px;
+                min-width: 150px;
+            }
+
+            .number {
+                font-size: 24px;
+                font-weight: bold;
+                margin-top: 10px;
+            }
+
+            table {
+                border-collapse: collapse;
+                width: 100%;
+                background: white;
+            }
+
+            th,
+            td {
+                border: 1px solid #ccc;
+                padding: 10px;
+                text-align: left;
+            }
+
+            th {
+                background: #f2f2f2;
+            }
+
+            .empty {
+                background: white;
+                padding: 30px;
+                text-align: center;
+                color: #666;
+            }
+
+        </style>
+
+    </head>
+
+    <body>
+
+        <h1>マイマケ 管理画面</h1>
+
+        <div style="display: flex; align-items: flex-start; gap: 60px;">
+
+            <div>
+
+        <h2>売上概要</h2>
+
+        <div class="summary">
+
+            <div class="box">
+
+                チケット販売
+
+                <div class="number">
+                    {{ ticket_count }}枚
+                </div>
+
+            </div>
+
+
+            <div class="box">
+
+                物販販売
+
+                <div class="number">
+                    {{ goods_count }}個
+                </div>
+
+            </div>
+
+
+            <div class="box">
+
+                売上合計
+
+                <div class="number">
+                    {{ "{:,}".format(total_sales) }}円
+                </div>
+
+            </div>
+
+        </div>
+
+        <a href="/unei-kanri/export">
+            <button type="button">
+                Excel DL
+            </button>
+        </a>
+
+        </div>
+
+        <div>
+
+
+        <h2>検索</h2>
+        
+        <form method="GET" action="/unei-kanri">
+
+            日時：
+            <input type="date" name="date_from" value="{{ date_from }}">
+            ～
+            <input type="date" name="date_to" value="{{ date_to }}">
+
+            <br><br>
+
+            種類：
+            <input type="text" name="type" value="{{ search_type }}">
+
+            商品名：
+            <input type="text" name="product" value="{{ product }}">
+
+            購入者：
+            <input type="text" name="purchaser" value="{{ purchaser }}">
+
+            <br><br>
+
+            メールアドレス：
+            <input type="text" name="email" value="{{ email }}">
+
+            お取り置き名：
+            <input type="text" name="reservation" value="{{ reservation }}">
+
+            状態：
+            <select name="status">
+                <option value="" {% if status == "" %}selected{% endif %}>すべて</option>
+                <option value="valid" {% if status == "valid" %}selected{% endif %}>有効</option>
+                <option value="invalid" {% if status == "invalid" %}selected{% endif %}>無効</option>
+            </select>
+
+            <button type="submit">検索</button>
+
+        </form>
+
+        </div>
+
+</div>
+
+        <br>
+
+        {% if ticket_rows or goods_rows %}
+
+
+        <div style="text-align: right; margin-bottom: 10px;">
+
+            {% if page > 1 %}
+                <a href="?page={{ page - 1 }}&date_from={{ date_from }}&date_to={{ date_to }}&type={{ search_type }}&product={{ product }}&purchaser={{ purchaser }}&email={{ email }}&reservation={{ reservation }}&status={{ status }}">
+                    ← 前へ
+                </a>
+            {% endif %}
+
+            <span style="margin: 0 15px;">
+                {{ page }} / {{ total_pages }} ページ
+            </span>
+
+            {% if page < total_pages %}
+                <a href="?page={{ page + 1 }}&date_from={{ date_from }}&date_to={{ date_to }}&type={{ search_type }}&product={{ product }}&purchaser={{ purchaser }}&email={{ email }}&reservation={{ reservation }}&status={{ status }}">
+                    次へ →
+                </a>
+            {% endif %}
+
+        </div>
+
+        <table id="purchaseTable">
+
+
+            <tr>
+
+                <th onclick="sortTable(0)" style="cursor: pointer;">
+                    日時 ↕
+                </th>
+                <th>種類</th>
+                <th>商品</th>
+                <th>購入者</th>
+                <th>メールアドレス</th>
+                <th>お取り置き名</th>
+                <th>状態</th>
+                <th>無効になった日時</th>
+                <th>数量</th>
+                <th>売上金額</th>
+                <th>合計金額</th>
+                <th>手数料</th>
+                <th>販売利益</th>
+                <th>決済ID</th>
+
+            </tr>
+
+            {% set ns = namespace(shown_payment_ids=[]) %}
+
+            {% for item in page_rows %}
+
+                {% if item.kind == "ticket" %}
+
+                    {% set row = item.row %}
+
+                    <tr>
+                        <td>{{ row[0].strftime("%Y-%m-%d %H:%M:%S") }}</td>
+                        <td>チケット</td>
+                        <td>{{ row[1] }}</td>
+                        <td>{{ row[2] or "" }}</td>
+                        <td>{{ row[3] or "" }}</td>
+
+                        <td>{{ row[4] or "" }}</td>
+
+                        {% if row[5] %}
+                        <td>無効</td>
+                        {% else %}
+                        <td>有効</td>
+                        {% endif %}
+
+                        <td>
+                            {% if row[6] %}
+                                {{ row[6].strftime("%Y-%m-%d %H:%M:%S") }}
+                            {% else %}
+                    -
+                            {% endif %}
+                        </td>
+
+                        <td>1</td>
+
+                        <td>{{ "{:,}".format(row[8]) }}円</td>
+
+                        {% if row[9] and row[9] not in ns.shown_payment_ids %}
+
+                            <td>
+                                {% if row[10] is not none and row[11] is not none %}
+                                {{ "{:,}".format(row[10] + row[11]) }}円
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if row[10] is not none %}
+                                    {{ "{:,}".format(row[10]) }}円
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if row[11] is not none %}
+                                {{ "{:,}".format(row[11]) }}円
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+
+                            {% set ns.shown_payment_ids = ns.shown_payment_ids + [row[9]] %}
+
+                        {% else %}
+
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+
+                        {% endif %}
+                        
+                        <td>
+                            {% if row[9] %}
+                                {{ row[9] }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                          
+                    </tr>
+
+                {% endif %}            
+
+
+                {% if item.kind == "goods" %}
+
+                    {% set row = item.row %}
+
+                    <tr>
+
+                        <td>{{ row[0].strftime("%Y-%m-%d %H:%M:%S") }}</td>
+                        <td>{{ row[1] }}</td>
+                        <td>{{ row[2] }}</td>
+                        <td>{{ row[3] or "" }}</td>
+                        <td>{{ row[4] or "" }}</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>{{ row[5] }}</td>
+                        <td>{{ "{:,}".format(row[6]) }}円</td>
+
+                        {% if row[7] and row[7] not in ns.shown_payment_ids %}
+
+                            <td>
+                                {% if row[8] is not none and row[9] is not none %}
+                                    {{ "{:,}".format(row[8] + row[9]) }}円
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if row[8] is not none %}
+                                    {{ "{:,}".format(row[8]) }}円
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if row[9] is not none %}
+                                    {{ "{:,}".format(row[9]) }}円
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+
+                            {% set ns.shown_payment_ids = ns.shown_payment_ids + [row[7]] %}
+
+                        {% else %}
+
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+
+                        {% endif %}
+                        
+                        <td>
+                            {% if row[7] %}
+                                {{ row[7] }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+
+                    </tr>
+
+                {% endif %}
+
+            {% endfor %}
+
+
+        </table>
+
+
+        {% else %}
+
+        <div class="empty">
+            まだ購入履歴はありません。
+        </div>
+
+        {% endif %}
+
+        <script>
+            let sortAscending = true;
+
+            function sortTable(columnIndex) {
+
+                const table = document.getElementById("purchaseTable");
+
+                const rows = Array.from(table.rows).slice(1);
+
+                rows.sort(function(a, b) {
+
+                    const aValue = a.cells[columnIndex].innerText.trim();
+                    const bValue = b.cells[columnIndex].innerText.trim();
+
+                    const aDate = new Date(aValue);
+                    const bDate = new Date(bValue);
+
+                    if (sortAscending) {
+                        return aDate - bDate;
+                    } else {
+                        return bDate - aDate;
+                    }
+                });
+
+                rows.forEach(function(row) {
+                    table.appendChild(row);
+                });
+
+                sortAscending = !sortAscending;
+            }
+        </script>
+
+    </body>
+
+    </html>
+
+    """
+
+    cur.close()
+    conn.close()
+
+    return render_template_string(
+        html,
+        ticket_rows=ticket_rows,
+        goods_rows=goods_rows,
+        page_rows=page_rows,
+        page=page,
+        total_pages=total_pages,
+        ticket_count=ticket_count,
+        goods_count=goods_count,
+        total_sales=total_sales,
+        date_from=date_from,
+        date_to=date_to,
+        search_type=search_type,
+        product=product,
+        purchaser=purchaser,
+        email=email,
+        reservation=reservation,
+        status=status
+    )
+
+@unei_kanri_bp.route("/unei-kanri/export")
+@admin_required
+def admin_export():
+    return export_excel()
