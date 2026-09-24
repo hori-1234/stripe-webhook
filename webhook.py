@@ -122,6 +122,32 @@ def webhook():
             event_id
         )
 
+        payment_intent_id = session.get("payment_intent")
+
+        print(
+            "PaymentIntent ID:",
+            payment_intent_id
+        )
+
+        payment_intent = stripe.PaymentIntent.retrieve(
+            payment_intent_id,
+            expand=["latest_charge.balance_transaction"]
+        )
+
+        charge = payment_intent.latest_charge
+
+        balance_transaction = charge.balance_transaction
+
+        print(
+            "Stripe手数料:",
+            balance_transaction.fee
+        )
+
+        print(
+            "Stripe手取り:",
+            balance_transaction.net
+        )
+
         line_items = stripe.checkout.Session.list_line_items(
             session["id"],
             expand=["data.price.product"]
