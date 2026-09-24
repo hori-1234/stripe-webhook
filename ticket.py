@@ -30,6 +30,11 @@ def issue_tickets(cur, line_items, session):
         ADD COLUMN IF NOT EXISTS reservation_name VARCHAR(200)
     """)
 
+    cur.execute("""
+        ALTER TABLE tickets
+        ADD COLUMN IF NOT EXISTS payment_intent_id VARCHAR(255)
+    """)
+
     # Stripeのお取り置き名を取得
     custom_fields = session.get("custom_fields") or []
 
@@ -200,9 +205,10 @@ def issue_tickets(cur, line_items, session):
                     purchaser_name,
                     email,
                     reservation_name,
-                    amount
+                    amount,
+                    payment_intent_id
                 )
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             """, (
                 ticket_type,
                 issue_number,
@@ -210,7 +216,8 @@ def issue_tickets(cur, line_items, session):
                 purchaser_name,
                 email,
                 reservation_name,
-                amount
+                amount,
+                session.get("payment_intent")
             ))
             
             issued_tickets.append({
