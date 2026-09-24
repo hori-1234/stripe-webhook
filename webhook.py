@@ -4,7 +4,7 @@ import boto3
 import psycopg2
 import stripe
 import resend
-
+import time
 
 from product import process_products
 from admin_auth import admin_required
@@ -141,14 +141,24 @@ def webhook():
             payment_intent_id
         )
 
-        payment_intent = stripe.PaymentIntent.retrieve(
-            payment_intent_id,
-            expand=["latest_charge.balance_transaction"]
-        )
+        for retry in range(10):
 
-        charge = payment_intent.latest_charge
-        
-        balance_transaction = charge.balance_transaction
+            payment_intent = stripe.PaymentIntent.retrieve(
+                payment_intent_id,
+                expand=["latest_charge.balance_transaction"]
+            )
+
+            charge = payment_intent.latest_charge
+            balance_transaction = charge.balance_transaction
+
+            if balance_transaction is not None:
+                break
+
+            print(
+                f"BalanceTransaction待機中... {retry + 1}/10"
+            )
+
+            time.sleep(2)
         
         if balance_transaction is not None:
 
@@ -172,9 +182,8 @@ def webhook():
             )
 
             raise Exception(
-                "BalanceTransaction未作成のためWebhookを再試行します"
+                "20秒待機してもBalanceTransaction未作成のためWebhookを再試行します"
             )
-
     
         cur.execute("""
             INSERT INTO payments (
