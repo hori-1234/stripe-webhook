@@ -179,7 +179,7 @@ def issue_tickets(cur, line_items, session):
             reservation_font = ImageFont.truetype(font_path, 30)
 
             # 文字部分の高さ
-            header_height = 475
+            header_height = 445
 
             # QRコードのサイズ
             qr_width, qr_height = qr.size
@@ -217,7 +217,7 @@ def issue_tickets(cur, line_items, session):
             title_width = title_bbox[2] - title_bbox[0]
 
             draw.text(
-                ((qr_width - title_width) // 2, 320),
+                ((qr_width - title_width) // 2, 300),
                 title_text,
                 fill="black",
                 font=title_font
@@ -233,7 +233,7 @@ def issue_tickets(cur, line_items, session):
             number_width = number_bbox[2] - number_bbox[0]
 
             draw.text(
-                ((qr_width - number_width) // 2, 370),
+                ((qr_width - number_width) // 2, 340),
                 number_text,
                 fill="black",
                 font=number_font
@@ -249,7 +249,7 @@ def issue_tickets(cur, line_items, session):
             reservation_width = reservation_bbox[2] - reservation_bbox[0]
 
             draw.text(
-                ((qr_width - reservation_width) // 2, 420),
+                ((qr_width - reservation_width) // 2, 390),
                 reservation_text,
                 fill="black",
                 font=reservation_font
