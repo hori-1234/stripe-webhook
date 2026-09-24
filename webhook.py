@@ -773,7 +773,7 @@ def admin():
 
         <h1>マイマケ 管理画面</h1>
 
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 40px;">
+        <div style="display: flex; align-items: flex-start; gap: 60px;">
 
             <div>
 
