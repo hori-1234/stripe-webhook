@@ -344,7 +344,6 @@ def ticket_confirm_use(ticket_id):
 
 
 @app.route("/ticket/<ticket_id>/cancel")
-@admin_required
 def ticket_cancel_request(ticket_id):
 
     return cancel_ticket_request(ticket_id)
