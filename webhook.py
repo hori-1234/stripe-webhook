@@ -97,6 +97,18 @@ def webhook():
             )
         """)
 
+
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS payments (
+                payment_intent_id VARCHAR(255) PRIMARY KEY,
+                amount INTEGER,
+                stripe_fee INTEGER,
+                stripe_net INTEGER,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        
         cur.execute("""
             INSERT INTO webhook_events (event_id)
             VALUES (%s)
@@ -135,19 +147,55 @@ def webhook():
         )
 
         charge = payment_intent.latest_charge
-
+        
         balance_transaction = charge.balance_transaction
+        
+        if balance_transaction is not None:
 
-        print(
-            "Stripe手数料:",
-            balance_transaction.fee
-        )
+            stripe_fee = balance_transaction.fee
+            stripe_net = balance_transaction.net
 
-        print(
-            "Stripe手取り:",
-            balance_transaction.net
-        )
+            print(
+                "Stripe手数料:",
+                stripe_fee
+            )
 
+            print(
+                "Stripe手取り:",
+                stripe_net
+            )
+
+        else:
+
+            stripe_fee = None
+            stripe_net = None
+
+            print(
+                "BalanceTransactionはまだ作成されていません"
+            )
+
+    
+        cur.execute("""
+            INSERT INTO payments (
+                payment_intent_id,
+                amount,
+                stripe_fee,
+                stripe_net
+            )
+            VALUES (%s, %s, %s, %s)
+            ON CONFLICT (payment_intent_id)
+            DO UPDATE SET
+                amount = EXCLUDED.amount,
+                stripe_fee = EXCLUDED.stripe_fee,
+                stripe_net = EXCLUDED.stripe_net
+        """, (
+            payment_intent_id,
+            session.get("amount_total"),
+            stripe_fee,
+            stripe_net
+        ))
+                
+        
         line_items = stripe.checkout.Session.list_line_items(
             session["id"],
             expand=["data.price.product"]
