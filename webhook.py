@@ -460,8 +460,13 @@ def admin():
             ALTER TABLE tickets
 
             ADD COLUMN IF NOT EXISTS email VARCHAR(320)
+        """)
+        
+        cur.execute("""
+            ALTER TABLE tickets
+            ADD COLUMN IF NOT EXISTS payment_intent_id VARCHAR(255)
 
-            """)
+        """)
 
         
         ticket_query = """
