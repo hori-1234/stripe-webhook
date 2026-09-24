@@ -773,6 +773,9 @@ def admin():
 
         <h1>マイマケ 管理画面</h1>
 
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 40px;">
+
+            <div>
 
         <h2>売上概要</h2>
 
@@ -818,8 +821,12 @@ def admin():
             </button>
         </a>
 
+        </div>
 
-        <h2>購入履歴</h2>
+        <div>
+
+
+        <h2>検索</h2>
         
         <form method="GET" action="/admin">
 
@@ -857,6 +864,10 @@ def admin():
             <button type="submit">検索</button>
 
         </form>
+
+        </div>
+
+</div>
 
         <br>
 
