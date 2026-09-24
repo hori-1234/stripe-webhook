@@ -6,6 +6,7 @@ import stripe
 import resend
 import time
 
+from admin_auth import admin_required
 from unei_kanri import unei_kanri_bp
 from product import process_products
 from ticket_check import (
@@ -318,12 +319,14 @@ def webhook():
 
 
 @app.route("/ticket/<ticket_id>")
+@admin_required
 def ticket_check(ticket_id):
 
     return check_ticket(ticket_id)
 
 
 @app.route("/ticket/<ticket_id>/use", methods=["POST"])
+@admin_required
 def ticket_use(ticket_id):
 
     from ticket_check import confirm_use_ticket
@@ -332,6 +335,7 @@ def ticket_use(ticket_id):
 
 
 @app.route("/ticket/<ticket_id>/confirm-use", methods=["POST"])
+@admin_required
 def ticket_confirm_use(ticket_id):
 
     from ticket_check import use_ticket
@@ -340,12 +344,14 @@ def ticket_confirm_use(ticket_id):
 
 
 @app.route("/ticket/<ticket_id>/cancel")
+@admin_required
 def ticket_cancel_request(ticket_id):
 
     return cancel_ticket_request(ticket_id)
 
 
 @app.route("/ticket/<ticket_id>/cancel-send", methods=["POST"])
+@admin_required
 def ticket_cancel_send(ticket_id):
 
     return cancel_ticket_send(ticket_id)
