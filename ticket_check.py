@@ -309,6 +309,14 @@ def check_ticket(ticket_id):
             <meta name="viewport"
                   content="width=device-width, initial-scale=1.0">
             <title>チケット確認</title>
+
+            <style>
+                .auto-fit {
+                    white-space: nowrap;
+                    font-size: clamp(12px, 4vw, 21px);
+                }
+            </style>
+        
         </head>
 
         <body style="
@@ -349,7 +357,7 @@ def check_ticket(ticket_id):
                     line-height: 1.8;
                 ">
 
-                    <p>
+                    <p class="auto-fit">
                         <strong>チケット種類</strong><br>
                         {ticket_type}
                     </p>
@@ -359,7 +367,7 @@ def check_ticket(ticket_id):
                         {issue_number}
                     </p>
 
-                    <p>
+                    <p class="auto-fit">
                         <strong>チケットID</strong><br>
                         {ticket_id}
                     </p>
