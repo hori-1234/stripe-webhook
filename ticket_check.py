@@ -311,10 +311,10 @@ def check_ticket(ticket_id):
             <title>チケット確認</title>
 
             <style>
-                .auto-fit {
+                .auto-fit {{
                     white-space: nowrap;
                     font-size: clamp(12px, 4vw, 21px);
-                }
+                }}
             </style>
         
         </head>
