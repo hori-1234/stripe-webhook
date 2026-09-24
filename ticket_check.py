@@ -129,6 +129,7 @@ def check_ticket(ticket_id):
         used = row[5]
         used_at = row[6]
         reservation_name = row[7]
+        print("確認画面のお取り置き名:", reservation_name)
 
         print(
             "チケットが見つかりました"
