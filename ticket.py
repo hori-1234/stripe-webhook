@@ -148,7 +148,7 @@ def issue_tickets(cur, line_items, session):
 
             if product_image:
                 product_image.thumbnail(
-                    (200, 200)
+                    (300, 300)
                 )
 
             # QRコード上部に表示する文字
