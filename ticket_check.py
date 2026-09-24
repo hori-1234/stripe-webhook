@@ -64,7 +64,8 @@ def check_ticket(ticket_id):
                 purchaser_name,
                 amount,
                 used,
-                used_at
+                used_at,
+                reservation_name
             FROM tickets
             WHERE ticket_id = %s
         """, (ticket_id,))
@@ -127,6 +128,7 @@ def check_ticket(ticket_id):
         amount = row[4]
         used = row[5]
         used_at = row[6]
+        reservation_name = row[7]
 
         print(
             "チケットが見つかりました"
@@ -250,6 +252,11 @@ def check_ticket(ticket_id):
                         <p>
                             <strong>購入者</strong><br>
                             {purchaser_name}
+                        </p>
+
+                        <p>
+                            <strong>お取り置き名</strong><br>
+                            {reservation_name or "-"}
                         </p>
 
                         <p>
@@ -389,6 +396,28 @@ def check_ticket(ticket_id):
 
                 </form>
 
+
+                <form
+                    method="GET"
+                    action="/ticket/{ticket_id}/cancel"
+                    style="margin-top: 15px;"
+                >
+                    <button
+                        type="submit"
+                        style="
+                            width: 100%;
+                            padding: 18px;
+                            font-size: 25px;
+                            font-weight: bold;
+                            border: none;
+                            border-radius: 10px;
+                            cursor: pointer;
+                        "
+                    >
+                        キャンセル
+                    </button>
+                </form>
+                
             </div>
 
         </body>
