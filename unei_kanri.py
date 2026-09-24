@@ -291,6 +291,17 @@ def admin():
 
         <style>
 
+            input,
+            select,
+            button {
+                font-size: 16px;
+                padding: 8px;
+            }
+
+            form {
+                font-size: 16px;
+            }
+
             body {
                 font-family: Arial, sans-serif;
                 margin: 30px;
@@ -437,7 +448,9 @@ def admin():
                 <option value="invalid" {% if status == "invalid" %}selected{% endif %}>無効</option>
             </select>
 
-            <button type="submit">検索</button>
+            <button type="submit" style="font-size: 16px; padding: 8px 18px;">
+                検索
+            </button>
 
             <a href="/unei-kanri/export" style="margin-left: 15px;">
                 <button type="button" style="font-size: 16px; padding: 8px 18px;">
