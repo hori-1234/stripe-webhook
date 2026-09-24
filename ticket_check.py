@@ -487,7 +487,8 @@ def confirm_use_ticket(ticket_id):
                 purchaser_name,
                 amount,
                 used,
-                used_at
+                used_at,
+                reservation_name
             FROM tickets
             WHERE ticket_id = %s
         """, (ticket_id,))
@@ -507,6 +508,8 @@ def confirm_use_ticket(ticket_id):
         purchaser_name = row[3]
         amount = row[4]
         used = row[5]
+        used_at = row[6]
+        reservation_name = row[7]
 
         if used:
 
@@ -753,6 +756,7 @@ def use_ticket(ticket_id):
                 amount,
                 used,
                 used_at
+                reservation_name
             FROM tickets
             WHERE ticket_id = %s
         """, (ticket_id,))
@@ -812,6 +816,7 @@ def use_ticket(ticket_id):
         amount = row[4]
         used = row[5]
         used_at = row[6]
+        reservation_name = row[7]
 
         if used:
 
@@ -1076,7 +1081,8 @@ def cancel_ticket_request(ticket_id):
                 ticket_id,
                 purchaser_name,
                 amount,
-                used
+                used,
+                reservation_name
             FROM tickets
             WHERE ticket_id = %s
         """, (ticket_id,))
@@ -1096,6 +1102,7 @@ def cancel_ticket_request(ticket_id):
         purchaser_name = row[3]
         amount = row[4]
         used = row[5]
+        reservation_name = row[6]
 
         if not used:
 
@@ -1308,7 +1315,8 @@ def cancel_ticket_send(ticket_id):
                 ticket_id,
                 purchaser_name,
                 amount,
-                used
+                used,
+                reservation_name
             FROM tickets
             WHERE ticket_id = %s
         """, (ticket_id,))
@@ -1328,6 +1336,7 @@ def cancel_ticket_send(ticket_id):
         purchaser_name = row[3]
         amount = row[4]
         used = row[5]
+        reservation_name = row[6]
 
         if not used:
 
@@ -1371,6 +1380,7 @@ def cancel_ticket_send(ticket_id):
 発行番号: {issue_number}
 チケットID: {ticket_id}
 購入者: {purchaser_name}
+お取り置き名: {reservation_name or "-"}
 料金: {amount:,}円
 
 下記URLを開くと、チケットの使用を取り消します。
