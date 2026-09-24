@@ -900,11 +900,14 @@ def admin():
                 <th>無効になった日時</th>
                 <th>数量</th>
                 <th>売上金額</th>
+                <th>合計金額</th>
                 <th>手数料</th>
                 <th>販売利益</th>
                 <th>決済ID</th>
 
             </tr>
+
+            {% set ns = namespace(shown_payment_ids=[]) %}
 
             {% for item in page_rows %}
 
@@ -936,23 +939,44 @@ def admin():
                         </td>
 
                         <td>1</td>
+
                         <td>{{ "{:,}".format(row[8]) }}円</td>
 
-                        <td>
-                            {% if row[10] is not none %}
-                            {{ "{:,}".format(row[10]) }}円
-                            {% else %}
-                                -
-                            {% endif %}
-                        </td>
+                        {% if row[9] and row[9] not in ns.shown_payment_ids %}
 
-                        <td>
-                            {% if row[11] is not none %}
-                            {{ "{:,}".format(row[11]) }}円
-                            {% else %}
-                                -
-                            {% endif %}
-                        </td>
+                            <td>
+                                {% if row[10] is not none and row[11] is not none %}
+                                {{ "{:,}".format(row[10] + row[11]) }}円
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if row[10] is not none %}
+                                    {{ "{:,}".format(row[10]) }}円
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if row[11] is not none %}
+                                {{ "{:,}".format(row[11]) }}円
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+
+                            {% set ns.shown_payment_ids = ns.shown_payment_ids + [row[9]] %}
+
+                        {% else %}
+
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+
+                        {% endif %}
                         
                         <td>
                             {% if row[9] %}
@@ -984,22 +1008,42 @@ def admin():
                         <td>{{ row[5] }}</td>
                         <td>{{ "{:,}".format(row[6]) }}円</td>
 
-                        <td>
-                            {% if row[8] is not none %}
-                                {{ "{:,}".format(row[8]) }}円
-                            {% else %}
-                                -
-                            {% endif %}
-                        </td>
+                        {% if row[7] and row[7] not in ns.shown_payment_ids %}
 
-                        <td>
-                            {% if row[9] is not none %}
-                                {{ "{:,}".format(row[9]) }}円
-                            {% else %}
-                                -
-                            {% endif %}
-                        </td>
+                            <td>
+                                {% if row[8] is not none and row[9] is not none %}
+                                    {{ "{:,}".format(row[8] + row[9]) }}円
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
 
+                            <td>
+                                {% if row[8] is not none %}
+                                    {{ "{:,}".format(row[8]) }}円
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if row[9] is not none %}
+                                    {{ "{:,}".format(row[9]) }}円
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+
+                            {% set ns.shown_payment_ids = ns.shown_payment_ids + [row[7]] %}
+
+                        {% else %}
+
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+
+                        {% endif %}
+                        
                         <td>
                             {% if row[7] %}
                                 {{ row[7] }}
