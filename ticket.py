@@ -44,7 +44,7 @@ def issue_tickets(cur, line_items, session):
     for field in custom_fields:
         label = field.get("label") or {}
 
-        if label.get("custom") == "お取り置き(出演者名)":
+        if label.get("custom") == "お取り置き(出演者名:1名)":
             text_data = field.get("text") or {}
             reservation_name = text_data.get("value")
             break
