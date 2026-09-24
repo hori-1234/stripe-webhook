@@ -395,11 +395,7 @@ def admin():
 
         </div>
 
-        <a href="/unei-kanri/export">
-            <button type="button">
-                Excel DL
-            </button>
-        </a>
+
 
         </div>
 
@@ -442,6 +438,12 @@ def admin():
             </select>
 
             <button type="submit">検索</button>
+
+            <a href="/unei-kanri/export" style="margin-left: 15px;">
+                <button type="button" style="font-size: 16px; padding: 8px 18px;">
+                    Excel DL
+                </button>
+            </a>
 
         </form>
 
