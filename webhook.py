@@ -422,11 +422,4 @@ def home():
     return "Webhook server is running"
 
 
-@app.route("/admin/export")
-@admin_required
-def admin_export():
-    return export_excel()
-
-
-
 
