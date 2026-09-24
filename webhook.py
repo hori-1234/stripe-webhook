@@ -891,7 +891,7 @@ def admin():
                 <th>無効になった日時</th>
                 <th>数量</th>
                 <th>売上金額</th>
-                <th>S手数料</th>
+                <th>手数料</th>
                 <th>販売利益</th>
                 <th>決済ID</th>
 
