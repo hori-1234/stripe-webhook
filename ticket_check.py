@@ -27,6 +27,8 @@ def check_ticket(ticket_id):
         "チケット確認:",
         ticket_id
     )
+    
+    print("★★★ 新しいcheck_ticketが動いています ★★★")
 
     conn = psycopg2.connect(
         os.environ["DATABASE_URL"]
