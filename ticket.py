@@ -121,15 +121,17 @@ def issue_tickets(cur, line_items, session):
             # QRコード上部に表示する文字
             title_text = ticket_type
             number_text = f"発行番号：{issue_number}"
+            reservation_text = f"お取り置き：{reservation_name or '-'}"
 
             # フォント
             font_path = "NotoSansJP-Regular.ttf"
 
             title_font = ImageFont.truetype(font_path, 40)
             number_font = ImageFont.truetype(font_path, 36)
+            reservation_font = ImageFont.truetype(font_path, 30)
 
             # 文字部分の高さ
-            header_height = 110
+            header_height = 155
 
             # QRコードのサイズ
             qr_width, qr_height = qr.size
@@ -176,6 +178,22 @@ def issue_tickets(cur, line_items, session):
                 number_text,
                 fill="black",
                 font=number_font
+            )
+
+            # お取り置き名
+            reservation_bbox = draw.textbbox(
+                (0, 0),
+                reservation_text,
+                font=reservation_font
+            )
+
+            reservation_width = reservation_bbox[2] - reservation_bbox[0]
+
+            draw.text(
+                ((qr_width - reservation_width) // 2, 100),
+                reservation_text,
+                fill="black",
+                font=reservation_font
             )
 
             # PNG化
