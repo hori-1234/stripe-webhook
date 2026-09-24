@@ -370,6 +370,11 @@ def check_ticket(ticket_id):
                     </p>
 
                     <p>
+                        <strong>お取り置き名</strong><br>
+                        {reservation_name or "-"}
+                    </p>
+
+                    <p>
                         <strong>料金</strong><br>
                         {amount:,}円
                     </p>
@@ -606,6 +611,11 @@ def confirm_use_ticket(ticket_id):
                     <p>
                         <strong>購入者</strong><br>
                         {purchaser_name}
+                    </p>
+
+                    <p>
+                        <strong>お取り置き名</strong><br>
+                        {reservation_name or "-"}
                     </p>
 
                     <p>
@@ -886,6 +896,11 @@ def use_ticket(ticket_id):
                         </p>
 
                         <p>
+                            <strong>お取り置き名</strong><br>
+                            {reservation_name or "-"}
+                        </p>
+
+                        <p>
                             <strong>料金</strong><br>
                             {amount:,}円
                         </p>
@@ -981,6 +996,11 @@ def use_ticket(ticket_id):
                     <p>
                         <strong>購入者</strong><br>
                         {purchaser_name}
+                    </p>
+
+                    <p>
+                        <strong>お取り置き名</strong><br>
+                        {reservation_name or "-"}
                     </p>
 
                     <p>
@@ -1168,6 +1188,11 @@ def cancel_ticket_request(ticket_id):
                     <p>
                         <strong>購入者</strong><br>
                         {purchaser_name}
+                    </p>
+
+                    <p>
+                        <strong>お取り置き名</strong><br>
+                        {reservation_name or "-"}
                     </p>
 
                     <p>
