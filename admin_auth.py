@@ -23,7 +23,7 @@ def admin_required(func):
                 401,
                 {
                     "WWW-Authenticate":
-                    'Basic realm="Admin"'
+                    'Basic realm="運営読取"'
                 }
             )
 
