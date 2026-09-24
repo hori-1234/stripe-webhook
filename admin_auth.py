@@ -19,7 +19,12 @@ def admin_required(func):
             or auth.password != password
         ):
             return Response(
-                "管理者認証が必要です",
+                """
+                <div style="font-size:32px; text-align:center; margin-top:80px;">
+                    認証がキャンセルされました。<br><br>
+                    画面を閉じてください。
+                </div>
+                """,
                 401,
                 {
                     "WWW-Authenticate":
