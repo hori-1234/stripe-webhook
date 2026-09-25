@@ -272,6 +272,8 @@ def issue_tickets(cur, line_items, session):
             purchaser_name = customer_details.get("name")
             email = customer_details.get("email")
 
+            product_price = item.price.unit_amount
+
             amount = item.amount_total // quantity
             
             cur.execute("""
@@ -305,6 +307,7 @@ def issue_tickets(cur, line_items, session):
                 "email": email,
                 "reservation_name": reservation_name,
                 "amount": amount,
+                "product_price": product_price,
                 "qr_bytes": qr_bytes
             })
 
