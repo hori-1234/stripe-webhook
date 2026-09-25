@@ -287,7 +287,8 @@ def webhook():
 
             send_goods_email(
                 session,
-                goods_items
+                goods_items,
+                stripe_fee
             )
 
         print(
