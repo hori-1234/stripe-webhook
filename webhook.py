@@ -258,7 +258,8 @@ def webhook():
         issued_tickets = process_products(
             cur,
             line_items,
-            session
+            session,
+            stripe_fee
         )
 
         conn.commit()
