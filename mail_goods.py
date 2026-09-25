@@ -4,7 +4,7 @@ import resend
 resend.api_key = os.environ["RESEND_API_KEY"]
 
 
-def send_goods_email(session, goods_items):
+def send_goods_email(session, goods_items, stripe_fee):
 
     try:
 
@@ -42,7 +42,9 @@ def send_goods_email(session, goods_items):
             text += f"""
 商品名: {product_name}
 数量: {quantity}
-購入金額: {amount}円
+商品価格: {amount - stripe_fee:,}円
+手数料: {stripe_fee:,}円
+支払合計金額: {amount:,}円
 
 """
 
