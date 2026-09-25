@@ -5,7 +5,7 @@ from goods import save_goods
 from digital_goods import save_digital_goods
 
 
-def process_products(cur, line_items, session):
+def process_products(cur, line_items, session, stripe_fee):
 
     # チケット商品
     ticket_items = []
@@ -125,7 +125,8 @@ def process_products(cur, line_items, session):
         save_digital_goods(
             cur,
             digital_goods_line_items,
-            session
+            session,
+            stripe_fee
         )
 
     # 発行したチケットを返す
