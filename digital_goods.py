@@ -17,7 +17,7 @@ r2 = boto3.client(
 R2_BUCKET = os.environ["R2_BUCKET_NAME"]
 
 
-def save_digital_goods(cur, line_items, session):
+def save_digital_goods(cur, line_items, session, stripe_fee):
 
     # goodsテーブルが存在しない場合に作成
     cur.execute("""
@@ -167,13 +167,15 @@ def save_digital_goods(cur, line_items, session):
             text = f"""
 {purchaser_name} 様
 
-PDF商品をご購入いただきありがとうございます。
+当商品をご購入いただきありがとうございます。
 
 以下の商品を添付いたしました。
 
 商品名: {product_name}
 数量: {quantity}
-購入金額: {amount}円
+商品価格: {amount - stripe_fee:,}円
+手数料: {stripe_fee:,}円
+支払合計金額: {amount:,}円
 
 添付PDFをご確認ください。
 
