@@ -4,8 +4,7 @@ import resend
 
 resend.api_key = os.environ["RESEND_API_KEY"]
 
-
-def send_ticket_email(session, issued_tickets):
+def send_ticket_email(session, issued_tickets, stripe_fee):
 
     try:
 
@@ -34,15 +33,13 @@ def send_ticket_email(session, issued_tickets):
 
         for ticket in issued_tickets:
 
-            fee = ticket["amount"] - ticket["product_price"]
-
             text += f"""
 チケット種類: {ticket["ticket_type"]}
 発行番号: {ticket["issue_number"]}
 チケットID: {ticket["ticket_id"]}
 商品価格: {ticket["product_price"]:,}円
-手数料: {fee:,}円
-合計: {ticket["amount"]:,}円
+手数料: {stripe_fee:,}円
+合計: {ticket["product_price"] + stripe_fee:,}円
 
 """
 
