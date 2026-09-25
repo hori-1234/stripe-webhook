@@ -37,9 +37,9 @@ def send_ticket_email(session, issued_tickets, stripe_fee):
 チケット種類: {ticket["ticket_type"]}
 発行番号: {ticket["issue_number"]}
 チケットID: {ticket["ticket_id"]}
-商品価格: {ticket["product_price"]:,}円
+商品価格: {ticket["amount"] - stripe_fee:,}円
 手数料: {stripe_fee:,}円
-合計: {ticket["product_price"] + stripe_fee:,}円
+支払合計金額: {ticket["amount"]:,}円
 
 """
 
