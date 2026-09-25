@@ -273,7 +273,8 @@ def webhook():
 
             send_ticket_email(
                 session,
-                issued_tickets
+                issued_tickets,
+                stripe_fee
             )
 
         if goods_items:
