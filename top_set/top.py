@@ -2,7 +2,6 @@ from flask import Blueprint, render_template_string
 
 top_bp = Blueprint("top", __name__)
 
-
 @top_bp.route("/")
 def top():
     return render_template_string("""
