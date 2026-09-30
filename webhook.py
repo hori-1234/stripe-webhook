@@ -6,10 +6,10 @@ import stripe
 import resend
 import time
 
-from privacy import privacy_bp
-from shipping import shipping_bp
-from tokushoho import tokushoho_bp
-from contact import contact_bp
+from top_set.privacy import privacy_bp
+from top_set.shipping import shipping_bp
+from top_set.tokushoho import tokushoho_bp
+from top_set.contact import contact_bp
 from top_set.cancel_policy import cancel_policy_bp
 from top_set.top import top_bp
 from admin_auth import admin_required, qr_required
