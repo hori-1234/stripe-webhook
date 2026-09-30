@@ -2,7 +2,6 @@ from flask import Blueprint, render_template_string
 
 cancel_policy_bp = Blueprint("cancel_policy", __name__)
 
-
 @cancel_policy_bp.route("/cancel-policy")
 def cancel_policy():
     return render_template_string("""
