@@ -30,6 +30,10 @@ def top():
         </a>
     </p>
 
+    <footer>
+        <a href="/tokushoho">特定商取引法に基づく表記</a>
+    </footer>
+
 </body>
 </html>
 """)
