@@ -18,6 +18,12 @@ def top():
 
     <h1>マイマケ</h1>
 
+    <p>
+        <a href="/cancel-policy">
+            キャンセル・返品・払い戻しについて
+        </a>
+    </p>
+
 </body>
 </html>
 """)
