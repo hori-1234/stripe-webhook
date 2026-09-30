@@ -6,6 +6,7 @@ import stripe
 import resend
 import time
 
+from top import top_bp
 from admin_auth import admin_required, qr_required
 from unei_kanri import unei_kanri_bp
 from product import process_products
@@ -19,6 +20,7 @@ from ticket_check import (
 
 app = Flask(__name__)
 app.register_blueprint(unei_kanri_bp)
+app.register_blueprint(top_bp)
 
 r2 = boto3.client(
     "s3",
