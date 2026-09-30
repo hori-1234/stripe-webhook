@@ -10,8 +10,8 @@ from privacy import privacy_bp
 from shipping import shipping_bp
 from tokushoho import tokushoho_bp
 from contact import contact_bp
-from cancel_policy import cancel_policy_bp
-from top import top_bp
+from top_set.cancel_policy import cancel_policy_bp
+from top_set.top import top_bp
 from admin_auth import admin_required, qr_required
 from unei_kanri import unei_kanri_bp
 from product import process_products
