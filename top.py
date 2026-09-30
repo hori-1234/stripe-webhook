@@ -24,6 +24,12 @@ def top():
         </a>
     </p>
 
+    <p>
+        <a href="/contact">
+            お問い合わせ
+        </a>
+    </p>
+
 </body>
 </html>
 """)
