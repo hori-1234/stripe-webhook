@@ -6,6 +6,7 @@ import stripe
 import resend
 import time
 
+from shipping import shipping_bp
 from tokushoho import tokushoho_bp
 from contact import contact_bp
 from cancel_policy import cancel_policy_bp
@@ -27,6 +28,7 @@ app.register_blueprint(top_bp)
 app.register_blueprint(cancel_policy_bp)
 app.register_blueprint(contact_bp)
 app.register_blueprint(tokushoho_bp)
+app.register_blueprint(shipping_bp)
 
 r2 = boto3.client(
     "s3",
