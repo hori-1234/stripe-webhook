@@ -75,6 +75,12 @@ def top():
 
     <h1>W's</h1>
     <div class="menu">
+
+    <p>
+        <a href="/member-video">
+            会員限定動画検索
+        </a>
+    </p>
     
     <p>
         <a href="/cancel-policy">
