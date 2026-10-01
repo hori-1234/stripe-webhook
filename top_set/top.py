@@ -20,6 +20,9 @@ def top():
             background-color: #f7f7f7;
             color: #333;
             text-align: center;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
         h1 {
@@ -49,9 +52,10 @@ def top():
         }
 
         footer {
-            margin-top: 80px;
-            padding: 20px;
+            margin-top: auto;
+            padding: 20px 30px;
             font-size: 14px;
+            text-align: left;
         }
 
         footer a {
