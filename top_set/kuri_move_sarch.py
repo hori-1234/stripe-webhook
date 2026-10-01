@@ -9,7 +9,8 @@ LOCK_MINUTES = 30
 @kuri_move_sarch_bp.route("/member-video/login", methods=["GET", "POST"])
 
 def member_login():
-    ip = request.remote_addr
+    ip = request.headers.get("X-Forwarded-For", request.remote_addr)
+    ip = ip.split(",")[0].strip()
     attempt = login_attempts.get(
         ip,
         {"count": 0, "locked_until": None}
