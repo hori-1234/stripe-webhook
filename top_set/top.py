@@ -24,12 +24,14 @@ def top():
 
         h1 {
             margin-top: 60px;
+            margin-left: 30px;
             font-size: 36px;
+            text-align: left;
         }
         .menu {
             width: 90%;
             max-width: 500px;
-            margin: 40px auto;
+            margin: 40px 0 40px 30px;
         }
 
         .menu p {
