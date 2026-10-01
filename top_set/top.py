@@ -78,7 +78,7 @@ def top():
 
     <p>
         <a href="/member-video">
-            会員限定動画検索
+            クリサポ限定動画検索
         </a>
     </p>
     
