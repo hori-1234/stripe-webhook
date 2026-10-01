@@ -1,12 +1,62 @@
-from flask import Blueprint, render_template_string, request
-from admin_auth import member_required
+import os
+from datetime import datetime, timedelta
+from flask import Blueprint, render_template_string, request, session, redirect, url_for
 
 kuri_move_sarch_bp = Blueprint("kuri_move_sarch", __name__)
+login_attempts = {}
+MAX_LOGIN_ATTEMPTS = 3
+LOCK_MINUTES = 30
+@kuri_move_sarch_bp.route("/member-video/login", methods=["GET", "POST"])
 
+def member_login():
+    locked_until = login_attempts.get("locked_until")
+
+    if locked_until:
+        if datetime.now() < locked_until:
+            return "ログイン試行回数を超えました。30分間ログインできません。", 403
+        else:
+            login_attempts.clear()
+            
+    if request.method == "POST":
+        username = request.form.get("username", "")
+        password = request.form.get("password", "")
+        correct_username = os.environ.get("kuri_USERNAME")
+        correct_password = os.environ.get("kuri_PASSWORD")
+        
+        if username == correct_username and password == correct_password:
+            login_attempts.clear()
+            session["member_logged_in"] = True
+            return redirect(url_for("kuri_move_sarch.member_video"))
+    
+        login_attempts["count"] = login_attempts.get("count", 0) + 1
+
+        if login_attempts["count"] >= MAX_LOGIN_ATTEMPTS:
+            login_attempts["locked_until"] = datetime.now() + timedelta(minutes=LOCK_MINUTES)
+            return "ログイン試行回数を超えました。", 403
+
+    remaining = MAX_LOGIN_ATTEMPTS - login_attempts.get("count", 0)
+
+    return render_template_string("""
+        <h1>クリサポログイン</h1>
+
+        {% if remaining < 3 %}
+            <p>ログイン失敗：残り {{ remaining }} 回</p>
+        {% endif %}
+
+        <form method="POST">
+            <input type="text" name="username" placeholder="ユーザー名" required>
+            <br><br>
+            <input type="password" name="password" placeholder="パスワード" required>
+            <br><br>
+            <button type="submit">ログイン</button>
+        </form>
+    """, remaining=remaining)
 
 @kuri_move_sarch_bp.route("/member-video")
-@member_required
 def member_video():
+    if not session.get("member_logged_in"):
+        return redirect(url_for("kuri_move_sarch.member_login"))
+
     performer = request.args.get("performer", "").strip()
 
     videos = []
