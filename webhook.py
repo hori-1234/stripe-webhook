@@ -6,7 +6,6 @@ import stripe
 import resend
 import time
 
-
 from top_set.kuri_move_sarch import kuri_move_sarch_bp
 from top_set.privacy import privacy_bp
 from top_set.shipping import shipping_bp
