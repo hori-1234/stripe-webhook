@@ -20,7 +20,12 @@ def member_login():
 
     if locked_until:
         if datetime.now() < locked_until:
-            return "ログイン試行回数を超えました。30分間ログインできません。", 403
+            return """
+            <div style="font-size:32px; text-align:center; margin-top:80px;">
+                ログイン試行回数を超えました。<br>
+                30分間ログインできません。
+            </div>
+            """, 403
         else:
             login_attempts.pop(ip, None)
             attempt = {"count": 0, "locked_until": None}
@@ -44,7 +49,12 @@ def member_login():
         login_attempts[ip] = attempt
 
         if attempt["count"] >= MAX_LOGIN_ATTEMPTS:
-            return "ログイン試行回数を超えました。30分間ログインできません。", 403
+            return """
+            <div style="font-size:32px; text-align:center; margin-top:80px;">
+                ログイン試行回数を超えました。<br>
+                30分間ログインできません。
+            </div>
+            """, 403
 
     remaining = MAX_LOGIN_ATTEMPTS - attempt["count"]
 
