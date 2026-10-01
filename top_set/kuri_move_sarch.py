@@ -9,13 +9,20 @@ LOCK_MINUTES = 30
 @kuri_move_sarch_bp.route("/member-video/login", methods=["GET", "POST"])
 
 def member_login():
-    locked_until = login_attempts.get("locked_until")
+    ip = request.remote_addr
+    attempt = login_attempts.get(
+        ip,
+        {"count": 0, "locked_until": None}
+    )
+
+    locked_until = attempt.get("locked_until")
 
     if locked_until:
         if datetime.now() < locked_until:
             return "ログイン試行回数を超えました。30分間ログインできません。", 403
         else:
-            login_attempts.clear()
+            login_attempts.pop(ip, None)
+            attempt = {"count": 0, "locked_until": None}
             
     if request.method == "POST":
         username = request.form.get("username", "")
@@ -24,19 +31,24 @@ def member_login():
         correct_password = os.environ.get("kuri_PASSWORD")
         
         if username == correct_username and password == correct_password:
-            login_attempts.clear()
+            login_attempts.pop(ip, None)
             session["member_logged_in"] = True
             return redirect(url_for("kuri_move_sarch.member_video"))
-    
-        login_attempts["count"] = login_attempts.get("count", 0) + 1
 
-        if login_attempts["count"] >= MAX_LOGIN_ATTEMPTS:
-            login_attempts["locked_until"] = datetime.now() + timedelta(minutes=LOCK_MINUTES)
-            return "ログイン試行回数を超えました。", 403
+        attempt["count"] += 1
 
-    remaining = MAX_LOGIN_ATTEMPTS - login_attempts.get("count", 0)
+        if attempt["count"] >= MAX_LOGIN_ATTEMPTS:
+            attempt["locked_until"] = datetime.now() + timedelta(minutes=LOCK_MINUTES)
+
+        login_attempts[ip] = attempt
+
+        if attempt["count"] >= MAX_LOGIN_ATTEMPTS:
+            return "ログイン試行回数を超えました。30分間ログインできません。", 403
+
+    remaining = MAX_LOGIN_ATTEMPTS - attempt["count"]
 
     return render_template_string("""
+        
         <h1>クリサポログイン</h1>
 
         {% if remaining < 3 %}
@@ -44,12 +56,32 @@ def member_login():
         {% endif %}
 
         <form method="POST">
-            <input type="text" name="username" placeholder="ユーザー名" required>
+            <input
+                type="text"
+                name="username"
+                placeholder="ユーザー名"
+                required
+                style="width:300px; padding:12px; font-size:18px;"
+            >
             <br><br>
-            <input type="password" name="password" placeholder="パスワード" required>
+
+            <input
+                type="password"
+                name="password"
+                placeholder="パスワード"
+                required
+                style="width:300px; padding:12px; font-size:18px;"
+            >
             <br><br>
-            <button type="submit">ログイン</button>
+
+            <button
+                type="submit"
+                style="padding:12px 24px; font-size:18px;"
+            >
+                ログイン
+            </button>
         </form>
+
     """, remaining=remaining)
 
 @kuri_move_sarch_bp.route("/member-video")
