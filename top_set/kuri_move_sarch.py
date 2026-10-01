@@ -18,8 +18,11 @@ def x_test():
     }
 
     response = requests.get(
-        "https://api.x.com/2/users/me",
-        headers=headers
+        "https://api.x.com/2/users/1870989834912985088/tweets",
+        headers=headers,
+        params={
+            "max_results": 10
+        }
     )
 
     return {
