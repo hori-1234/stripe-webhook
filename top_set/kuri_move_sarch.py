@@ -1,11 +1,33 @@
 import os
+import requests
 from datetime import datetime, timedelta
 from flask import Blueprint, render_template_string, request, session, redirect, url_for
 
 kuri_move_sarch_bp = Blueprint("kuri_move_sarch", __name__)
+
+X_ACCESS_TOKEN = os.environ.get("X_ACCESS_TOKEN")
+
 login_attempts = {}
 MAX_LOGIN_ATTEMPTS = 3
 LOCK_MINUTES = 30
+
+@kuri_move_sarch_bp.route("/member-video/x-test")
+def x_test():
+    headers = {
+        "Authorization": f"Bearer {X_ACCESS_TOKEN}"
+    }
+
+    response = requests.get(
+        "https://api.x.com/2/users/me",
+        headers=headers
+    )
+
+    return {
+        "status": response.status_code,
+        "body": response.json()
+    }
+
+
 @kuri_move_sarch_bp.route("/member-video/login", methods=["GET", "POST"])
 
 def member_login():
