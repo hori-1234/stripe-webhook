@@ -1,9 +1,11 @@
 from flask import Blueprint, render_template_string, request
+from admin_auth import member_required
 
 kuri_move_sarch_bp = Blueprint("kuri_move_sarch", __name__)
 
 
 @kuri_move_sarch_bp.route("/member-video")
+@member_required
 def member_video():
     performer = request.args.get("performer", "").strip()
 
