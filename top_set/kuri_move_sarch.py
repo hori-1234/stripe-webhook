@@ -7,12 +7,7 @@ kuri_move_sarch_bp = Blueprint("kuri_move_sarch", __name__)
 def member_video():
     performer = request.args.get("performer", "").strip()
 
-    videos = [
-        {
-            "performers": "よふかし",
-            "url": "https://x.com/nmw_krsp/status/1873164757911695791"
-        }
-    ]
+    videos = []
 
     results = []
 
