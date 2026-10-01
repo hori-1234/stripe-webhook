@@ -33,6 +33,7 @@ app.register_blueprint(tokushoho_bp)
 app.register_blueprint(shipping_bp)
 app.register_blueprint(privacy_bp)
 app.register_blueprint(kuri_move_sarch_bp)
+app.secret_key = os.environ.get("kuri_SECRET_KEY")
 
 r2 = boto3.client(
     "s3",
