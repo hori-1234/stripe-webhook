@@ -6,8 +6,18 @@ kuri_move_sarch_bp = Blueprint("kuri_move_sarch", __name__)
 @kuri_move_sarch_bp.route("/member-video")
 def member_video():
     performer = request.args.get("performer", "").strip()
+
+    videos = []
+
+    results = []
+
+    if performer:
+        for video in videos:
+            if performer.lower() in video["performers"].lower():
+                results.append(video)
   
     return render_template_string("""
+    
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -46,13 +56,27 @@ def member_video():
     
 </form>
 
+<hr>
+
+<h2>検索結果</h2>
+
 {% if performer %}
-    <h2>検索結果</h2>
     <p>「{{ performer }}」の動画</p>
+{% endif %}
+
+{% for video in results %}
+    <p>
+        <a href="{{ video['url'] }}" target="_blank">
+            Xで動画を見る
+        </a>
+    </p>
+{% endfor %}
+
+{% if performer and not results %}
+    <p>該当する動画はありません。</p>
 {% endif %}
 
 </body>
 </html>
-""", performer=performer)
-
+""", performer=performer, results=results)
 
