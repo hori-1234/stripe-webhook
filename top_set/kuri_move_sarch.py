@@ -11,14 +11,27 @@ def member_video():
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+    <style>
+        input[type="text"] {
+            width: 300px;
+            padding: 12px;
+            font-size: 18px;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 18px;
+        }
+    </style>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>会員限定動画検索</title>
+    <title>動画検索</title>
 </head>
 
 <body>
 
-    <h1>会員限定動画検索</h1>
+    <h1>動画検索</h1>
 
     <form method="GET" action="/member-video">
     <input
