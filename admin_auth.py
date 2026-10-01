@@ -68,3 +68,37 @@ def qr_required(func):
         return func(*args, **kwargs)
 
     return decorated
+
+
+def member_required(func):
+
+    @wraps(func)
+    def decorated(*args, **kwargs):
+
+        username = os.environ.get("kuri_USERNAME")
+        password = os.environ.get("kuri_PASSWORD")
+
+        auth = request.authorization
+
+        if (
+            not auth
+            or auth.username != username
+            or auth.password != password
+        ):
+            return Response(
+                """
+                <div style="font-size:32px; text-align:center; margin-top:80px;">
+                    認証がキャンセルされました。<br><br>
+                    画面を閉じてください。
+                </div>
+                """,
+                401,
+                {
+                    "WWW-Authenticate":
+                    'Basic realm="member-video"'
+                }
+            )
+
+        return func(*args, **kwargs)
+
+    return decorated
