@@ -69,7 +69,7 @@ def top():
 
 <body>
 
-    <h1>マイマケ</h1>
+    <h1>W's</h1>
     <div class="menu">
     
     <p>
