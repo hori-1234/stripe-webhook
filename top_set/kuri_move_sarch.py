@@ -309,6 +309,7 @@ def member_video():
 
 {% for video in results %}
     <p>
+        {{ loop.index }}.
         <a href="{{ video['url'] }}" target="_blank">
             Xで動画を見る
         </a>
