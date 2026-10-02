@@ -77,10 +77,6 @@ def register_video():
     return render_template_string("""
         <h1>動画登録</h1>
 
-        {% if message %}
-            <p>{{ message }}</p>
-        {% endif %}
-
         <form method="POST">
             <p>検索ワード</p>
             <input
@@ -110,6 +106,13 @@ def register_video():
                 登録
             </button>
         </form>
+
+        {% if message %}
+            <p style="font-size:24px; font-weight:bold;">
+                {{ message }}
+            </p>
+        {% endif %}
+
     """, message=message)
 
 @kuri_move_sarch_bp.route("/member-video/x-test")
