@@ -38,7 +38,7 @@ def register_video():
 
     message = ""
 
-    if request.method == "POST":
+    if request.method == "POST" and request.form.get("action") == "register":
         search_words = request.form.get("search_words", "").strip()
         x_url = request.form.get("x_url", "").strip()
 
@@ -74,10 +74,40 @@ def register_video():
             cur.close()
             conn.close()
 
+    if request.method == "POST" and request.form.get("action") == "delete":
+        delete_url = request.form.get("delete_url", "").strip()
+
+        if delete_url:
+            conn = psycopg2.connect(DATABASE_URL)
+            cur = conn.cursor()
+
+            cur.execute(
+                """
+                DELETE FROM member_videos
+                WHERE x_url = %s
+                """,
+                (delete_url,)
+            )
+
+            deleted_count = cur.rowcount
+            conn.commit()
+
+            cur.close()
+            conn.close()
+
+            if deleted_count > 0:
+                message = "動画を削除しました。"
+            else:
+                message = "該当する動画は登録されていません。"
+
     return render_template_string("""
         <h1>動画登録</h1>
 
+        <h2>登録</h2>
+    
         <form method="POST">
+            <input type="hidden" name="action" value="register">
+        
             <p>検索ワード</p>
             <input
                 type="text"
@@ -107,6 +137,32 @@ def register_video():
             </button>
         </form>
 
+                <hr style="margin-top:40px; margin-bottom:40px;">
+
+        <h2>削除</h2>
+
+        <form method="POST">
+            <input type="hidden" name="action" value="delete">
+
+            <p>削除する動画のリンク</p>
+            <input
+                type="text"
+                name="delete_url"
+                placeholder="https://x.com/..."
+                required
+                style="width:400px; padding:12px; font-size:18px;"
+            >
+
+            <br><br>
+
+            <button
+                type="submit"
+                style="padding:12px 24px; font-size:18px;"
+            >
+                削除
+            </button>
+        </form>
+
         {% if message %}
             <p style="font-size:24px; font-weight:bold;">
                 {{ message }}
@@ -114,7 +170,6 @@ def register_video():
         {% endif %}
 
     """, message=message)
-
 @kuri_move_sarch_bp.route("/member-video/x-test")
 def x_test():
     headers = {
