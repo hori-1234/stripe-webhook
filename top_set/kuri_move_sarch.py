@@ -254,6 +254,15 @@ def register_video():
                 >
                     修正
                 </button>
+
+                <button
+                    type="button"
+                    onclick="window.location.href='/admin/member-video/register'"
+                    style="padding:12px 24px; font-size:18px; margin-left:10px;"
+                >
+                    キャンセル
+                </button>
+
             </form>
 
         {% endif %}
