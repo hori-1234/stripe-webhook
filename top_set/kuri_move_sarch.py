@@ -22,11 +22,17 @@ def create_video_table():
         CREATE TABLE IF NOT EXISTS member_videos (
             id SERIAL PRIMARY KEY,
             search_words TEXT NOT NULL,
+            search_readings TEXT,
             x_url TEXT NOT NULL UNIQUE,
             created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
         )
     """)
 
+    cur.execute("""
+        ALTER TABLE member_videos
+        ADD COLUMN IF NOT EXISTS search_readings TEXT
+    """)
+    
     conn.commit()
     cur.close()
     conn.close()
@@ -40,10 +46,12 @@ def register_video():
     edit_message = ""
     delete_message = ""
     current_search_words = ""
+    current_search_readings = ""
     edit_url_value = ""
 
     if request.method == "POST" and request.form.get("action") == "register":
         search_words = request.form.get("search_words", "").strip()
+        search_readings = request.form.get("search_readings", "").strip()
         x_url = request.form.get("x_url", "").strip()
 
         if search_words and x_url:
@@ -66,10 +74,18 @@ def register_video():
             else:
                 cur.execute(
                     """
-                    INSERT INTO member_videos (search_words, x_url)
-                    VALUES (%s, %s)
+                    INSERT INTO member_videos (
+                        search_words,
+                        search_readings,
+                        x_url
+                    )
+                    VALUES (%s, %s, %s)
                     """,
-                    (search_words, x_url)
+                    (
+                        search_words,
+                        search_readings,
+                        x_url
+                    )
                 )
 
                 conn.commit()
@@ -77,7 +93,6 @@ def register_video():
 
             cur.close()
             conn.close()
-
 
     if request.method == "POST" and request.form.get("action") == "load_edit":
         edit_url_value = request.form.get("edit_url", "").strip()
@@ -88,7 +103,7 @@ def register_video():
 
             cur.execute(
                 """
-                SELECT search_words
+                SELECT search_words, search_readings
                 FROM member_videos
                 WHERE x_url = %s
                 """,
@@ -102,12 +117,14 @@ def register_video():
 
             if row:
                 current_search_words = row[0]
+                current_search_readings = row[1] or ""
             else:
-                edit_message = "該当する動画は登録されていません."
-
+                edit_message = "該当する動画は登録されていません。"                
+                
     if request.method == "POST" and request.form.get("action") == "edit":
         edit_url = request.form.get("edit_url", "").strip()
         new_search_words = request.form.get("new_search_words", "").strip()
+        new_search_readings = request.form.get("new_search_readings", "").strip()
 
         if edit_url and new_search_words:
             conn = psycopg2.connect(DATABASE_URL)
@@ -116,10 +133,15 @@ def register_video():
             cur.execute(
                 """
                 UPDATE member_videos
-                SET search_words = %s
+                SET search_words = %s,
+                    search_readings = %s
                 WHERE x_url = %s
                 """,
-                (new_search_words, edit_url)
+                (
+                    new_search_words,
+                    new_search_readings,
+                    edit_url
+                )
             )
 
             updated_count = cur.rowcount
@@ -129,10 +151,10 @@ def register_video():
             conn.close()
 
             if updated_count > 0:
-                edit_message = "検索ワードを修正しました。"
+                edit_message = "検索ワード・読みを修正しました。"
             else:
                 edit_message = "該当する動画は登録されていません。"
-
+    
     if request.method == "POST" and request.form.get("action") == "delete":
         delete_url = request.form.get("delete_url", "").strip()
 
@@ -176,6 +198,15 @@ def register_video():
                 style="width:400px; padding:12px; font-size:18px;"
             >
             <p>※グループ名・活動者名はスペースで区切って入力してください。</p>
+
+            <p>読み（漢字のワードがある場合）</p>
+            <input
+                type="text"
+                name="search_readings"
+                placeholder="例：やまだはなこ　さとうみさき"
+                style="width:400px; padding:12px; font-size:18px;"
+            >
+            <p>※ひらがな・カタカナのワードは入力不要です。</p>
 
             <p>リンク</p>
             <input
@@ -246,6 +277,17 @@ def register_video():
                     style="width:400px; padding:12px; font-size:18px;"
                 >
 
+                <p>読み（漢字のワードがある場合）</p>
+
+                <input
+                    type="text"
+                    name="new_search_readings"
+                    value="{{ current_search_readings }}"
+                    style="width:400px; padding:12px; font-size:18px;"
+                >
+
+                <p>※ひらがな・カタカナのワードは入力不要です。</p>
+
                 <br><br>
 
                 <button
@@ -310,28 +352,9 @@ def register_video():
     edit_message=edit_message,
     delete_message=delete_message,
     current_search_words=current_search_words,
+    current_search_readings=current_search_readings,
     edit_url_value=edit_url_value
     )
-    
-@kuri_move_sarch_bp.route("/member-video/x-test")
-def x_test():
-    headers = {
-        "Authorization": f"Bearer {X_ACCESS_TOKEN}"
-    }
-
-    response = requests.get(
-        "https://api.x.com/2/users/1870989834912985088/tweets",
-        headers=headers,
-        params={
-            "max_results": 10
-        }
-    )
-
-    return {
-        "status": response.status_code,
-        "body": response.json()
-    }
-
 
 @kuri_move_sarch_bp.route("/member-video/login", methods=["GET", "POST"])
 
@@ -436,19 +459,47 @@ def member_video():
     cur = conn.cursor()
 
     cur.execute("""
-        SELECT search_words
+        SELECT search_words, search_readings
         FROM member_videos
     """)
 
     word_rows = cur.fetchall()
 
-    words = set()
+    words = {}
 
     for row in word_rows:
-        for word in row[0].split():
-            words.add(word)
+        search_word_list = row[0].split()
+        
+        reading_list = row[1].split() if row[1] else []
 
-    word_list = sorted(words)
+        reading_index = 0
+
+        for word in search_word_list:
+            first = word[0]
+
+            is_kana = (
+                "\u3040" <= first <= "\u309f"
+                or "\u30a0" <= first <= "\u30ff"
+            )
+
+            is_kanji = (
+                "\u4e00" <= first <= "\u9fff"
+            )
+
+            if is_kana:
+                words[word] = word
+
+            elif is_kanji:
+                if reading_index < len(reading_list):
+                    words[word] = reading_list[reading_index]
+                    reading_index += 1
+                else:
+                    words[word] = word
+
+            else:
+                words[word] = word
+
+    word_list = sorted(words.keys(), key=lambda word: words[word])
     kana_groups = {
         "あ行": "あいうえおアイウエオ",
         "か行": "かきくけこがぎぐげごカキクケコガギグゲゴ",
@@ -466,7 +517,11 @@ def member_video():
     grouped_words = {group: [] for group in kana_groups}
 
     for word in word_list:
-        first = word[0]
+
+        # 漢字などに読みが登録されている場合は、
+        # 表示名ではなく「読み」の先頭文字で分類する
+        reading = words[word]
+        first = reading[0]
 
         found = False
 
@@ -477,7 +532,7 @@ def member_video():
                 break
 
         if not found:
-            grouped_words["英数字・その他"].append(word)    
+            grouped_words["英数字・その他"].append(word)
 
     cur.close()
     conn.close()
@@ -492,9 +547,13 @@ def member_video():
             SELECT search_words, x_url
             FROM member_videos
             WHERE search_words ILIKE %s
+                OR search_readings ILIKE %s
             ORDER BY created_at DESC
             """,
-            (f"%{performer}%",)
+            (
+                f"%{performer}%",
+                f"%{performer}%"
+            )
         )
 
         rows = cur.fetchall()
