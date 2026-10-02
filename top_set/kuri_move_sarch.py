@@ -36,7 +36,8 @@ def create_video_table():
 def register_video():
     create_video_table()
 
-    message = ""
+    register_message = ""
+    delete_message = ""
 
     if request.method == "POST" and request.form.get("action") == "register":
         search_words = request.form.get("search_words", "").strip()
@@ -58,7 +59,7 @@ def register_video():
             existing_video = cur.fetchone()
 
             if existing_video:
-                message = "この動画は登録済みです。"
+                register_message = "この動画は登録済みです。"
             else:
                 cur.execute(
                     """
@@ -69,7 +70,7 @@ def register_video():
                 )
 
                 conn.commit()
-                message = "動画を登録しました。"
+                register_message = "動画を登録しました。"
 
             cur.close()
             conn.close()
@@ -96,9 +97,9 @@ def register_video():
             conn.close()
 
             if deleted_count > 0:
-                message = "動画を削除しました。"
+                delete_message = "動画を削除しました。"
             else:
-                message = "該当する動画は登録されていません。"
+                delete_message = "該当する動画は登録されていません。"
 
     return render_template_string("""
         <h1>動画登録</h1>
@@ -137,6 +138,12 @@ def register_video():
             </button>
         </form>
 
+        {% if register_message %}
+            <p style="font-size:24px; font-weight:bold;">
+                {{ register_message }}
+            </p>
+        {% endif %}
+
                 <hr style="margin-top:40px; margin-bottom:40px;">
 
         <h2>削除</h2>
@@ -163,13 +170,16 @@ def register_video():
             </button>
         </form>
 
-        {% if message %}
+        {% if delete_message %}
             <p style="font-size:24px; font-weight:bold;">
-                {{ message }}
+                {{ delete_message }}
             </p>
         {% endif %}
 
-    """, message=message)
+    """,
+    register_message=register_message,
+    delete_message=delete_message                                  
+    )
 @kuri_move_sarch_bp.route("/member-video/x-test")
 def x_test():
     headers = {
