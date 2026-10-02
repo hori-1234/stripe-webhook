@@ -37,7 +37,10 @@ def register_video():
     create_video_table()
 
     register_message = ""
+    edit_message = ""
     delete_message = ""
+    current_search_words = ""
+    edit_url_value = ""
 
     if request.method == "POST" and request.form.get("action") == "register":
         search_words = request.form.get("search_words", "").strip()
@@ -74,6 +77,61 @@ def register_video():
 
             cur.close()
             conn.close()
+
+
+    if request.method == "POST" and request.form.get("action") == "load_edit":
+        edit_url_value = request.form.get("edit_url", "").strip()
+
+        if edit_url_value:
+            conn = psycopg2.connect(DATABASE_URL)
+            cur = conn.cursor()
+
+            cur.execute(
+                """
+                SELECT search_words
+                FROM member_videos
+                WHERE x_url = %s
+                """,
+                (edit_url_value,)
+            )
+
+            row = cur.fetchone()
+
+            cur.close()
+            conn.close()
+
+            if row:
+                current_search_words = row[0]
+            else:
+                edit_message = "該当する動画は登録されていません."
+
+    if request.method == "POST" and request.form.get("action") == "edit":
+        edit_url = request.form.get("edit_url", "").strip()
+        new_search_words = request.form.get("new_search_words", "").strip()
+
+        if edit_url and new_search_words:
+            conn = psycopg2.connect(DATABASE_URL)
+            cur = conn.cursor()
+
+            cur.execute(
+                """
+                UPDATE member_videos
+                SET search_words = %s
+                WHERE x_url = %s
+                """,
+                (new_search_words, edit_url)
+            )
+
+            updated_count = cur.rowcount
+            conn.commit()
+
+            cur.close()
+            conn.close()
+
+            if updated_count > 0:
+                edit_message = "検索ワードを修正しました。"
+            else:
+                edit_message = "該当する動画は登録されていません。"
 
     if request.method == "POST" and request.form.get("action") == "delete":
         delete_url = request.form.get("delete_url", "").strip()
@@ -144,6 +202,68 @@ def register_video():
             </p>
         {% endif %}
 
+        <hr style="margin-top:40px; margin-bottom:40px;">
+
+        <h2>検索ワード修正</h2>
+
+        <form method="POST">
+            <input type="hidden" name="action" value="load_edit">
+
+            <p>修正する動画のリンク</p>
+
+            <input
+                type="text"
+                name="edit_url"
+                value="{{ edit_url_value }}"
+                placeholder="https://x.com/..."
+                required
+                style="width:400px; padding:12px; font-size:18px;"
+            >
+
+            <br><br>
+
+            <button
+                type="submit"
+                style="padding:12px 24px; font-size:18px;"
+            >
+                現在のワードを表示
+            </button>
+        </form>
+
+        {% if current_search_words %}
+
+            <form method="POST" style="margin-top:20px;">
+                <input type="hidden" name="action" value="edit">
+                <input type="hidden" name="edit_url" value="{{ edit_url_value }}">
+
+                <p>検索ワード</p>
+
+                <input
+                    type="text"
+                    name="new_search_words"
+                    value="{{ current_search_words }}"
+                    required
+                    style="width:400px; padding:12px; font-size:18px;"
+                >
+
+                <br><br>
+
+                <button
+                    type="submit"
+                    style="padding:12px 24px; font-size:18px;"
+                >
+                    修正
+                </button>
+            </form>
+
+        {% endif %}
+
+        {% if edit_message %}
+            <p style="font-size:24px; font-weight:bold;">
+                {{ edit_message }}
+            </p>
+        {% endif %}
+
                 <hr style="margin-top:40px; margin-bottom:40px;">
 
         <h2>削除</h2>
@@ -178,8 +298,12 @@ def register_video():
 
     """,
     register_message=register_message,
-    delete_message=delete_message                                  
+    edit_message=edit_message,
+    delete_message=delete_message,
+    current_search_words=current_search_words,
+    edit_url_value=edit_url_value
     )
+    
 @kuri_move_sarch_bp.route("/member-video/x-test")
 def x_test():
     headers = {
