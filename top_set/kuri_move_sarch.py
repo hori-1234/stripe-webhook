@@ -525,12 +525,19 @@ def member_video():
             font-size: 18px;
         }
 
+        .result-area {
+            display: flex;
+            gap: 40px;
+            align-items: flex-start;
+        }
+
+        .search-results {
+            flex: 1;
+        }
+
         .word-list {
-            position: fixed;
-            top: 30px;
-            right: 30px;
-            width: 250px;
-            max-height: 85vh;
+            width: 300px;
+            height: 400px;
             overflow-y: auto;
             border: 1px solid #ccc;
             padding: 15px;
@@ -544,13 +551,17 @@ def member_video():
         }
 
         @media (max-width: 700px) {
+            .result-area {
+                display: block;
+            }
+
             .word-list {
-                position: static;
                 width: auto;
-                max-height: 300px;
+                height: 300px;
                 margin-top: 30px;
             }
         }
+
     </style>
 
     <meta charset="UTF-8">
@@ -575,44 +586,55 @@ def member_video():
     
 </form>
 
-<div class="word-list">
-    <h2>登録ワード一覧</h2>
-
-    {% for group, words in grouped_words.items() %}
-
-        {% if words %}
-            <h3>{{ group }}</h3>
-
-            {% for word in words %}
-                <a href="/member-video?performer={{ word }}">
-                    {{ word }}
-                </a><br>
-            {% endfor %}
-        {% endif %}
-
-    {% endfor %}
-</div>
-
 <hr>
 
-<h2>検索結果</h2>
+<div class="result-area">
 
-{% if performer %}
-    <p>「{{ performer }}」の動画</p>
-{% endif %}
+    <div class="search-results">
 
-{% for video in results %}
-    <p>
-        {{ loop.index }}.
-        <a href="{{ video['url'] }}" target="_blank">
-            Xで動画を見る
-        </a>
-    </p>
-{% endfor %}
+        <h2>検索結果</h2>
 
-{% if performer and not results %}
-    <p>該当する動画はありません。</p>
-{% endif %}
+        {% if performer %}
+            <p>「{{ performer }}」の動画</p>
+        {% endif %}
+
+        {% for video in results %}
+            <p>
+                {{ loop.index }}.
+                <a href="{{ video['url'] }}" target="_blank">
+                    Xで動画を見る
+                </a>
+            </p>
+        {% endfor %}
+
+        {% if performer and not results %}
+            <p>該当する動画はありません。</p>
+        {% endif %}
+
+    </div>
+
+    <div class="word-list">
+
+        <h2>登録ワード一覧</h2>
+
+        {% for group, words in grouped_words.items() %}
+
+            {% if words %}
+                <h3>{{ group }}</h3>
+
+                {% for word in words %}
+                    <a href="/member-video?performer={{ word }}">
+                        {{ word }}
+                    </a><br>
+                {% endfor %}
+
+            {% endif %}
+
+        {% endfor %}
+
+    </div>
+
+</div>
 
 </body>
 </html>
