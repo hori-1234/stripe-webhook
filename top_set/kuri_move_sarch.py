@@ -297,8 +297,59 @@ def member_video():
     performer = request.args.get("performer", "").strip()
     results = []
 
+    create_video_table()
+
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT search_words
+        FROM member_videos
+    """)
+
+    word_rows = cur.fetchall()
+
+    words = set()
+
+    for row in word_rows:
+        for word in row[0].split():
+            words.add(word)
+
+    word_list = sorted(words)
+    kana_groups = {
+        "あ行": "あいうえおアイウエオ",
+        "か行": "かきくけこがぎぐげごカキクケコガギグゲゴ",
+        "さ行": "さしすせそざじずぜぞサシスセソザジズゼゾ",
+        "た行": "たちつてとだぢづでどタチツテトダヂヅデド",
+        "な行": "なにぬねのナニヌネノ",
+        "は行": "はひふへほばびぶべぼぱぴぷぺぽハヒフヘホバビブベボパピプペポ",
+        "ま行": "まみむめもマミムメモ",
+        "や行": "やゆよヤユヨ",
+        "ら行": "らりるれろラリルレロ",
+        "わ行": "わをんワヲン",
+        "英数字・その他": ""
+    }
+
+    grouped_words = {group: [] for group in kana_groups}
+
+    for word in word_list:
+        first = word[0]
+
+        found = False
+
+        for group, chars in kana_groups.items():
+            if first in chars:
+                grouped_words[group].append(word)
+                found = True
+                break
+
+        if not found:
+            grouped_words["英数字・その他"].append(word)    
+
+    cur.close()
+    conn.close()
+    
     if performer:
-        create_video_table()
 
         conn = psycopg2.connect(DATABASE_URL)
         cur = conn.cursor()
@@ -340,6 +391,33 @@ def member_video():
             padding: 12px 24px;
             font-size: 18px;
         }
+
+        .word-list {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            width: 250px;
+            max-height: 85vh;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 15px;
+            background: white;
+        }
+
+        .word-list a {
+            display: inline-block;
+            padding: 5px 0;
+            font-size: 18px;
+        }
+
+        @media (max-width: 700px) {
+            .word-list {
+                position: static;
+                width: auto;
+                max-height: 300px;
+                margin-top: 30px;
+            }
+        }
     </style>
 
     <meta charset="UTF-8">
@@ -364,6 +442,24 @@ def member_video():
     
 </form>
 
+<div class="word-list">
+    <h2>登録ワード一覧</h2>
+
+    {% for group, words in grouped_words.items() %}
+
+        {% if words %}
+            <h3>{{ group }}</h3>
+
+            {% for word in words %}
+                <a href="/member-video?performer={{ word }}">
+                    {{ word }}
+                </a><br>
+            {% endfor %}
+        {% endif %}
+
+    {% endfor %}
+</div>
+
 <hr>
 
 <h2>検索結果</h2>
@@ -387,5 +483,9 @@ def member_video():
 
 </body>
 </html>
-""", performer=performer, results=results)
-
+""",
+performer=performer,
+results=results,
+word_list=word_list,
+grouped_words=grouped_words
+)
