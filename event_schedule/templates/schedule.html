@@ -116,6 +116,22 @@
             color: white;
         }
 
+        .event-row {
+            min-width: 1400px;
+            padding: 12px 10px;
+            box-sizing: border-box;
+            color: #000;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .event-row:nth-of-type(even) {
+            background: #eaf7ff;
+        }
+
+        .event-row:nth-of-type(odd) {
+            background: #ffffff;
+        }
+
         @media (max-width: 700px) {
             body {
                 padding: 15px;
@@ -227,6 +243,34 @@
                 （{{ date.holiday_name }}）
             {% endif %}
         </div>
+
+        {% set event_number = namespace(value=0) %}
+        {% for event in events %}
+            {% if event[1].day == date.day %}
+                {% set event_number.value = event_number.value + 1 %}
+
+                <div
+                    class="event-row"
+                    style="
+                        background:
+                        {% if event_number.value % 2 == 0 %}
+                            #eaf7ff
+                        {% else %}
+                            #ffffff
+                        {% endif %};
+                    "
+                >
+                    {{ event[2].strftime("%H:%M") }}
+                    ～
+                    {{ event[3].strftime("%H:%M") }}
+
+                    ｜ {{ event[4] }}
+                    ｜ {{ event[5] }}
+                    ｜ {{ event[6] }}
+                </div>
+
+            {% endif %}
+        {% endfor %}
 
     {% endfor %}
 
