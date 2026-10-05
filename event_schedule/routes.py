@@ -80,6 +80,12 @@ def schedule_add():
         cur.close()
         conn.close()
 
-        return redirect(url_for("event_schedule.schedule_add"))
+        return render_template(
+            "schedule_add.html",
+            success_message="イベントを登録しました。"
+        )
 
-    return render_template("schedule_add.html")
+    return render_template(
+        "schedule_add.html",
+        success_message=""
+    )
