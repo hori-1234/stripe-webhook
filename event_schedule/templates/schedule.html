@@ -89,7 +89,7 @@
         .time-header {
             min-width: 1400px;
             display: grid;
-            grid-template-columns: 120px repeat(17, 1fr) 95px;
+            grid-template-columns: 120px repeat(17, 1fr) 40px 95px;
             border-bottom: 1px solid #aaa;
             padding: 12px 0;
             box-sizing: border-box;
@@ -187,6 +187,12 @@
             font-weight: bold;
             white-space: nowrap;
             overflow: hidden;
+        }
+
+        .event-toggle-space {
+            width: 40px;
+            height: 42px;
+            flex-shrink: 0;
         }
 
         .event-edit-area {
@@ -331,6 +337,7 @@
             <div>22</div>
             <div>23</div>
             <div>24</div>
+            <div></div>
             <div class="edit-header">
                 編集
             </div>
@@ -420,6 +427,8 @@
                             {% endif %}
 
                         </div>
+                        <div class="event-toggle-space"></div>
+                        
                         <div class="event-edit-area">
                             <a
                                 href="/schedule/edit/{{ event.id }}"
