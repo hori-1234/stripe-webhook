@@ -400,5 +400,21 @@
 
 </div>
 
+<script>
+    function togglePerformers(eventId, button) {
+        const performerList = document.getElementById(
+            "performers-" + eventId
+        );
+
+        if (performerList.classList.contains("open")) {
+            performerList.classList.remove("open");
+            button.textContent = "▽";
+        } else {
+            performerList.classList.add("open");
+            button.textContent = "△";
+        }
+    }
+</script>
+
 </body>
 </html>
