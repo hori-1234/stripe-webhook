@@ -60,7 +60,11 @@ def schedule_add():
             return "終了時間は08:00～23:59の範囲で設定してください。", 400
 
         if end_time <= start_time:
-            return "終了時間は開始時間より後に設定してください。", 400
+            return render_template(
+                "schedule_add.html",
+                success_message="",
+                error_message="終了時間は開始時間より後に設定してください。"
+            )
 
         location = request.form.get("location", "").strip()
         event_name = request.form.get("event_name", "").strip()
@@ -266,10 +270,14 @@ def schedule_edit(event_id):
 
     error_message = ""
 
+    if request.args.get("time_error") == "1":
+        error_message = "終了時間は開始時間より後に設定してください。"
+
     if session.get(f"schedule_edit_{event_id}"):
         return render_template(
             "schedule_edit_form.html",
-            event=event
+            event=event,
+            error_message=error_message
         )
 
     if request.method == "POST":
@@ -310,7 +318,13 @@ def schedule_edit_update(event_id):
         return "終了時間は08:00～23:59の範囲で設定してください。", 400
 
     if end_time <= start_time:
-        return "終了時間は開始時間より後に設定してください。", 400
+        return redirect(
+            url_for(
+                "event_schedule.schedule_edit",
+                event_id=event_id,
+                time_error=1
+            )
+        )
 
     location = request.form.get("location", "").strip()
     event_name = request.form.get("event_name", "").strip()
