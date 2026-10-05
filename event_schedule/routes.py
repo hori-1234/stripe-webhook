@@ -196,6 +196,9 @@ def schedule():
 
     year = request.args.get("year", today.year, type=int)
     month = request.args.get("month", today.month, type=int)
+    genre = request.args.get("genre", "").strip()
+    selected_locations = request.args.getlist("location")
+
 
     if month == 1:
         prev_year = year - 1
@@ -234,7 +237,7 @@ def schedule():
     conn = psycopg2.connect(DATABASE_URL)
     cur = conn.cursor()
 
-    cur.execute("""
+    query = """
         SELECT
             id,
             event_date,
@@ -247,10 +250,40 @@ def schedule():
         FROM event_schedules
         WHERE EXTRACT(YEAR FROM event_date) = %s
           AND EXTRACT(MONTH FROM event_date) = %s
-        ORDER BY event_date, start_time, id
-    """, (year, month))
+    """
+
+    params = [year, month]
+    if genre:
+        query += " AND genre = %s"
+        params.append(genre)
+
+    if selected_locations:
+        placeholders = ", ".join(
+            ["%s"] * len(selected_locations)
+        )
+        query += f" AND location IN ({placeholders})"
+        params.extend(selected_locations)
+
+    query += " ORDER BY event_date, start_time, id"
+
+    cur.execute(query, params)
 
     events = cur.fetchall()
+
+    # 表示中の月に登録されている場所を重複なしで取得
+    cur.execute("""
+        SELECT DISTINCT location
+        FROM event_schedules
+        WHERE EXTRACT(YEAR FROM event_date) = %s
+          AND EXTRACT(MONTH FROM event_date) = %s
+          AND location IS NOT NULL
+          AND location <> ''
+        ORDER BY location
+    """, (year, month))
+
+    locations = [
+        row[0] for row in cur.fetchall()
+    ]
 
     cur.close()
     conn.close()
@@ -309,7 +342,8 @@ def schedule():
         prev_month=prev_month,
         next_year=next_year,
         next_month=next_month,
-        events=display_events
+        events=display_events,
+        locations=locations
     )
 
 @event_schedule_bp.route("/schedule/edit/<int:event_id>", methods=["GET", "POST"])
