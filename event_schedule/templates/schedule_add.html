@@ -68,6 +68,14 @@
         .submit-area {
             margin-left: 160px;
             margin-top: 30px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .success-message {
+            font-weight: bold;
+            font-size: 16px;
         }
 
         button {
@@ -168,6 +176,12 @@
 
         <div class="submit-area">
             <button type="submit">登録</button>
+            
+            {% if success_message %}
+                <span class="success-message">
+                    {{ success_message }}
+                </span>
+            {% endif %}
         </div>
 
     </form>
