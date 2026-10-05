@@ -7,6 +7,7 @@ from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, url_for, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from cryptography.fernet import Fernet
+from admin_auth import admin_required
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 EVENT_PASSWORD_KEY = os.environ.get("EVENT_PASSWORD_KEY")
@@ -381,7 +382,17 @@ def schedule_edit_update(event_id):
     cur.close()
     conn.close()
 
+    is_admin_edit = session.pop(
+        f"schedule_admin_edit_{event_id}",
+        False
+    )
+
     session.pop(f"schedule_edit_{event_id}", None)
+
+    if is_admin_edit:
+        return redirect(
+            url_for("event_schedule.schedule_admin")
+        )
 
     return redirect(
         url_for(
@@ -425,7 +436,17 @@ def schedule_edit_delete(event_id):
     cur.close()
     conn.close()
 
+    is_admin_edit = session.pop(
+        f"schedule_admin_edit_{event_id}",
+        False
+    )
+
     session.pop(f"schedule_edit_{event_id}", None)
+
+    if is_admin_edit:
+        return redirect(
+            url_for("event_schedule.schedule_admin")
+        )
 
     return redirect(
         url_for(
@@ -433,4 +454,97 @@ def schedule_edit_delete(event_id):
             year=event_date.year,
             month=event_date.month
         )
+    )
+    
+@event_schedule_bp.route("/schedule/admin")
+@admin_required
+def schedule_admin():
+    create_event_schedule_table()
+
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT
+            id,
+            event_date,
+            start_time,
+            end_time,
+            location,
+            event_name,
+            genre,
+            performers,
+            edit_password_encrypted
+        FROM event_schedules
+        ORDER BY event_date, start_time, id
+    """)
+
+    events = cur.fetchall()
+
+    cur.close()
+    conn.close()
+
+    admin_events = []
+
+    for event in events:
+        edit_password = ""
+
+        if event[8]:
+            edit_password = decrypt_edit_password(event[8])
+
+        admin_events.append({
+            "id": event[0],
+            "event_date": event[1],
+            "start_time": event[2],
+            "end_time": event[3],
+            "location": event[4],
+            "event_name": event[5],
+            "genre": event[6],
+            "performers": event[7],
+            "edit_password": edit_password
+        })
+
+    return render_template(
+        "schedule_admin.html",
+        events=admin_events
+    )
+
+@event_schedule_bp.route("/schedule/admin/edit/<int:event_id>")
+@admin_required
+def schedule_admin_edit(event_id):
+    create_event_schedule_table()
+
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT
+            id,
+            event_date,
+            start_time,
+            end_time,
+            location,
+            event_name,
+            genre,
+            performers,
+            edit_password_hash
+        FROM event_schedules
+        WHERE id = %s
+    """, (event_id,))
+
+    event = cur.fetchone()
+
+    cur.close()
+    conn.close()
+
+    if event is None:
+        return "イベントが見つかりません。", 404
+
+    session[f"schedule_edit_{event_id}"] = True
+    session[f"schedule_admin_edit_{event_id}"] = True
+
+    return render_template(
+        "schedule_edit_form.html",
+        event=event,
+        error_message=""
     )
