@@ -1,1 +1,92 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>イベント新規登録</title>
+</head>
 
+<body>
+
+    <h1>イベント新規登録</h1>
+
+    <form method="POST">
+
+        <div>
+            <label>日程</label><br>
+            <input type="date" name="event_date" required>
+        </div>
+
+        <br>
+
+        <div>
+            <label>開始時間</label><br>
+            <input type="time" name="start_time" required>
+        </div>
+
+        <br>
+
+        <div>
+            <label>終了時間</label><br>
+            <input type="time" name="end_time" required>
+        </div>
+
+        <br>
+
+        <div>
+            <label>場所</label><br>
+            <input
+                type="text"
+                name="location"
+                placeholder="例：東京"
+                required
+            >
+        </div>
+
+        <br>
+
+        <div>
+            <label>イベント名</label><br>
+            <input
+                type="text"
+                name="event_name"
+                required
+            >
+        </div>
+
+        <br>
+
+        <div>
+            <label>出演者</label><br>
+            <textarea
+                name="performers"
+                rows="6"
+                placeholder="出演者名を入力してください"
+            ></textarea>
+        </div>
+
+        <br>
+
+        <div>
+            <label>編集用パスワード</label><br>
+            <input
+                type="password"
+                name="edit_password"
+                required
+            >
+            <br>
+            <small>
+                登録後の編集・削除に使用します。
+            </small>
+        </div>
+
+        <br>
+
+        <button type="submit">
+            登録
+        </button>
+
+    </form>
+
+</body>
+</html>
