@@ -5,7 +5,7 @@ import jpholiday
 
 from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, url_for
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
@@ -222,4 +222,142 @@ def schedule():
         next_year=next_year,
         next_month=next_month,
         events=display_events
+    )
+
+@event_schedule_bp.route("/schedule/edit/<int:event_id>", methods=["GET", "POST"])
+def schedule_edit(event_id):
+    create_event_schedule_table()
+
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT
+            id,
+            event_date,
+            start_time,
+            end_time,
+            location,
+            event_name,
+            genre,
+            performers,
+            edit_password_hash
+        FROM event_schedules
+        WHERE id = %s
+    """, (event_id,))
+
+    event = cur.fetchone()
+
+    cur.close()
+    conn.close()
+
+    if event is None:
+        return "イベントが見つかりません。", 404
+
+    error_message = ""
+
+    if request.method == "POST":
+        edit_password = request.form.get("edit_password", "")
+
+        if check_password_hash(event[8], edit_password):
+            return render_template(
+                "schedule_edit_form.html",
+                event=event
+            )
+
+        error_message = "編集パスワードが違います。"
+
+    return render_template(
+        "schedule_edit.html",
+        event=event,
+        error_message=error_message
+    )
+
+@event_schedule_bp.route("/schedule/edit/<int:event_id>/update", methods=["POST"])
+def schedule_edit_update(event_id):
+    create_event_schedule_table()
+
+    event_date = request.form.get("event_date")
+    start_time = request.form.get("start_time")
+    end_time = request.form.get("end_time")
+    location = request.form.get("location", "").strip()
+    event_name = request.form.get("event_name", "").strip()
+    genre = request.form.get("genre", "").strip()
+    performers = request.form.get("performers", "").strip()
+
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+
+    cur.execute("""
+        UPDATE event_schedules
+        SET
+            event_date = %s,
+            start_time = %s,
+            end_time = %s,
+            location = %s,
+            event_name = %s,
+            genre = %s,
+            performers = %s,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = %s
+    """, (
+        event_date,
+        start_time,
+        end_time,
+        location,
+        event_name,
+        genre,
+        performers,
+        event_id
+    ))
+
+    conn.commit()
+    cur.close()
+    conn.close()
+
+    return redirect(
+        url_for(
+            "event_schedule.schedule",
+            year=event_date[:4],
+            month=int(event_date[5:7])
+        )
+    )
+
+@event_schedule_bp.route("/schedule/edit/<int:event_id>/delete", methods=["POST"])
+def schedule_edit_delete(event_id):
+    create_event_schedule_table()
+
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT event_date
+        FROM event_schedules
+        WHERE id = %s
+    """, (event_id,))
+
+    event = cur.fetchone()
+
+    if event is None:
+        cur.close()
+        conn.close()
+        return "イベントが見つかりません。", 404
+
+    event_date = event[0]
+
+    cur.execute("""
+        DELETE FROM event_schedules
+        WHERE id = %s
+    """, (event_id,))
+
+    conn.commit()
+    cur.close()
+    conn.close()
+
+    return redirect(
+        url_for(
+            "event_schedule.schedule",
+            year=event_date.year,
+            month=event_date.month
+        )
     )
