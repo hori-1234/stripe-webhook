@@ -4,6 +4,94 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>イベント新規登録</title>
+
+    <style>
+        body {
+            font-family: sans-serif;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        h1 {
+            margin-bottom: 30px;
+        }
+
+        .form-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .form-row label {
+            width: 160px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .form-row input,
+        .form-row textarea {
+            width: 100%;
+            max-width: 600px;
+            box-sizing: border-box;
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        .form-row input[type="date"],
+        .form-row input[type="time"] {
+            max-width: 300px;
+        }
+
+        .performers-row {
+            align-items: flex-start;
+        }
+
+        .performers-area {
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .performers-area textarea {
+            width: 100%;
+            max-width: none;
+            min-height: 180px;
+            resize: vertical;
+        }
+
+        .description {
+            margin-top: 6px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .submit-area {
+            margin-left: 160px;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 12px 40px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 600px) {
+            .form-row {
+                display: block;
+            }
+
+            .form-row label {
+                display: block;
+                width: auto;
+                margin-bottom: 8px;
+            }
+
+            .submit-area {
+                margin-left: 0;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -12,29 +100,23 @@
 
     <form method="POST">
 
-        <div>
-            <label>日程</label><br>
+        <div class="form-row">
+            <label>日程</label>
             <input type="date" name="event_date" required>
         </div>
 
-        <br>
-
-        <div>
-            <label>開始時間</label><br>
+        <div class="form-row">
+            <label>開始時間</label>
             <input type="time" name="start_time" required>
         </div>
 
-        <br>
-
-        <div>
-            <label>終了時間</label><br>
+        <div class="form-row">
+            <label>終了時間</label>
             <input type="time" name="end_time" required>
         </div>
 
-        <br>
-
-        <div>
-            <label>場所</label><br>
+        <div class="form-row">
+            <label>場所</label>
             <input
                 type="text"
                 name="location"
@@ -43,48 +125,50 @@
             >
         </div>
 
-        <br>
-
-        <div>
-            <label>イベント名</label><br>
+        <div class="form-row">
+            <label>イベント名</label>
             <input
                 type="text"
                 name="event_name"
+                placeholder="イベント名を入力"
                 required
             >
         </div>
 
-        <br>
+        <div class="form-row performers-row">
+            <label>出演者</label>
 
-        <div>
-            <label>出演者</label><br>
-            <textarea
-                name="performers"
-                rows="6"
-                placeholder="出演者名を入力してください"
-            ></textarea>
+            <div class="performers-area">
+                <textarea
+                    name="performers"
+                    placeholder="例：出演者A 出演者B 出演者C"
+                ></textarea>
+
+                <div class="description">
+                    ※複数の出演者を登録する場合は、出演者名をスペースで区切って入力してください。
+                </div>
+            </div>
         </div>
 
-        <br>
+        <div class="form-row">
+            <label>編集用パスワード</label>
 
-        <div>
-            <label>編集用パスワード</label><br>
-            <input
-                type="password"
-                name="edit_password"
-                required
-            >
-            <br>
-            <small>
-                登録後の編集・削除に使用します。
-            </small>
+            <div>
+                <input
+                    type="password"
+                    name="edit_password"
+                    required
+                >
+
+                <div class="description">
+                    ※登録後の編集・削除に使用します。
+                </div>
+            </div>
         </div>
 
-        <br>
-
-        <button type="submit">
-            登録
-        </button>
+        <div class="submit-area">
+            <button type="submit">登録</button>
+        </div>
 
     </form>
 
