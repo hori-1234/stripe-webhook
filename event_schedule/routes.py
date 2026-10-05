@@ -54,6 +54,7 @@ def schedule_add():
         end_time = request.form.get("end_time")
         location = request.form.get("location", "").strip()
         event_name = request.form.get("event_name", "").strip()
+        genre = request.form.get("genre", "").strip()
         performers = request.form.get("performers", "").strip()
         edit_password = request.form.get("edit_password", "")
 
@@ -69,6 +70,7 @@ def schedule_add():
                 end_time,
                 location,
                 event_name,
+                genre,
                 performers,
                 edit_password_hash
             )
@@ -79,6 +81,7 @@ def schedule_add():
             end_time,
             location,
             event_name,
+            genre,
             performers,
             edit_password_hash
         ))
