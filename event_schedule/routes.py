@@ -6,14 +6,27 @@ import jpholiday
 from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, url_for, session
 from werkzeug.security import generate_password_hash, check_password_hash
+from cryptography.fernet import Fernet
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
+EVENT_PASSWORD_KEY = os.environ.get("EVENT_PASSWORD_KEY")
 
 event_schedule_bp = Blueprint(
     "event_schedule",
     __name__,
     template_folder="templates"
 )
+def encrypt_edit_password(password):
+    fernet = Fernet(EVENT_PASSWORD_KEY.encode())
+    return fernet.encrypt(password.encode()).decode()
+
+
+def decrypt_edit_password(encrypted_password):
+    if not encrypted_password:
+        return ""
+
+    fernet = Fernet(EVENT_PASSWORD_KEY.encode())
+    return fernet.decrypt(encrypted_password.encode()).decode()
 
 def create_event_schedule_table():
     conn = psycopg2.connect(DATABASE_URL)
@@ -38,6 +51,11 @@ def create_event_schedule_table():
     cur.execute("""
         ALTER TABLE event_schedules
         ADD COLUMN IF NOT EXISTS genre TEXT
+    """)
+
+    cur.execute("""
+        ALTER TABLE event_schedules
+        ADD COLUMN IF NOT EXISTS edit_password_encrypted TEXT
     """)
 
     conn.commit()
@@ -72,6 +90,7 @@ def schedule_add():
                 form_data=request.form
             )
         edit_password_hash = generate_password_hash(edit_password)
+        edit_password_encrypted = encrypt_edit_password(edit_password)
 
         conn = psycopg2.connect(DATABASE_URL)
         cur = conn.cursor()
@@ -86,8 +105,9 @@ def schedule_add():
                 genre,
                 performers,
                 edit_password_hash
+                edit_password_encrypted
             )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, (
             event_date,
             start_time,
@@ -97,6 +117,7 @@ def schedule_add():
             genre,
             performers,
             edit_password_hash
+            edit_password_encrypted
         ))
 
         conn.commit()
