@@ -332,7 +332,6 @@
                 >
 
                     <div class="event-content">
-
                         <div class="event-info">
 
                             <span class="event-genre">
@@ -359,11 +358,37 @@
                                 ～
                                 {{ event.end_time.strftime("%H:%M") }}
                             </div>
+                            {% if event.performers %}
+                                <button
+                                    type="button"
+                                    class="performer-toggle"
+                                    style="
+                                        position: absolute;
+                                        left: calc(
+                                            {{ event.left_percent }}%
+                                            + {{ event.width_percent }}%
+                                        );
+                                        top: 9px;
+                                    "
+                                    onclick="togglePerformers({{ event.id }}, this)"
+                                >
+                                    ▽
+                                </button>
+                            {% endif %}
 
                         </div>
 
                     </div>
 
+                    {% if event.performers %}
+                        <div
+                            id="performers-{{ event.id }}"
+                            class="performer-list"
+                        >
+                            出演者：{{ event.performers }}
+                        </div>
+                    {% endif %}                        
+                        
                 </div>
 
             {% endif %}
