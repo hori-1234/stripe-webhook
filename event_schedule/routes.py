@@ -52,6 +52,16 @@ def schedule_add():
         event_date = request.form.get("event_date")
         start_time = request.form.get("start_time")
         end_time = request.form.get("end_time")
+
+        if not ("08:00" <= start_time <= "23:59"):
+            return "開始時間は08:00～23:59の範囲で設定してください。", 400
+
+        if not ("08:00" <= end_time <= "23:59"):
+            return "終了時間は08:00～23:59の範囲で設定してください。", 400
+
+        if end_time <= start_time:
+            return "終了時間は開始時間より後に設定してください。", 400
+
         location = request.form.get("location", "").strip()
         event_name = request.form.get("event_name", "").strip()
         genre = request.form.get("genre", "").strip()
@@ -292,6 +302,16 @@ def schedule_edit_update(event_id):
     event_date = request.form.get("event_date")
     start_time = request.form.get("start_time")
     end_time = request.form.get("end_time")
+
+    if not ("08:00" <= start_time <= "23:59"):
+        return "開始時間は08:00～23:59の範囲で設定してください。", 400
+
+    if not ("08:00" <= end_time <= "23:59"):
+        return "終了時間は08:00～23:59の範囲で設定してください。", 400
+
+    if end_time <= start_time:
+        return "終了時間は開始時間より後に設定してください。", 400
+
     location = request.form.get("location", "").strip()
     event_name = request.form.get("event_name", "").strip()
     genre = request.form.get("genre", "").strip()
