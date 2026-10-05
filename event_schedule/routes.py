@@ -89,3 +89,9 @@ def schedule_add():
         "schedule_add.html",
         success_message=""
     )
+
+@event_schedule_bp.route("/schedule")
+def schedule():
+    create_event_schedule_table()
+
+    return render_template("schedule.html")
