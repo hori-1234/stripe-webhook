@@ -1,6 +1,8 @@
 import os
 import psycopg2
+import calendar
 
+from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, url_for
 from werkzeug.security import generate_password_hash
 
@@ -94,4 +96,49 @@ def schedule_add():
 def schedule():
     create_event_schedule_table()
 
-    return render_template("schedule.html")
+    today = datetime.now()
+
+    year = request.args.get("year", today.year, type=int)
+    month = request.args.get("month", today.month, type=int)
+
+    if month == 1:
+        prev_year = year - 1
+        prev_month = 12
+    else:
+        prev_year = year
+        prev_month = month - 1
+
+    if month == 12:
+        next_year = year + 1
+        next_month = 1
+    else:
+        next_year = year
+        next_month = month + 1
+
+    last_day = calendar.monthrange(year, month)[1]
+
+    weekday_names = [
+        "月", "火", "水", "木", "金", "土", "日"
+    ]
+
+    days = []
+
+    for day in range(1, last_day + 1):
+        date = datetime(year, month, day)
+
+        days.append({
+            "day": day,
+            "weekday": weekday_names[date.weekday()],
+            "weekday_number": date.weekday()
+        })
+
+    return render_template(
+        "schedule.html",
+        year=year,
+        month=month,
+        days=days,
+        prev_year=prev_year,
+        prev_month=prev_month,
+        next_year=next_year,
+        next_month=next_month
+    )
