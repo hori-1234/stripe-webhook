@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>イベントスケジュール 運営管理</title>
+
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #999;
+            padding: 8px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background: #eee;
+        }
+
+        .password {
+            font-weight: bold;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <a class="back-link" href="/schedule">
+        ← イベントスケジュールへ戻る
+    </a>
+
+    <h1>イベントスケジュール 運営管理</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>日程</th>
+                <th>時間</th>
+                <th>場所</th>
+                <th>イベント名</th>
+                <th>ジャンル</th>
+                <th>出演者</th>
+                <th>編集パスワード</th>
+                <th>編集</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for event in events %}
+            <tr>
+                <td>{{ event.event_date }}</td>
+
+                <td>
+                    {{ event.start_time.strftime('%H:%M') }}
+                    ～
+                    {{ event.end_time.strftime('%H:%M') }}
+                </td>
+
+                <td>{{ event.location }}</td>
+
+                <td>{{ event.event_name }}</td>
+
+                <td>{{ event.genre }}</td>
+
+                <td>{{ event.performers }}</td>
+
+                <td class="password">
+                    {% if event.edit_password %}
+                        {{ event.edit_password }}
+                    {% else %}
+                        取得不可
+                    {% endif %}
+                </td>
+
+                <td>
+                  <a href="{{ url_for('event_schedule.schedule_admin_edit', event_id=event.id) }}">
+                      編集
+                  </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</body>
+</html>
