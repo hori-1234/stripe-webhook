@@ -79,6 +79,22 @@
             cursor: pointer;
         }
 
+        .search-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .search-row > label {
+            width: 70px;
+            flex-shrink: 0;
+        }
+
+        .search-button {
+            margin-left: 30px;
+        }
+
         .schedule-area {
             width: 100%;
             overflow: visible;
@@ -391,22 +407,53 @@
             新規追加
         </a>
 
-        <form class="search-form">
+            <form class="search-form" method="GET" action="/schedule">
 
-            <input
-                type="text"
-                name="keyword"
-                placeholder="日程・場所・イベント名・出演者を検索"
-            >
+                <input type="hidden" name="year" value="{{ year }}">
+                <input type="hidden" name="month" value="{{ month }}">
 
-            <button type="submit">
-                検索
-            </button>
+                <!-- ジャンル -->
+                <div class="search-row">
+                    <label>ジャンル</label>
 
-        </form>
+                    <select name="genre">
+                        <option value="">すべて</option>
+                        <option value="歌" {% if request.args.get('genre') == '歌' %}selected{% endif %}>歌</option>
+                        <option value="踊" {% if request.args.get('genre') == '踊' %}selected{% endif %}>踊</option>
+                        <option value="歌踊" {% if request.args.get('genre') == '歌踊' %}selected{% endif %}>歌踊</option>
+                        <option value="その他" {% if request.args.get('genre') == 'その他' %}selected{% endif %}>その他</option>
+                    </select>
+                    
+                    <button type="submit">検索</button>
+                    
+                </div>
 
+                <!-- 場所 -->
+                <div class="search-row">
+                    <label>場所</label>
+
+                    <details class="location-select">
+                        <summary>場所を選択 ▼</summary>
+
+                        <div class="location-options">
+                            {% for location in locations %}
+                                <label>
+                                    <input
+                                        type="checkbox"
+                                        name="location"
+                                        value="{{ location }}"
+                                        {% if location in request.args.getlist('location') %}checked{% endif %}
+                                    >
+                                    {{ location }}
+                                </label>
+                            {% endfor %}
+                        </div>
+                    </details>
+                </div>
+
+            </form>
+                
     </div>
-
 
     <div class="schedule-area">
 
