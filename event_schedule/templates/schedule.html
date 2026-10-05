@@ -262,6 +262,56 @@
                 gap: 20px;
             }
         }
+
+        @media (orientation: landscape) and (max-width: 1000px) {
+            body {
+                padding: 10px;
+            }
+
+            .time-header,
+            .date-row,
+            .event-row {
+                min-width: 0;
+                width: 100%;
+            }
+
+            .event-content {
+                min-width: 0;
+                width: 100%;
+            }
+
+            .time-header {
+                grid-template-columns: 80px repeat(17, 1fr) 40px 60px;
+            }
+
+            .event-info {
+                width: 80px;
+                font-size: 11px;
+                gap: 3px;
+            }
+
+            .event-edit-area {
+                width: 60px;
+            }
+
+            .event-edit-button {
+                width: 52px;
+                font-size: 12px;
+            }
+
+            .time-header div {
+                font-size: 11px;
+            }
+
+            .event-bar {
+                font-size: 11px;
+                padding: 6px 4px;
+            }
+
+            .performer-list {
+                padding-left: 80px;
+            }
+        }
     </style>
 </head>
 
