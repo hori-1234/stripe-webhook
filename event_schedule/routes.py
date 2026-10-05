@@ -1,6 +1,7 @@
 import os
 import psycopg2
 import calendar
+import jpholiday
 
 from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, url_for
@@ -126,10 +127,13 @@ def schedule():
     for day in range(1, last_day + 1):
         date = datetime(year, month, day)
 
+        holiday_name = jpholiday.is_holiday_name(date.date())
+
         days.append({
             "day": day,
             "weekday": weekday_names[date.weekday()],
-            "weekday_number": date.weekday()
+            "weekday_number": date.weekday(),
+            "holiday_name": holiday_name
         })
 
     return render_template(
