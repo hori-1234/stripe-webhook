@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>イベント編集</title>
+
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 30px;
+            background: #fff;
+            color: #222;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        .event-info {
+            padding: 20px;
+            border: 1px solid #ccc;
+            margin-bottom: 25px;
+        }
+
+        .event-info div {
+            margin-bottom: 8px;
+        }
+
+        .password-area {
+            margin-top: 25px;
+        }
+
+        .password-area label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .password-area input {
+            width: 100%;
+            max-width: 400px;
+            padding: 10px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        .password-area button {
+            display: block;
+            margin-top: 15px;
+            padding: 10px 25px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 25px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>イベント編集</h1>
+
+    <a href="/schedule" class="back-link">
+        ← スケジュールに戻る
+    </a>
+
+    <div class="event-info">
+
+        <div>
+            <strong>日程：</strong>
+            {{ event[1].strftime("%Y/%m/%d") }}
+        </div>
+
+        <div>
+            <strong>時間：</strong>
+            {{ event[2].strftime("%H:%M") }}
+            ～
+            {{ event[3].strftime("%H:%M") }}
+        </div>
+
+        <div>
+            <strong>ジャンル：</strong>
+            {{ event[6] }}
+        </div>
+
+        <div>
+            <strong>場所：</strong>
+            {{ event[4] }}
+        </div>
+
+        <div>
+            <strong>イベント名：</strong>
+            {{ event[5] }}
+        </div>
+
+        <div>
+            <strong>出演者：</strong>
+            {{ event[7] }}
+        </div>
+
+    </div>
+
+    <form method="post">
+
+        <div class="password-area">
+
+            <label for="edit_password">
+                編集パスワード
+            </label>
+
+            <input
+                type="password"
+                id="edit_password"
+                name="edit_password"
+                required
+            >
+
+            <button type="submit">
+                編集画面へ
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+</body>
+</html>
