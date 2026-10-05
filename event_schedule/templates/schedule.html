@@ -132,6 +132,54 @@
             background: #ffffff;
         }
 
+        .event-content {
+            display: flex;
+            align-items: center;
+            min-width: 1400px;
+        }
+
+        .event-info {
+            width: 120px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-right: 10px;
+            box-sizing: border-box;
+        }
+
+        .event-genre {
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .event-location {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .event-timeline {
+            position: relative;
+            width: calc(100% - 120px);
+            height: 42px;
+        }
+
+        .event-bar {
+            position: absolute;
+            top: 5px;
+            height: 32px;
+            background: orange;
+            color: #000;
+            border-radius: 4px;
+            box-sizing: border-box;
+            padding: 6px 10px;
+            font-size: 14px;
+            font-weight: bold;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
         @media (max-width: 700px) {
             body {
                 padding: 15px;
