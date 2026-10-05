@@ -167,6 +167,51 @@ def schedule():
     cur.close()
     conn.close()
 
+    display_events = []
+
+    for event in events:
+        start_time = event[2]
+        end_time = event[3]
+
+        start_minutes = (
+            start_time.hour * 60
+            + start_time.minute
+        )
+
+        end_minutes = (
+            end_time.hour * 60
+            + end_time.minute
+        )
+
+        timeline_start = 8 * 60
+        timeline_end = 24 * 60
+        timeline_minutes = timeline_end - timeline_start
+
+        left_percent = (
+            (start_minutes - timeline_start)
+            / timeline_minutes
+            * 100
+        )
+
+        width_percent = (
+            (end_minutes - start_minutes)
+            / timeline_minutes
+            * 100
+        )
+
+        display_events.append({
+            "id": event[0],
+            "event_date": event[1],
+            "start_time": start_time,
+            "end_time": end_time,
+            "location": event[4],
+            "event_name": event[5],
+            "genre": event[6],
+            "performers": event[7],
+            "left_percent": left_percent,
+            "width_percent": width_percent
+        })
+
     return render_template(
         "schedule.html",
         year=year,
@@ -176,5 +221,5 @@ def schedule():
         prev_month=prev_month,
         next_year=next_year,
         next_month=next_month,
-        events=events
+        events=display_events
     )
