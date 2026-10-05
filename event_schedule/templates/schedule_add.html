@@ -210,6 +210,13 @@
 
         <div class="submit-area">
             <button type="submit">登録</button>
+
+
+            {% if error_message %}
+                <span style="color: red; margin-right: 15px;">
+                    {{ error_message }}
+                </span>
+            {% endif %}
             
             {% if success_message %}
                 <span class="success-message">
