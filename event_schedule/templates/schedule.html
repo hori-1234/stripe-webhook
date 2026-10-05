@@ -304,14 +304,24 @@
             }
 
             .event-bar {
+                height: 40px;
+                top: 1px;
                 font-size: 11px;
-                padding: 6px 4px;
+                padding: 3px 4px;
+                line-height: 16px;
+            }
+
+            .event-bar-name,
+            .event-bar-time {
+                display: block;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
 
             .performer-list {
                 padding-left: 80px;
             }
-        }
     </style>
 </head>
 
@@ -453,11 +463,16 @@
                                     width: {{ event.width_percent }}%;
                                 "
                             >
-                                {{ event.event_name }}
-                                {{ event.start_time.strftime("%H:%M") }}
-                                ～
-                                {{ event.end_time.strftime("%H:%M") }}
+                                <span class="event-bar-name">
+                                    {{ event.event_name }}
+                                </span>
+                                <span class="event-bar-time">
+                                    {{ event.start_time.strftime("%H:%M") }}
+                                    ～
+                                    {{ event.end_time.strftime("%H:%M") }}
+                                </span>  
                             </div>
+                            
                             {% if event.performers %}
                                 <button
                                     type="button"
