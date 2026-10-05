@@ -117,7 +117,12 @@
 
         <div class="form-row">
             <label>日程</label>
-            <input type="date" name="event_date" required>
+            <input
+                type="date"
+                name="event_date"
+                value="{{ form_data.get('event_date', '') if form_data else '' }}"
+                required
+            >
         </div>
 
         <div class="form-row">
@@ -126,6 +131,7 @@
                 type="time"
                 id="start_time"
                 name="start_time"
+                value="{{ form_data.get('start_time', '') if form_data else '' }}"
                 min="08:00"
                 max="23:59"
                 required
@@ -139,6 +145,7 @@
                 type="time"
                 id="end_time"
                 name="end_time"
+                value="{{ form_data.get('end_time', '') if form_data else '' }}"
                 min="08:00"
                 max="23:59"
                 required
@@ -150,6 +157,7 @@
             <input
                 type="text"
                 name="location"
+                value="{{ form_data.get('location', '') if form_data else '' }}"
                 placeholder="例：東京"
                 required
             >
@@ -160,6 +168,7 @@
             <input
                 type="text"
                 name="event_name"
+                value="{{ form_data.get('event_name', '') if form_data else '' }}"
                 placeholder="イベント名を入力"
                 required
             >
@@ -170,10 +179,10 @@
 
             <select name="genre" required>
                 <option value="">選択してください</option>
-                <option value="歌">歌</option>
-                <option value="踊">踊</option>
-                <option value="歌踊">歌踊</option>
-                <option value="その他">その他</option>
+                <option value="歌" {% if form_data and form_data.get('genre') == '歌' %}selected{% endif %}>歌</option>
+                <option value="踊" {% if form_data and form_data.get('genre') == '踊' %}selected{% endif %}>踊</option>
+                <option value="歌踊" {% if form_data and form_data.get('genre') == '歌踊' %}selected{% endif %}>歌踊</option>
+                <option value="その他" {% if form_data and form_data.get('genre') == 'その他' %}selected{% endif %}>その他</option>
             </select>
         </div>
         
@@ -184,7 +193,7 @@
                 <textarea
                     name="performers"
                     placeholder="例：出演者A 出演者B 出演者C"
-                ></textarea>
+                >{{ form_data.get('performers', '') if form_data else '' }}</textarea>
 
                 <div class="description">
                     ※複数の出演者を登録する場合は、出演者名をスペースで区切って入力してください。
