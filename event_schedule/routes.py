@@ -143,6 +143,30 @@ def schedule():
             "holiday_name": holiday_name
         })
 
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT
+            id,
+            event_date,
+            start_time,
+            end_time,
+            location,
+            event_name,
+            genre,
+            performers
+        FROM event_schedules
+        WHERE EXTRACT(YEAR FROM event_date) = %s
+          AND EXTRACT(MONTH FROM event_date) = %s
+        ORDER BY event_date, start_time, id
+    """, (year, month))
+
+    events = cur.fetchall()
+
+    cur.close()
+    conn.close()
+
     return render_template(
         "schedule.html",
         year=year,
@@ -151,5 +175,6 @@ def schedule():
         prev_year=prev_year,
         prev_month=prev_month,
         next_year=next_year,
-        next_month=next_month
+        next_month=next_month,
+        events=events
     )
