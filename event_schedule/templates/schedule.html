@@ -99,10 +99,21 @@
         }
 
         .date-row {
-            min-width: 1100px;
+            min-width: 1400px;
             padding: 14px 10px;
             border-bottom: 1px solid #ccc;
             font-weight: bold;
+            box-sizing: border-box;
+        }
+
+        .date-row.saturday {
+            background: #0066cc;
+            color: white;
+        }
+
+        .date-row.sunday {
+            background: #d60000;
+            color: white;
         }
 
         @media (max-width: 700px) {
@@ -133,15 +144,15 @@
 
     <div class="month-navigation">
 
-        <a href="#">
+        <a href="/schedule?year={{ prev_year }}&month={{ prev_month }}">
             ＜ 先月
         </a>
 
         <div class="current-month">
-            2026年10月
+            {{ year }}年{{ month }}月
         </div>
 
-        <a href="#">
+        <a href="/schedule?year={{ next_year }}&month={{ next_month }}">
             翌月 ＞
         </a>
 
@@ -199,14 +210,17 @@
             <div>24</div>
 
         </div>
-
-        <div class="date-row">
-            10/3
+    {% for date in days %}
+        
+        <div class="
+            date-row
+            {% if date.weekday_number == 5 %}saturday{% endif %}
+            {% if date.weekday_number == 6 %}sunday{% endif %}
+        ">
+            {{ month }}/{{ date.day }} {{ date.weekday }}
         </div>
 
-        <div class="date-row">
-            10/4
-        </div>
+    {% endfor %}
 
     </div>
 
