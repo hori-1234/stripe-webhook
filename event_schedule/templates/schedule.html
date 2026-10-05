@@ -293,8 +293,11 @@
         </div>
 
         {% set event_number = namespace(value=0) %}
+
         {% for event in events %}
-            {% if event[1].day == date.day %}
+
+            {% if event.event_date.day == date.day %}
+
                 {% set event_number.value = event_number.value + 1 %}
 
                 <div
@@ -308,20 +311,47 @@
                         {% endif %};
                     "
                 >
-                    {{ event[2].strftime("%H:%M") }}
-                    ～
-                    {{ event[3].strftime("%H:%M") }}
 
-                    ｜ {{ event[4] }}
-                    ｜ {{ event[5] }}
-                    ｜ {{ event[6] }}
+                    <div class="event-content">
+
+                        <div class="event-info">
+
+                            <span class="event-genre">
+                                {{ event.genre }}
+                            </span>
+
+                            <span class="event-location">
+                                {{ event.location }}
+                            </span>
+
+                        </div>
+
+                        <div class="event-timeline">
+
+                            <div
+                                class="event-bar"
+                                style="
+                                    left: {{ event.left_percent }}%;
+                                    width: {{ event.width_percent }}%;
+                                "
+                            >
+                                {{ event.event_name }}
+                                {{ event.start_time.strftime("%H:%M") }}
+                                ～
+                                {{ event.end_time.strftime("%H:%M") }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
                 </div>
 
             {% endif %}
+
         {% endfor %}
 
-    {% endfor %}
-
+    {% endfor %}    
     </div>
 
 </div>
