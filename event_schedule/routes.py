@@ -59,6 +59,19 @@ def create_event_schedule_table():
         ADD COLUMN IF NOT EXISTS edit_password_encrypted TEXT
     """)
 
+    cur.execute("""
+        ALTER TABLE event_schedules
+        ADD COLUMN IF NOT EXISTS registration_ip TEXT
+    """)
+
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS event_schedule_blocked_ips (
+            id SERIAL PRIMARY KEY,
+            ip_address TEXT UNIQUE NOT NULL,
+            created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
     conn.commit()
     cur.close()
     conn.close()
@@ -76,6 +89,29 @@ def schedule_add():
         genre = request.form.get("genre", "").strip()
         performers = request.form.get("performers", "").strip()
         edit_password = request.form.get("edit_password", "")
+
+        registration_ip = request.headers.get(
+            "X-Forwarded-For",
+            request.remote_addr
+        )
+        registration_ip = registration_ip.split(",")[0].strip()
+
+        conn = psycopg2.connect(DATABASE_URL)
+        cur = conn.cursor()
+
+        cur.execute("""
+            SELECT 1
+            FROM event_schedule_blocked_ips
+            WHERE ip_address = %s
+        """, (registration_ip,))
+
+        is_blocked = cur.fetchone() is not None
+
+        cur.close()
+        conn.close()
+
+        if is_blocked:
+            return "このIPアドレスからはイベントを登録できません。", 403
 
         if not ("08:00" <= start_time <= "23:59"):
             return "開始時間は08:00～23:59の範囲で設定してください。", 400
@@ -106,9 +142,10 @@ def schedule_add():
                 genre,
                 performers,
                 edit_password_hash,
-                edit_password_encrypted
+                edit_password_encrypted,
+                registration_ip
             )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, (
             event_date,
             start_time,
@@ -118,7 +155,8 @@ def schedule_add():
             genre,
             performers,
             edit_password_hash,
-            edit_password_encrypted
+            edit_password_encrypted,
+            registration_ip
         ))
 
         conn.commit()
@@ -474,12 +512,22 @@ def schedule_admin():
             event_name,
             genre,
             performers,
-            edit_password_encrypted
+            edit_password_encrypted,
+            registration_ip
         FROM event_schedules
         ORDER BY event_date, start_time, id
     """)
 
     events = cur.fetchall()
+
+    cur.execute("""
+        SELECT ip_address
+        FROM event_schedule_blocked_ips
+    """)
+
+    blocked_ips = {
+        row[0] for row in cur.fetchall()
+    }
 
     cur.close()
     conn.close()
@@ -501,13 +549,81 @@ def schedule_admin():
             "event_name": event[5],
             "genre": event[6],
             "performers": event[7],
-            "edit_password": edit_password
+            "edit_password": edit_password,
+            "registration_ip": event[9],
+            "is_blocked": event[9] in blocked_ips
         })
 
     return render_template(
         "schedule_admin.html",
         events=admin_events
     )
+
+@event_schedule_bp.route(
+    "/schedule/admin/block-ip",
+    methods=["POST"]
+)
+@admin_required
+def schedule_admin_block_ip():
+    ip_address = request.form.get("ip_address", "").strip()
+
+    if not ip_address:
+        return redirect(
+            url_for("event_schedule.schedule_admin")
+        )
+
+    create_event_schedule_table()
+
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+
+    cur.execute("""
+        INSERT INTO event_schedule_blocked_ips (
+            ip_address
+        )
+        VALUES (%s)
+        ON CONFLICT (ip_address) DO NOTHING
+    """, (ip_address,))
+
+    conn.commit()
+    cur.close()
+    conn.close()
+
+    return redirect(
+        url_for("event_schedule.schedule_admin")
+    )
+
+@event_schedule_bp.route(
+    "/schedule/admin/unblock-ip",
+    methods=["POST"]
+)
+@admin_required
+def schedule_admin_unblock_ip():
+    ip_address = request.form.get("ip_address", "").strip()
+
+    if not ip_address:
+        return redirect(
+            url_for("event_schedule.schedule_admin")
+        )
+
+    create_event_schedule_table()
+
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+
+    cur.execute("""
+        DELETE FROM event_schedule_blocked_ips
+        WHERE ip_address = %s
+    """, (ip_address,))
+
+    conn.commit()
+    cur.close()
+    conn.close()
+
+    return redirect(
+        url_for("event_schedule.schedule_admin")
+    )
+
 
 @event_schedule_bp.route("/schedule/admin/edit/<int:event_id>")
 @admin_required
