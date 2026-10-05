@@ -122,12 +122,27 @@
 
         <div class="form-row">
             <label>開始時間</label>
-            <input type="time" name="start_time" required>
+            <input
+                type="time"
+                id="start_time"
+                name="start_time"
+                min="08:00"
+                max="23:59"
+                required
+            >
+            
         </div>
 
         <div class="form-row">
             <label>終了時間</label>
-            <input type="time" name="end_time" required>
+            <input
+                type="time"
+                id="end_time"
+                name="end_time"
+                min="08:00"
+                max="23:59"
+                required
+            >
         </div>
 
         <div class="form-row">
