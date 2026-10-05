@@ -90,7 +90,7 @@ def schedule_add():
                 form_data=request.form
             )
         edit_password_hash = generate_password_hash(edit_password)
-         = encrypt_edit_password(edit_password)
+        edit_password_encrypted = encrypt_edit_password(edit_password)
 
         conn = psycopg2.connect(DATABASE_URL)
         cur = conn.cursor()
