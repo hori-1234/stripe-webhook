@@ -137,9 +137,10 @@
 
             <input
                 type="time"
-                id="start_time"
                 name="start_time"
                 value="{{ event[2].strftime('%H:%M') }}"
+                min="08:00"
+                max="23:59"
                 required
             >
         </div>
@@ -149,9 +150,10 @@
 
             <input
                 type="time"
-                id="end_time"
                 name="end_time"
                 value="{{ event[3].strftime('%H:%M') }}"
+                min="08:00"
+                max="23:59"
                 required
             >
         </div>
