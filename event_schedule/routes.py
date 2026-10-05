@@ -4,7 +4,7 @@ import calendar
 import jpholiday
 
 from datetime import datetime
-from flask import Blueprint, render_template, request, redirect, url_for
+from flask import Blueprint, render_template, request, redirect, url_for, session
 from werkzeug.security import generate_password_hash, check_password_hash
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
@@ -256,10 +256,19 @@ def schedule_edit(event_id):
 
     error_message = ""
 
+    if session.get(f"schedule_edit_{event_id}"):
+        return render_template(
+            "schedule_edit_form.html",
+            event=event
+        )
+
     if request.method == "POST":
         edit_password = request.form.get("edit_password", "")
 
         if check_password_hash(event[8], edit_password):
+
+            session[f"schedule_edit_{event_id}"] = True
+
             return render_template(
                 "schedule_edit_form.html",
                 event=event
@@ -276,6 +285,9 @@ def schedule_edit(event_id):
 @event_schedule_bp.route("/schedule/edit/<int:event_id>/update", methods=["POST"])
 def schedule_edit_update(event_id):
     create_event_schedule_table()
+
+    if not session.get(f"schedule_edit_{event_id}"):
+        return "編集権限がありません。", 403
 
     event_date = request.form.get("event_date")
     start_time = request.form.get("start_time")
@@ -315,6 +327,8 @@ def schedule_edit_update(event_id):
     cur.close()
     conn.close()
 
+    session.pop(f"schedule_edit_{event_id}", None)
+
     return redirect(
         url_for(
             "event_schedule.schedule",
@@ -326,6 +340,9 @@ def schedule_edit_update(event_id):
 @event_schedule_bp.route("/schedule/edit/<int:event_id>/delete", methods=["POST"])
 def schedule_edit_delete(event_id):
     create_event_schedule_table()
+
+    if not session.get(f"schedule_edit_{event_id}"):
+        return "編集権限がありません。", 403
 
     conn = psycopg2.connect(DATABASE_URL)
     cur = conn.cursor()
@@ -353,6 +370,8 @@ def schedule_edit_delete(event_id):
     conn.commit()
     cur.close()
     conn.close()
+
+    session.pop(f"schedule_edit_{event_id}", None)
 
     return redirect(
         url_for(
