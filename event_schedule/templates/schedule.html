@@ -163,6 +163,36 @@
         .event-genre {
             font-weight: bold;
             white-space: nowrap;
+            display: inline-block;
+            width: 52px;
+            padding: 3px 0;
+            text-align: center;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        /* 歌 */
+        .genre-song {
+            background: yellow;
+            color: #000;
+        }
+
+        /* 踊 */
+        .genre-dance {
+            background: orange;
+            color: #fff;
+        }
+
+        /* 歌踊 */
+        .genre-song-dance {
+            background: pink;
+            color: #fff;
+        }
+
+        /* その他 */
+        .genre-other {
+            background: #000;
+            color: #fff;
         }
 
         .event-location {
@@ -447,14 +477,24 @@
 
                     <div class="event-content">
                         <div class="event-info">
-
-                            <span class="event-genre">
+                            
+                            <span class="event-genre
+                                {% if event.genre == '歌' %}
+                                    genre-song
+                                {% elif event.genre == '踊' %}
+                                    genre-dance
+                                {% elif event.genre == '歌踊' %}
+                                    genre-song-dance
+                                {% else %}
+                                    genre-other
+                                {% endif %}
+                            ">
                                 {{ event.genre }}
                             </span>
-
-                            <span class="event-location">
-                                {{ event.location }}
-                            </span>
+                            
+    <span class="event-location">
+        {{ event.location }}
+    </span>
 
                         </div>
 
