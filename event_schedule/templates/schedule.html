@@ -211,13 +211,21 @@
 
         </div>
     {% for date in days %}
-        
         <div class="
             date-row
-            {% if date.weekday_number == 5 %}saturday{% endif %}
-            {% if date.weekday_number == 6 %}sunday{% endif %}
+            {% if date.holiday_name %}
+                sunday
+            {% elif date.weekday_number == 5 %}
+                saturday
+            {% elif date.weekday_number == 6 %}
+                sunday
+            {% endif %}
         ">
             {{ month }}/{{ date.day }} {{ date.weekday }}
+
+            {% if date.holiday_name %}
+                （{{ date.holiday_name }}）
+            {% endif %}
         </div>
 
     {% endfor %}
