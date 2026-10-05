@@ -126,14 +126,32 @@ def schedule_add():
                 error_message="終了時間は開始時間より後に設定してください。",
                 form_data=request.form
             )
+
         edit_password_hash = generate_password_hash(edit_password)
         edit_password_encrypted = encrypt_edit_password(edit_password)
 
-        conn = psycopg2.connect(DATABASE_URL)
-        cur = conn.cursor()
+        conn = None
+        cur = None
 
-        cur.execute("""
-            INSERT INTO event_schedules (
+        try:
+            conn = psycopg2.connect(DATABASE_URL)
+            cur = conn.cursor()
+
+            cur.execute("""
+                INSERT INTO event_schedules (
+                    event_date,
+                    start_time,
+                    end_time,
+                    location,
+                    event_name,
+                    genre,
+                    performers,
+                    edit_password_hash,
+                    edit_password_encrypted,
+                    registration_ip
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
                 event_date,
                 start_time,
                 end_time,
@@ -144,25 +162,22 @@ def schedule_add():
                 edit_password_hash,
                 edit_password_encrypted,
                 registration_ip
-            )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """, (
-            event_date,
-            start_time,
-            end_time,
-            location,
-            event_name,
-            genre,
-            performers,
-            edit_password_hash,
-            edit_password_encrypted,
-            registration_ip
-        ))
+            ))
 
-        conn.commit()
-        cur.close()
-        conn.close()
+            conn.commit()
 
+        except Exception:
+            if conn:
+                conn.rollback()
+            raise
+
+        finally:
+            if cur:
+                cur.close()
+
+            if conn:
+                conn.close()
+        
         return render_template(
             "schedule_add.html",
             success_message="イベントを登録しました。"
