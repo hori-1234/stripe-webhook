@@ -1,1 +1,260 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <title>イベント内容編集</title>
+
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 30px;
+            background: #fff;
+            color: #222;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            margin-bottom: 30px;
+        }
+
+        .form-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .form-row label {
+            width: 140px;
+            flex-shrink: 0;
+            font-weight: bold;
+        }
+
+        .form-row input,
+        .form-row textarea,
+        .form-row select {
+            width: 100%;
+            max-width: 600px;
+            box-sizing: border-box;
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        .form-row textarea {
+            min-height: 180px;
+            resize: vertical;
+        }
+
+        .button-area {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-left: 140px;
+            margin-top: 30px;
+        }
+
+        .button-area button,
+        .button-area a {
+            padding: 10px 20px;
+            font-size: 16px;
+            text-decoration: none;
+            box-sizing: border-box;
+            cursor: pointer;
+        }
+
+        .back-button {
+            border: 1px solid #333;
+            background: #fff;
+            color: #222;
+        }
+
+        .update-button {
+            border: 1px solid #333;
+            background: #222;
+            color: #fff;
+        }
+
+        .cancel-button {
+            border: 1px solid #c00;
+            background: #fff;
+            color: #c00;
+        }
+
+        @media (max-width: 700px) {
+            body {
+                padding: 15px;
+            }
+
+            .form-row {
+                display: block;
+            }
+
+            .form-row label {
+                display: block;
+                width: auto;
+                margin-bottom: 8px;
+            }
+
+            .button-area {
+                margin-left: 0;
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>イベント内容編集</h1>
+
+    <form
+        method="post"
+        action="/schedule/edit/{{ event[0] }}/update"
+    >
+
+        <div class="form-row">
+            <label for="event_date">日程</label>
+
+            <input
+                type="date"
+                id="event_date"
+                name="event_date"
+                value="{{ event[1].strftime('%Y-%m-%d') }}"
+                required
+            >
+        </div>
+
+        <div class="form-row">
+            <label for="start_time">開始時間</label>
+
+            <input
+                type="time"
+                id="start_time"
+                name="start_time"
+                value="{{ event[2].strftime('%H:%M') }}"
+                required
+            >
+        </div>
+
+        <div class="form-row">
+            <label for="end_time">終了時間</label>
+
+            <input
+                type="time"
+                id="end_time"
+                name="end_time"
+                value="{{ event[3].strftime('%H:%M') }}"
+                required
+            >
+        </div>
+
+        <div class="form-row">
+            <label for="location">場所</label>
+
+            <input
+                type="text"
+                id="location"
+                name="location"
+                value="{{ event[4] }}"
+                required
+            >
+        </div>
+
+        <div class="form-row">
+            <label for="event_name">イベント名</label>
+
+            <input
+                type="text"
+                id="event_name"
+                name="event_name"
+                value="{{ event[5] }}"
+                required
+            >
+        </div>
+
+        <div class="form-row">
+            <label for="genre">ジャンル</label>
+
+            <select
+                id="genre"
+                name="genre"
+                required
+            >
+                <option value="歌"
+                    {% if event[6] == "歌" %}selected{% endif %}
+                >
+                    歌
+                </option>
+
+                <option value="踊"
+                    {% if event[6] == "踊" %}selected{% endif %}
+                >
+                    踊
+                </option>
+
+                <option value="歌踊"
+                    {% if event[6] == "歌踊" %}selected{% endif %}
+                >
+                    歌踊
+                </option>
+
+                <option value="その他"
+                    {% if event[6] == "その他" %}selected{% endif %}
+                >
+                    その他
+                </option>
+            </select>
+        </div>
+
+        <div class="form-row">
+            <label for="performers">出演者</label>
+
+            <textarea
+                id="performers"
+                name="performers"
+            >{{ event[7] or "" }}</textarea>
+        </div>
+
+
+        <div class="button-area">
+
+            <a
+                href="/schedule"
+                class="back-button"
+            >
+                戻る
+            </a>
+
+            <button
+                type="submit"
+                class="update-button"
+            >
+                編集完了
+            </button>
+
+            <button
+                type="submit"
+                class="cancel-button"
+                formaction="/schedule/edit/{{ event[0] }}/delete"
+                formmethod="post"
+                onclick="return confirm('このイベントを取り消しますか？');"
+            >
+                イベントの取消
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+</body>
+</html>
