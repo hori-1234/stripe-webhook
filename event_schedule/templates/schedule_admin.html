@@ -61,6 +61,7 @@
                 <th>イベント名</th>
                 <th>ジャンル</th>
                 <th>出演者</th>
+                <th>登録IP</th>
                 <th>編集パスワード</th>
                 <th>編集</th>
             </tr>
@@ -85,13 +86,53 @@
 
                 <td>{{ event.performers }}</td>
 
+                <td>
+                    {% if event.registration_ip %}
+                        {{ event.registration_ip }}
+
+                        {% if event.is_blocked %}
+                            <form
+                                method="POST"
+                                action="{{ url_for('event_schedule.schedule_admin_unblock_ip') }}"
+                                style="margin-top: 6px;"
+                            >
+                                <input
+                                    type="hidden"
+                                    name="ip_address"
+                                    value="{{ event.registration_ip }}"
+                                >
+                                <button type="submit">
+                                    ブロック解除
+                                </button>
+                            </form>
+                        {% else %}
+                            <form
+                                method="POST"
+                                action="{{ url_for('event_schedule.schedule_admin_block_ip') }}"
+                                style="margin-top: 6px;"
+                            >
+                                <input
+                                    type="hidden"
+                                    name="ip_address"
+                                    value="{{ event.registration_ip }}"
+                                >
+                                <button type="submit">
+                                    ブロック
+                                </button>
+                            </form>
+                        {% endif %}
+                    {% else %}
+                        取得不可
+                    {% endif %}
+                </td>
+  
                 <td class="password">
                     {% if event.edit_password %}
                         {{ event.edit_password }}
                     {% else %}
                         取得不可
                     {% endif %}
-                </td>
+                </td>   
 
                 <td>
                   <a href="{{ url_for('event_schedule.schedule_admin_edit', event_id=event.id) }}">
