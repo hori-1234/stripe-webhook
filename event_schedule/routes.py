@@ -52,6 +52,11 @@ def schedule_add():
         event_date = request.form.get("event_date")
         start_time = request.form.get("start_time")
         end_time = request.form.get("end_time")
+        location = request.form.get("location", "").strip()
+        event_name = request.form.get("event_name", "").strip()
+        genre = request.form.get("genre", "").strip()
+        performers = request.form.get("performers", "").strip()
+        edit_password = request.form.get("edit_password", "")
 
         if not ("08:00" <= start_time <= "23:59"):
             return "開始時間は08:00～23:59の範囲で設定してください。", 400
@@ -63,15 +68,9 @@ def schedule_add():
             return render_template(
                 "schedule_add.html",
                 success_message="",
-                error_message="終了時間は開始時間より後に設定してください。"
+                error_message="終了時間は開始時間より後に設定してください。",
+                form_data=request.form
             )
-
-        location = request.form.get("location", "").strip()
-        event_name = request.form.get("event_name", "").strip()
-        genre = request.form.get("genre", "").strip()
-        performers = request.form.get("performers", "").strip()
-        edit_password = request.form.get("edit_password", "")
-
         edit_password_hash = generate_password_hash(edit_password)
 
         conn = psycopg2.connect(DATABASE_URL)
