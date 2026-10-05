@@ -28,17 +28,21 @@ def create_event_schedule_table():
             location TEXT NOT NULL,
             event_name TEXT NOT NULL,
             performers TEXT,
+            genre TEXT,
             edit_password_hash TEXT NOT NULL,
             created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
         )
     """)
 
+    cur.execute("""
+        ALTER TABLE event_schedules
+        ADD COLUMN IF NOT EXISTS genre TEXT
+    """)
+
     conn.commit()
     cur.close()
     conn.close()
-
-
 
 @event_schedule_bp.route("/schedule/add", methods=["GET", "POST"])
 def schedule_add():
