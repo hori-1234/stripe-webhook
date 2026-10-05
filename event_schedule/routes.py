@@ -74,7 +74,7 @@ def schedule_add():
                 performers,
                 edit_password_hash
             )
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         """, (
             event_date,
             start_time,
