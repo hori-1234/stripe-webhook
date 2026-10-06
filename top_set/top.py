@@ -77,6 +77,12 @@ def top():
     <div class="menu">
 
     <p>
+        <a href="/schedule">
+            イベントスケジュール
+        </a>
+    </p>
+
+    <p>
         <a href="/member-video">
             クリサポ限定動画検索
         </a>
