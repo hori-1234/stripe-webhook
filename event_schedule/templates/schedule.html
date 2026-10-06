@@ -575,6 +575,137 @@
             </div>
 
         </div>
+
+    {% if request.args.get('performer', '').strip() %}
+
+        {% for search_date in performer_search_dates %}
+
+            <div class="
+                date-row
+                {% if search_date.weekday() == 5 %}
+                    saturday
+                {% elif search_date.weekday() == 6 %}
+                    sunday
+                {% endif %}
+            ">
+                {{ search_date.month }}/{{ search_date.day }}
+            </div>
+
+            {% set event_number = namespace(value=0) %}
+
+            {% for event in events %}
+
+                {% if event.event_date == search_date %}
+
+                    {% set event_number.value = event_number.value + 1 %}
+
+                    <div
+                        class="event-row"
+                        style="
+                            background:
+                            {% if event_number.value % 2 == 0 %}
+                                #eaf7ff
+                            {% else %}
+                                #ffffff
+                            {% endif %};
+                        "
+                    >
+                        <div class="event-content">
+
+                            <div class="event-info">
+
+                                <span class="event-genre
+                                    {% if event.genre == '歌' %}
+                                        genre-song
+                                    {% elif event.genre == '踊' %}
+                                        genre-dance
+                                    {% elif event.genre == '歌踊' %}
+                                        genre-song-dance
+                                    {% else %}
+                                        genre-other
+                                    {% endif %}
+                                ">
+                                    {{ event.genre }}
+                                </span>
+
+                                <span class="event-location">
+                                    {{ event.location }}
+                                </span>
+
+                            </div>
+
+                            <div class="event-timeline">
+
+                                <div
+                                    class="event-bar"
+                                    style="
+                                        left: {{ event.left_percent }}%;
+                                        width: {{ event.width_percent }}%;
+                                    "
+                                >
+                                    <span class="event-bar-name">
+                                        {{ event.event_name }}
+                                    </span>
+
+                                    <span class="event-bar-time">
+                                        {{ event.start_time.strftime("%H:%M") }}
+                                        ～
+                                        {{ event.end_time.strftime("%H:%M") }}
+                                    </span>
+                                </div>
+
+                                {% if event.performers %}
+                                    <button
+                                        type="button"
+                                        class="performer-toggle"
+                                        style="
+                                            position: absolute;
+                                            left: calc(
+                                                {{ event.left_percent }}%
+                                                + {{ event.width_percent }}%
+                                            );
+                                            top: 9px;
+                                        "
+                                        onclick="togglePerformers({{ event.id }}, this)"
+                                    >
+                                        ▽
+                                    </button>
+                                {% endif %}
+
+                            </div>
+
+                            <div class="event-toggle-space"></div>
+
+                            <div class="event-edit-area">
+                                <a
+                                    href="/schedule/edit/{{ event.id }}"
+                                    class="event-edit-button"
+                                >
+                                    編集
+                                </a>
+                            </div>
+
+                        </div>
+
+                        {% if event.performers %}
+                            <div
+                                id="performers-{{ event.id }}"
+                                class="performer-list"
+                            >
+                                出演者：{{ event.performers }}
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+                {% endif %}
+        
+            {% endfor %}
+        
+        {% endfor %}
+        
+    {% else %}
+        
     {% for date in days %}
         <div class="
             date-row
@@ -703,7 +834,10 @@
 
         {% endfor %}
 
-    {% endfor %}    
+    {% endfor %}
+
+    {% endif %}
+        
     </div>
 
 </div>
