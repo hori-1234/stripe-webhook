@@ -62,6 +62,7 @@
         .search-form {
             display: flex;
             flex: 1;
+            flex-direction: column;
             gap: 10px;
         }
 
@@ -89,6 +90,55 @@
         .search-row > label {
             width: 70px;
             flex-shrink: 0;
+        }
+
+        .search-button {
+            margin-left: 30px;
+        }
+
+                .search-row > label {
+            width: 70px;
+            flex-shrink: 0;
+        }
+
+        .search-row select {
+            width: 180px;
+            padding: 10px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        .location-select {
+            width: 180px;
+            box-sizing: border-box;
+        }
+
+        .location-select summary {
+            padding: 10px;
+            border: 1px solid #777;
+            border-radius: 2px;
+            background: #fff;
+            cursor: pointer;
+            box-sizing: border-box;
+        }
+
+        .location-options {
+            padding: 10px;
+            border: 1px solid #aaa;
+            background: #fff;
+        }
+
+        .location-options label {
+            display: block;
+            width: auto;
+            margin-bottom: 6px;
+        }
+
+        .location-options input {
+            width: auto;
+            padding: 0;
+            margin-right: 6px;
+            flex: none;
         }
 
         .search-button {
@@ -433,7 +483,7 @@
                     <label>場所</label>
 
                     <details class="location-select">
-                        <summary>場所を選択 ▼</summary>
+                        <summary>場所を選択 </summary>
 
                         <div class="location-options">
                             {% for location in locations %}
