@@ -377,10 +377,18 @@ def schedule():
     performer_search_dates = []
 
     if performer_keyword:
-        performer_search_dates = sorted({
+        unique_dates = sorted({
             event["event_date"]
             for event in display_events
         })
+
+        performer_search_dates = [
+            {
+                "date": search_date,
+                "holiday_name": jpholiday.is_holiday_name(search_date)
+            }
+            for search_date in unique_dates
+        ]
 
     return render_template(
         "schedule.html",
