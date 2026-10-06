@@ -29,6 +29,32 @@ def decrypt_edit_password(encrypted_password):
     fernet = Fernet(EVENT_PASSWORD_KEY.encode())
     return fernet.decrypt(encrypted_password.encode()).decode()
 
+def delete_old_events():
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+
+    try:
+        cur.execute("""
+            DELETE FROM event_schedules
+            WHERE event_date < CURRENT_DATE - INTERVAL '6 months'
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM event_schedule_blocked_ips
+                  WHERE event_schedule_blocked_ips.ip_address
+                        = event_schedules.registration_ip
+              )
+        """)
+
+        conn.commit()
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        cur.close()
+        conn.close()
+
 def create_event_schedule_table():
     conn = psycopg2.connect(DATABASE_URL)
     cur = conn.cursor()
@@ -191,6 +217,7 @@ def schedule_add():
 @event_schedule_bp.route("/schedule")
 def schedule():
     create_event_schedule_table()
+    delete_old_events()
 
     today = datetime.now()
 
