@@ -503,6 +503,9 @@
                             {% endfor %}
                         </div>
                     </details>
+                    <span class="selected-locations">
+                        {{ request.args.getlist('location') | join('、') }}
+                    </span>
                 </div>
                 
                 <!-- イベント名 -->
