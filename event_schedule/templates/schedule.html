@@ -582,21 +582,27 @@
 
             <div class="
                 date-row
-                {% if search_date.weekday() == 5 %}
+                {% if search_date.holiday_name %}
+                    sunday
+                {% elif search_date.date.weekday() == 5 %}
                     saturday
-                {% elif search_date.weekday() == 6 %}
+                {% elif search_date.date.weekday() == 6 %}
                     sunday
                 {% endif %}
             ">
-                {{ search_date.month }}/{{ search_date.day }}
-                {{ ["月", "火", "水", "木", "金", "土", "日"][search_date.weekday()] }}
+                {{ search_date.date.month }}/{{ search_date.date.day }}
+                {{ ["月", "火", "水", "木", "金", "土", "日"][search_date.date.weekday()] }}
+
+                {% if search_date.holiday_name %}
+                    （{{ search_date.holiday_name }}）
+                {% endif %}
             </div>
 
             {% set event_number = namespace(value=0) %}
 
             {% for event in events %}
 
-                {% if event.event_date == search_date %}
+                {% if event.event_date == search_date.date %}
 
                     {% set event_number.value = event_number.value + 1 %}
 
