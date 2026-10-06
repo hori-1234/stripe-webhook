@@ -589,6 +589,7 @@
                 {% endif %}
             ">
                 {{ search_date.month }}/{{ search_date.day }}
+                {{ ["月", "火", "水", "木", "金", "土", "日"][search_date.weekday()] }}
             </div>
 
             {% set event_number = namespace(value=0) %}
