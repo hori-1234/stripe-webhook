@@ -145,6 +145,13 @@
             flex: none;
         }
 
+        .selected-locations {
+            font-size: 14px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+
         .search-button {
             margin-left: 30px;
         }
@@ -709,6 +716,31 @@
             button.textContent = "△";
         }
     }
+
+    function updateSelectedLocations() {
+        const checkedLocations = document.querySelectorAll(
+            'input[name="location"]:checked'
+        );
+
+        const selectedLocations = Array.from(checkedLocations).map(
+            checkbox => checkbox.value
+        );
+
+        const display = document.querySelector(".selected-locations");
+
+        if (display) {
+            display.textContent = selectedLocations.join("、");
+        }
+    }
+
+    document.querySelectorAll('input[name="location"]').forEach(
+        checkbox => {
+            checkbox.addEventListener(
+                "change",
+                updateSelectedLocations
+            );
+        }
+    );
 </script>
 
 </body>
