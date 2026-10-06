@@ -108,6 +108,15 @@
             box-sizing: border-box;
         }
 
+        .search-row input[type="text"] {
+            width: 300px;
+            max-width: 300px;
+            flex: none;
+            padding: 10px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
         .location-select {
             width: 180px;
             box-sizing: border-box;
@@ -500,10 +509,31 @@
                         </div>
                     </details>
                 </div>
+                
+                <!-- イベント名 -->
+                <div class="search-row">
+                    <label>イベント名</label>
+                    <input
+                        type="text"
+                        name="event_name"
+                        value="{{ request.args.get('event_name', '') }}"
+                    >
+                </div>
+
+                <!-- 出演者名 -->
+                <div class="search-row">
+                    <label>出演者名</label>
+                    <input
+                        type="text"
+                        name="performer"
+                        value="{{ request.args.get('performer', '') }}"
+                    >
+                </div>
 
             </form>
                 
     </div>
+    
 
     <div class="schedule-area">
 
