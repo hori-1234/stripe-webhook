@@ -276,11 +276,17 @@ def schedule():
             genre,
             performers
         FROM event_schedules
-        WHERE EXTRACT(YEAR FROM event_date) = %s
-          AND EXTRACT(MONTH FROM event_date) = %s
     """
-
-    params = [year, month]
+    if performer_keyword:
+        query += " WHERE event_date >= CURRENT_DATE"
+        params = []
+    else:
+        query += """
+            WHERE EXTRACT(YEAR FROM event_date) = %s
+              AND EXTRACT(MONTH FROM event_date) = %s
+        """
+        params = [year, month]
+    
     if genre:
         query += " AND genre = %s"
         params.append(genre)
@@ -368,6 +374,13 @@ def schedule():
             "left_percent": left_percent,
             "width_percent": width_percent
         })
+    performer_search_dates = []
+
+    if performer_keyword:
+        performer_search_dates = sorted({
+            event["event_date"]
+            for event in display_events
+        })
 
     return render_template(
         "schedule.html",
@@ -379,7 +392,8 @@ def schedule():
         next_year=next_year,
         next_month=next_month,
         events=display_events,
-        locations=locations
+        locations=locations,
+        performer_search_dates=performer_search_dates
     )
 
 @event_schedule_bp.route("/schedule/edit/<int:event_id>", methods=["GET", "POST"])
