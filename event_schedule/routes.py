@@ -198,7 +198,8 @@ def schedule():
     month = request.args.get("month", today.month, type=int)
     genre = request.args.get("genre", "").strip()
     selected_locations = request.args.getlist("location")
-
+    event_name_keyword = request.args.get("event_name", "").strip()
+    performer_keyword = request.args.get("performer", "").strip()
 
     if month == 1:
         prev_year = year - 1
@@ -264,10 +265,18 @@ def schedule():
         query += f" AND location IN ({placeholders})"
         params.extend(selected_locations)
 
+    if event_name_keyword:
+        query += " AND event_name ILIKE %s"
+        params.append(f"%{event_name_keyword}%")
+
+    if performer_keyword:
+        query += " AND performers ILIKE %s"
+        params.append(f"%{performer_keyword}%")
+
     query += " ORDER BY event_date, start_time, id"
 
     cur.execute(query, params)
-
+    
     events = cur.fetchall()
 
     # 表示中の月に登録されている場所を重複なしで取得
