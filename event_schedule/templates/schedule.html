@@ -923,6 +923,12 @@
     function searchPerformer(performer) {
         const form = document.getElementById("schedule-search-form");
         const performerInput = form.querySelector('input[name="performer"]');
+        const performerList = document.querySelector(".registered-performers");
+
+        sessionStorage.setItem(
+            "performerScrollTop",
+            performerList.scrollTop
+        );
 
         performerInput.value = performer;
         form.submit();
@@ -966,6 +972,13 @@
             );
         }
     );
+
+    const performerList = document.querySelector(".registered-performers");
+    const savedScrollTop = sessionStorage.getItem("performerScrollTop");
+
+    if (performerList && savedScrollTop !== null) {
+        performerList.scrollTop = Number(savedScrollTop);
+    }
 </script>
 
 </body>
