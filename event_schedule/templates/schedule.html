@@ -156,6 +156,43 @@
             margin-left: 30px;
         }
 
+        .registered-performers {
+            width: 300px;
+            align-self: stretch;
+            margin-left: 40px;
+            padding: 10px 15px;
+            border: 1px solid #777;
+            box-sizing: border-box;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .registered-performers-title {
+            position: sticky;
+            top: 0;
+            background: #fff;
+            font-weight: bold;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            z-index: 1;
+        }
+
+        .registered-performer {
+            display: block;
+            width: 100%;
+            margin-bottom: 6px;
+            padding: 4px 6px;
+            border: none;
+            background: none;
+            text-align: left;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .registered-performer:hover {
+            background: #eee;
+        }
+
         .schedule-area {
             width: 100%;
             overflow: visible;
@@ -403,6 +440,12 @@
                 margin-bottom: 15px;
             }
 
+            .registered-performers {
+                width: 100%;
+                margin-left: 0;
+                margin-top: 20px;
+            }
+
             .month-navigation {
                 gap: 20px;
             }
@@ -491,7 +534,7 @@
             新規追加
         </a>
 
-            <form class="search-form" method="GET" action="/schedule">
+            <form id="schedule-search-form" class="search-form" method="GET" action="/schedule">
 
                 <input type="hidden" name="year" value="{{ year }}">
                 <input type="hidden" name="month" value="{{ month }}">
@@ -559,9 +602,27 @@
                 </div>
 
             </form>
+            
+            <div class="registered-performers">
+                <div class="registered-performers-title">
+                    登録演者名
+                </div>
+
+                {% for performer in registered_performers %}
+
+                    <button
+                        type="submit"
+                        name="performer"
+                        value="{{ performer }}"
+                        form="schedule-search-form"
+                        class="registered-performer"
+                    >
+                        {{ performer }}
+                    </button>
+                {% endfor %}
+            </div>
                 
     </div>
-    
 
     <div class="schedule-area">
 
