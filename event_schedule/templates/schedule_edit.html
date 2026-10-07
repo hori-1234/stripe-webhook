@@ -88,7 +88,11 @@
             <strong>時間：</strong>
             {{ event[2].strftime("%H:%M") }}
             ～
-            {{ event[3].strftime("%H:%M") }}
+            {% if event[3] %}
+                {{ event[3].strftime("%H:%M") }}
+            {% else %}
+                不明
+            {% endif %}
         </div>
 
         <div>
