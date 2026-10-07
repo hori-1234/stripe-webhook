@@ -150,14 +150,26 @@
 
             <input
                 type="time"
+                id="end_time"
                 name="end_time"
-                value="{{ event[3].strftime('%H:%M') }}"
+                value="{{ event[3].strftime('%H:%M') if event[3] else '' }}"
                 min="08:00"
                 max="23:59"
-                required
+                {% if event[3] %}required{% endif %}
             >
-        </div>
 
+            <label style="margin-left: 10px; width: auto;">
+                <input
+                    type="checkbox"
+                    id="end_time_unknown"
+                    name="end_time_unknown"
+                    value="1"
+                    {% if not event[3] %}checked{% endif %}
+                >
+                終了時間不明
+            </label>
+        </div>
+            
         <div class="form-row">
             <label for="location">場所</label>
 
@@ -256,6 +268,24 @@
     </form>
 
 </div>
+<script>
+    const endTimeInput = document.getElementById("end_time");
+    const endTimeUnknown = document.getElementById("end_time_unknown");
 
+    function updateEndTimeInput() {
+        if (endTimeUnknown.checked) {
+            endTimeInput.disabled = true;
+            endTimeInput.required = false;
+        } else {
+            endTimeInput.disabled = false;
+            endTimeInput.required = true;
+        }
+    }
+
+    endTimeUnknown.addEventListener("change", updateEndTimeInput);
+
+    updateEndTimeInput();
+</script>
+        
 </body>
 </html>
