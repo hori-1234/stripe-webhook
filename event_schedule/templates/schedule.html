@@ -611,11 +611,9 @@
                 {% for performer in registered_performers %}
 
                     <button
-                        type="submit"
-                        name="performer"
-                        value="{{ performer }}"
-                        form="schedule-search-form"
+                        type="button"
                         class="registered-performer"
+                        onclick="searchPerformer('{{ performer | e }}')"
                     >
                         {{ performer }}
                     </button>
@@ -922,6 +920,14 @@
 </div>
 
 <script>
+    function searchPerformer(performer) {
+        const form = document.getElementById("schedule-search-form");
+        const performerInput = form.querySelector('input[name="performer"]');
+
+        performerInput.value = performer;
+        form.submit();
+    }
+
     function togglePerformers(eventId, button) {
         const performerList = document.getElementById(
             "performers-" + eventId
