@@ -233,8 +233,10 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            padding-right: 10px;
+            padding-right: 0;
             box-sizing: border-box;
+            position: relative;
+            z-index: 3;
         }
 
         .event-genre {
@@ -274,8 +276,8 @@
 
         .event-location {
             white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            overflow: visible;
+            text-overflow: clip;
         }
 
         .event-timeline {
@@ -290,23 +292,34 @@
             top: 1px;
             height: 40px;
             background: orange;
-            color: #000;
             border-radius: 4px;
             box-sizing: border-box;
-            padding: 6px 10px;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .event-text {
+            position: absolute;
+            left: calc(100% + 1em);
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 2;
+            padding: 3px 0;
+            box-sizing: border-box;
             font-size: 14px;
             line-height: 17px;
             font-weight: bold;
+            color: #000;
             white-space: nowrap;
-            overflow: hidden;
+            pointer-events: none;
         }
 
         .event-bar-name,
         .event-bar-time {
             display: block;
             white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            overflow: visible;
+            text-overflow: clip;
         }
 
         .event-toggle-space {
@@ -413,7 +426,6 @@
             .event-info {
                 width: 130px;
                 font-size: 16px;
-                gap: 3px;
             }
 
             .event-edit-area {
@@ -427,22 +439,6 @@
 
             .time-header div {
                 font-size: 11px;
-            }
-
-            .event-bar {
-                height: 40px;
-                top: 1px;
-                font-size: 11px;
-                padding: 3px 4px;
-                line-height: 16px;
-            }
-
-            .event-bar-name,
-            .event-bar-time {
-                display: block;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
             }
 
             .performer-list {
@@ -648,17 +644,7 @@
                                     {{ event.location }}
                                 </span>
 
-                            </div>
-
-                            <div class="event-timeline">
-
-                                <div
-                                    class="event-bar"
-                                    style="
-                                        left: {{ event.left_percent }}%;
-                                        width: {{ event.width_percent }}%;
-                                    "
-                                >
+                                <div class="event-text">
                                     <span class="event-bar-name">
                                         {{ event.event_name }}
                                     </span>
@@ -674,6 +660,18 @@
                                     </span>
                                 </div>
 
+                            </div>
+
+                            <div class="event-timeline">
+
+                                <div
+                                    class="event-bar"
+                                    style="
+                                        left: {{ event.left_percent }}%;
+                                        width: {{ event.width_percent }}%;
+                                    "
+                                ></div>                                
+                                
                                 {% if event.performers %}
                                     <button
                                         type="button"
@@ -781,9 +779,28 @@
                                 {{ event.genre }}
                             </span>
                             
-    <span class="event-location">
-        {{ event.location }}
-    </span>
+                            <span class="event-location">
+                                {{ event.location }}
+                            </span>
+
+                            <div
+                                class="event-text"
+
+                            >
+                                <span class="event-bar-name">
+                                    {{ event.event_name }}
+                                </span>
+
+                                <span class="event-bar-time">
+                                    {{ event.start_time.strftime("%H:%M") }}
+                                    ～
+                                    {% if event.end_time %}
+                                        {{ event.end_time.strftime("%H:%M") }}
+                                    {% else %}
+                                        不明
+                                    {% endif %}
+                                </span>
+                            </div>
 
                         </div>
 
@@ -795,21 +812,8 @@
                                     left: {{ event.left_percent }}%;
                                     width: {{ event.width_percent }}%;
                                 "
-                            >
-                                <span class="event-bar-name">
-                                    {{ event.event_name }}
-                                </span>
-                                <span class="event-bar-time">
-                                    {{ event.start_time.strftime("%H:%M") }}
-                                    ～
-                                    {% if event.end_time %}
-                                        {{ event.end_time.strftime("%H:%M") }}
-                                    {% else %}
-                                        不明
-                                    {% endif %}
-                                </span>  
-                            </div>
-                            
+                            ></div>
+                                
                             {% if event.performers %}
                                 <button
                                     type="button"
