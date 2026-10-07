@@ -90,6 +90,12 @@ def create_event_schedule_table():
         ADD COLUMN IF NOT EXISTS registration_ip TEXT
     """)
 
+        # 終了時間「不明」を保存できるようにする
+    cur.execute("""
+        ALTER TABLE event_schedules
+        ALTER COLUMN end_time DROP NOT NULL
+    """)
+
     cur.execute("""
         CREATE TABLE IF NOT EXISTS event_schedule_blocked_ips (
             id SERIAL PRIMARY KEY,
@@ -110,6 +116,11 @@ def schedule_add():
         event_date = request.form.get("event_date")
         start_time = request.form.get("start_time")
         end_time = request.form.get("end_time")
+        end_time_unknown = request.form.get("end_time_unknown") == "1"
+
+        if end_time_unknown:
+            end_time = None
+            
         location = request.form.get("location", "").strip()
         event_name = request.form.get("event_name", "").strip()
         genre = request.form.get("genre", "").strip()
@@ -142,16 +153,17 @@ def schedule_add():
         if not ("08:00" <= start_time <= "23:59"):
             return "開始時間は08:00～23:59の範囲で設定してください。", 400
 
-        if not ("08:00" <= end_time <= "23:59"):
-            return "終了時間は08:00～23:59の範囲で設定してください。", 400
+        if not end_time_unknown:
+            if not ("08:00" <= end_time <= "23:59"):
+                return "終了時間は08:00～23:59の範囲で設定してください。", 400
 
-        if end_time <= start_time:
-            return render_template(
-                "schedule_add.html",
-                success_message="",
-                error_message="終了時間は開始時間より後に設定してください。",
-                form_data=request.form
-            )
+            if end_time <= start_time:
+                return render_template(
+                    "schedule_add.html",
+                    success_message="",
+                    error_message="終了時間は開始時間より後に設定してください。",
+                    form_data=request.form
+                )
 
         edit_password_hash = generate_password_hash(edit_password)
         edit_password_encrypted = encrypt_edit_password(edit_password)
@@ -341,11 +353,14 @@ def schedule():
             + start_time.minute
         )
 
-        end_minutes = (
-            end_time.hour * 60
-            + end_time.minute
-        )
-
+        if end_time is None:
+            end_minutes = 24 * 60
+        else:
+            end_minutes = (
+                end_time.hour * 60
+                + end_time.minute
+             )
+            
         timeline_start = 8 * 60
         timeline_end = 24 * 60
         timeline_minutes = timeline_end - timeline_start
@@ -476,21 +491,26 @@ def schedule_edit_update(event_id):
     event_date = request.form.get("event_date")
     start_time = request.form.get("start_time")
     end_time = request.form.get("end_time")
+    end_time_unknown = request.form.get("end_time_unknown") == "1"
+
+    if end_time_unknown:
+        end_time = None
 
     if not ("08:00" <= start_time <= "23:59"):
         return "開始時間は08:00～23:59の範囲で設定してください。", 400
 
-    if not ("08:00" <= end_time <= "23:59"):
-        return "終了時間は08:00～23:59の範囲で設定してください。", 400
+    if not end_time_unknown:
+        if not ("08:00" <= end_time <= "23:59"):
+            return "終了時間は08:00～23:59の範囲で設定してください。", 400
 
-    if end_time <= start_time:
-        return redirect(
-            url_for(
-                "event_schedule.schedule_edit",
-                event_id=event_id,
-                time_error=1
+        if end_time <= start_time:
+            return redirect(
+                url_for(
+                    "event_schedule.schedule_edit",
+                    event_id=event_id,
+                    time_error=1
+                )
             )
-        )
 
     location = request.form.get("location", "").strip()
     event_name = request.form.get("event_name", "").strip()
