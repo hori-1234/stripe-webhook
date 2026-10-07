@@ -46,6 +46,15 @@
             font-size: 16px;
         }
 
+        .form-row input[type="checkbox"] {
+            width: 28px;
+            height: 28px;
+            max-width: none;
+            padding: 0;
+            margin: 0 8px 0 0;
+            flex-shrink: 0;
+        }
+
         .form-row textarea {
             min-height: 180px;
             resize: vertical;
@@ -158,7 +167,14 @@
                 {% if event[3] %}required{% endif %}
             >
 
-            <label style="margin-left: 10px; width: auto;">
+            <label style="
+                width: auto;
+                margin-left: 10px;
+                display: flex;
+                align-items: center;
+                font-weight: normal;
+                white-space: nowrap;
+            ">
                 <input
                     type="checkbox"
                     id="end_time_unknown"
