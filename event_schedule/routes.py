@@ -400,7 +400,7 @@ def schedule():
     registered_performers = set()
 
     for row in performer_rows:
-        for performer in row[0].splitlines():
+        for performer in row[0].split():
             performer = performer.strip()
 
             if performer:
