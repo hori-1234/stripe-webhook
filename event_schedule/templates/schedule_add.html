@@ -44,6 +44,15 @@
             max-width: 300px;
         }
 
+        .form-row input[type="checkbox"] {
+            width: 28px;
+            height: 28px;
+            max-width: none;
+            padding: 0;
+            margin: 0 8px 0 0;
+            flex-shrink: 0;
+        }
+
         .performers-row {
             align-items: flex-start;
         }
@@ -151,7 +160,14 @@
                 required
             >
 
-            <label style="margin-left: 10px;">
+            <label style="
+                width: auto;
+                margin-left: 10px;
+                display: flex;
+                align-items: center;
+                font-weight: normal;
+                white-space: nowrap;
+            ">
                 <input
                     type="checkbox"
                     id="end_time_unknown"
