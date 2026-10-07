@@ -241,7 +241,7 @@
         }
 
         .event-info {
-            width: 120px;
+            width: 160px;
             flex-shrink: 0;
             display: flex;
             align-items: center;
@@ -313,7 +313,7 @@
 
         .event-text {
             position: absolute;
-            left: calc(100% + 1em);
+            left: calc(100% + 0.5em);
             top: 50%;
             transform: translateY(-50%);
             z-index: 2;
@@ -365,7 +365,7 @@
         }
         
         .performer-toggle {
-            margin-left: 4px;
+            margin-left: 0;
             width: 32px;
             height: 32px;
             border: none;
@@ -656,6 +656,16 @@
                                     {{ event.location }}
                                 </span>
 
+                                {% if event.performers %}
+                                    <button
+                                        type="button"
+                                        class="performer-toggle"
+                                        onclick="togglePerformers({{ event.id }}, this)"
+                                    >
+                                        ▽
+                                    </button>
+                                {% endif %}
+
                                 <div class="event-text">
                                     <span class="event-bar-name">
                                         {{ event.event_name }}
@@ -684,24 +694,6 @@
                                     "
                                 ></div>                                
                                 
-                                {% if event.performers %}
-                                    <button
-                                        type="button"
-                                        class="performer-toggle"
-                                        style="
-                                            position: absolute;
-                                            left: calc(
-                                                {{ event.left_percent }}%
-                                                + {{ event.width_percent }}%
-                                            );
-                                            top: 9px;
-                                        "
-                                        onclick="togglePerformers({{ event.id }}, this)"
-                                    >
-                                        ▽
-                                    </button>
-                                {% endif %}
-
                             </div>
 
                             <div class="event-toggle-space"></div>
@@ -795,6 +787,10 @@
                                 {{ event.location }}
                             </span>
 
+                            {% if event.performers %}
+                                <button type="button" class="performer-toggle" onclick="togglePerformers({{ event.id }}, this)">▽</button>
+                            {% endif %}
+
                             <div
                                 class="event-text"
 
@@ -826,24 +822,6 @@
                                 "
                             ></div>
                                 
-                            {% if event.performers %}
-                                <button
-                                    type="button"
-                                    class="performer-toggle"
-                                    style="
-                                        position: absolute;
-                                        left: calc(
-                                            {{ event.left_percent }}%
-                                            + {{ event.width_percent }}%
-                                        );
-                                        top: 9px;
-                                    "
-                                    onclick="togglePerformers({{ event.id }}, this)"
-                                >
-                                    ▽
-                                </button>
-                            {% endif %}
-
                         </div>
                         <div class="event-toggle-space"></div>
                         
