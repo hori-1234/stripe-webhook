@@ -8,6 +8,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, sessio
 from werkzeug.security import generate_password_hash, check_password_hash
 from cryptography.fernet import Fernet
 from admin_auth import admin_required
+import unicodedata
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 EVENT_PASSWORD_KEY = os.environ.get("EVENT_PASSWORD_KEY")
@@ -28,6 +29,21 @@ def decrypt_edit_password(encrypted_password):
 
     fernet = Fernet(EVENT_PASSWORD_KEY.encode())
     return fernet.decrypt(encrypted_password.encode()).decode()
+
+def performer_sort_key(name):
+    normalized = unicodedata.normalize("NFKC", name)
+    first = normalized[0]
+
+    if "\u3040" <= first <= "\u309f":
+        group = 0
+    elif "\u30a0" <= first <= "\u30ff":
+        group = 1
+    elif "\u4e00" <= first <= "\u9fff":
+        group = 2
+    else:
+        group = 3
+
+    return (group, normalized)
 
 def delete_old_events():
     conn = psycopg2.connect(DATABASE_URL)
@@ -353,6 +369,48 @@ def schedule():
     
     events = cur.fetchall()
 
+    performer_query = """
+        SELECT performers
+        FROM event_schedules
+        WHERE event_date >= CURRENT_DATE
+          AND performers IS NOT NULL
+          AND performers <> ''
+    """
+
+    performer_params = []
+
+    if genre:
+        performer_query += " AND genre = %s"
+        performer_params.append(genre)
+
+    if selected_locations:
+        placeholders = ", ".join(
+            ["%s"] * len(selected_locations)
+        )
+        performer_query += f" AND location IN ({placeholders})"
+        performer_params.extend(selected_locations)
+
+    if event_name_keyword:
+        performer_query += " AND event_name ILIKE %s"
+        performer_params.append(f"%{event_name_keyword}%")
+
+    cur.execute(performer_query, performer_params)
+    performer_rows = cur.fetchall()
+
+    registered_performers = set()
+
+    for row in performer_rows:
+        for performer in row[0].splitlines():
+            performer = performer.strip()
+
+            if performer:
+                registered_performers.add(performer)
+                
+    registered_performers = sorted(
+        registered_performers,
+        key=performer_sort_key
+    )
+    
     # 表示中の月に登録されている場所を重複なしで取得
     cur.execute("""
         SELECT DISTINCT location
@@ -445,7 +503,8 @@ def schedule():
         next_month=next_month,
         events=display_events,
         locations=locations,
-        performer_search_dates=performer_search_dates
+        performer_search_dates=performer_search_dates,
+        registered_performers=registered_performers
     )
 
 @event_schedule_bp.route("/schedule/edit/<int:event_id>", methods=["GET", "POST"])
