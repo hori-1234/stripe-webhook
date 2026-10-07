@@ -494,15 +494,15 @@ def schedule_edit(event_id):
         edit_password = request.form.get("edit_password", "")
         action = request.form.get("action", "edit")
 
-        if check_password_hash(event[8], edit_password):
-
-            if action == "copy":
-                return redirect(
-                    url_for(
-                        "event_schedule.schedule_add",
-                        copy_id=event_id
-                    )
+        if action == "copy":
+            return redirect(
+                url_for(
+                    "event_schedule.schedule_add",
+                    copy_id=event_id
                 )
+            )
+            
+        if check_password_hash(event[8], edit_password):
 
             session[f"schedule_edit_{event_id}"] = True
 
