@@ -150,6 +150,17 @@
                 max="23:59"
                 required
             >
+
+            <label style="margin-left: 10px;">
+                <input
+                    type="checkbox"
+                    id="end_time_unknown"
+                    name="end_time_unknown"
+                    value="1"
+                    {% if form_data and form_data.get('end_time_unknown') %}checked{% endif %}
+                >
+                終了時間不明
+            </label>
         </div>
 
         <div class="form-row">
@@ -236,5 +247,24 @@
 
     </form>
 
+<script>
+    const endTimeInput = document.getElementById("end_time");
+    const endTimeUnknown = document.getElementById("end_time_unknown");
+
+    function updateEndTimeInput() {
+        if (endTimeUnknown.checked) {
+            endTimeInput.disabled = true;
+            endTimeInput.required = false;
+        } else {
+            endTimeInput.disabled = false;
+            endTimeInput.required = true;
+        }
+    }
+
+    endTimeUnknown.addEventListener("change", updateEndTimeInput);
+
+    updateEndTimeInput();
+</script>
+    
 </body>
 </html>
