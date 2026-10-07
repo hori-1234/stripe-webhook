@@ -287,8 +287,8 @@
 
         .event-bar {
             position: absolute;
-            top: 5px;
-            height: 32px;
+            top: 1px;
+            height: 40px;
             background: orange;
             color: #000;
             border-radius: 4px;
@@ -298,6 +298,14 @@
             font-weight: bold;
             white-space: nowrap;
             overflow: hidden;
+        }
+
+        .event-bar-name,
+        .event-bar-time {
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .event-toggle-space {
