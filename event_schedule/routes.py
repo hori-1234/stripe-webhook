@@ -112,6 +112,34 @@ def create_event_schedule_table():
 def schedule_add():
     create_event_schedule_table()
 
+    copy_id = request.args.get("copy_id", type=int)
+
+    copy_event = None
+
+    if copy_id:
+        conn = psycopg2.connect(DATABASE_URL)
+        cur = conn.cursor()
+
+        cur.execute("""
+            SELECT
+                id,
+                event_date,
+                start_time,
+                end_time,
+                location,
+                event_name,
+                genre,
+                performers
+            FROM event_schedules
+            WHERE id = %s
+        """, (copy_id,))
+
+        copy_event = cur.fetchone()
+
+        cur.close()
+        conn.close()
+
+
     if request.method == "POST":
         event_date = request.form.get("event_date")
         start_time = request.form.get("start_time")
@@ -223,7 +251,8 @@ def schedule_add():
 
     return render_template(
         "schedule_add.html",
-        success_message=""
+        success_message="",
+        copy_event=copy_event
     )
 
 @event_schedule_bp.route("/schedule")
@@ -463,8 +492,17 @@ def schedule_edit(event_id):
 
     if request.method == "POST":
         edit_password = request.form.get("edit_password", "")
+        action = request.form.get("action", "edit")
 
         if check_password_hash(event[8], edit_password):
+
+            if action == "copy":
+                return redirect(
+                    url_for(
+                        "event_schedule.schedule_add",
+                        copy_id=event_id
+                    )
+                )
 
             session[f"schedule_edit_{event_id}"] = True
 
