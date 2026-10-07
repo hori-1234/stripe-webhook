@@ -657,7 +657,11 @@
                                     <span class="event-bar-time">
                                         {{ event.start_time.strftime("%H:%M") }}
                                         ～
-                                        {{ event.end_time.strftime("%H:%M") }}
+                                        {% if event.end_time %}
+                                            {{ event.end_time.strftime("%H:%M") }}
+                                        {% else %}
+                                            不明
+                                        {% endif %}
                                     </span>
                                 </div>
 
@@ -789,7 +793,11 @@
                                 <span class="event-bar-time">
                                     {{ event.start_time.strftime("%H:%M") }}
                                     ～
-                                    {{ event.end_time.strftime("%H:%M") }}
+                                    {% if event.end_time %}
+                                        {{ event.end_time.strftime("%H:%M") }}
+                                    {% else %}
+                                        不明
+                                    {% endif %}
                                 </span>  
                             </div>
                             
