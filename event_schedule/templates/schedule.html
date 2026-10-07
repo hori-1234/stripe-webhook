@@ -161,6 +161,19 @@
             overflow: visible;
             border: 1px solid #777;
             box-sizing: border-box;
+            position: relative;
+        }
+
+        .schedule-area::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            width: 1px;
+            background: #777;
+            pointer-events: none;
+            z-index: 200;
         }
 
         .time-header {
@@ -332,7 +345,6 @@
             width: 95px;
             align-self: stretch;
             flex-shrink: 0;
-            border-right: 1px solid #777;
             display: flex;
             align-items: center;
             justify-content: center;
