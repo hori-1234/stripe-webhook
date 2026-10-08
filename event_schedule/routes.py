@@ -213,6 +213,14 @@ def schedule_add():
         performers = request.form.get("performers", "").strip()
         edit_password = request.form.get("edit_password", "")
 
+        if len(event_name) > 40:
+            return render_template(
+                "schedule_add.html",
+                error_message="イベント名は全角・半角問わず40文字以内で入力してください。",
+                form_data=request.form,
+                copy_event=copy_event
+            )
+
         registration_ip = request.headers.get(
             "X-Forwarded-For",
             request.remote_addr
@@ -712,6 +720,9 @@ def schedule_edit_update(event_id):
     event_name = request.form.get("event_name", "").strip()
     genre = request.form.get("genre", "").strip()
     performers = request.form.get("performers", "").strip()
+    
+    if len(event_name) > 40:
+        return "イベント名は全角・半角問わず40文字以内で入力してください。", 400
 
     conn = psycopg2.connect(DATABASE_URL)
     cur = conn.cursor()
