@@ -931,6 +931,29 @@
         sessionStorage.removeItem("performerScrollTop");
         window.location.href = "/schedule";
     }
+
+        async function updateRegisteredPerformers() {
+        const form = document.getElementById("schedule-search-form");
+        const params = new URLSearchParams(new FormData(form));
+
+        const response = await fetch("/schedule?" + params.toString());
+
+        if (!response.ok) {
+            return;
+        }
+
+        const html = await response.text();
+        const documentData = new DOMParser().parseFromString(html, "text/html");
+
+        const newList = documentData.querySelector(".registered-performers");
+        const currentList = document.querySelector(".registered-performers");
+
+        if (newList && currentList) {
+            const scrollTop = currentList.scrollTop;
+            currentList.innerHTML = newList.innerHTML;
+            currentList.scrollTop = scrollTop;
+        }
+    }
     
     function searchPerformer(performer) {
         const form = document.getElementById("schedule-search-form");
@@ -980,7 +1003,10 @@
         checkbox => {
             checkbox.addEventListener(
                 "change",
-                updateSelectedLocations
+                () => {
+                    updateSelectedLocations();
+                    updateRegisteredPerformers();
+                }
             );
         }
     );
