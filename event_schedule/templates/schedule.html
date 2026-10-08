@@ -941,9 +941,11 @@
         window.location.href = "/schedule";
     }
 
-        async function updateRegisteredPerformers() {
+    async function updateRegisteredPerformers() {
         const form = document.getElementById("schedule-search-form");
         const params = new URLSearchParams(new FormData(form));
+
+        params.set("performer_refresh", "1");
 
         const response = await fetch("/schedule?" + params.toString());
 
@@ -975,9 +977,15 @@
         );
 
         performerInput.value = performer;
+
+        const clickData = new URLSearchParams();
+        clickData.append("performer", performer);
+
+        navigator.sendBeacon("/schedule/performer-click", clickData);
+
         form.submit();
     }
-
+        
     function togglePerformers(eventId, button) {
         const performerList = document.getElementById(
             "performers-" + eventId
