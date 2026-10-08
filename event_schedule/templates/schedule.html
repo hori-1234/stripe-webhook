@@ -518,8 +518,14 @@
 
             .event-text {
                 left: calc(100% + 0.5em);
+                max-width: calc(100vw - 285px);
+                overflow: hidden;
             }
-
+            
+            .event-bar-name {
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
 
             .event-edit-area {
                 width: 60px;
