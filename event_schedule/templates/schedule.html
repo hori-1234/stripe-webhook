@@ -294,7 +294,7 @@
             font-weight: bold;
             white-space: nowrap;
             display: inline-block;
-            width: 52px;
+            width: 72px;
             padding: 3px 0;
             text-align: center;
             border-radius: 4px;
@@ -860,6 +860,8 @@
                                     genre-dance
                                 {% elif event.genre == '歌踊' %}
                                     genre-song-dance
+                                {% elif event.genre == 'アイドル' %}
+                                    genre-idol
                                 {% else %}
                                     genre-other
                                 {% endif %}
