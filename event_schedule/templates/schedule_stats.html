@@ -44,24 +44,104 @@
 
     <div class="stats-section">
         <h2>閲覧数</h2>
-        <p>今日：集計準備中</p>
-        <p>今月：集計準備中</p>
-        <p>累計：集計準備中</p>
+        <p>今日：{{ today_views }} 回</p>
+        <p>今月：{{ month_views }} 回</p>
+        <p>累計：{{ total_views }} 回</p>
     </div>
 
     <div class="stats-section">
         <h2>出演者クリックランキング</h2>
-        <p>集計準備中</p>
+        
+        {% if performer_ranking %}
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <th style="border: 1px solid #ccc; padding: 10px;">順位</th>
+                        <th style="border: 1px solid #ccc; padding: 10px;">出演者名</th>
+                        <th style="border: 1px solid #ccc; padding: 10px;">クリック数</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for performer in performer_ranking %}
+                    <tr>
+                        <td style="border: 1px solid #ccc; padding: 10px;">
+                            {{ loop.index }}
+                        </td>
+                        <td style="border: 1px solid #ccc; padding: 10px;">
+                            {{ performer[0] }}
+                        </td>
+                        <td style="border: 1px solid #ccc; padding: 10px;">
+                            {{ performer[1] }} 回
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>まだクリックデータがありません。</p>
+        {% endif %}
     </div>
 
     <div class="stats-section">
-        <h2>日別閲覧数</h2>
-        <p>集計準備中</p>
+        <h2>日別閲覧数（直近30日間）</h2>
+
+        {% if daily_views %}
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <th style="border: 1px solid #ccc; padding: 10px;">日付</th>
+                        <th style="border: 1px solid #ccc; padding: 10px;">閲覧数</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for day in daily_views %}
+                    <tr>
+                        <td style="border: 1px solid #ccc; padding: 10px;">
+                            {{ day[0].strftime('%Y/%m/%d') }}
+                        </td>
+                        <td style="border: 1px solid #ccc; padding: 10px;">
+                            {{ day[1] }} 回
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>まだ閲覧データがありません。</p>
+        {% endif %}
     </div>
 
     <div class="stats-section">
         <h2>閲覧端末</h2>
-        <p>スマホ・PC：集計準備中</p>
+        
+        {% if device_views %}
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <th style="border: 1px solid #ccc; padding: 10px;">端末</th>
+                        <th style="border: 1px solid #ccc; padding: 10px;">閲覧数</th>
+                        <th style="border: 1px solid #ccc; padding: 10px;">割合</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for device in device_views %}
+                    <tr>
+                        <td style="border: 1px solid #ccc; padding: 10px;">
+                            {{ device[0] }}
+                        </td>
+                        <td style="border: 1px solid #ccc; padding: 10px;">
+                            {{ device[1] }} 回
+                        </td>
+                        <td style="border: 1px solid #ccc; padding: 10px;">
+                            {{ (device[1] / total_views * 100) | round(1) }} %
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>まだ閲覧データがありません。</p>
+        {% endif %}
     </div>
 
 </body>
