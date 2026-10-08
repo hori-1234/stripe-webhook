@@ -2,9 +2,10 @@ import os
 import psycopg2
 import calendar
 import jpholiday
+import secrets
 
 from datetime import datetime
-from flask import Blueprint, render_template, request, redirect, url_for, session
+from flask import Blueprint, render_template, request, redirect, url_for, session, make_response
 from werkzeug.security import generate_password_hash, check_password_hash
 from cryptography.fernet import Fernet
 from admin_auth import admin_required
@@ -91,6 +92,14 @@ def create_schedule_stats_tables():
                 performer_name TEXT NOT NULL,
                 click_count INTEGER NOT NULL DEFAULT 0,
                 PRIMARY KEY (click_date, performer_name)
+            )
+        """)
+
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS schedule_unique_visitors (
+                visit_date DATE NOT NULL,
+                visitor_id TEXT NOT NULL,
+                PRIMARY KEY (visit_date, visitor_id)
             )
         """)
 
@@ -311,6 +320,11 @@ def schedule():
 
     create_schedule_stats_tables()
 
+    visitor_id = request.cookies.get("schedule_visitor_id")
+
+    if not visitor_id:
+        visitor_id = secrets.token_urlsafe(32)
+
     if request.args.get("performer_refresh") != "1":
         user_agent = request.user_agent.string.lower()
 
@@ -324,18 +338,27 @@ def schedule():
 
         cur.execute("""
             INSERT INTO schedule_page_views (
-                view_date,
-                device_type,
-                view_count
+                view_date, device_type, view_count
             )
             VALUES (
                 (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo')::date,
-                %s,
-                1
+                %s, 1
             )
             ON CONFLICT (view_date, device_type)
             DO UPDATE SET view_count = schedule_page_views.view_count + 1
         """, (device_type,))
+
+        cur.execute("""
+            INSERT INTO schedule_unique_visitors (
+                visit_date, visitor_id
+            )
+            VALUES (
+                (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo')::date,
+                %s
+            )
+            ON CONFLICT (visit_date, visitor_id)
+            DO NOTHING
+        """, (visitor_id,))
 
         conn.commit()
         cur.close()
@@ -557,7 +580,7 @@ def schedule():
             for search_date in unique_dates
         ]
 
-    return render_template(
+    response = make_response(render_template(
         "schedule.html",
         year=year,
         month=month,
@@ -570,7 +593,18 @@ def schedule():
         locations=locations,
         performer_search_dates=performer_search_dates,
         registered_performers=registered_performers
+    ))
+
+    response.set_cookie(
+        "schedule_visitor_id",
+        visitor_id,
+        max_age=60 * 60 * 24 * 365,
+        secure=request.is_secure,
+        httponly=True,
+        samesite="Lax"
     )
+
+    return response
 
 @event_schedule_bp.route("/schedule/edit/<int:event_id>", methods=["GET", "POST"])
 def schedule_edit(event_id):
@@ -945,6 +979,23 @@ def schedule_admin_stats():
     """)
 
     device_views = cur.fetchall()
+    cur.execute("""
+        SELECT
+            COUNT(DISTINCT visitor_id) FILTER (
+                WHERE visit_date =
+                    (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo')::date
+            ),
+            COUNT(DISTINCT visitor_id) FILTER (
+                WHERE visit_date >= DATE_TRUNC(
+                    'month',
+                    CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+                )::date
+            ),
+            COUNT(DISTINCT visitor_id)
+        FROM schedule_unique_visitors
+    """)
+
+    today_unique, month_unique, total_unique = cur.fetchone()
 
     cur.close()
     conn.close()
@@ -956,7 +1007,10 @@ def schedule_admin_stats():
         total_views=total_views,
         performer_ranking=performer_ranking,
         daily_views=daily_views,
-        device_views=device_views
+        device_views=device_views,
+        today_unique=today_unique,
+        month_unique=month_unique,
+        total_unique=total_unique
     )
 
 @event_schedule_bp.route(
