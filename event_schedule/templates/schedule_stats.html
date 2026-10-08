@@ -50,6 +50,13 @@
     </div>
 
     <div class="stats-section">
+        <h2>ユニークユーザー数</h2>
+        <p>今日：{{ today_unique }} 人</p>
+        <p>今月：{{ month_unique }} 人</p>
+        <p>累計：{{ total_unique }} 人</p>
+    </div>
+
+    <div class="stats-section">
         <h2>出演者クリックランキング</h2>
         
         {% if performer_ranking %}
