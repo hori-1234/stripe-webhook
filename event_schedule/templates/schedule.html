@@ -315,7 +315,13 @@
 
         /* 歌踊 */
         .genre-song-dance {
-            background: pink;
+            background: #2196F3;
+            color: #fff;
+        }
+
+        /* アイドル */
+        .genre-idol {
+            background: #FF69B4;
             color: #fff;
         }
 
@@ -563,6 +569,7 @@
                         <option value="歌" {% if request.args.get('genre') == '歌' %}selected{% endif %}>歌</option>
                         <option value="踊" {% if request.args.get('genre') == '踊' %}selected{% endif %}>踊</option>
                         <option value="歌踊" {% if request.args.get('genre') == '歌踊' %}selected{% endif %}>歌踊</option>
+                        <option value="アイドル" {% if request.args.get('genre') == 'アイドル' %}selected{% endif %}>アイドル</option>
                         <option value="その他" {% if request.args.get('genre') == 'その他' %}selected{% endif %}>その他</option>
                     </select>
                     
@@ -720,6 +727,8 @@
                                         genre-dance
                                     {% elif event.genre == '歌踊' %}
                                         genre-song-dance
+                                    {% elif event.genre == 'アイドル' %}
+                                        genre-idol
                                     {% else %}
                                         genre-other
                                     {% endif %}
