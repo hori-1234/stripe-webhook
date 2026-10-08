@@ -71,6 +71,39 @@ def delete_old_events():
         cur.close()
         conn.close()
 
+def create_schedule_stats_tables():
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+
+    try:
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS schedule_page_views (
+                view_date DATE NOT NULL,
+                device_type TEXT NOT NULL,
+                view_count INTEGER NOT NULL DEFAULT 0,
+                PRIMARY KEY (view_date, device_type)
+            )
+        """)
+
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS schedule_performer_clicks (
+                click_date DATE NOT NULL,
+                performer_name TEXT NOT NULL,
+                click_count INTEGER NOT NULL DEFAULT 0,
+                PRIMARY KEY (click_date, performer_name)
+            )
+        """)
+
+        conn.commit()
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        cur.close()
+        conn.close()
+
 def create_event_schedule_table():
     conn = psycopg2.connect(DATABASE_URL)
     cur = conn.cursor()
@@ -275,6 +308,38 @@ def schedule_add():
 def schedule():
     create_event_schedule_table()
     delete_old_events()
+
+    create_schedule_stats_tables()
+
+    if request.args.get("performer_refresh") != "1":
+        user_agent = request.user_agent.string.lower()
+
+        if "mobile" in user_agent or "iphone" in user_agent or "android" in user_agent:
+            device_type = "スマホ"
+        else:
+            device_type = "PC"
+
+        conn = psycopg2.connect(DATABASE_URL)
+        cur = conn.cursor()
+
+        cur.execute("""
+            INSERT INTO schedule_page_views (
+                view_date,
+                device_type,
+                view_count
+            )
+            VALUES (
+                (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo')::date,
+                %s,
+                1
+            )
+            ON CONFLICT (view_date, device_type)
+            DO UPDATE SET view_count = schedule_page_views.view_count + 1
+        """, (device_type,))
+
+        conn.commit()
+        cur.close()
+        conn.close()
 
     today = datetime.now()
 
@@ -781,6 +846,117 @@ def schedule_admin():
     return render_template(
         "schedule_admin.html",
         events=admin_events
+    )
+
+@event_schedule_bp.route("/schedule/performer-click", methods=["POST"])
+def schedule_performer_click():
+    performer_name = request.form.get("performer", "").strip()
+
+    if not performer_name or len(performer_name) > 200:
+        return "", 400
+
+    create_schedule_stats_tables()
+
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+
+    try:
+        cur.execute("""
+            INSERT INTO schedule_performer_clicks (
+                click_date,
+                performer_name,
+                click_count
+            )
+            VALUES (
+                (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo')::date,
+                %s,
+                1
+            )
+            ON CONFLICT (click_date, performer_name)
+            DO UPDATE SET click_count = schedule_performer_clicks.click_count + 1
+        """, (performer_name,))
+
+        conn.commit()
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        cur.close()
+        conn.close()
+
+    return "", 204
+
+@event_schedule_bp.route("/schedule/admin/stats")
+@admin_required
+def schedule_admin_stats():
+    create_schedule_stats_tables()
+
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT
+            COALESCE(SUM(view_count) FILTER (
+                WHERE view_date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo')::date
+            ), 0),
+            COALESCE(SUM(view_count) FILTER (
+                WHERE DATE_TRUNC('month', view_date::timestamp) =
+                      DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo')
+            ), 0),
+            COALESCE(SUM(view_count), 0)
+        FROM schedule_page_views
+    """)
+
+    today_views, month_views, total_views = cur.fetchone()
+
+    cur.execute("""
+        SELECT
+            performer_name,
+            SUM(click_count) AS total_clicks
+        FROM schedule_performer_clicks
+        GROUP BY performer_name
+        ORDER BY total_clicks DESC, performer_name
+    """)
+
+    performer_ranking = cur.fetchall()
+
+    cur.execute("""
+        SELECT
+            view_date,
+            SUM(view_count) AS daily_views
+        FROM schedule_page_views
+        WHERE view_date >=
+            (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo')::date - 29
+        GROUP BY view_date
+        ORDER BY view_date DESC
+    """)
+
+    daily_views = cur.fetchall()
+
+    cur.execute("""
+        SELECT
+            device_type,
+            SUM(view_count) AS total_views
+        FROM schedule_page_views
+        GROUP BY device_type
+        ORDER BY total_views DESC
+    """)
+
+    device_views = cur.fetchall()
+
+    cur.close()
+    conn.close()
+
+    return render_template(
+        "schedule_stats.html",
+        today_views=today_views,
+        month_views=month_views,
+        total_views=total_views,
+        performer_ranking=performer_ranking,
+        daily_views=daily_views,
+        device_views=device_views
     )
 
 @event_schedule_bp.route(
