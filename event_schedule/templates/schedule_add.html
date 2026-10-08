@@ -192,13 +192,21 @@
 
         <div class="form-row">
             <label>イベント名</label>
-            <input
-                type="text"
-                name="event_name"
-                value="{{ form_data.get('event_name', '') if form_data else (copy_event[5] if copy_event else '') }}"
-                placeholder="イベント名を入力"
-                required
-            >
+            
+            <div style="width: 100%; max-width: 600px;">
+                <input
+                    type="text"
+                    name="event_name"
+                    value="{{ form_data.get('event_name', '') if form_data else (copy_event[5] if copy_event else '') }}"
+                    placeholder="イベント名を入力"
+                    maxlength="40"
+                    required
+                >
+
+                <div class="description">
+                    ※イベント名は全角・半角問わず40文字まで
+                </div>
+            </div>
         </div>
 
         <div class="form-row">
