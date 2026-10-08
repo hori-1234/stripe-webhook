@@ -553,6 +553,7 @@
                     </select>
                     
                     <button type="submit">検索</button>
+                    <button type="button" onclick="clearSearch()">クリア</button>
                     
                 </div>
 
@@ -921,6 +922,11 @@
 </div>
 
 <script>
+    function clearSearch() {
+        sessionStorage.removeItem("performerScrollTop");
+        window.location.href = "/schedule";
+    }
+    
     function searchPerformer(performer) {
         const form = document.getElementById("schedule-search-form");
         const performerInput = form.querySelector('input[name="performer"]');
