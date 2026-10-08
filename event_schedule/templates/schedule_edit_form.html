@@ -201,13 +201,20 @@
         <div class="form-row">
             <label for="event_name">イベント名</label>
 
-            <input
-                type="text"
-                id="event_name"
-                name="event_name"
-                value="{{ event[5] }}"
-                required
-            >
+            <div style="width: 100%; max-width: 600px;">
+                <input
+                    type="text"
+                    id="event_name"
+                    name="event_name"
+                    value="{{ event[5] }}"
+                    maxlength="40"
+                    required
+                >
+
+                <div style="margin-top: 6px; font-size: 14px; color: #666;">
+                    ※イベント名は全角・半角問わず40文字まで
+                </div>
+            </div>
         </div>
 
         <div class="form-row">
