@@ -550,22 +550,30 @@
 
 <div class="container">
 
-    <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+       <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 25px;">
 
-        {% if memo_login_email %}
-            <span>{{ memo_login_email }}</span>
-        {% else %}
-            <a
-                href="/schedule/login"
-                style="display: inline-block; padding: 8px 16px; border: 1px solid #333; color: #222; text-decoration: none; white-space: nowrap;"
-            >
-                ログイン
-            </a>
-        {% endif %}
+        <h1 style="margin: 0; min-width: 0; font-size: clamp(18px, 4vw, 32px);">
+            イベントスケジュール
+        </h1>
+
+        <div style="flex-shrink: 0;">
+
+            {% if memo_login_email %}
+                <span style="font-size: 12px; overflow-wrap: anywhere;">
+                    {{ memo_login_email }}
+                </span>
+            {% else %}
+                <a
+                    href="/schedule/login"
+                    style="display: inline-block; padding: 8px 12px; border: 1px solid #333; color: #222; text-decoration: none; white-space: nowrap; font-size: 13px;"
+                >
+                    ログイン
+                </a>
+            {% endif %}
+
+        </div>
 
     </div>
-
-    <h1>イベントスケジュール</h1>
 
     <div class="month-navigation">
 
