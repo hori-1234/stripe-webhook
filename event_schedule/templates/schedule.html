@@ -876,7 +876,6 @@
                             <div class="event-toggle-space"></div>
 
                             <div class="event-edit-area">
-                            <div class="event-edit-area">
                                 <a href="/schedule/edit/{{ event.id }}" class="event-edit-button">
                                     編集
                                 </a>
@@ -885,7 +884,10 @@
                                     メモ
                                 </button>
                             </div>                    
+                        </div>
 
+                        <div id="memo-{{ event.id }}" class="event-memo-area" style="display: none;">
+                            <div class="event-memo-title">メモ</div>
                         </div>
 
                         {% if event.performers %}
@@ -1022,7 +1024,10 @@
                                 メモ
                             </button>
                         </div>
-                        
+                    </div>
+
+                    <div id="memo-{{ event.id }}" class="event-memo-area" style="display: none;">
+                        <div class="event-memo-title">メモ</div>
                     </div>
 
                     {% if event.performers %}
@@ -1111,6 +1116,17 @@
             performerList.classList.add("open");
             button.textContent = "△";
         }
+    }
+
+    function toggleMemo(eventId) {
+        const memoArea = document.getElementById("memo-" + eventId);
+
+        if (!memoArea) {
+            return;
+        }
+
+        memoArea.style.display =
+            memoArea.style.display === "none" ? "block" : "none";
     }
 
     function updateSelectedLocations() {
