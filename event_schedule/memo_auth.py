@@ -441,6 +441,16 @@ def memo_login_page():
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>イベスケ - ログイン</title>
+
+        <style>
+            @media (max-width: 600px) {
+                input[type="email"],
+                button[type="submit"] {
+                    width: 240px !important;
+                    height: 42px !important;
+                }
+            }
+        </style>
     </head>
     <body>
         <h2>イベスケ ログイン</h2>
