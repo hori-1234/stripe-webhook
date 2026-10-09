@@ -170,3 +170,82 @@ def check_login_code_limits(email, ip_address):
         return False
 
     return True
+
+def check_login_code_limits_locked(cur, email, ip_address):
+    cur.execute("""
+        SELECT COUNT(*)
+        FROM schedule_memo_login_codes
+        WHERE email = %s
+          AND created_at > CURRENT_TIMESTAMP - INTERVAL '1 minute'
+    """, (email,))
+
+    if cur.fetchone()[0] >= 1:
+        return False
+
+    cur.execute("""
+        SELECT COUNT(*)
+        FROM schedule_memo_login_codes
+        WHERE email = %s
+          AND created_at > CURRENT_TIMESTAMP - INTERVAL '1 hour'
+    """, (email,))
+
+    if cur.fetchone()[0] >= 5:
+        return False
+
+    cur.execute("""
+        SELECT COUNT(*)
+        FROM schedule_memo_login_codes
+        WHERE request_ip = %s
+          AND created_at > CURRENT_TIMESTAMP - INTERVAL '1 hour'
+    """, (ip_address,))
+
+    if cur.fetchone()[0] >= 20:
+        return False
+
+    return True
+
+def issue_login_code(email, ip_address):
+    code = generate_login_code()
+    code_hash = generate_password_hash(code)
+
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+
+    try:
+        # 同一メールアドレス・IPの処理をロック
+        lock_login_code_requests(cur, email, ip_address)
+
+        # ロック取得後に発行制限を確認
+        if not check_login_code_limits_locked(
+            cur, email, ip_address
+        ):
+            conn.rollback()
+            return None
+
+        # 認証コードを保存
+        cur.execute("""
+            INSERT INTO schedule_memo_login_codes (
+                email,
+                code_hash,
+                expires_at,
+                request_ip
+            )
+            VALUES (
+                %s,
+                %s,
+                CURRENT_TIMESTAMP + INTERVAL '10 minutes',
+                %s
+            )
+        """, (email, code_hash, ip_address))
+
+        conn.commit()
+
+        return code
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        cur.close()
+        conn.close()
