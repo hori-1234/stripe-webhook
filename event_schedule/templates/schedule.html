@@ -550,7 +550,7 @@
 
 <div class="container">
 
-       <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 25px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 25px;">
 
         <h1 style="margin: 0; min-width: 0; font-size: clamp(18px, 4vw, 32px);">
             イベントスケジュール
@@ -559,10 +559,27 @@
         <div style="flex-shrink: 0;">
 
             {% if memo_login_email %}
-                <span style="font-size: 12px; overflow-wrap: anywhere;">
-                    {{ memo_login_email }}
-                </span>
+            
+                <div style="display: flex; align-items: center; gap: 10px;">
+
+                    <span style="font-size: 12px; overflow-wrap: anywhere;">
+                        {{ memo_login_email }}
+                    </span>
+
+                    <form action="/schedule/logout" method="POST" style="margin: 0;">
+                        <button
+                            type="submit"
+                            style="padding: 8px 12px; border: 1px solid #333; background: #fff; color: #222; cursor: pointer; white-space: nowrap; font-size: 13px;"
+                        >
+                            ログアウト
+                        </button>
+                    </form>
+
+                </div>
+
             {% else %}
+
+            
                 <a
                     href="/schedule/login"
                     style="display: inline-block; padding: 8px 12px; border: 1px solid #333; color: #222; text-decoration: none; white-space: nowrap; font-size: 13px;"
