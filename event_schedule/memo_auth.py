@@ -444,8 +444,29 @@ def memo_login_page():
     </head>
     <body>
         <h2>イベスケ ログイン</h2>
-        <p>メールアドレスでログインします。</p>
-        <p>認証コードをメールでお送りします。</p>
+
+        <p>メールアドレスを入力してください。</p>
+
+        <form method="POST" action="/schedule/login/send">
+            <input
+                type="email"
+                name="email"
+                placeholder="メールアドレス"
+                autocomplete="email"
+                maxlength="254"
+                required
+            >
+
+            <button type="submit">
+                認証コードを送信
+            </button>
+        </form>
+
+        <p>初回利用の場合は、認証後に自動登録されます。</p>
+
+        <p>
+            <a href="/schedule">スケジュールに戻る</a>
+        </p>
     </body>
     </html>
     """
