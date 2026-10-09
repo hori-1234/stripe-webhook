@@ -446,8 +446,8 @@ def memo_login_page():
             @media (max-width: 600px) {
                 input[type="email"],
                 button[type="submit"] {
-                    width: 50px !important;
-                    height: 10px !important;
+                    width: 100px !important;
+                    height: 20px !important;
                 }
             }
         </style>
