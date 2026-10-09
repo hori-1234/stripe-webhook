@@ -48,6 +48,11 @@ def create_schedule_memo_login_codes_table():
         """)
 
         cur.execute("""
+            ALTER TABLE schedule_memo_login_codes
+            ADD COLUMN IF NOT EXISTS request_ip TEXT
+        """)
+
+        cur.execute("""
             CREATE INDEX IF NOT EXISTS
                 idx_schedule_memo_login_codes_email
             ON schedule_memo_login_codes (email, created_at DESC)
