@@ -903,6 +903,11 @@
 
                                 <input type="color" id="memo-color-{{ event.id }}" name="sticky_color" value="#ffff99" title="付箋の色を選択" style="width: 32px; height: 26px; padding: 0; cursor: pointer; vertical-align: middle;">
                             </div>
+
+                            <div class="event-memo-text">
+                                <label for="memo-text-{{ event.id }}">メモ</label>
+                                <textarea id="memo-text-{{ event.id }}" name="memo_text" rows="3" placeholder="メモを入力" style="display: block; width: 100%; max-width: 600px; box-sizing: border-box; padding: 8px; font-size: 14px;"></textarea>
+                            </div>
                         </div>
 
                         {% if event.performers %}
@@ -1056,6 +1061,11 @@
                                 <option value="練習">練習</option>
                             </select>
                             <input type="color" id="memo-color-{{ event.id }}" name="sticky_color" value="#ffff99" title="付箋の色を選択" style="width: 32px; height: 26px; padding: 0; cursor: pointer; vertical-align: middle;">
+                        </div>
+                        
+                        <div class="event-memo-text">
+                            <label for="memo-text-{{ event.id }}">メモ</label>
+                            <textarea id="memo-text-{{ event.id }}" name="memo_text" rows="3" placeholder="メモを入力" style="display: block; width: 100%; max-width: 600px; box-sizing: border-box; padding: 8px; font-size: 14px;"></textarea>
                         </div>
                     </div>
 
