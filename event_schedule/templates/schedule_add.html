@@ -218,6 +218,9 @@
                 <option value="踊" {% if (form_data and form_data.get('genre') == '踊') or (not form_data and copy_event and copy_event[6] == '踊') %}selected{% endif %}>踊</option>
                 <option value="歌踊" {% if (form_data and form_data.get('genre') == '歌踊') or (not form_data and copy_event and copy_event[6] == '歌踊') %}selected{% endif %}>歌踊</option>
                 <option value="アイドル" {% if (form_data and form_data.get('genre') == 'アイドル') or (not form_data and copy_event and copy_event[6] == 'アイドル') %}selected{% endif %}>アイドル</option>
+                <option value="WS" {% if (form_data and form_data.get('genre') == 'WS') or (not form_data and copy_event and copy_event[6] == 'WS') %}selected{% endif %}>WS</option>
+                <option value="オフ会" {% if (form_data and form_data.get('genre') == 'オフ会') or (not form_data and copy_event and copy_event[6] == 'オフ会') %}selected{% endif %}>オフ会</option>
+                <option value="撮影会" {% if (form_data and form_data.get('genre') == '撮影会') or (not form_data and copy_event and copy_event[6] == '撮影会') %}selected{% endif %}>撮影会</option>
                 <option value="その他" {% if (form_data and form_data.get('genre') == 'その他') or (not form_data and copy_event and copy_event[6] == 'その他') %}selected{% endif %}>その他</option>
             </select>
         </div>
