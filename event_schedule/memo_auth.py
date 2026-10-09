@@ -509,6 +509,8 @@ def memo_login_send():
     if result != "sent":
         return "認証コードの発行回数が上限に達しました。時間をおいて再度お試しください。", 429
 
+    session["memo_pending_email"] = email
+
     return """
     <!DOCTYPE html>
     <html lang="ja">
