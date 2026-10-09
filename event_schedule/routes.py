@@ -330,7 +330,6 @@ def schedule_add():
 
 @event_schedule_bp.route("/schedule")
 def schedule():
-    delete_old_events()
 
     visitor_id = request.cookies.get("schedule_visitor_id")
 
