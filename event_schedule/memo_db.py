@@ -179,3 +179,25 @@ def create_schedule_memo_alarms_table():
         cur.close()
         conn.close()
 
+def create_schedule_maintenance_table():
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+
+    try:
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS schedule_maintenance (
+                task_name TEXT PRIMARY KEY,
+                last_run_at TIMESTAMPTZ
+            )
+        """)
+
+        conn.commit()
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        cur.close()
+        conn.close()
+
