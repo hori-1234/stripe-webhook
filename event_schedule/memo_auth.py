@@ -491,11 +491,34 @@ def memo_login_page():
 
 @memo_auth_bp.route("/schedule/login/send", methods=["POST"])
 def memo_login_send():
-    email = request.form.get("email", "")
-
-    email = normalize_login_email(email)
+    email = normalize_login_email(request.form.get("email", ""))
 
     if email is None:
         return "メールアドレスの形式が正しくありません", 400
 
-    return "メールアドレスを受け付けました。認証メールはまだ送信していません。"
+    try:
+        result = issue_and_send_login_code(
+            email,
+            request.remote_addr or ""
+        )
+    except Exception:
+        return "認証メールの送信に失敗しました。時間をおいて再度お試しください。", 500
+
+    if result != "sent":
+        return "認証コードの発行回数が上限に達しました。時間をおいて再度お試しください。", 429
+
+    return """
+    <!DOCTYPE html>
+    <html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>イベスケ - メール認証</title>
+    </head>
+    <body>
+        <h2>認証メールを送信しました</h2>
+        <p>メールに記載された6桁の認証コードをご確認ください。</p>
+        <p><a href="/schedule/login">ログイン画面に戻る</a></p>
+    </body>
+    </html>
+    """
