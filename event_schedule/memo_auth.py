@@ -220,7 +220,7 @@ def issue_login_code(email, ip_address):
             cur, email, ip_address
         ):
             conn.rollback()
-            return None
+            return None, None
 
         # 同じメールアドレスの古い認証コードを無効化
         cur.execute("""
@@ -244,11 +244,15 @@ def issue_login_code(email, ip_address):
                 CURRENT_TIMESTAMP + INTERVAL '10 minutes',
                 %s
             )
+            
+            RETURNING id
         """, (email, code_hash, ip_address))
+
+        login_code_id = cur.fetchone()[0]
 
         conn.commit()
 
-        return code
+        return code, login_code_id
 
     except Exception:
         conn.rollback()
@@ -264,7 +268,7 @@ def issue_and_send_login_code(email, ip_address):
     if email is None:
         return "invalid_email"
 
-    code = issue_login_code(email, ip_address)
+    code, login_code_id = issue_login_code(email, ip_address)
 
     if code is None:
         return "rate_limited"
@@ -273,7 +277,6 @@ def issue_and_send_login_code(email, ip_address):
         send_login_code(email, code)
 
     except Exception:
-        # メール送信に失敗した場合、未使用コードを無効化
         conn = psycopg2.connect(DATABASE_URL)
         cur = conn.cursor()
 
@@ -281,15 +284,9 @@ def issue_and_send_login_code(email, ip_address):
             cur.execute("""
                 UPDATE schedule_memo_login_codes
                 SET used_at = CURRENT_TIMESTAMP
-                WHERE id = (
-                    SELECT id
-                    FROM schedule_memo_login_codes
-                    WHERE email = %s
-                      AND used_at IS NULL
-                    ORDER BY created_at DESC, id DESC
-                    LIMIT 1
-                )
-            """, (email,))
+                WHERE id = %s
+                  AND used_at IS NULL
+            """, (login_code_id,))
 
             conn.commit()
 
