@@ -4,6 +4,7 @@ import calendar
 import jpholiday
 import secrets
 
+from event_schedule.memo_auth import get_logged_in_memo_email
 from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, url_for, session, make_response
 from werkzeug.security import generate_password_hash, check_password_hash
