@@ -218,6 +218,7 @@ def schedule_add():
         event_name = request.form.get("event_name", "").strip()
         genre = request.form.get("genre", "").strip()
         performers = request.form.get("performers", "").strip()
+        streaming_available = request.form.get("streaming_available") == "1"
         edit_password = request.form.get("edit_password", "")
 
         if len(event_name) > 40:
@@ -279,17 +280,19 @@ def schedule_add():
             cur.execute("""
                 INSERT INTO event_schedules (
                     event_date,
+                    event_date,
                     start_time,
                     end_time,
                     location,
                     event_name,
                     genre,
                     performers,
+                    streaming_available,
                     edit_password_hash,
                     edit_password_encrypted,
                     registration_ip
                 )
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
                 event_date,
                 start_time,
@@ -298,6 +301,7 @@ def schedule_add():
                 event_name,
                 genre,
                 performers,
+                streaming_available,
                 edit_password_hash,
                 edit_password_encrypted,
                 registration_ip
