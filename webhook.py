@@ -16,6 +16,7 @@ from top_set.top import top_bp
 from admin_auth import admin_required, qr_required
 from unei_kanri import unei_kanri_bp
 from event_schedule.routes import event_schedule_bp
+from event_schedule.memo_auth import memo_auth_bp
 from product import process_products
 from ticket_check import (
     check_ticket,
@@ -28,6 +29,7 @@ from ticket_check import (
 app = Flask(__name__)
 app.register_blueprint(unei_kanri_bp)
 app.register_blueprint(event_schedule_bp)
+app.register_blueprint(memo_auth_bp)
 app.register_blueprint(top_bp)
 app.register_blueprint(cancel_policy_bp)
 app.register_blueprint(contact_bp)
