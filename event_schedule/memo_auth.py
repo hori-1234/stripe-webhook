@@ -16,7 +16,7 @@ memo_auth_bp = Blueprint(
 def generate_login_code():
     return f"{secrets.randbelow(1000000):06d}"
 
-def save_login_code(email, code):
+def save_login_code(email, code, ip_address):
     code_hash = generate_password_hash(code)
 
     conn = psycopg2.connect(DATABASE_URL)
@@ -27,14 +27,16 @@ def save_login_code(email, code):
             INSERT INTO schedule_memo_login_codes (
                 email,
                 code_hash,
-                expires_at
+                expires_at,
+                request_ip
             )
             VALUES (
                 %s,
                 %s,
-                CURRENT_TIMESTAMP + INTERVAL '10 minutes'
+                CURRENT_TIMESTAMP + INTERVAL '10 minutes',
+                %s
             )
-        """, (email, code_hash))
+        """, (email, code_hash, ip_address))
 
         conn.commit()
 
