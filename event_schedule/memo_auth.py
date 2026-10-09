@@ -519,7 +519,34 @@ def memo_login_send():
     </head>
     <body>
         <h2>認証メールを送信しました</h2>
-        <p>メールに記載された6桁の認証コードをご確認ください。</p>
+
+        <p>メールに記載された6桁の認証コードを入力してください。</p>
+
+        <form method="POST" action="/schedule/login/verify">
+            <input
+                type="text"
+                name="code"
+                placeholder="6桁の認証コード"
+                inputmode="numeric"
+                pattern="[0-9]{6}"
+                maxlength="6"
+                autocomplete="one-time-code"
+                style="width: 220px; height: 45px; box-sizing: border-box; padding: 10px; font-size: 16px;"
+                required
+            >
+
+            <p>
+                <button
+                    type="submit"
+                    style="width: 220px; height: 45px; font-size: 16px; cursor: pointer;"
+                >
+                    認証してログイン
+                </button>
+            </p>
+        </form>
+
+        <p>認証コードの有効期限は10分間です。</p>
+
         <p><a href="/schedule/login">ログイン画面に戻る</a></p>
     </body>
     </html>
