@@ -329,7 +329,6 @@ def schedule_add():
 
 @event_schedule_bp.route("/schedule")
 def schedule():
-    create_event_schedule_table()
     delete_old_events()
 
     create_schedule_stats_tables()
