@@ -148,3 +148,12 @@ def can_issue_login_code_from_ip(ip_address):
     finally:
         cur.close()
         conn.close()
+
+def check_login_code_limits(email, ip_address):
+    if not can_issue_login_code(email):
+        return False
+
+    if not can_issue_login_code_from_ip(ip_address):
+        return False
+
+    return True
