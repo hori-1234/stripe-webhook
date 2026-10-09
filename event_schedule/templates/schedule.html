@@ -417,8 +417,10 @@
             align-self: stretch;
             flex-shrink: 0;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
+            gap: 4px;
             box-sizing: border-box;
         }
 
@@ -874,13 +876,15 @@
                             <div class="event-toggle-space"></div>
 
                             <div class="event-edit-area">
-                                <a
-                                    href="/schedule/edit/{{ event.id }}"
-                                    class="event-edit-button"
-                                >
+                            <div class="event-edit-area">
+                                <a href="/schedule/edit/{{ event.id }}" class="event-edit-button">
                                     編集
                                 </a>
-                            </div>
+
+                                <button type="button" class="event-edit-button event-memo-button">
+                                    メモ
+                                </button>
+                            </div>                    
 
                         </div>
 
@@ -1010,13 +1014,13 @@
                         <div class="event-toggle-space"></div>
                         
                         <div class="event-edit-area">
-                            <a
-                                href="/schedule/edit/{{ event.id }}"
-                                class="event-edit-button"
-                            >
+                            <a href="/schedule/edit/{{ event.id }}" class="event-edit-button">
                                 編集
                             </a>
 
+                            <button type="button" class="event-edit-button event-memo-button">
+                                メモ
+                            </button>
                         </div>
                         
                     </div>
