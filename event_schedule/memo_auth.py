@@ -364,3 +364,89 @@ def verify_login_code(email, code):
     finally:
         cur.close()
         conn.close()
+
+def get_or_create_memo_user(email):
+    email = normalize_login_email(email)
+
+    if email is None:
+        return None
+
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+
+    try:
+        cur.execute("""
+            INSERT INTO schedule_memo_users (email)
+            VALUES (%s)
+            ON CONFLICT (email)
+            DO UPDATE SET
+                updated_at = CURRENT_TIMESTAMP
+            RETURNING id
+        """, (email,))
+
+        user_id = cur.fetchone()[0]
+
+        conn.commit()
+
+        return user_id
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        cur.close()
+        conn.close()
+
+def login_memo_user(email):
+    email = normalize_login_email(email)
+
+    if email is None:
+        return False
+
+    user_id = get_or_create_memo_user(email)
+
+    if user_id is None:
+        return False
+
+    session.clear()
+
+    session["memo_user_id"] = user_id
+    session["memo_user_email"] = email
+    session.permanent = True
+
+    return Truedef login_memo_user(email):
+    email = normalize_login_email(email)
+
+    if email is None:
+        return False
+
+    user_id = get_or_create_memo_user(email)
+
+    if user_id is None:
+        return False
+
+    session.clear()
+
+    session["memo_user_id"] = user_id
+    session["memo_user_email"] = email
+    session.permanent = True
+
+    return True
+    email = normalize_login_email(email)
+
+    if email is None:
+        return False
+
+    user_id = get_or_create_memo_user(email)
+
+    if user_id is None:
+        return False
+
+    session.clear()
+
+    session["memo_user_id"] = user_id
+    session["memo_user_email"] = email
+    session.permanent = True
+
+    return True
