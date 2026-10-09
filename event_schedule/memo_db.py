@@ -63,3 +63,63 @@ def create_schedule_memo_login_codes_table():
         cur.close()
         conn.close()
 
+
+def create_schedule_memos_table():
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+
+    try:
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS schedule_memos (
+                id BIGSERIAL PRIMARY KEY,
+                user_id BIGINT NOT NULL
+                    REFERENCES schedule_memo_users(id)
+                    ON DELETE CASCADE,
+
+                event_id INTEGER,
+                memo_date DATE NOT NULL,
+
+                event_name TEXT,
+                event_location TEXT,
+
+                memo_text TEXT NOT NULL DEFAULT '',
+                tag TEXT NOT NULL DEFAULT '付箋なし',
+                tag_color TEXT NOT NULL DEFAULT '#FFF2B3',
+
+                created_at TIMESTAMPTZ NOT NULL
+                    DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMPTZ NOT NULL
+                    DEFAULT CURRENT_TIMESTAMP,
+
+                CONSTRAINT schedule_memos_target_check
+                    CHECK (
+                        event_id IS NOT NULL
+                        OR event_name IS NULL
+                    )
+            )
+        """)
+
+        cur.execute("""
+            CREATE UNIQUE INDEX IF NOT EXISTS
+                idx_schedule_memos_user_event
+            ON schedule_memos (user_id, event_id)
+            WHERE event_id IS NOT NULL
+        """)
+
+        cur.execute("""
+            CREATE UNIQUE INDEX IF NOT EXISTS
+                idx_schedule_memos_user_date
+            ON schedule_memos (user_id, memo_date)
+            WHERE event_id IS NULL
+        """)
+
+        conn.commit()
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        cur.close()
+        conn.close()
+
