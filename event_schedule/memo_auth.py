@@ -409,44 +409,7 @@ def login_memo_user(email):
     if user_id is None:
         return False
 
-    session.clear()
-
     session["memo_user_id"] = user_id
     session["memo_user_email"] = email
-    session.permanent = True
-
-    return Truedef login_memo_user(email):
-    email = normalize_login_email(email)
-
-    if email is None:
-        return False
-
-    user_id = get_or_create_memo_user(email)
-
-    if user_id is None:
-        return False
-
-    session.clear()
-
-    session["memo_user_id"] = user_id
-    session["memo_user_email"] = email
-    session.permanent = True
-
-    return True
-    email = normalize_login_email(email)
-
-    if email is None:
-        return False
-
-    user_id = get_or_create_memo_user(email)
-
-    if user_id is None:
-        return False
-
-    session.clear()
-
-    session["memo_user_id"] = user_id
-    session["memo_user_email"] = email
-    session.permanent = True
 
     return True
