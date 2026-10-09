@@ -331,8 +331,6 @@ def schedule_add():
 def schedule():
     delete_old_events()
 
-    create_schedule_stats_tables()
-
     visitor_id = request.cookies.get("schedule_visitor_id")
 
     if not visitor_id:
