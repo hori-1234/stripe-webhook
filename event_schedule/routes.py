@@ -334,6 +334,7 @@ def schedule():
     create_schedule_stats_tables()
     create_schedule_memo_users_table()
     create_schedule_memo_login_codes_table()
+    create_schedule_memos_table()
 
     visitor_id = request.cookies.get("schedule_visitor_id")
 
