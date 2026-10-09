@@ -1119,6 +1119,13 @@
     }
 
     function toggleMemo(eventId) {
+        const isLoggedIn = {{ (memo_login_email is not none) | tojson }};
+
+        if (!isLoggedIn) {
+            window.location.href = "/schedule/login";
+            return;
+        }
+
         const memoArea = document.getElementById("memo-" + eventId);
 
         if (!memoArea) {
