@@ -280,7 +280,6 @@ def schedule_add():
             cur.execute("""
                 INSERT INTO event_schedules (
                     event_date,
-                    event_date,
                     start_time,
                     end_time,
                     location,
@@ -639,7 +638,8 @@ def schedule_edit(event_id):
             event_name,
             genre,
             performers,
-            edit_password_hash
+            edit_password_hash,
+            streaming_available
         FROM event_schedules
         WHERE id = %s
     """, (event_id,))
@@ -728,6 +728,7 @@ def schedule_edit_update(event_id):
     event_name = request.form.get("event_name", "").strip()
     genre = request.form.get("genre", "").strip()
     performers = request.form.get("performers", "").strip()
+    streaming_available = request.form.get("streaming_available") == "1"
     
     if len(event_name) > 40:
         return "イベント名は全角・半角問わず40文字以内で入力してください。", 400
@@ -745,6 +746,7 @@ def schedule_edit_update(event_id):
             event_name = %s,
             genre = %s,
             performers = %s,
+            streaming_available = %s,
             updated_at = CURRENT_TIMESTAMP
         WHERE id = %s
     """, (
@@ -755,6 +757,7 @@ def schedule_edit_update(event_id):
         event_name,
         genre,
         performers,
+        streaming_available,
         event_id
     ))
 
@@ -1116,7 +1119,8 @@ def schedule_admin_edit(event_id):
             event_name,
             genre,
             performers,
-            edit_password_hash
+            edit_password_hash,
+            streaming_available
         FROM event_schedules
         WHERE id = %s
     """, (event_id,))
