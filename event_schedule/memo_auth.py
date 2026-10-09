@@ -249,3 +249,81 @@ def issue_login_code(email, ip_address):
     finally:
         cur.close()
         conn.close()
+
+def issue_and_send_login_code(email, ip_address):
+    email = normalize_login_email(email)
+
+    if email is None:
+        return "invalid_email"
+
+    code = issue_login_code(email, ip_address)
+
+    if code is None:
+        return "rate_limited"
+
+    send_login_code(email, code)
+
+    return "sent"
+
+def verify_login_code(email, code):
+    email = normalize_login_email(email)
+
+    if email is None:
+        return False
+
+    if not isinstance(code, str) or len(code) != 6 or not code.isdigit():
+        return False
+
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+
+    try:
+        cur.execute("""
+            SELECT id, code_hash, attempt_count
+            FROM schedule_memo_login_codes
+            WHERE email = %s
+              AND used_at IS NULL
+              AND expires_at > CURRENT_TIMESTAMP
+            ORDER BY created_at DESC, id DESC
+            LIMIT 1
+            FOR UPDATE
+        """, (email,))
+
+        record = cur.fetchone()
+
+        if record is None:
+            conn.rollback()
+            return False
+
+        record_id, code_hash, attempt_count = record
+
+        if attempt_count >= 5:
+            conn.rollback()
+            return False
+
+        if not check_password_hash(code_hash, code):
+            cur.execute("""
+                UPDATE schedule_memo_login_codes
+                SET attempt_count = attempt_count + 1
+                WHERE id = %s
+            """, (record_id,))
+
+            conn.commit()
+            return False
+
+        cur.execute("""
+            UPDATE schedule_memo_login_codes
+            SET used_at = CURRENT_TIMESTAMP
+            WHERE id = %s
+        """, (record_id,))
+
+        conn.commit()
+        return True
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        cur.close()
+        conn.close()
