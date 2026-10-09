@@ -443,11 +443,13 @@ def memo_login_page():
         <title>イベスケ - ログイン</title>
 
         <style>
-            @media (max-width: 600px) {
+            @media (max-width: 900px) {
                 input[type="email"],
                 button[type="submit"] {
-                    width: 100px !important;
-                    height: 20px !important;
+                    width: 200px !important;
+                    height: 36px !important;
+                    font-size: 13px !important;
+                    padding: 5px !important;
                 }
             }
         </style>
