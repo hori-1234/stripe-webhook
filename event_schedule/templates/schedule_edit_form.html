@@ -249,6 +249,24 @@
                     アイドル
                 </option>
 
+                <option value="WS"
+                    {% if event[6] == "WS" %}selected{% endif %}
+                >
+                    WS
+                </option>
+
+                <option value="オフ会"
+                    {% if event[6] == "オフ会" %}selected{% endif %}
+                >
+                    オフ会
+                </option>
+
+                <option value="撮影会"
+                    {% if event[6] == "撮影会" %}selected{% endif %}
+                >
+                    撮影会
+                </option>
+                
                 <option value="その他"
                     {% if event[6] == "その他" %}selected{% endif %}
                 >
