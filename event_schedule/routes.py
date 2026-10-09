@@ -433,7 +433,8 @@ def schedule():
             location,
             event_name,
             genre,
-            performers
+            performers,
+            streaming_available
         FROM event_schedules
     """
     if performer_keyword:
@@ -575,6 +576,7 @@ def schedule():
             "event_name": event[5],
             "genre": event[6],
             "performers": event[7],
+            "streaming_available": event[8],
             "left_percent": left_percent,
             "width_percent": width_percent
         })
