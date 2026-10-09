@@ -413,3 +413,12 @@ def login_memo_user(email):
     session["memo_user_email"] = email
 
     return True
+
+def logout_memo_user():
+    session.pop("memo_user_id", None)
+    session.pop("memo_user_email", None)
+
+    return True
+
+def is_memo_logged_in():
+    return session.get("memo_user_id") is not None
