@@ -68,3 +68,32 @@ def send_login_code(email, code):
     })
 
     return response
+
+def can_issue_login_code(email):
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+
+    try:
+        cur.execute("""
+            SELECT
+                COUNT(*) FILTER (
+                    WHERE created_at > CURRENT_TIMESTAMP
+                        - INTERVAL '1 minute'
+                ),
+                COUNT(*) FILTER (
+                    WHERE created_at > CURRENT_TIMESTAMP
+                        - INTERVAL '1 hour'
+                )
+            FROM schedule_memo_login_codes
+            WHERE email = %s
+              AND created_at > CURRENT_TIMESTAMP
+                  - INTERVAL '1 hour'
+        """, (email,))
+
+        minute_count, hour_count = cur.fetchone()
+
+        return minute_count == 0 and hour_count < 5
+
+    finally:
+        cur.close()
+        conn.close()
