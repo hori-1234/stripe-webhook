@@ -224,6 +224,20 @@
                 <option value="その他" {% if (form_data and form_data.get('genre') == 'その他') or (not form_data and copy_event and copy_event[6] == 'その他') %}selected{% endif %}>その他</option>
             </select>
         </div>
+
+        <div class="form-row">
+            <label>配信</label>
+
+            <label style="width: auto; display: flex; align-items: center; font-weight: normal;">
+                <input
+                    type="checkbox"
+                    name="streaming_available"
+                    value="1"
+                    {% if form_data and form_data.get('streaming_available') %}checked{% endif %}
+                >
+                配信あり
+            </label>
+        </div>
         
         <div class="form-row performers-row">
             <label>出演者</label>
