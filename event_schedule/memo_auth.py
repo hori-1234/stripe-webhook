@@ -12,3 +12,6 @@ memo_auth_bp = Blueprint(
     "memo_auth",
     __name__
 )
+
+def generate_login_code():
+    return f"{secrets.randbelow(1000000):06d}"
