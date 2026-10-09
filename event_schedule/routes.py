@@ -603,7 +603,8 @@ def schedule():
         events=display_events,
         locations=locations,
         performer_search_dates=performer_search_dates,
-        registered_performers=registered_performers
+        registered_performers=registered_performers,
+        memo_login_email=get_logged_in_memo_email()
     ))
 
     response.set_cookie(
