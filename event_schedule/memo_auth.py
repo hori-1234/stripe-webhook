@@ -149,6 +149,19 @@ def can_issue_login_code_from_ip(ip_address):
         cur.close()
         conn.close()
 
+def lock_login_code_requests(cur, email, ip_address):
+    cur.execute("""
+        SELECT pg_advisory_xact_lock(
+            hashtextextended(%s, 0)
+        )
+    """, ("memo_login_email:" + email,))
+
+    cur.execute("""
+        SELECT pg_advisory_xact_lock(
+            hashtextextended(%s, 0)
+        )
+    """, ("memo_login_ip:" + ip_address,))
+
 def check_login_code_limits(email, ip_address):
     if not can_issue_login_code(email):
         return False
