@@ -13,7 +13,8 @@ import unicodedata
 from .memo_db import (
     create_schedule_memo_users_table,
     create_schedule_memo_login_codes_table,
-    create_schedule_memos_table
+    create_schedule_memos_table,
+    create_schedule_memo_alarms_table
 )
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
