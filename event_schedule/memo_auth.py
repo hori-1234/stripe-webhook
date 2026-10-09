@@ -428,3 +428,24 @@ def get_logged_in_memo_email():
         return None
 
     return session.get("memo_user_email")
+
+@memo_auth_bp.route("/schedule/login", methods=["GET"])
+def memo_login_page():
+    if is_memo_logged_in():
+        return redirect("/schedule")
+
+    return """
+    <!DOCTYPE html>
+    <html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>イベスケ - ログイン</title>
+    </head>
+    <body>
+        <h2>イベスケ ログイン</h2>
+        <p>メールアドレスでログインします。</p>
+        <p>認証コードをメールでお送りします。</p>
+    </body>
+    </html>
+    """
