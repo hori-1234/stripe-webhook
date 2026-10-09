@@ -123,3 +123,59 @@ def create_schedule_memos_table():
         cur.close()
         conn.close()
 
+
+def create_schedule_memo_alarms_table():
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+
+    try:
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS schedule_memo_alarms (
+                id BIGSERIAL PRIMARY KEY,
+
+                memo_id BIGINT NOT NULL
+                    REFERENCES schedule_memos(id)
+                    ON DELETE CASCADE,
+
+                recipient_email TEXT NOT NULL,
+                subject TEXT NOT NULL,
+                body TEXT NOT NULL DEFAULT '',
+
+                scheduled_at TIMESTAMPTZ NOT NULL,
+
+                status TEXT NOT NULL DEFAULT 'pending'
+                    CHECK (status IN (
+                        'pending',
+                        'processing',
+                        'sent',
+                        'failed',
+                        'cancelled'
+                    )),
+
+                sent_at TIMESTAMPTZ,
+                attempt_count INTEGER NOT NULL DEFAULT 0,
+
+                created_at TIMESTAMPTZ NOT NULL
+                    DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMPTZ NOT NULL
+                    DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        cur.execute("""
+            CREATE INDEX IF NOT EXISTS
+                idx_schedule_memo_alarms_pending
+            ON schedule_memo_alarms (scheduled_at)
+            WHERE status = 'pending'
+        """)
+
+        conn.commit()
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        cur.close()
+        conn.close()
+
