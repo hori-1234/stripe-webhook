@@ -97,3 +97,32 @@ def can_issue_login_code(email):
     finally:
         cur.close()
         conn.close()
+
+def normalize_login_email(email):
+    if not isinstance(email, str):
+        return None
+
+    email = email.strip().lower()
+
+    if not email or len(email) > 254:
+        return None
+
+    if email.count("@") != 1:
+        return None
+
+    local_part, domain = email.rsplit("@", 1)
+
+    if not local_part or not domain:
+        return None
+
+    if len(local_part) > 64:
+        return None
+
+    if "." not in domain:
+        return None
+
+    if any(char.isspace() for char in email):
+        return None
+
+    return email
+
