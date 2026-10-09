@@ -502,8 +502,10 @@ def memo_login_send():
             request.remote_addr or ""
         )
     except Exception:
+        import traceback
+        traceback.print_exc()
         return "認証メールの送信に失敗しました。時間をおいて再度お試しください。", 500
-
+        
     if result != "sent":
         return "認証コードの発行回数が上限に達しました。時間をおいて再度お試しください。", 429
 
