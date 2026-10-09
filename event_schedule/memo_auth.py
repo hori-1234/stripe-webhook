@@ -126,3 +126,23 @@ def normalize_login_email(email):
 
     return email
 
+def can_issue_login_code_from_ip(ip_address):
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+
+    try:
+        cur.execute("""
+            SELECT COUNT(*)
+            FROM schedule_memo_login_codes
+            WHERE request_ip = %s
+              AND created_at > CURRENT_TIMESTAMP
+                  - INTERVAL '1 hour'
+        """, (ip_address,))
+
+        count = cur.fetchone()[0]
+
+        return count < 20
+
+    finally:
+        cur.close()
+        conn.close()
