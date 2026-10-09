@@ -580,3 +580,9 @@ def memo_login_verify():
     session.pop("memo_pending_email", None)
 
     return redirect("/schedule")
+
+@memo_auth_bp.route("/schedule/logout", methods=["POST"])
+def memo_logout():
+    logout_memo_user()
+    session.pop("memo_pending_email", None)
+    return redirect("/schedule")
