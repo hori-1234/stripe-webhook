@@ -853,6 +853,7 @@
                                         {% else %}
                                             不明
                                         {% endif %}
+                                        {% if event.streaming_available %}[配]{% endif %}
                                     </span>
                                 </div>
 
@@ -989,6 +990,7 @@
                                     {% else %}
                                         不明
                                     {% endif %}
+                                    {% if event.streaming_available %}[配]{% endif %}
                                 </span>
                             </div>
 
