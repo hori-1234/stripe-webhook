@@ -4,7 +4,7 @@ import calendar
 import jpholiday
 import secrets
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import Blueprint, render_template, request, redirect, url_for, session, make_response
 from werkzeug.security import generate_password_hash, check_password_hash
 from cryptography.fernet import Fernet
