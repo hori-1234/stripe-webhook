@@ -1143,3 +1143,16 @@ def schedule_admin_edit(event_id):
         event=event,
         error_message=""
     )
+
+@event_schedule_bp.route("/schedule/mynote")
+def schedule_mynote():
+
+    memo_login_email = get_logged_in_memo_email()
+
+    if not memo_login_email:
+        return redirect(url_for("event_schedule.schedule"))
+
+    return render_template(
+        "schedule_mynote.html",
+        memo_login_email=memo_login_email
+    )
