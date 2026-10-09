@@ -276,6 +276,20 @@
         </div>
 
         <div class="form-row">
+            <label>配信</label>
+
+            <label style="width: auto; display: flex; align-items: center; font-weight: normal;">
+                <input
+                    type="checkbox"
+                    name="streaming_available"
+                    value="1"
+                    {% if event[9] %}checked{% endif %}
+                >
+                配信あり
+            </label>
+        </div>
+
+        <div class="form-row">
             <label for="performers">出演者</label>
 
             <textarea
