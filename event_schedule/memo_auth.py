@@ -553,3 +553,30 @@ def memo_login_send():
     </body>
     </html>
     """
+
+@memo_auth_bp.route("/schedule/login/verify", methods=["POST"])
+def memo_login_verify():
+    email = session.get("memo_pending_email")
+    code = request.form.get("code", "").strip()
+
+    if not email:
+        return redirect("/schedule/login")
+
+    if len(code) != 6 or not code.isdigit():
+        return "6桁の認証コードを入力してください。", 400
+
+    try:
+        if not verify_login_code(email, code):
+            return "認証コードが違うか、有効期限が切れています。", 400
+
+        if not login_memo_user(email):
+            return "ログイン処理に失敗しました。", 500
+
+    except Exception:
+        import traceback
+        traceback.print_exc()
+        return "認証処理でエラーが発生しました。", 500
+
+    session.pop("memo_pending_email", None)
+
+    return redirect("/schedule")
