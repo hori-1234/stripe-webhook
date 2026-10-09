@@ -452,28 +452,22 @@ def memo_login_page():
                 type="email"
                 name="email"
                 placeholder="メールアドレス"
-                style="width: 300px; height: 50px; max-width: 100%; box-sizing: border-box; padding: 10px; font-size: 16px;"
                 autocomplete="email"
                 maxlength="254"
+                style="width: 300px; height: 50px; max-width: 100%; box-sizing: border-box; padding: 10px; font-size: 16px;"
                 required
             >
 
-            <button type="submit">
-                認証コードを送信
-            </button>
+            <p>
+                <button
+                    type="submit"
+                    style="width: 300px; height: 50px; max-width: 100%; box-sizing: border-box; font-size: 16px; cursor: pointer;"
+                >
+                    認証コードを送信
+                </button>
+            </p>
         </form>
 
-@memo_auth_bp.route("/schedule/login/send", methods=["POST"])
-def memo_login_send():
-    email = request.form.get("email", "")
-
-    # 送信処理を実行する前に、メールアドレスを確認
-    email = normalize_login_email(email)
-
-    if email is None:
-        return "メールアドレスの形式が正しくありません", 400
-
-    return "メールアドレスを受け付けました。認証メールはまだ送信していません。"
         <p>初回利用の場合は、認証後に自動登録されます。</p>
 
         <p>
@@ -482,3 +476,14 @@ def memo_login_send():
     </body>
     </html>
     """
+
+@memo_auth_bp.route("/schedule/login/send", methods=["POST"])
+def memo_login_send():
+    email = request.form.get("email", "")
+
+    email = normalize_login_email(email)
+
+    if email is None:
+        return "メールアドレスの形式が正しくありません", 400
+
+    return "メールアドレスを受け付けました。認証メールはまだ送信していません。"
