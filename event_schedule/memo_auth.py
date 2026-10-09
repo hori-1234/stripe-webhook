@@ -45,4 +45,26 @@ def save_login_code(email, code):
     finally:
         cur.close()
         conn.close()
-        
+
+def send_login_code(email, code):
+    import resend
+
+    resend.api_key = os.environ.get("RESEND_API_KEY")
+
+    if not resend.api_key:
+        raise RuntimeError("RESEND_API_KEYが設定されていません")
+
+    response = resend.Emails.send({
+        "from": os.environ.get("RESEND_FROM_EMAIL"),
+        "to": [email],
+        "subject": "【イベスケ】ログイン認証コード",
+        "text": (
+            "イベスケのログイン認証コードをお知らせします。\n\n"
+            f"認証コード：{code}\n\n"
+            "有効期限は10分間です。\n\n"
+            "このメールに心当たりがない場合は、"
+            "何もせず破棄してください。"
+        )
+    })
+
+    return response
