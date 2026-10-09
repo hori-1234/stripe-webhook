@@ -10,6 +10,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from cryptography.fernet import Fernet
 from admin_auth import admin_required
 import unicodedata
+from .memo_db import create_schedule_memo_users_table
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 EVENT_PASSWORD_KEY = os.environ.get("EVENT_PASSWORD_KEY")
