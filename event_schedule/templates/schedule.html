@@ -325,6 +325,24 @@
             color: #fff;
         }
 
+        /* WS */
+        .genre-ws {
+            background: #000;
+            color: #ffff00;
+        }
+
+        /* オフ会 */
+        .genre-offkai {
+            background: #38a9d6;
+            color: #fff;
+        }
+
+        /* 撮影会 */
+        .genre-photo {
+            background: #800080;
+            color: #fff;
+        }
+
         /* その他 */
         .genre-other {
             background: #000;
@@ -633,6 +651,9 @@
                         <option value="踊" {% if request.args.get('genre') == '踊' %}selected{% endif %}>踊</option>
                         <option value="歌踊" {% if request.args.get('genre') == '歌踊' %}selected{% endif %}>歌踊</option>
                         <option value="アイドル" {% if request.args.get('genre') == 'アイドル' %}selected{% endif %}>アイドル</option>
+                        <option value="WS" {% if request.args.get('genre') == 'WS' %}selected{% endif %}>WS</option>
+                        <option value="オフ会" {% if request.args.get('genre') == 'オフ会' %}selected{% endif %}>オフ会</option>
+                        <option value="撮影会" {% if request.args.get('genre') == '撮影会' %}selected{% endif %}>撮影会</option>
                         <option value="その他" {% if request.args.get('genre') == 'その他' %}selected{% endif %}>その他</option>
                     </select>
                     
@@ -792,6 +813,12 @@
                                         genre-song-dance
                                     {% elif event.genre == 'アイドル' %}
                                         genre-idol
+                                    {% elif event.genre == 'WS' %}
+                                        genre-ws
+                                    {% elif event.genre == 'オフ会' %}
+                                        genre-offkai
+                                    {% elif event.genre == '撮影会' %}
+                                        genre-photo
                                     {% else %}
                                         genre-other
                                     {% endif %}
@@ -925,6 +952,12 @@
                                     genre-song-dance
                                 {% elif event.genre == 'アイドル' %}
                                     genre-idol
+                                {% elif event.genre == 'WS' %}
+                                    genre-ws
+                                {% elif event.genre == 'オフ会' %}
+                                    genre-offkai
+                                {% elif event.genre == '撮影会' %}
+                                    genre-photo
                                 {% else %}
                                     genre-other
                                 {% endif %}
