@@ -422,3 +422,9 @@ def logout_memo_user():
 
 def is_memo_logged_in():
     return session.get("memo_user_id") is not None
+
+def get_logged_in_memo_email():
+    if not is_memo_logged_in():
+        return None
+
+    return session.get("memo_user_email")
