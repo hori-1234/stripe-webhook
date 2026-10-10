@@ -645,10 +645,6 @@
                 イベントスケジュール
             </h1>
 
-            <div class="schedule-today-views" style="font-size: 18px; font-weight: bold; margin-top: 5px;">
-                本日の閲覧数　{{ today_views }}
-            </div>
-
             <button
                 type="button"
                 id="mymemo-toggle-button"
@@ -661,7 +657,11 @@
         </div>
      </div>
         
-        <div style="flex-shrink: 0;">
+        <div style="flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+
+            <div style="font-size: 16px; font-weight: bold; white-space: nowrap;">
+                本日の閲覧数　{{ today_views }}
+            </div>
 
             {% if memo_login_email %}
             
