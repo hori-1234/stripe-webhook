@@ -1369,6 +1369,44 @@
             button.style.background = "#fff";
             button.style.color = "#000";
         }
+
+        document.querySelectorAll(".date-row").forEach(dateRow => {
+            const memoButton = dateRow.querySelector(".date-memo-button");
+
+            let hasMemo =
+                memoButton &&
+                memoButton.style.backgroundColor === "yellow";
+
+            const dateMemoArea = dateRow.nextElementSibling;
+
+            if (dateMemoArea && dateMemoArea.classList.contains("event-memo-area")) {
+                dateMemoArea.style.display = "none";
+            }
+
+            let element = dateMemoArea?.nextElementSibling;
+
+            while (element && !element.classList.contains("date-row")) {
+                if (element.classList.contains("event-row")) {
+                    const eventMemoButton = element.querySelector(".event-memo-button");
+
+                    const hasEventMemo =
+                        eventMemoButton &&
+                        eventMemoButton.style.backgroundColor === "yellow";
+
+                    if (hasEventMemo) {
+                        hasMemo = true;
+                    }
+
+                    element.style.display =
+                        !isMyMemoMode || hasEventMemo ? "" : "none";
+                }
+
+                element = element.nextElementSibling;
+            }
+
+            dateRow.style.display =
+                !isMyMemoMode || hasMemo ? "" : "none";
+        });
     }
     
     function clearSearch() {
