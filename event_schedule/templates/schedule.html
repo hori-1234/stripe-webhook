@@ -846,7 +846,7 @@
 
         </div>
 
-    {% if request.args.get('performer', '').strip() %}
+    {% if request.args.get('performer', '').strip() or request.args.get('mymemo') == '1' %}
 
         {% for search_date in performer_search_dates %}
 
