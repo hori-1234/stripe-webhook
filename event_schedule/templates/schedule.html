@@ -630,7 +630,7 @@
                 <div style="display: flex; align-items: center; gap: 10px;">
 
                     <span style="font-size: 12px; overflow-wrap: anywhere;">
-                        {{ memo_login_email }}
+                        {{ memo_login_email[:3] }}{{ '×' * (memo_login_email.split('@')[0]|length - 3) }}@{{ '×' * (memo_login_email.split('@')[1]|length) }}
                     </span>
 
                     <form action="/schedule/logout" method="POST" style="margin: 0;">
