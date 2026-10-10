@@ -1046,11 +1046,14 @@
                 </button>
                 </div>
 
-                <div id="date-memo-alarm-{{ year }}-{{ '%02d'|format(month) }}-{{ '%02d'|format(date.day) }}" style="display: none;">
+                <div id="date-memo-alarm-{{ year }}-{{ '%02d'|format(month) }}-{{ '%02d'|format(date.day) }}" data-saved-alarms='{{ saved_date_memos.get("%04d-%02d-%02d"|format(year, month, date.day), {}).get("alarms", []) | tojson }}' style="display: none;">
                     <div>アラーム設定（最大4件）</div>
 
                     {% set saved_alarms = saved_date_memos.get('%04d-%02d-%02d'|format(year, month, date.day), {}).get('alarms', []) %}
                     {% set alarm1 = saved_alarms | selectattr('alarm_number', 'equalto', 1) | first | default(none) %}
+                    {% set alarm2 = saved_alarms | selectattr('alarm_number', 'equalto', 2) | first | default(none) %}
+                    {% set alarm3 = saved_alarms | selectattr('alarm_number', 'equalto', 3) | first | default(none) %}
+                    {% set alarm4 = saved_alarms | selectattr('alarm_number', 'equalto', 4) | first | default(none) %}
 
                     <div class="memo-alarm-item" data-alarm-number="1" style="margin-top: 12px;">
                         <div style="margin-bottom: 8px;">アラーム1</div>
@@ -1629,6 +1632,31 @@
             alert("通信エラーが発生しました");
         }
     }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll('[id^="date-memo-alarm-"]').forEach(alarmArea => {
+            const dateKey = alarmArea.id.replace("date-memo-alarm-", "");
+            const savedAlarms = JSON.parse(alarmArea.dataset.savedAlarms || "[]");
+
+            savedAlarms
+                .filter(alarm => alarm.alarm_number >= 2 && alarm.alarm_number <= 4)
+                .sort((a, b) => a.alarm_number - b.alarm_number)
+                .forEach(alarm => {
+                    addDateMemoAlarm(dateKey);
+
+                    const item = alarmArea.querySelector(
+                        `.memo-alarm-item[data-alarm-number="${alarm.alarm_number}"]`
+                    );
+
+                    if (!item) return;
+
+                    item.querySelector('input[type="datetime-local"]').value = alarm.scheduled_at || "";
+                    item.querySelector('input[type="email"]').value = alarm.recipient_email || "";
+                    item.querySelector('input[name^="alarm_subject_"]').value = alarm.subject || "";
+                    item.querySelector('textarea[name^="alarm_body_"]').value = alarm.body || "";
+                });
+        });
+    });
     
 </script>
 
