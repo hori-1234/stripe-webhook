@@ -27,6 +27,8 @@ from ticket_check import (
 
 
 app = Flask(__name__)
+app.config["PERMANENT_SESSION_LIFETIME"] = 60 * 60 * 24 * 365
+app.config["SESSION_REFRESH_EACH_REQUEST"] = True
 app.register_blueprint(unei_kanri_bp)
 app.register_blueprint(event_schedule_bp)
 app.register_blueprint(memo_auth_bp)
