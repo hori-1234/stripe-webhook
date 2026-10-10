@@ -954,6 +954,11 @@
     {% else %}
         
     {% for date in days %}
+        
+        {% set date_memo = saved_date_memos.get('%04d-%02d-%02d'|format(year, month, date.day), {}) %}
+        {% set date_tag = date_memo.get('tag', '') %}
+        {% set date_color = date_memo.get('tag_color', '#ffff99') %}
+
         <div class="
             date-row
             {% if date.holiday_name %}
@@ -964,18 +969,38 @@
                 sunday
             {% endif %}
         ">
+        
             {{ month }}/{{ date.day }} {{ date.weekday }}
 
             {% if date.holiday_name %}
                 （{{ date.holiday_name }}）
             {% endif %}
 
-            <button type="button" class="event-edit-button date-memo-button" onclick="toggleDateMemo('{{ year }}-{{ '%02d'|format(month) }}-{{ '%02d'|format(date.day) }}')" style="float: right; cursor: pointer;">
-                メモ
-            </button>
+            <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
+
+                {% if date_tag and date_tag != '付箋なし' %}
+                    <span class="event-sticky-label" style="
+                        display: inline-block;
+                        background: {{ date_color }};
+                        color: #000;
+                        padding: 4px 8px;
+                        border-radius: 3px;
+                        font-size: 12px;
+                        white-space: nowrap;
+                    ">
+                        {{ date_tag }}
+                    </span>
+                {% endif %}
+
+                <button type="button" class="event-edit-button date-memo-button" onclick="toggleDateMemo('{{ year }}-{{ '%02d'|format(month) }}-{{ '%02d'|format(date.day) }}')" style="float: none; cursor: pointer;">
+                    メモ
+                </button>
+
+            </div>
         </div>
 
         <div id="date-memo-{{ year }}-{{ '%02d'|format(month) }}-{{ '%02d'|format(date.day) }}" class="event-memo-area" style="display: none;">
+           
             <div class="event-memo-title">マイメモ</div>
 
             {% set date_memo = saved_date_memos.get('%04d-%02d-%02d'|format(year, month, date.day), {}) %}
