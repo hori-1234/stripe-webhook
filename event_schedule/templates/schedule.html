@@ -1566,10 +1566,29 @@
         const textarea = document.getElementById(`date-memo-text-${dateKey}`);
         const sticky = document.getElementById(`date-memo-sticky-${dateKey}`);
         const color = document.getElementById(`date-memo-color-${dateKey}`);
+        const alarmArea = document.getElementById(`date-memo-alarm-${dateKey}`);
 
         if (!textarea || !sticky || !color) {
             alert("日付メモの入力欄が見つかりません");
             return;
+        }
+
+        const alarms = [];
+
+        if (alarmArea) {
+            alarmArea.querySelectorAll(".memo-alarm-item").forEach(item => {
+                const datetime = item.querySelector('input[type="datetime-local"]');
+                const email = item.querySelector('input[type="email"]');
+                const subject = item.querySelector('input[name^="alarm_subject_"]');
+                const body = item.querySelector('textarea[name^="alarm_body_"]');
+
+                alarms.push({
+                    scheduled_at: datetime ? datetime.value : "",
+                    recipient_email: email ? email.value.trim() : "",
+                    subject: subject ? subject.value.trim() : "",
+                    body: body ? body.value : ""
+                });
+            });
         }
 
         try {
@@ -1582,12 +1601,14 @@
                     memo_date: dateKey,
                     memo_text: textarea.value,
                     tag: sticky.value,
-                    tag_color: color.value
+                    tag_color: color.value,
+                    alarms: alarms
                 })
             });
 
             const result = await response.json();
 
+            
             if (!response.ok || !result.success) {
                 alert(result.error || "保存に失敗しました");
                 return;
