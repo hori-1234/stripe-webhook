@@ -568,9 +568,55 @@ def schedule():
             saved_date_memos[memo_date.isoformat()] = {
                 "memo_text": memo_text or "",
                 "tag": tag or "",
-                "tag_color": tag_color or "#ffff99"
+                "tag_color": tag_color or "#ffff99",
+                "alarms": []
             }
-    
+
+        cur.execute("""
+            SELECT
+                m.memo_date,
+                a.alarm_number,
+                a.recipient_email,
+                a.subject,
+                a.body,
+                a.scheduled_at,
+                a.status
+            FROM schedule_memo_alarms a
+            JOIN schedule_memos m
+                ON m.id = a.memo_id
+            WHERE m.user_id = %s
+              AND m.event_id IS NULL
+              AND EXTRACT(YEAR FROM m.memo_date) = %s
+              AND EXTRACT(MONTH FROM m.memo_date) = %s
+            ORDER BY m.memo_date, a.alarm_number
+        """, (memo_user_id, year, month))
+
+        for (
+            memo_date,
+            alarm_number,
+            recipient_email,
+            subject,
+            body,
+            scheduled_at,
+            status
+        ) in cur.fetchall():
+
+            date_key = memo_date.isoformat()
+
+            if date_key not in saved_date_memos:
+                continue
+
+            saved_date_memos[date_key]["alarms"].append({
+                "alarm_number": alarm_number,
+                "recipient_email": recipient_email,
+                "subject": subject,
+                "body": body or "",
+                "scheduled_at": scheduled_at.strftime(
+                    "%Y-%m-%dT%H:%M"
+                ),
+                "status": status
+            })
+
     cur.close()
     conn.close()
         
@@ -1365,6 +1411,192 @@ def create_schedule_memo_alarms_table():
         """)
 
         conn.commit()
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        cur.close()
+        conn.close()
+
+@event_schedule_bp.route("/schedule/memo/date/save", methods=["POST"])
+def schedule_memo_date_save():
+
+    from datetime import timezone
+    from zoneinfo import ZoneInfo
+
+    user_id = session.get("memo_user_id")
+
+    if not user_id:
+        return {"error": "ログインが必要です"}, 401
+
+    data = request.get_json(silent=True)
+
+    if not isinstance(data, dict):
+        return {"error": "送信データが正しくありません"}, 400
+
+    memo_date = data.get("memo_date")
+    memo_text = data.get("memo_text", "")
+    tag = data.get("tag", "")
+    tag_color = data.get("tag_color", "#ffff99")
+    alarms = data.get("alarms", [])
+
+    if not isinstance(memo_date, str):
+        return {"error": "日付が正しくありません"}, 400
+
+    if not all(isinstance(value, str) for value in (
+        memo_text, tag, tag_color
+    )):
+        return {"error": "入力値が正しくありません"}, 400
+
+    try:
+        parsed_date = datetime.strptime(
+            memo_date, "%Y-%m-%d"
+        ).date()
+    except ValueError:
+        return {"error": "日付が正しくありません"}, 400
+
+    if len(memo_text) > 10000:
+        return {"error": "メモは10000文字以内にしてください"}, 400
+
+    if not isinstance(alarms, list) or len(alarms) > 4:
+        return {"error": "アラームは4件までです"}, 400
+
+    parsed_alarms = []
+    used_numbers = set()
+
+    for alarm in alarms:
+
+        if not isinstance(alarm, dict):
+            return {"error": "アラームの形式が正しくありません"}, 400
+
+        alarm_number = alarm.get("alarm_number")
+        recipient_email = alarm.get("recipient_email")
+        subject = alarm.get("subject")
+        body = alarm.get("body", "")
+        scheduled_at = alarm.get("scheduled_at")
+
+        if type(alarm_number) is not int or not 1 <= alarm_number <= 4:
+            return {"error": "アラーム番号が正しくありません"}, 400
+
+        if alarm_number in used_numbers:
+            return {"error": "アラーム番号が重複しています"}, 400
+
+        used_numbers.add(alarm_number)
+
+        if not all(isinstance(value, str) for value in (
+            recipient_email, subject, body, scheduled_at
+        )):
+            return {"error": "アラームの入力値が正しくありません"}, 400
+
+        recipient_email = recipient_email.strip()
+        subject = subject.strip()
+
+        if (
+            not recipient_email
+            or "@" not in recipient_email
+            or not subject
+            or not scheduled_at
+        ):
+            return {"error": "アラームの必須項目を入力してください"}, 400
+
+        try:
+            alarm_datetime = datetime.strptime(
+                scheduled_at, "%Y-%m-%dT%H:%M"
+            ).replace(tzinfo=ZoneInfo("Asia/Tokyo"))
+
+        except ValueError:
+            return {"error": "アラーム日時が正しくありません"}, 400
+
+        if alarm_datetime <= datetime.now(timezone.utc):
+            return {"error": "アラーム日時は未来にしてください"}, 400
+
+        parsed_alarms.append((
+            alarm_number,
+            recipient_email,
+            subject,
+            body,
+            alarm_datetime
+        ))
+
+    create_schedule_memo_alarms_table()
+
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+
+    try:
+        cur.execute("""
+            INSERT INTO schedule_memos (
+                user_id,
+                event_id,
+                memo_date,
+                memo_text,
+                tag,
+                tag_color
+            )
+            VALUES (%s, NULL, %s, %s, %s, %s)
+            ON CONFLICT (user_id, memo_date)
+                WHERE event_id IS NULL
+            DO UPDATE SET
+                memo_text = EXCLUDED.memo_text,
+                tag = EXCLUDED.tag,
+                tag_color = EXCLUDED.tag_color,
+                updated_at = CURRENT_TIMESTAMP
+            RETURNING id
+        """, (
+            user_id,
+            parsed_date,
+            memo_text,
+            tag,
+            tag_color
+        ))
+
+        memo_id = cur.fetchone()[0]
+
+        for (
+            alarm_number,
+            recipient_email,
+            subject,
+            body,
+            alarm_datetime
+        ) in parsed_alarms:
+
+            cur.execute("""
+                INSERT INTO schedule_memo_alarms (
+                    memo_id,
+                    alarm_number,
+                    recipient_email,
+                    subject,
+                    body,
+                    scheduled_at
+                )
+                VALUES (%s, %s, %s, %s, %s, %s)
+                ON CONFLICT (memo_id, alarm_number)
+                DO UPDATE SET
+                    recipient_email = EXCLUDED.recipient_email,
+                    subject = EXCLUDED.subject,
+                    body = EXCLUDED.body,
+                    scheduled_at = EXCLUDED.scheduled_at,
+                    status = 'pending',
+                    sent_at = NULL,
+                    attempt_count = 0,
+                    updated_at = CURRENT_TIMESTAMP
+            """, (
+                memo_id,
+                alarm_number,
+                recipient_email,
+                subject,
+                body,
+                alarm_datetime
+            ))
+
+        conn.commit()
+
+        return {
+            "success": True,
+            "memo_id": memo_id
+        }
 
     except Exception:
         conn.rollback()
