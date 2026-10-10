@@ -607,6 +607,9 @@ def schedule():
             if date_key not in saved_date_memos:
                 continue
 
+            if status == "sent":
+                continue
+                
             saved_date_memos[date_key]["alarms"].append({
                 "alarm_number": alarm_number,
                 "recipient_email": recipient_email,
@@ -617,7 +620,7 @@ def schedule():
                 ).strftime("%Y-%m-%dT%H:%M"),
                 "status": status
             })
-
+                
     cur.close()
     conn.close()
         
@@ -1573,7 +1576,6 @@ def schedule_memo_date_save():
                     scheduled_at
                 )
                 VALUES (%s, %s, %s, %s, %s, %s)
-                ON CONFLICT (memo_id, alarm_number)
                 DO UPDATE SET
                     recipient_email = EXCLUDED.recipient_email,
                     subject = EXCLUDED.subject,
@@ -1583,6 +1585,11 @@ def schedule_memo_date_save():
                     sent_at = NULL,
                     attempt_count = 0,
                     updated_at = CURRENT_TIMESTAMP
+                WHERE schedule_memo_alarms.status IN ('sent', 'cancelled')
+                   OR schedule_memo_alarms.recipient_email IS DISTINCT FROM EXCLUDED.recipient_email
+                   OR schedule_memo_alarms.subject IS DISTINCT FROM EXCLUDED.subject
+                   OR schedule_memo_alarms.body IS DISTINCT FROM EXCLUDED.body
+                   OR schedule_memo_alarms.scheduled_at IS DISTINCT FROM EXCLUDED.scheduled_at
             """, (
                 memo_id,
                 alarm_number,
