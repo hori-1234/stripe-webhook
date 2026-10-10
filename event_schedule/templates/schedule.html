@@ -263,10 +263,19 @@
         }
 
         @media (min-width: 1001px) {
+            .date-row {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+
             .date-row .date-memo-button {
+                float: none !important;
                 margin-right: 12px;
+                flex-shrink: 0;
             }
         }
+        
         .date-row.saturday {
             background: #0066cc;
             color: white;
