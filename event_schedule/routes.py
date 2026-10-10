@@ -529,9 +529,33 @@ def schedule():
         row[0] for row in cur.fetchall()
     ]
 
+    # ログイン中のユーザーのイベントメモを取得
+    saved_event_memos = {}
+
+    memo_user_id = session.get("memo_user_id")
+
+    if memo_user_id:
+        cur.execute("""
+            SELECT
+                event_id,
+                memo_text,
+                tag,
+                tag_color
+            FROM schedule_memos
+            WHERE user_id = %s
+              AND event_id IS NOT NULL
+        """, (memo_user_id,))
+
+        for event_id, memo_text, tag, tag_color in cur.fetchall():
+            saved_event_memos[event_id] = {
+                "memo_text": memo_text or "",
+                "tag": tag or "",
+                "tag_color": tag_color or "#ffff99"
+            }
+
     cur.close()
     conn.close()
-
+        
     display_events = []
 
     for event in events:
@@ -609,6 +633,7 @@ def schedule():
         locations=locations,
         performer_search_dates=performer_search_dates,
         registered_performers=registered_performers,
+        saved_event_memos=saved_event_memos,
         memo_login_email=get_logged_in_memo_email()
     ))
 
