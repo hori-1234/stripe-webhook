@@ -556,7 +556,7 @@ def schedule():
 
         # ログイン中のユーザーの日付メモを取得
         cur.execute("""
-            SELECT memo_date, memo_text
+            SELECT memo_date, memo_text, tag, tag_color
             FROM schedule_memos
             WHERE user_id = %s
               AND event_id IS NULL
@@ -564,8 +564,12 @@ def schedule():
               AND EXTRACT(MONTH FROM memo_date) = %s
         """, (memo_user_id, year, month))
 
-        for memo_date, memo_text in cur.fetchall():
-            saved_date_memos[memo_date.isoformat()] = memo_text or ""
+        for memo_date, memo_text, tag, tag_color in cur.fetchall():
+            saved_date_memos[memo_date.isoformat()] = {
+                "memo_text": memo_text or "",
+                "tag": tag or "",
+                "tag_color": tag_color or "#ffff99"
+            }
     
     cur.close()
     conn.close()
