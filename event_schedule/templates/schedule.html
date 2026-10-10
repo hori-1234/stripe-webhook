@@ -850,8 +850,9 @@
                     {% endif %}
 
                     <button type="button" class="event-edit-button date-memo-button" onclick="toggleDateMemo('{{ search_date.date.isoformat() }}')" style="float: none; cursor: pointer; {% if date_memo.get('memo_text') or (date_tag and date_tag != '付箋なし') %}background: yellow; color: red;{% endif %}">
-                    メモ
-                </button>
+                        メモ
+                    </button>
+                </div>
             </div>
 
             <div id="date-memo-{{ search_date.date.isoformat() }}" class="event-memo-area" style="display: none;">
