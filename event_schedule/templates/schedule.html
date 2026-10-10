@@ -919,10 +919,10 @@
                                     編集
                                 </a>
 
-                                <button type="button" class="event-edit-button date-memo-button" onclick="toggleDateMemo('{{ year }}-{{ '%02d'|format(month) }}-{{ '%02d'|format(date.day) }}')" style="float: right; cursor: pointer;">
+                                <button type="button" class="event-edit-button event-memo-button" onclick="toggleMemo({{ event.id }})">
                                     メモ
                                 </button>
-                            </div>                    
+                            </div>      
                         </div>
 
                         {% if event.performers %}
@@ -1034,9 +1034,28 @@
 
         <div id="date-memo-{{ year }}-{{ '%02d'|format(month) }}-{{ '%02d'|format(date.day) }}" class="event-memo-area" style="display: none;">
             <div class="event-memo-title">マイメモ</div>
-            <textarea rows="3" placeholder="この日のメモを入力" style="display: block; width: 100%; max-width: 600px; box-sizing: border-box; padding: 8px; font-size: 14px;"></textarea>
-        </div>
 
+            <div class="event-memo-sticky">
+                <label for="date-memo-sticky-{{ year }}-{{ month }}-{{ date.day }}">付箋</label>
+
+                <select id="date-memo-sticky-{{ year }}-{{ month }}-{{ date.day }}" name="sticky" style="width: 85px; padding: 2px 4px; font-size: 13px;">
+                    <option value="">なし</option>
+                    <option value="参加">参加</option>
+                    <option value="検討中">検討中</option>
+                    <option value="チケ発">チケ発</option>
+                    <option value="事前準備">事前準備</option>
+                    <option value="練習">練習</option>
+                </select>
+
+                <input type="color" id="date-memo-color-{{ year }}-{{ month }}-{{ date.day }}" name="sticky_color" value="#ffff99" title="付箋の色を選択" style="width: 32px; height: 26px; padding: 0; cursor: pointer; vertical-align: middle;">
+            </div>
+
+            <div class="event-memo-text">
+                <label for="date-memo-text-{{ year }}-{{ month }}-{{ date.day }}">メモ</label>
+                <textarea id="date-memo-text-{{ year }}-{{ month }}-{{ date.day }}" name="memo_text" rows="3" placeholder="メモを入力" style="display: block; width: 100%; max-width: 600px; box-sizing: border-box; padding: 8px; font-size: 14px;"></textarea>
+            </div>
+        </div>
+            
         {% set event_number = namespace(value=0) %}
 
         {% for event in events %}
