@@ -979,9 +979,9 @@
             <div class="event-memo-title">マイメモ</div>
 
             <div class="event-memo-sticky">
-                <label for="date-memo-sticky-{{ year }}-{{ month }}-{{ date.day }}">付箋</label>
+                <label for="date-memo-sticky-{{ year }}-{{ '%02d'|format(month) }}-{{ '%02d'|format(date.day) }}">付箋</label>
 
-                <select id="date-memo-sticky-{{ year }}-{{ month }}-{{ date.day }}" name="sticky" style="width: 85px; padding: 2px 4px; font-size: 13px;">
+                <select id="date-memo-sticky-{{ year }}-{{ '%02d'|format(month) }}-{{ '%02d'|format(date.day) }}" name="sticky" style="width: 85px; padding: 2px 4px; font-size: 13px;">
                     <option value="">なし</option>
                     <option value="参加">参加</option>
                     <option value="検討中">検討中</option>
@@ -990,7 +990,7 @@
                     <option value="練習">練習</option>
                 </select>
 
-                <input type="color" id="date-memo-color-{{ year }}-{{ month }}-{{ date.day }}" name="sticky_color" value="#ffff99" title="付箋の色を選択" style="width: 32px; height: 26px; padding: 0; cursor: pointer; vertical-align: middle;">
+                <input type="color" id="date-memo-color-{{ year }}-{{ '%02d'|format(month) }}-{{ '%02d'|format(date.day) }}" name="sticky_color" value="#ffff99" title="付箋の色を選択" style="width: 32px; height: 26px; padding: 0; cursor: pointer; vertical-align: middle;">
             </div>
 
             <div class="event-memo-text">
@@ -1532,8 +1532,10 @@
 
         async function saveDateMemo(dateKey) {
         const textarea = document.getElementById(`date-memo-text-${dateKey}`);
+        const sticky = document.getElementById(`date-memo-sticky-${dateKey}`);
+        const color = document.getElementById(`date-memo-color-${dateKey}`);
 
-        if (!textarea) {
+        if (!textarea || !sticky || !color) {
             alert("日付メモの入力欄が見つかりません");
             return;
         }
@@ -1546,7 +1548,9 @@
                 },
                 body: JSON.stringify({
                     memo_date: dateKey,
-                    memo_text: textarea.value
+                    memo_text: textarea.value,
+                    tag: sticky.value,
+                    tag_color: color.value
                 })
             });
 
