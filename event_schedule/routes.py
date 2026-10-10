@@ -531,6 +531,7 @@ def schedule():
 
     # ログイン中のユーザーのイベントメモを取得
     saved_event_memos = {}
+    saved_date_memos = {}
 
     memo_user_id = session.get("memo_user_id")
 
@@ -553,6 +554,19 @@ def schedule():
                 "tag_color": tag_color or "#ffff99"
             }
 
+        # ログイン中のユーザーの日付メモを取得
+        cur.execute("""
+            SELECT memo_date, memo_text
+            FROM schedule_memos
+            WHERE user_id = %s
+              AND event_id IS NULL
+              AND EXTRACT(YEAR FROM memo_date) = %s
+              AND EXTRACT(MONTH FROM memo_date) = %s
+        """, (memo_user_id, year, month))
+
+        for memo_date, memo_text in cur.fetchall():
+            saved_date_memos[memo_date.isoformat()] = memo_text or ""
+    
     cur.close()
     conn.close()
         
@@ -634,6 +648,7 @@ def schedule():
         performer_search_dates=performer_search_dates,
         registered_performers=registered_performers,
         saved_event_memos=saved_event_memos,
+        saved_date_memos=saved_date_memos,
         memo_login_email=get_logged_in_memo_email()
     ))
 
