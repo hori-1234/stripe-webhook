@@ -978,24 +978,29 @@
         <div id="date-memo-{{ year }}-{{ '%02d'|format(month) }}-{{ '%02d'|format(date.day) }}" class="event-memo-area" style="display: none;">
             <div class="event-memo-title">マイメモ</div>
 
+            {% set date_memo = saved_date_memos.get('%04d-%02d-%02d'|format(year, month, date.day), {}) %}
+            {% set date_tag = date_memo.get('tag', '') %}
+            {% set date_color = date_memo.get('tag_color', '#ffff99') %}
+
             <div class="event-memo-sticky">
                 <label for="date-memo-sticky-{{ year }}-{{ '%02d'|format(month) }}-{{ '%02d'|format(date.day) }}">付箋</label>
 
                 <select id="date-memo-sticky-{{ year }}-{{ '%02d'|format(month) }}-{{ '%02d'|format(date.day) }}" name="sticky" style="width: 85px; padding: 2px 4px; font-size: 13px;">
-                    <option value="">なし</option>
-                    <option value="参加">参加</option>
-                    <option value="検討中">検討中</option>
-                    <option value="チケ発">チケ発</option>
-                    <option value="事前準備">事前準備</option>
-                    <option value="練習">練習</option>
+                    <option value="" {% if date_tag in ['', '付箋なし'] %}selected{% endif %}>なし</option>
+                    <option value="参加" {% if date_tag == '参加' %}selected{% endif %}>参加</option>
+                    <option value="検討中" {% if date_tag == '検討中' %}selected{% endif %}>検討中</option>
+                    <option value="チケ発" {% if date_tag == 'チケ発' %}selected{% endif %}>チケ発</option>
+                    <option value="事前準備" {% if date_tag == '事前準備' %}selected{% endif %}>事前準備</option>
+                    <option value="練習" {% if date_tag == '練習' %}selected{% endif %}>練習</option>
                 </select>
 
-                <input type="color" id="date-memo-color-{{ year }}-{{ '%02d'|format(month) }}-{{ '%02d'|format(date.day) }}" name="sticky_color" value="#ffff99" title="付箋の色を選択" style="width: 32px; height: 26px; padding: 0; cursor: pointer; vertical-align: middle;">
+                <input type="color" id="date-memo-color-{{ year }}-{{ '%02d'|format(month) }}-{{ '%02d'|format(date.day) }}" name="sticky_color" value="{{ date_color }}" title="付箋の色を選択" style="width: 32px; height: 26px; padding: 0; cursor: pointer; vertical-align: middle;">
             </div>
 
             <div class="event-memo-text">
+                
                 <label for="date-memo-text-{{ year }}-{{ '%02d'|format(month) }}-{{ '%02d'|format(date.day) }}">メモ</label>
-                <textarea id="date-memo-text-{{ year }}-{{ '%02d'|format(month) }}-{{ '%02d'|format(date.day) }}" name="memo_text" rows="3" placeholder="メモを入力" style="display: block; width: 100%; max-width: 600px; box-sizing: border-box; padding: 8px; font-size: 14px;">{{ saved_date_memos.get('%04d-%02d-%02d'|format(year, month, date.day), '') }}</textarea>
+                <textarea id="date-memo-text-{{ year }}-{{ '%02d'|format(month) }}-{{ '%02d'|format(date.day) }}" name="memo_text" rows="3" placeholder="メモを入力" style="display: block; width: 100%; max-width: 600px; box-sizing: border-box; padding: 8px; font-size: 14px;">{{ saved_date_memos.get('%04d-%02d-%02d'|format(year, month, date.day), {}).get('memo_text', '') }}</textarea>
             </div>
 
             <div class="event-memo-alarm">
