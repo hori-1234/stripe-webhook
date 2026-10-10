@@ -999,10 +999,10 @@
                     </span>
                 {% endif %}
 
-                <button type="button" class="event-edit-button date-memo-button" onclick="toggleDateMemo('{{ year }}-{{ '%02d'|format(month) }}-{{ '%02d'|format(date.day) }}')" style="float: none; cursor: pointer;">
+                <button type="button" class="event-edit-button date-memo-button" onclick="toggleDateMemo('{{ year }}-{{ '%02d'|format(month) }}-{{ '%02d'|format(date.day) }}')" style="float: none; cursor: pointer; {% if date_memo.get('memo_text') or (date_tag and date_tag != '付箋なし') %}background: yellow; color: red;{% endif %}">
                     メモ
                 </button>
-
+                
             </div>
         </div>
 
@@ -1212,7 +1212,7 @@
                                     編集
                                 </a>
 
-                                <button type="button" class="event-edit-button event-memo-button" onclick="toggleMemo({{ event.id }})">
+                                <button type="button" class="event-edit-button event-memo-button" onclick="toggleMemo({{ event.id }})" style="{% if saved_event_memos.get(event.id, {}).get('memo_text') or saved_event_memos.get(event.id, {}).get('tag') %}background: yellow; color: red;{% endif %}">
                                     メモ
                                 </button>
                             </div>
