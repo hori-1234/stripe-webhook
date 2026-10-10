@@ -5,12 +5,15 @@
                             <label for="memo-sticky-{{ event.id }}">付箋</label>
 
                             <select id="memo-sticky-{{ event.id }}" name="sticky" style="width: 85px; padding: 2px 4px; font-size: 13px;">
-                                <option value="">なし</option>
-                                <option value="参加">参加</option>
-                                <option value="検討中">検討中</option>
-                                <option value="チケ発">チケ発</option>
-                                <option value="事前準備">事前準備</option>
-                                <option value="練習">練習</option>
+
+                            <select id="memo-sticky-{{ event.id }}" name="sticky" style="width: 85px; padding: 2px 4px; font-size: 13px;">
+                              {% set saved_tag = saved_event_memos.get(event.id, {}).get("tag", "") %}
+                              <option value="" {% if saved_tag == "" %}selected{% endif %}>なし</option>
+                              <option value="参加" {% if saved_tag == "参加" %}selected{% endif %}>参加</option>
+                              <option value="検討中" {% if saved_tag == "検討中" %}selected{% endif %}>検討中</option>
+                              <option value="チケ発" {% if saved_tag == "チケ発" %}selected{% endif %}>チケ発</option>
+                              <option value="事前準備" {% if saved_tag == "事前準備" %}selected{% endif %}>事前準備</option>
+                              <option value="練習" {% if saved_tag == "練習" %}selected{% endif %}>練習</option>
                             </select>
                             <input type="color" id="memo-color-{{ event.id }}" name="sticky_color" value="{{ saved_event_memos.get(event.id, {}).get('tag_color') or '#ffff99' }}" title="付箋の色を選択" style="width: 32px; height: 26px; padding: 0; cursor: pointer; vertical-align: middle;">
                         </div>
