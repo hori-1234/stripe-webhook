@@ -1314,9 +1314,15 @@ def schedule_memo_date_save():
     memo_date = data.get("memo_date")
     memo_text = data.get("memo_text", "")
 
+    tag = data.get("tag", "")
+    tag_color = data.get("tag_color", "#ffff99")
+
     if not isinstance(memo_date, str) or not isinstance(memo_text, str):
         return {"error": "入力値が正しくありません"}, 400
 
+    if not isinstance(tag, str) or not isinstance(tag_color, str):
+        return {"error": "付箋の入力値が正しくありません"}, 400
+        
     try:
         parsed_date = datetime.strptime(memo_date, "%Y-%m-%d").date()
     except ValueError:
@@ -1329,24 +1335,31 @@ def schedule_memo_date_save():
     cur = conn.cursor()
 
     try:
+
         cur.execute("""
             INSERT INTO schedule_memos (
                 user_id,
                 event_id,
                 memo_date,
-                memo_text
+                memo_text,
+                tag,
+                tag_color
             )
-            VALUES (%s, NULL, %s, %s)
+            VALUES (%s, NULL, %s, %s, %s, %s)
             ON CONFLICT (user_id, memo_date)
                 WHERE event_id IS NULL
             DO UPDATE SET
                 memo_text = EXCLUDED.memo_text,
+                tag = EXCLUDED.tag,
+                tag_color = EXCLUDED.tag_color,
                 updated_at = CURRENT_TIMESTAMP
             RETURNING id
         """, (
             user_id,
             parsed_date,
-            memo_text
+            memo_text,
+            tag,
+            tag_color
         ))
 
         memo_id = cur.fetchone()[0]
