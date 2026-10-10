@@ -415,6 +415,15 @@ def login_memo_user(email):
 
     return True
 
+def login_memo_user_by_id(user_id, email):
+    session.clear()
+    session.permanent = True
+    session["memo_user_id"] = user_id
+    session["memo_user_email"] = email
+
+    return True
+
+
 def logout_memo_user():
     session.pop("memo_user_id", None)
     session.pop("memo_user_email", None)
