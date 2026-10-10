@@ -781,6 +781,11 @@
                 {% if search_date.holiday_name %}
                     （{{ search_date.holiday_name }}）
                 {% endif %}
+
+                <button type="button" class="date-memo-button" style="float: right; padding: 7px 14px; font-size: 14px; cursor: pointer;">
+                    メモ
+                </button>
+
             </div>
 
             {% set event_number = namespace(value=0) %}
@@ -990,6 +995,11 @@
             {% if date.holiday_name %}
                 （{{ date.holiday_name }}）
             {% endif %}
+
+            <button type="button" class="date-memo-button" style="float: right; padding: 7px 14px; font-size: 14px; cursor: pointer;">
+                メモ
+            </button>
+            
         </div>
 
         {% set event_number = namespace(value=0) %}
