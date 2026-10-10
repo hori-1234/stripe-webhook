@@ -387,6 +387,7 @@ def schedule():
     selected_locations = request.args.getlist("location")
     event_name_keyword = request.args.get("event_name", "").strip()
     performer_keyword = request.args.get("performer", "").strip()
+    mymemo_mode = request.args.get("mymemo") == "1"
 
     if month == 1:
         prev_year = year - 1
@@ -440,6 +441,9 @@ def schedule():
     """
     if performer_keyword:
         query += " WHERE event_date >= CURRENT_DATE"
+        params = []
+    elif mymemo_mode:
+        query += " WHERE 1 = 1"
         params = []
     else:
         query += """
@@ -681,17 +685,35 @@ def schedule():
         })
     performer_search_dates = []
 
-    if performer_keyword:
-        unique_dates = sorted({
-            event["event_date"]
-            for event in display_events
-        })
+    if performer_keyword or mymemo_mode:
+        if mymemo_mode:
+            unique_dates = set()
+
+            for date_key, memo in saved_date_memos.items():
+                if memo.get("memo_text") or memo.get("tag"):
+                    unique_dates.add(
+                        datetime.strptime(date_key, "%Y-%m-%d").date()
+                    )
+
+            for event in display_events:
+                memo = saved_event_memos.get(event["id"], {})
+
+                if memo.get("memo_text") or memo.get("tag"):
+                    unique_dates.add(event["event_date"])
+
+            unique_dates = sorted(unique_dates)
+        else:
+            unique_dates = sorted({
+                event["event_date"]
+                for event in display_events
+            })
 
         performer_search_dates = [
             {
                 "date": search_date,
                 "holiday_name": jpholiday.is_holiday_name(search_date)
             }
+
             for search_date in unique_dates
         ]
 
