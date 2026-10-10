@@ -614,10 +614,15 @@
 
     <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 25px;">
 
-        <h1 style="margin: 0; min-width: 0; font-size: clamp(18px, 4vw, 32px);">
+        <div style="min-width: 0;">
+            <h1 style="margin: 0; font-size: clamp(18px, 4vw, 32px);">
             イベントスケジュール
-        </h1>
-
+            </h1>
+            <div style="font-size: 13px; margin-top: 5px;">
+                本日の閲覧数　{{ today_views }}
+            </div>
+        </div>
+        
         <div style="flex-shrink: 0;">
 
             {% if memo_login_email %}
