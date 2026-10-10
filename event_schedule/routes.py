@@ -561,10 +561,15 @@ def schedule():
             FROM schedule_memos
             WHERE user_id = %s
               AND event_id IS NULL
-              AND EXTRACT(YEAR FROM memo_date) = %s
-              AND EXTRACT(MONTH FROM memo_date) = %s
-        """, (memo_user_id, year, month))
-
+              AND (
+                  %s <> ''
+                  OR (
+                      EXTRACT(YEAR FROM memo_date) = %s
+                      AND EXTRACT(MONTH FROM memo_date) = %s
+                  )
+              )
+        """, (memo_user_id, performer_keyword, year, month))
+    
         for memo_date, memo_text, tag, tag_color in cur.fetchall():
             saved_date_memos[memo_date.isoformat()] = {
                 "memo_text": memo_text or "",
