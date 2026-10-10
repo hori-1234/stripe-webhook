@@ -917,21 +917,35 @@
                                 <div id="memo-alarm-{{ event.id }}" style="display: none;">
                                     <div>アラーム設定（最大4件）</div>
 
-                                        <div class="memo-alarm-item">
-                                            <div>アラーム1</div>
+                                    <div class="memo-alarm-item" style="margin-top: 12px;">
+                                        <div style="margin-bottom: 8px;">アラーム1</div>
 
-                                            <label>通知日時</label>
-                                            <input type="datetime-local" name="alarm_datetime_1">
+                                        <div style="display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start;">
 
-                                            <label>送信先メールアドレス</label>
-                                            <input type="email" name="alarm_email_1" placeholder="example@example.com">
+                                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                                <div style="display: flex; align-items: center; gap: 8px;">
+                                                    <label style="width: 60px;">通知日時</label>
+                                                    <input type="datetime-local" name="alarm_datetime_1" style="width: 210px; padding: 6px; font-size: 14px;">
+                                                </div>
 
-                                            <label>件名</label>
-                                            <input type="text" name="alarm_subject_1" placeholder="件名を入力">
+                                                <div style="display: flex; align-items: center; gap: 8px;">
+                                                    <label style="width: 60px;">メアド</label>
+                                                    <input type="email" name="alarm_email_1" placeholder="example@example.com" style="width: 210px; padding: 6px; font-size: 14px;">
+                                                </div>
 
-                                            <label>本文</label>
-                                            <textarea name="alarm_body_1" rows="3" placeholder="通知内容を入力"></textarea>
+                                                <div style="display: flex; align-items: center; gap: 8px;">
+                                                    <label style="width: 60px;">件名</label>
+                                                    <input type="text" name="alarm_subject_1" placeholder="件名を入力" style="width: 210px; padding: 6px; font-size: 14px;">
+                                                </div>
+                                            </div>
+
+                                            <div style="display: flex; align-items: flex-start; gap: 8px;">
+                                                <label style="padding-top: 6px;">本文</label>
+                                                <textarea name="alarm_body_1" rows="5" placeholder="通知内容を入力" style="width: 280px; padding: 6px; font-size: 14px; box-sizing: border-box;"></textarea>
+                                            </div>
+
                                         </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
