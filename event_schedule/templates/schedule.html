@@ -1353,6 +1353,24 @@
 </div>
 
 <script>
+    let isMyMemoMode = false;
+
+    function toggleMyMemoMode() {
+        const button = document.getElementById("mymemo-toggle-button");
+
+        isMyMemoMode = !isMyMemoMode;
+
+        if (isMyMemoMode) {
+            button.textContent = "通常";
+            button.style.background = "#fff";
+            button.style.color = "#000";
+        } else {
+            button.textContent = "マイメモ";
+            button.style.background = "yellow";
+            button.style.color = "red";
+        }
+    }
+    
     function clearSearch() {
         sessionStorage.removeItem("performerScrollTop");
         window.location.href = "/schedule";
