@@ -1470,6 +1470,53 @@ def schedule_memo_date_save():
     parsed_alarms = []
     used_numbers = set()
 
+    # 1日あたりのメール通知予約上限
+    DAILY_ALARM_RESERVATION_LIMIT = 90
+
+    def get_daily_alarm_reservation_count(
+        cur, target_date, memo_id, alarm_numbers
+    ):
+        # 予約中・送信処理中の件数を取得
+        cur.execute("""
+            SELECT COUNT(*)
+            FROM schedule_memo_alarms
+            WHERE status IN ('pending', 'processing')
+              AND (scheduled_at AT TIME ZONE 'Asia/Tokyo')::date = %s
+              AND NOT (
+                  memo_id = %s
+                  AND alarm_number = ANY(%s)
+                  AND status = 'pending'
+              )
+        """, (
+            target_date,
+            memo_id,
+            alarm_numbers
+        ))
+
+        reserved_count = cur.fetchone()[0]
+
+        # 送信履歴テーブルの存在を確認
+        cur.execute("""
+            SELECT to_regclass(
+                'public.schedule_memo_alarm_send_history'
+            )
+        """)
+
+        history_table = cur.fetchone()[0]
+
+        sent_count = 0
+
+        if history_table is not None:
+            cur.execute("""
+                SELECT COUNT(*)
+                FROM schedule_memo_alarm_send_history
+                WHERE (sent_at AT TIME ZONE 'Asia/Tokyo')::date = %s
+            """, (target_date,))
+
+            sent_count = cur.fetchone()[0]
+
+        return reserved_count + sent_count
+
     for alarm in alarms:
 
         if not isinstance(alarm, dict):
@@ -1558,6 +1605,60 @@ def schedule_memo_date_save():
 
         memo_id = cur.fetchone()[0]
 
+        # 同時予約による上限超過を防ぐ
+        cur.execute("""
+            SELECT pg_advisory_xact_lock(20261010, 1)
+        """)
+
+        # 今回保存するアラーム番号
+        alarm_numbers = [
+            alarm[0] for alarm in parsed_alarms
+        ]
+
+        # 通知日ごとに予約数を確認
+        alarm_dates = {
+            alarm[4].date() for alarm in parsed_alarms
+        }
+
+        for target_date in alarm_dates:
+
+            existing_count = get_daily_alarm_reservation_count(
+                cur,
+                target_date,
+                memo_id,
+                alarm_numbers
+            )
+
+            # 同じ日付で予約済みのアラーム番号を取得
+            cur.execute("""
+                SELECT alarm_number
+                FROM schedule_memo_alarms
+                WHERE memo_id = %s
+                  AND status = 'pending'
+                  AND (scheduled_at AT TIME ZONE 'Asia/Tokyo')::date = %s
+            """, (memo_id, target_date))
+
+            existing_alarm_numbers = {
+                row[0] for row in cur.fetchall()
+            }
+
+            # 今回保存するアラームを日付ごとに数える
+            new_count = sum(
+                1 for alarm in parsed_alarms
+                if alarm[4].date() == target_date
+            )
+            )
+
+            if existing_count + new_count > DAILY_ALARM_RESERVATION_LIMIT:
+                conn.rollback()
+                return {
+                    "error": (
+                        "ご指定の日付は、メール通知の予約が上限に達しているため、"
+                        "新たに設定できません。恐れ入りますが、"
+                        "別の日付をご指定ください。"
+                    )
+                }, 409
+
         for (
             alarm_number,
             recipient_email,
@@ -1576,6 +1677,7 @@ def schedule_memo_date_save():
                     scheduled_at
                 )
                 VALUES (%s, %s, %s, %s, %s, %s)
+                ON CONFLICT (memo_id, alarm_number)
                 DO UPDATE SET
                     recipient_email = EXCLUDED.recipient_email,
                     subject = EXCLUDED.subject,
