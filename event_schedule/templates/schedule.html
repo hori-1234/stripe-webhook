@@ -919,7 +919,7 @@
                                     編集
                                 </a>
 
-                                <button type="button" class="event-edit-button event-memo-button" onclick="toggleMemo({{ event.id }})">
+                                <button type="button" class="event-edit-button date-memo-button" onclick="toggleDateMemo('{{ year }}-{{ '%02d'|format(month) }}-{{ '%02d'|format(date.day) }}')" style="float: right; cursor: pointer;">
                                     メモ
                                 </button>
                             </div>                    
