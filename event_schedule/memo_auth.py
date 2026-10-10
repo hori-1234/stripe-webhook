@@ -5,6 +5,18 @@ import psycopg2
 from datetime import datetime, timedelta, timezone
 from flask import Blueprint, request, session, redirect, url_for, render_template
 from werkzeug.security import generate_password_hash, check_password_hash
+from authlib.integrations.flask_client import OAuth
+oauth = OAuth()
+
+oauth.register(
+    name="google",
+    client_id=os.environ.get("GOOGLE_CLIENT_ID"),
+    client_secret=os.environ.get("GOOGLE_CLIENT_SECRET"),
+    server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
+    client_kwargs={
+        "scope": "openid email profile"
+    }
+)
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
