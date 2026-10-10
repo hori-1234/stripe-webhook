@@ -409,6 +409,7 @@ def login_memo_user(email):
     if user_id is None:
         return False
 
+    session.permanent = True
     session["memo_user_id"] = user_id
     session["memo_user_email"] = email
 
@@ -417,6 +418,7 @@ def login_memo_user(email):
 def logout_memo_user():
     session.pop("memo_user_id", None)
     session.pop("memo_user_email", None)
+    session.permanent = False
 
     return True
 
