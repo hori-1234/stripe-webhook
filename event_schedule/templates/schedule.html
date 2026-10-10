@@ -593,6 +593,16 @@
             .performer-list {
                 padding-left: 80px;
             }
+        }
+        
+        @media (min-width: 1001px) {
+            .event-sticky-label {
+                font-size: 16px !important;
+                padding: 7px 12px !important;
+                font-weight: bold;
+            }
+        }
+        
     </style>
 </head>
 
@@ -1125,7 +1135,7 @@
                         <div style="position: relative; flex-shrink: 0;">
 
                             {% if memo_tag %}
-                                <span style="
+                                <span class="event-sticky-label" style="
                                     position: absolute;
                                     right: 100%;
                                     top: 50%;
