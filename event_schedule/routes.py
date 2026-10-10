@@ -1302,74 +1302,69 @@ def schedule_memo_event_save():
         cur.close()
         conn.close()
 
-@event_schedule_bp.route("/schedule/memo/date/save", methods=["POST"])
-def schedule_memo_date_save():
-
-    user_id = session.get("memo_user_id")
-
-    if not user_id:
-        return {"error": "ログインが必要です"}, 401
-
-    data = request.get_json(silent=True)
-
-    if not isinstance(data, dict):
-        return {"error": "送信データが正しくありません"}, 400
-
-    memo_date = data.get("memo_date")
-    memo_text = data.get("memo_text", "")
-
-    tag = data.get("tag", "")
-    tag_color = data.get("tag_color", "#ffff99")
-
-    if not isinstance(memo_date, str) or not isinstance(memo_text, str):
-        return {"error": "入力値が正しくありません"}, 400
-
-    if not isinstance(tag, str) or not isinstance(tag_color, str):
-        return {"error": "付箋の入力値が正しくありません"}, 400
-        
-    try:
-        parsed_date = datetime.strptime(memo_date, "%Y-%m-%d").date()
-    except ValueError:
-        return {"error": "日付が正しくありません"}, 400
-
-    if len(memo_text) > 10000:
-        return {"error": "メモは10000文字以内にしてください"}, 400
-
+def create_schedule_memo_alarms_table():
     conn = psycopg2.connect(DATABASE_URL)
     cur = conn.cursor()
 
     try:
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS schedule_memo_alarms (
+                id BIGSERIAL PRIMARY KEY,
+
+                memo_id BIGINT NOT NULL
+                    REFERENCES schedule_memos(id)
+                    ON DELETE CASCADE,
+
+                alarm_number INTEGER NOT NULL
+                    CHECK (alarm_number BETWEEN 1 AND 4),
+
+                recipient_email TEXT NOT NULL,
+                subject TEXT NOT NULL,
+                body TEXT NOT NULL DEFAULT '',
+
+                scheduled_at TIMESTAMPTZ NOT NULL,
+
+                status TEXT NOT NULL DEFAULT 'pending'
+                    CHECK (status IN (
+                        'pending',
+                        'processing',
+                        'sent',
+                        'failed',
+                        'cancelled'
+                    )),
+
+                sent_at TIMESTAMPTZ,
+                attempt_count INTEGER NOT NULL DEFAULT 0,
+
+                created_at TIMESTAMPTZ NOT NULL
+                    DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMPTZ NOT NULL
+                    DEFAULT CURRENT_TIMESTAMP,
+
+                CONSTRAINT schedule_memo_alarms_number_unique
+                    UNIQUE (memo_id, alarm_number)
+            )
+        """)
 
         cur.execute("""
-            INSERT INTO schedule_memos (
-                user_id,
-                event_id,
-                memo_date,
-                memo_text,
-                tag,
-                tag_color
-            )
-            VALUES (%s, NULL, %s, %s, %s, %s)
-            ON CONFLICT (user_id, memo_date)
-                WHERE event_id IS NULL
-            DO UPDATE SET
-                memo_text = EXCLUDED.memo_text,
-                tag = EXCLUDED.tag,
-                tag_color = EXCLUDED.tag_color,
-                updated_at = CURRENT_TIMESTAMP
-            RETURNING id
-        """, (
-            user_id,
-            parsed_date,
-            memo_text,
-            tag,
-            tag_color
-        ))
+            ALTER TABLE schedule_memo_alarms
+            ADD COLUMN IF NOT EXISTS alarm_number INTEGER
+        """)
 
-        memo_id = cur.fetchone()[0]
+        cur.execute("""
+            CREATE UNIQUE INDEX IF NOT EXISTS
+                idx_schedule_memo_alarms_memo_number
+            ON schedule_memo_alarms (memo_id, alarm_number)
+        """)
+
+        cur.execute("""
+            CREATE INDEX IF NOT EXISTS
+                idx_schedule_memo_alarms_pending
+            ON schedule_memo_alarms (scheduled_at)
+            WHERE status = 'pending'
+        """)
+
         conn.commit()
-
-        return {"success": True, "memo_id": memo_id}
 
     except Exception:
         conn.rollback()
