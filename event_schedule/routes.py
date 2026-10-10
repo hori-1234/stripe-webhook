@@ -1282,3 +1282,67 @@ def schedule_memo_event_save():
     finally:
         cur.close()
         conn.close()
+
+@event_schedule_bp.route("/schedule/memo/date/save", methods=["POST"])
+def schedule_memo_date_save():
+
+    user_id = session.get("memo_user_id")
+
+    if not user_id:
+        return {"error": "ログインが必要です"}, 401
+
+    data = request.get_json(silent=True)
+
+    if not isinstance(data, dict):
+        return {"error": "送信データが正しくありません"}, 400
+
+    memo_date = data.get("memo_date")
+    memo_text = data.get("memo_text", "")
+
+    if not isinstance(memo_date, str) or not isinstance(memo_text, str):
+        return {"error": "入力値が正しくありません"}, 400
+
+    try:
+        parsed_date = datetime.strptime(memo_date, "%Y-%m-%d").date()
+    except ValueError:
+        return {"error": "日付が正しくありません"}, 400
+
+    if len(memo_text) > 10000:
+        return {"error": "メモは10000文字以内にしてください"}, 400
+
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+
+    try:
+        cur.execute("""
+            INSERT INTO schedule_memos (
+                user_id,
+                event_id,
+                memo_date,
+                memo_text
+            )
+            VALUES (%s, NULL, %s, %s)
+            ON CONFLICT (user_id, memo_date)
+                WHERE event_id IS NULL
+            DO UPDATE SET
+                memo_text = EXCLUDED.memo_text,
+                updated_at = CURRENT_TIMESTAMP
+            RETURNING id
+        """, (
+            user_id,
+            parsed_date,
+            memo_text
+        ))
+
+        memo_id = cur.fetchone()[0]
+        conn.commit()
+
+        return {"success": True, "memo_id": memo_id}
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        cur.close()
+        conn.close()
