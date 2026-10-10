@@ -1235,6 +1235,16 @@
                             <textarea id="memo-text-{{ event.id }}" name="memo_text" rows="3" placeholder="メモを入力" style="display: block; width: 100%; max-width: 600px; box-sizing: border-box; padding: 8px; font-size: 14px;"></textarea>
                         </div>
 
+                        <div style="margin: 10px 0;">
+                            <button
+                                type="button"
+                                onclick="saveEventMemo({{ event.id }})"
+                                style="padding: 7px 20px; font-size: 14px; cursor: pointer;"
+                            >
+                                保存
+                            </button>
+                        </div>
+
                         <div class="event-memo-alarm">
                             <button type="button" onclick="toggleMemoAlarm({{ event.id }})" style="width: 120px; padding: 2px 4px; font-size: 13px; cursor: pointer;">
                                 アラーム設定 ▼
