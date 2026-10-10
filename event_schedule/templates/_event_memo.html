@@ -1,78 +1,97 @@
-                    <div id="memo-{{ event.id }}" class="event-memo-area" style="display: none;">
-                        <div class="event-memo-title">メモ</div>
 
-                        <div class="event-memo-sticky">
-                            <label for="memo-sticky-{{ event.id }}">付箋</label>
+<div id="memo-{{ event.id }}" class="event-memo-area" style="display: none;">
+    <div class="event-memo-title">メモ</div>
 
-                            <select id="memo-sticky-{{ event.id }}" name="sticky" style="width: 85px; padding: 2px 4px; font-size: 13px;">
-                              {% set saved_tag = saved_event_memos.get(event.id, {}).get("tag", "") %}
-                              <option value="" {% if saved_tag == "" %}selected{% endif %}>なし</option>
-                              <option value="参加" {% if saved_tag == "参加" %}selected{% endif %}>参加</option>
-                              <option value="検討中" {% if saved_tag == "検討中" %}selected{% endif %}>検討中</option>
-                              <option value="チケ発" {% if saved_tag == "チケ発" %}selected{% endif %}>チケ発</option>
-                              <option value="事前準備" {% if saved_tag == "事前準備" %}selected{% endif %}>事前準備</option>
-                              <option value="練習" {% if saved_tag == "練習" %}selected{% endif %}>練習</option>
-                            </select>
-                            <input type="color" id="memo-color-{{ event.id }}" name="sticky_color" value="{{ saved_event_memos.get(event.id, {}).get('tag_color') or '#ffff99' }}" title="付箋の色を選択" style="width: 32px; height: 26px; padding: 0; cursor: pointer; vertical-align: middle;">
+    <div class="event-memo-sticky">
+        <label for="memo-sticky-{{ event.id }}">付箋</label>
+
+        {% set saved_tag = saved_event_memos.get(event.id, {}).get("tag", "") %}
+
+        <select id="memo-sticky-{{ event.id }}" name="sticky" style="width: 85px; padding: 2px 4px; font-size: 13px;">
+            <option value="" {% if saved_tag == "" %}selected{% endif %}>なし</option>
+            <option value="参加" {% if saved_tag == "参加" %}selected{% endif %}>参加</option>
+            <option value="検討中" {% if saved_tag == "検討中" %}selected{% endif %}>検討中</option>
+            <option value="チケ発" {% if saved_tag == "チケ発" %}selected{% endif %}>チケ発</option>
+            <option value="事前準備" {% if saved_tag == "事前準備" %}selected{% endif %}>事前準備</option>
+            <option value="練習" {% if saved_tag == "練習" %}selected{% endif %}>練習</option>
+        </select>
+
+        <input
+            type="color"
+            id="memo-color-{{ event.id }}"
+            name="sticky_color"
+            value="{{ saved_event_memos.get(event.id, {}).get('tag_color') or '#ffff99' }}"
+            title="付箋の色を選択"
+            style="width: 32px; height: 26px; padding: 0; cursor: pointer; vertical-align: middle;"
+        >
+    </div>
+
+    <div class="event-memo-text">
+        <label for="memo-text-{{ event.id }}">メモ</label>
+        <textarea id="memo-text-{{ event.id }}" name="memo_text" rows="3" placeholder="メモを入力" style="display: block; width: 100%; max-width: 600px; box-sizing: border-box; padding: 8px; font-size: 14px;">{{ saved_event_memos.get(event.id, {}).get("memo_text", "") }}</textarea>
+    </div>
+
+    <div style="margin: 10px 0;">
+        <button
+            type="button"
+            onclick="saveEventMemo({{ event.id }})"
+            style="padding: 7px 20px; font-size: 14px; cursor: pointer;"
+        >
+            保存
+        </button>
+    </div>
+
+    <div class="event-memo-alarm">
+        <button
+            type="button"
+            onclick="toggleMemoAlarm({{ event.id }})"
+            style="width: 120px; padding: 2px 4px; font-size: 13px; cursor: pointer;"
+        >
+            アラーム設定 ▼
+        </button>
+
+        <div id="memo-alarm-{{ event.id }}" style="display: none;">
+            <div>アラーム設定（最大4件）</div>
+
+            <div class="memo-alarm-item" style="margin-top: 12px;">
+                <div style="margin-bottom: 8px;">アラーム1</div>
+
+                <div style="display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start;">
+
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <label style="width: 70px; flex-shrink: 0;">通知日時</label>
+                            <input type="datetime-local" name="alarm_datetime_1" style="width: 210px; padding: 6px; font-size: 14px;">
                         </div>
-                        
-                        <div class="event-memo-text">
-                            <label for="memo-text-{{ event.id }}">メモ</label>
-                            <textarea id="memo-text-{{ event.id }}" name="memo_text" rows="3" placeholder="メモを入力" style="display: block; width: 100%; max-width: 600px; box-sizing: border-box; padding: 8px; font-size: 14px;">{{ saved_event_memos.get(event.id, {}).get("memo_text", "") }}</textarea>
-                        </div>
-                        
-                        <div style="margin: 10px 0;">
-                            <button
-                                type="button"
-                                onclick="saveEventMemo({{ event.id }})"
-                                style="padding: 7px 20px; font-size: 14px; cursor: pointer;"
-                            >
-                                保存
-                            </button>
+
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <label style="width: 70px; flex-shrink: 0;">メアド</label>
+                            <input type="email" name="alarm_email_1" placeholder="example@example.com" style="width: 210px; padding: 6px; font-size: 14px;">
                         </div>
 
-                        <div class="event-memo-alarm">
-                            <button type="button" onclick="toggleMemoAlarm({{ event.id }})" style="width: 120px; padding: 2px 4px; font-size: 13px; cursor: pointer;">
-                                アラーム設定 ▼
-                            </button>
-
-                            <div id="memo-alarm-{{ event.id }}" style="display: none;">
-                                <div>アラーム設定（最大4件）</div>
-
-                                <div class="memo-alarm-item" style="margin-top: 12px;">
-                                    <div style="margin-bottom: 8px;">アラーム1</div>
-
-                                    <div style="display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start;">
-
-                                        <div style="display: flex; flex-direction: column; gap: 8px;">
-                                            <div style="display: flex; align-items: center; gap: 8px;">
-                                                <label style="width: 70px; flex-shrink: 0;">通知日時</label>
-                                                <input type="datetime-local" name="alarm_datetime_1" style="width: 210px; padding: 6px; font-size: 14px;">
-                                            </div>
-
-                                            <div style="display: flex; align-items: center; gap: 8px;">
-                                                <label style="width: 70px; flex-shrink: 0;">メアド</label>
-                                                <input type="email" name="alarm_email_1" placeholder="example@example.com" style="width: 210px; padding: 6px; font-size: 14px;">
-                                            </div>
-
-                                            <div style="display: flex; align-items: center; gap: 8px;">
-                                                <label style="width: 70px; flex-shrink: 0;">件名</label>
-                                                <input type="text" name="alarm_subject_1" placeholder="件名を入力" style="width: 210px; padding: 6px; font-size: 14px;">
-                                            </div>
-                                        </div>
-
-                                        <div style="display: flex; align-items: flex-start; gap: 8px;">
-                                            <label style="padding-top: 6px;">本文</label>
-                                            <textarea name="alarm_body_1" rows="5" placeholder="通知内容を入力" style="width: 280px; padding: 6px; font-size: 14px; box-sizing: border-box;"></textarea>
-                                        </div>
-                                        
-                                    </div>
-                                </div>
-
-                                <button type="button" class="memo-alarm-add-button" onclick="addMemoAlarm({{ event.id }})" style="margin-top: 10px; padding: 7px 14px; font-size: 14px; cursor: pointer;">
-                                    ＋ アラーム追加
-                                </button>
-                                
-                            </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <label style="width: 70px; flex-shrink: 0;">件名</label>
+                            <input type="text" name="alarm_subject_1" placeholder="件名を入力" style="width: 210px; padding: 6px; font-size: 14px;">
                         </div>
-                    </div>                    
+                    </div>
+
+                    <div style="display: flex; align-items: flex-start; gap: 8px;">
+                        <label style="padding-top: 6px;">本文</label>
+                        <textarea name="alarm_body_1" rows="5" placeholder="通知内容を入力" style="width: 280px; padding: 6px; font-size: 14px; box-sizing: border-box;"></textarea>
+                    </div>
+
+                </div>
+            </div>
+
+            <button
+                type="button"
+                class="memo-alarm-add-button"
+                onclick="addMemoAlarm({{ event.id }})"
+                style="margin-top: 10px; padding: 7px 14px; font-size: 14px; cursor: pointer;"
+            >
+                ＋ アラーム追加
+            </button>
+
+        </div>
+    </div>
+</div>
