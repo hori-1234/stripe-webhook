@@ -17,9 +17,9 @@
                         
                         <div class="event-memo-text">
                             <label for="memo-text-{{ event.id }}">メモ</label>
-                            <textarea id="memo-text-{{ event.id }}" name="memo_text" rows="3" placeholder="メモを入力" style="display: block; width: 100%; max-width: 600px; box-sizing: border-box; padding: 8px; font-size: 14px;"></textarea>
+                            <textarea id="memo-text-{{ event.id }}" name="memo_text" rows="3" placeholder="メモを入力" style="display: block; width: 100%; max-width: 600px; box-sizing: border-box; padding: 8px; font-size: 14px;">{{ saved_event_memos.get(event.id, {}).get("memo_text", "") }}</textarea>
                         </div>
-
+                        
                         <div style="margin: 10px 0;">
                             <button
                                 type="button"
