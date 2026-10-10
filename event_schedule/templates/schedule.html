@@ -1049,6 +1049,9 @@
                 <div id="date-memo-alarm-{{ year }}-{{ '%02d'|format(month) }}-{{ '%02d'|format(date.day) }}" style="display: none;">
                     <div>アラーム設定（最大4件）</div>
 
+                    {% set saved_alarms = saved_date_memos.get('%04d-%02d-%02d'|format(year, month, date.day), {}).get('alarms', []) %}
+                    {% set alarm1 = saved_alarms | selectattr('alarm_number', 'equalto', 1) | first | default(none) %}
+
                     <div class="memo-alarm-item" data-alarm-number="1" style="margin-top: 12px;">
                         <div style="margin-bottom: 8px;">アラーム1</div>
 
@@ -1582,7 +1585,12 @@
                 const subject = item.querySelector('input[name^="alarm_subject_"]');
                 const body = item.querySelector('textarea[name^="alarm_body_"]');
 
+                const alarmNumber = Number(
+                    datetime?.name.match(/^alarm_datetime_([1-4])$/)?.[1]
+                );
+
                 alarms.push({
+                    alarm_number: alarmNumber,
                     scheduled_at: datetime ? datetime.value : "",
                     recipient_email: email ? email.value.trim() : "",
                     subject: subject ? subject.value.trim() : "",
