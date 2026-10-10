@@ -614,25 +614,24 @@
 
     <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 25px;">
         
-        <div style="min-width: 0;">
-            <div style="display: flex; align-items: flex-start; flex-wrap: wrap; gap: 8px 16px;">
-                <h1 style="margin: 0; font-size: clamp(18px, 4vw, 32px);">
+    <div style="min-width: 0;">
+        <div class="schedule-title-area" style="min-width: 0;">
+            <h1 style="margin: 0; font-size: clamp(18px, 4vw, 32px);">
                 イベントスケジュール
-                </h1>
+            </h1>
 
-                <button
-                    type="button"
-                    id="mymemo-toggle-button"
-                    onclick="toggleMyMemoMode()"
-                    style="padding: 6px 14px; font-size: 14px; cursor: pointer;"
-                >
-                    マイメモ
-                </button>
-            </div>
-
-            <div style="font-size: 18px; font-weight: bold; margin-top: 5px;">
+            <div class="schedule-today-views" style="font-size: 18px; font-weight: bold; margin-top: 5px;">
                 本日の閲覧数　{{ today_views }}
             </div>
+
+            <button
+                type="button"
+                id="mymemo-toggle-button"
+                onclick="toggleMyMemoMode()"
+                style="padding: 10px 22px; font-size: 16px; cursor: pointer;"
+            >
+                マイメモ
+            </button>
         </div>
         
         <div style="flex-shrink: 0;">
