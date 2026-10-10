@@ -654,9 +654,9 @@
                 id="mymemo-toggle-button"
                 class="event-edit-button"
                 onclick="toggleMyMemoMode()"
-                style="width: 110px; padding: 10px 0; font-size: 16px; font-weight: bold; background: yellow; color: red; cursor: pointer;"
+                style="width: 110px; padding: 10px 0; font-size: 16px; font-weight: bold; background: #fff; color: #000; cursor: pointer;"
             >
-                マイメモ
+                通常
             </button>
         </div>
      </div>
@@ -1361,13 +1361,13 @@
         isMyMemoMode = !isMyMemoMode;
 
         if (isMyMemoMode) {
-            button.textContent = "通常";
-            button.style.background = "#fff";
-            button.style.color = "#000";
-        } else {
             button.textContent = "マイメモ";
             button.style.background = "yellow";
             button.style.color = "red";
+        } else {
+            button.textContent = "通常";
+            button.style.background = "#fff";
+            button.style.color = "#000";
         }
     }
     
