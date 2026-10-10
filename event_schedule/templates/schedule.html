@@ -932,7 +932,15 @@
 
             {% for event in events %}
 
-                {% if event.event_date == search_date.date %}
+                {% set event_memo = saved_event_memos.get(event.id, {}) %}
+
+                {% if event.event_date == search_date.date
+                    and (
+                        request.args.get('mymemo') != '1'
+                        or event_memo.get('memo_text')
+                        or (event_memo.get('tag') and event_memo.get('tag') != '付箋なし')
+                    )
+                %}
 
                     {% set event_number.value = event_number.value + 1 %}
 
