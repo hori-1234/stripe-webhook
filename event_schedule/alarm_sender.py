@@ -5,6 +5,29 @@ from zoneinfo import ZoneInfo
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
+def create_alarm_send_history_table():
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+
+    try:
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS schedule_memo_alarm_send_history (
+                id BIGSERIAL PRIMARY KEY,
+                alarm_id BIGINT,
+                recipient_email TEXT NOT NULL,
+                subject TEXT NOT NULL,
+                sent_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        conn.commit()
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        cur.close()
+        conn.close()
 
 def get_pending_alarms():
     now_jst = datetime.now(ZoneInfo("Asia/Tokyo"))
@@ -50,6 +73,7 @@ def get_pending_alarms():
 
 
 def process_pending_alarms():
+    create_alarm_send_history_table()
     alarms = get_pending_alarms()
 
     for alarm_id, recipient_email, subject, body in alarms:
