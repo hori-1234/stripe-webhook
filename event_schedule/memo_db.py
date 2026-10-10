@@ -19,6 +19,22 @@ def create_schedule_memo_users_table():
             )
         """)
 
+        cur.execute("""
+            ALTER TABLE schedule_memo_users
+            ADD COLUMN IF NOT EXISTS google_sub TEXT
+        """)
+
+        cur.execute("""
+            CREATE UNIQUE INDEX IF NOT EXISTS
+                idx_schedule_memo_users_google_sub
+            ON schedule_memo_users (google_sub)
+        """)
+
+        cur.execute("""
+            ALTER TABLE schedule_memo_users
+            ADD COLUMN IF NOT EXISTS google_link_prompt_snoozed_until TIMESTAMPTZ
+        """)
+
         conn.commit()
 
     except Exception:
