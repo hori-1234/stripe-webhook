@@ -1003,6 +1003,17 @@
                     アラーム設定 ▼
                 </button>
 
+                <div style="margin: 10px 0;">
+                    <button
+                        type="button"
+                        class="date-memo-save-button"
+                        style="padding: 7px 20px; font-size: 14px; cursor: pointer;"
+                        onclick="saveDateMemo('{{ year }}-{{ '%02d'|format(month) }}-{{ '%02d'|format(date.day) }}')"
+                    >
+                        保存
+                </button>
+                </div>
+
                 <div id="date-memo-alarm-{{ year }}-{{ '%02d'|format(month) }}-{{ '%02d'|format(date.day) }}" style="display: none;">
                     <div>アラーム設定（最大4件）</div>
 
@@ -1518,6 +1529,42 @@
     if (performerList && savedScrollTop !== null) {
         performerList.scrollTop = Number(savedScrollTop);
     }
+
+        async function saveDateMemo(dateKey) {
+        const textarea = document.getElementById(`date-memo-text-${dateKey}`);
+
+        if (!textarea) {
+            alert("日付メモの入力欄が見つかりません");
+            return;
+        }
+
+        try {
+            const response = await fetch("/schedule/memo/date/save", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    memo_date: dateKey,
+                    memo_text: textarea.value
+                })
+            });
+
+            const result = await response.json();
+
+            if (!response.ok || !result.success) {
+                alert(result.error || "保存に失敗しました");
+                return;
+            }
+
+            alert("日付メモを保存しました");
+
+        } catch (error) {
+            console.error(error);
+            alert("通信エラーが発生しました");
+        }
+    }
+    
 </script>
 
 </body>
