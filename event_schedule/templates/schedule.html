@@ -995,7 +995,7 @@
 
             <div class="event-memo-text">
                 <label for="date-memo-text-{{ year }}-{{ month }}-{{ date.day }}">メモ</label>
-                <textarea id="date-memo-text-{{ year }}-{{ month }}-{{ date.day }}" name="memo_text" rows="3" placeholder="メモを入力" style="display: block; width: 100%; max-width: 600px; box-sizing: border-box; padding: 8px; font-size: 14px;"></textarea>
+                 <textarea id="date-memo-text-{{ year }}-{{ month }}-{{ date.day }}" name="memo_text" rows="3" placeholder="メモを入力" style="display: block; width: 100%; max-width: 600px; box-sizing: border-box; padding: 8px; font-size: 14px;">{{ saved_date_memos.get('%04d-%02d-%02d'|format(year, month, date.day), '') }}</textarea>
             </div>
 
             <div class="event-memo-alarm">
