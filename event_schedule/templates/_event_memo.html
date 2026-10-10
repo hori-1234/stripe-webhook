@@ -5,8 +5,6 @@
                             <label for="memo-sticky-{{ event.id }}">付箋</label>
 
                             <select id="memo-sticky-{{ event.id }}" name="sticky" style="width: 85px; padding: 2px 4px; font-size: 13px;">
-
-                            <select id="memo-sticky-{{ event.id }}" name="sticky" style="width: 85px; padding: 2px 4px; font-size: 13px;">
                               {% set saved_tag = saved_event_memos.get(event.id, {}).get("tag", "") %}
                               <option value="" {% if saved_tag == "" %}selected{% endif %}>なし</option>
                               <option value="参加" {% if saved_tag == "参加" %}selected{% endif %}>参加</option>
