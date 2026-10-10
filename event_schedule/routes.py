@@ -4,6 +4,7 @@ import calendar
 import jpholiday
 import secrets
 
+from zoneinfo import ZoneInfo
 from event_schedule.memo_auth import get_logged_in_memo_email
 from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, url_for, session, make_response
@@ -611,9 +612,9 @@ def schedule():
                 "recipient_email": recipient_email,
                 "subject": subject,
                 "body": body or "",
-                "scheduled_at": scheduled_at.strftime(
-                    "%Y-%m-%dT%H:%M"
-                ),
+                "scheduled_at": scheduled_at.astimezone(
+                    ZoneInfo("Asia/Tokyo")
+                ).strftime("%Y-%m-%dT%H:%M"),
                 "status": status
             })
 
