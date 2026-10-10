@@ -12,7 +12,7 @@
                                 <option value="事前準備">事前準備</option>
                                 <option value="練習">練習</option>
                             </select>
-                            <input type="color" id="memo-color-{{ event.id }}" name="sticky_color" value="#ffff99" title="付箋の色を選択" style="width: 32px; height: 26px; padding: 0; cursor: pointer; vertical-align: middle;">
+                            <input type="color" id="memo-color-{{ event.id }}" name="sticky_color" value="{{ saved_event_memos.get(event.id, {}).get('tag_color') or '#ffff99' }}" title="付箋の色を選択" style="width: 32px; height: 26px; padding: 0; cursor: pointer; vertical-align: middle;">
                         </div>
                         
                         <div class="event-memo-text">
