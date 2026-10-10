@@ -1054,8 +1054,50 @@
                 <label for="date-memo-text-{{ year }}-{{ month }}-{{ date.day }}">メモ</label>
                 <textarea id="date-memo-text-{{ year }}-{{ month }}-{{ date.day }}" name="memo_text" rows="3" placeholder="メモを入力" style="display: block; width: 100%; max-width: 600px; box-sizing: border-box; padding: 8px; font-size: 14px;"></textarea>
             </div>
+
+            <div class="event-memo-alarm">
+                <button type="button" onclick="toggleDateMemoAlarm('{{ year }}-{{ '%02d'|format(month) }}-{{ '%02d'|format(date.day) }}')" style="width: 120px; padding: 2px 4px; font-size: 13px; cursor: pointer;">
+                    アラーム設定 ▼
+                </button>
+
+                <div id="date-memo-alarm-{{ year }}-{{ '%02d'|format(month) }}-{{ '%02d'|format(date.day) }}" style="display: none;">
+                    <div>アラーム設定（最大4件）</div>
+
+                    <div class="memo-alarm-item" data-alarm-number="1" style="margin-top: 12px;">
+                        <div style="margin-bottom: 8px;">アラーム1</div>
+
+                        <div style="display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start;">
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <label style="width: 70px; flex-shrink: 0;">通知日時</label>
+                                    <input type="datetime-local" name="alarm_datetime_1" style="width: 210px; padding: 6px; font-size: 14px;">
+                                </div>
+
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <label style="width: 70px; flex-shrink: 0;">メアド</label>
+                                    <input type="email" name="alarm_email_1" placeholder="example@example.com" style="width: 210px; padding: 6px; font-size: 14px;">
+                                </div>
+
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <label style="width: 70px; flex-shrink: 0;">件名</label>
+                                    <input type="text" name="alarm_subject_1" placeholder="件名を入力" style="width: 210px; padding: 6px; font-size: 14px;">
+                                </div>
+                            </div>
+
+                            <div style="display: flex; align-items: flex-start; gap: 8px;">
+                                <label style="padding-top: 6px;">本文</label>
+                                <textarea name="alarm_body_1" rows="5" placeholder="通知内容を入力" style="width: 280px; padding: 6px; font-size: 14px; box-sizing: border-box;"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="button" class="memo-alarm-add-button" onclick="addDateMemoAlarm('{{ year }}-{{ '%02d'|format(month) }}-{{ '%02d'|format(date.day) }}')" style="margin-top: 10px; padding: 7px 14px; font-size: 14px; cursor: pointer;">
+                        ＋ アラーム追加
+                    </button>
+                </div>
+            </div>
         </div>
-            
+
         {% set event_number = namespace(value=0) %}
 
         {% for event in events %}
@@ -1353,6 +1395,17 @@
 
         memoArea.style.display =
             memoArea.style.display === "none" ? "block" : "none";
+    }
+
+    function toggleDateMemoAlarm(date) {
+        const alarmArea = document.getElementById("date-memo-alarm-" + date);
+
+        if (!alarmArea) {
+            return;
+        }
+
+        alarmArea.style.display =
+            alarmArea.style.display === "none" ? "block" : "none";
     }
 
     function addMemoAlarm(eventId) {
