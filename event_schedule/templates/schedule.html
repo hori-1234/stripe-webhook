@@ -1059,23 +1059,23 @@
                             <div style="display: flex; flex-direction: column; gap: 8px;">
                                 <div style="display: flex; align-items: center; gap: 8px;">
                                     <label style="width: 70px; flex-shrink: 0;">通知日時</label>
-                                    <input type="datetime-local" name="alarm_datetime_1" style="width: 210px; padding: 6px; font-size: 14px;">
+                                    <input type="datetime-local" name="alarm_datetime_1" value="{{ alarm1.scheduled_at if alarm1 else '' }}" style="width: 210px; padding: 6px; font-size: 14px;">        
                                 </div>
 
                                 <div style="display: flex; align-items: center; gap: 8px;">
                                     <label style="width: 70px; flex-shrink: 0;">メアド</label>
-                                    <input type="email" name="alarm_email_1" placeholder="example@example.com" style="width: 210px; padding: 6px; font-size: 14px;">
+                                    <input type="email" name="alarm_email_1" value="{{ alarm1.recipient_email if alarm1 else '' }}" placeholder="example@example.com" style="width: 210px; padding: 6px; font-size: 14px;">
                                 </div>
 
                                 <div style="display: flex; align-items: center; gap: 8px;">
                                     <label style="width: 70px; flex-shrink: 0;">件名</label>
-                                    <input type="text" name="alarm_subject_1" placeholder="件名を入力" style="width: 210px; padding: 6px; font-size: 14px;">
+                                    <input type="text" name="alarm_subject_1" value="{{ alarm1.subject | e if alarm1 else '' }}" placeholder="件名を入力" style="width: 210px; padding: 6px; font-size: 14px;">
                                 </div>
                             </div>
 
                             <div style="display: flex; align-items: flex-start; gap: 8px;">
                                 <label style="padding-top: 6px;">本文</label>
-                                <textarea name="alarm_body_1" rows="5" placeholder="通知内容を入力" style="width: 280px; padding: 6px; font-size: 14px; box-sizing: border-box;"></textarea>
+                                <textarea name="alarm_body_1" rows="5" placeholder="通知内容を入力" style="width: 280px; padding: 6px; font-size: 14px; box-sizing: border-box;">{{ alarm1.body if alarm1 else '' }}</textarea>
                             </div>
                         </div>
                     </div>
