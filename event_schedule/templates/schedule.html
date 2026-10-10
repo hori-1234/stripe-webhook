@@ -891,6 +891,12 @@
                             </div>                    
                         </div>
 
+                        {% if event.performers %}
+                            <div id="performers-{{ event.id }}" class="performer-list">
+                                出演者：{{ event.performers }}
+                            </div>
+                        {% endif %}
+
                         <div id="memo-{{ event.id }}" class="event-memo-area" style="display: none;">
                             <div class="event-memo-title">メモ</div>
 
@@ -959,15 +965,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        {% if event.performers %}
-                            <div
-                                id="performers-{{ event.id }}"
-                                class="performer-list"
-                            >
-                                出演者：{{ event.performers }}
-                            </div>
-                        {% endif %}
 
                     </div>
 
@@ -1101,6 +1098,12 @@
                         </div>
                     </div>
 
+                    {% if event.performers %}
+                        <div id="performers-{{ event.id }}" class="performer-list">
+                            出演者：{{ event.performers }}
+                        </div>
+                    {% endif %}
+
                     <div id="memo-{{ event.id }}" class="event-memo-area" style="display: none;">
                         <div class="event-memo-title">メモ</div>
 
@@ -1167,16 +1170,7 @@
                                 
                             </div>
                         </div>
-                    </div>
-
-                    {% if event.performers %}
-                        <div
-                            id="performers-{{ event.id }}"
-                            class="performer-list"
-                        >
-                            出演者：{{ event.performers }}
-                        </div>
-                    {% endif %}                        
+                    </div>                    
                         
                 </div>
 
