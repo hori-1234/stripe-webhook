@@ -1647,7 +1647,6 @@ def schedule_memo_date_save():
                 1 for alarm in parsed_alarms
                 if alarm[4].date() == target_date
             )
-            )
 
             if existing_count + new_count > DAILY_ALARM_RESERVATION_LIMIT:
                 conn.rollback()
