@@ -604,7 +604,32 @@
                 font-weight: bold;
             }
         }
-        
+
+                @media (min-width: 1001px) {
+            .schedule-title-area {
+                display: grid;
+                grid-template-columns: max-content max-content;
+                column-gap: 20px;
+                align-items: center;
+            }
+
+            .schedule-title-area h1 {
+                grid-column: 1;
+                grid-row: 1;
+            }
+
+            .schedule-today-views {
+                grid-column: 1;
+                grid-row: 2;
+            }
+
+            #mymemo-toggle-button {
+                grid-column: 2;
+                grid-row: 1;
+                align-self: center;
+            }
+        }
+
     </style>
 </head>
 
@@ -615,7 +640,7 @@
     <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 25px;">
         
     <div style="min-width: 0;">
-        <div class="schedule-title-area" style="min-width: 0;">
+         <div class="schedule-title-area" style="min-width: 0; position: relative;">
             <h1 style="margin: 0; font-size: clamp(18px, 4vw, 32px);">
                 イベントスケジュール
             </h1>
