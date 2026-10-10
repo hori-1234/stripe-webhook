@@ -785,9 +785,13 @@
                 <button type="button" class="date-memo-button" style="float: right; padding: 7px 14px; font-size: 14px; cursor: pointer;">
                     メモ
                 </button>
-
             </div>
 
+            <div id="date-memo-{{ search_date.date.isoformat() }}" class="event-memo-area" style="display: none;">
+                <div class="event-memo-title">マイメモ</div>
+                <textarea rows="3" placeholder="この日のメモを入力" style="display: block; width: 100%; max-width: 600px; box-sizing: border-box; padding: 8px; font-size: 14px;"></textarea>
+            </div>
+        
             {% set event_number = namespace(value=0) %}
 
             {% for event in events %}
@@ -996,7 +1000,11 @@
             <button type="button" class="date-memo-button" style="float: right; padding: 7px 14px; font-size: 14px; cursor: pointer;">
                 メモ
             </button>
-            
+        </div>
+
+        <div id="date-memo-{{ year }}-{{ '%02d'|format(month) }}-{{ '%02d'|format(date.day) }}" class="event-memo-area" style="display: none;">
+            <div class="event-memo-title">マイメモ</div>
+            <textarea rows="3" placeholder="この日のメモを入力" style="display: block; width: 100%; max-width: 600px; box-sizing: border-box; padding: 8px; font-size: 14px;"></textarea>
         </div>
 
         {% set event_number = namespace(value=0) %}
@@ -1278,6 +1286,24 @@
 
         alarmArea.style.display =
             alarmArea.style.display === "none" ? "block" : "none";
+    }
+
+    function toggleDateMemo(date) {
+        const isLoggedIn = {{ (memo_login_email is not none) | tojson }};
+
+        if (!isLoggedIn) {
+            window.location.href = "/schedule/login";
+            return;
+        }
+
+        const memoArea = document.getElementById("date-memo-" + date);
+
+        if (!memoArea) {
+            return;
+        }
+
+        memoArea.style.display =
+            memoArea.style.display === "none" ? "block" : "none";
     }
 
     function addMemoAlarm(eventId) {
