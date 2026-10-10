@@ -481,11 +481,20 @@ def memo_login_page():
         </form>
 
         <p>初回利用の場合は、認証後に自動登録されます。</p>
+        
+        <script>
+            const emailInput = document.querySelector('input[name="email"]');
+            const savedEmail = localStorage.getItem("schedule_login_email");
 
-        <p>
-            <a href="/schedule">スケジュールに戻る</a>
-        </p>
-    </body>
+            if (savedEmail) {
+                emailInput.value = savedEmail;
+            }
+
+            emailInput.closest("form").addEventListener("submit", function () {
+                localStorage.setItem("schedule_login_email", emailInput.value.trim());
+            });
+        </script>
+
     </html>
     """
 
