@@ -1156,3 +1156,104 @@ def schedule_mynote():
         "schedule_mynote.html",
         memo_login_email=memo_login_email
     )
+
+@event_schedule_bp.route("/schedule/memo/event/save", methods=["POST"])
+def schedule_memo_event_save():
+
+    user_id = session.get("memo_user_id")
+
+    if not user_id:
+        return {"error": "ログインが必要です"}, 401
+
+    data = request.get_json(silent=True)
+
+    if not isinstance(data, dict):
+        return {"error": "送信データが正しくありません"}, 400
+
+    event_id = data.get("event_id")
+    memo_text = data.get("memo_text", "")
+    tag = data.get("tag", "")
+    tag_color = data.get("tag_color", "#ffff99")
+
+    if type(event_id) is not int or event_id <= 0:
+        return {"error": "イベントIDが正しくありません"}, 400
+
+    if not all(isinstance(value, str) for value in (
+        memo_text, tag, tag_color
+    )):
+        return {"error": "メモの入力値が正しくありません"}, 400
+
+    if len(memo_text) > 10000:
+        return {"error": "メモは10000文字以内にしてください"}, 400
+
+    if tag not in ("", "参加", "検討中", "チケ発", "事前準備", "練習"):
+        return {"error": "付箋の種類が正しくありません"}, 400
+
+    import re
+
+    if not re.fullmatch(r"#[0-9a-fA-F]{6}", tag_color):
+        return {"error": "付箋の色が正しくありません"}, 400
+
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+
+    try:
+        cur.execute("""
+            SELECT event_date, event_name, location
+            FROM event_schedules
+            WHERE id = %s
+        """, (event_id,))
+
+        event = cur.fetchone()
+
+        if event is None:
+            return {"error": "イベントが見つかりません"}, 404
+
+        event_date, event_name, event_location = event
+
+        cur.execute("""
+            INSERT INTO schedule_memos (
+                user_id,
+                event_id,
+                memo_date,
+                event_name,
+                event_location,
+                memo_text,
+                tag,
+                tag_color
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            ON CONFLICT (user_id, event_id)
+                WHERE event_id IS NOT NULL
+            DO UPDATE SET
+                memo_date = EXCLUDED.memo_date,
+                event_name = EXCLUDED.event_name,
+                event_location = EXCLUDED.event_location,
+                memo_text = EXCLUDED.memo_text,
+                tag = EXCLUDED.tag,
+                tag_color = EXCLUDED.tag_color,
+                updated_at = CURRENT_TIMESTAMP
+            RETURNING id
+        """, (
+            user_id,
+            event_id,
+            event_date,
+            event_name,
+            event_location,
+            memo_text,
+            tag,
+            tag_color
+        ))
+
+        memo_id = cur.fetchone()[0]
+        conn.commit()
+
+        return {"success": True, "memo_id": memo_id}
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        cur.close()
+        conn.close()
