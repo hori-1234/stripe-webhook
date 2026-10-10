@@ -1408,6 +1408,72 @@
             alarmArea.style.display === "none" ? "block" : "none";
     }
 
+    function addDateMemoAlarm(date) {
+        const alarmArea = document.getElementById("date-memo-alarm-" + date);
+
+        if (!alarmArea) {
+            return;
+        }
+
+        const alarmItems = alarmArea.querySelectorAll(".memo-alarm-item");
+
+        if (alarmItems.length >= 4) {
+            alert("アラームは最大4件までです。");
+            return;
+        }
+
+        const usedNumbers = Array.from(alarmItems).map(item =>
+            Number(item.dataset.alarmNumber || 1)
+        );
+
+        let alarmNumber = 1;
+
+        while (usedNumbers.includes(alarmNumber)) {
+            alarmNumber++;
+        }
+
+        const alarmItem = document.createElement("div");
+        alarmItem.className = "memo-alarm-item";
+        alarmItem.dataset.alarmNumber = alarmNumber;
+        alarmItem.style.marginTop = "12px";
+
+        alarmItem.innerHTML = `
+            <div style="margin-bottom: 8px;">
+                アラーム${alarmNumber}
+                <button type="button" style="margin-left: 12px; padding: 6px 12px; font-size: 14px; cursor: pointer;" onclick="this.closest('.memo-alarm-item').remove()">
+                    削除
+                </button>
+            </div>
+
+            <div style="display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start;">
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <label style="width: 70px; flex-shrink: 0;">通知日時</label>
+                        <input type="datetime-local" name="alarm_datetime_${alarmNumber}" style="width: 210px; padding: 6px; font-size: 14px;">
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <label style="width: 70px; flex-shrink: 0;">メアド</label>
+                        <input type="email" name="alarm_email_${alarmNumber}" placeholder="example@example.com" style="width: 210px; padding: 6px; font-size: 14px;">
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <label style="width: 70px; flex-shrink: 0;">件名</label>
+                        <input type="text" name="alarm_subject_${alarmNumber}" placeholder="件名を入力" style="width: 210px; padding: 6px; font-size: 14px;">
+                    </div>
+                </div>
+
+                <div style="display: flex; align-items: flex-start; gap: 8px;">
+                    <label style="padding-top: 6px;">本文</label>
+                    <textarea name="alarm_body_${alarmNumber}" rows="5" placeholder="通知内容を入力" style="width: 280px; padding: 6px; font-size: 14px; box-sizing: border-box;"></textarea>
+                </div>
+            </div>
+        `;
+
+        const addButton = alarmArea.querySelector(".memo-alarm-add-button");
+        alarmArea.insertBefore(alarmItem, addButton);
+    }
+        
     function addMemoAlarm(eventId) {
         const alarmArea = document.getElementById("memo-alarm-" + eventId);
 
