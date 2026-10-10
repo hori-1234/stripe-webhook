@@ -1195,6 +1195,17 @@
             memoArea.style.display === "none" ? "block" : "none";
     }
 
+    function toggleMemoAlarm(eventId) {
+        const alarmArea = document.getElementById("memo-alarm-" + eventId);
+
+        if (!alarmArea) {
+            return;
+        }
+
+        alarmArea.style.display =
+            alarmArea.style.display === "none" ? "block" : "none";
+    }
+
     function updateSelectedLocations() {
         const checkedLocations = document.querySelectorAll(
             'input[name="location"]:checked'
