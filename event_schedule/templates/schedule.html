@@ -908,6 +908,16 @@
                                 <label for="memo-text-{{ event.id }}">メモ</label>
                                 <textarea id="memo-text-{{ event.id }}" name="memo_text" rows="3" placeholder="メモを入力" style="display: block; width: 100%; max-width: 600px; box-sizing: border-box; padding: 8px; font-size: 14px;"></textarea>
                             </div>
+
+                            <div class="event-memo-alarm">
+                                <button type="button" onclick="toggleMemoAlarm({{ event.id }})">
+                                    アラーム設定 ▼
+                                </button>
+
+                                <div id="memo-alarm-{{ event.id }}" style="display: none;">
+                                    <div>アラーム設定（最大4件）</div>
+                                </div>
+                            </div>
                         </div>
 
                         {% if event.performers %}
@@ -1066,6 +1076,16 @@
                         <div class="event-memo-text">
                             <label for="memo-text-{{ event.id }}">メモ</label>
                             <textarea id="memo-text-{{ event.id }}" name="memo_text" rows="3" placeholder="メモを入力" style="display: block; width: 100%; max-width: 600px; box-sizing: border-box; padding: 8px; font-size: 14px;"></textarea>
+                        </div>
+
+                        <div class="event-memo-alarm">
+                            <button type="button" onclick="toggleMemoAlarm({{ event.id }})">
+                                アラーム設定 ▼
+                            </button>
+
+                            <div id="memo-alarm-{{ event.id }}" style="display: none;">
+                                <div>アラーム設定（最大4件）</div>
+                            </div>
                         </div>
                     </div>
 
