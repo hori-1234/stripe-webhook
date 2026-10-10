@@ -620,6 +620,15 @@ def schedule():
                 ).strftime("%Y-%m-%dT%H:%M"),
                 "status": status
             })
+
+    cur.execute("""
+        SELECT COALESCE(SUM(view_count), 0)
+        FROM schedule_page_views
+        WHERE view_date =
+            (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo')::date
+    """)
+
+    today_views = cur.fetchone()[0]
                 
     cur.close()
     conn.close()
@@ -703,6 +712,7 @@ def schedule():
         registered_performers=registered_performers,
         saved_event_memos=saved_event_memos,
         saved_date_memos=saved_date_memos,
+        today_views=today_views,
         memo_login_email=get_logged_in_memo_email()
     ))
 
