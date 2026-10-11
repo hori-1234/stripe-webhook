@@ -830,7 +830,10 @@
                 
                 {% for performer in registered_performers %}
 
-                    <div class="registered-performer-row">
+                    <div
+                        class="registered-performer-row"
+                        data-original-order="{{ loop.index0 }}"
+                    >
 
                         {% if memo_login_email %}
                             <button
@@ -1626,10 +1629,16 @@
                     ".registered-performer"
                 ).dataset.performer;
 
-                return aName.localeCompare(
-                    bName,
-                    "ja"
+                const aOrder = Number(
+                    a.dataset.originalOrder
                 );
+
+                const bOrder = Number(
+                    b.dataset.originalOrder
+                );
+
+                return aOrder - bOrder;
+                    
             });
 
             rows.forEach(row => {
