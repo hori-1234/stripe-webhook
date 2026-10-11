@@ -1162,6 +1162,7 @@ def schedule_performer_click():
 
     return "", 204
 
+
 @event_schedule_bp.route("/schedule/admin/stats")
 @admin_required
 def schedule_admin_stats():
@@ -1185,16 +1186,118 @@ def schedule_admin_stats():
 
     today_views, month_views, total_views = cur.fetchone()
 
+    
+    # 出演者ステータスの検索条件
+    selected_genre = request.args.get("genre", "").strip()
+    sort_by = request.args.get("sort", "clicks")
+    sort_order = request.args.get("order", "desc")
+    page = max(1, request.args.get("page", 1, type=int))
+    per_page = 50
+
+    if sort_by not in ("clicks", "favorites"):
+        sort_by = "clicks"
+
+    if sort_order not in ("asc", "desc"):
+        sort_order = "desc"
+
     cur.execute("""
+        WITH performer_genres AS (
+            SELECT
+                performer_name,
+                ARRAY_AGG(DISTINCT genre ORDER BY genre)
+                    FILTER (WHERE genre IS NOT NULL AND genre <> '')
+                    AS genres
+            FROM (
+                SELECT
+                    REGEXP_SPLIT_TO_TABLE(
+                        TRIM(performers),
+                        '\\s+'
+                    ) AS performer_name,
+                    genre
+                FROM event_schedules
+                WHERE performers IS NOT NULL
+                  AND TRIM(performers) <> ''
+            ) AS names
+            WHERE performer_name <> ''
+            GROUP BY performer_name
+        ),
+        clicks AS (
+            SELECT
+                performer_name,
+                SUM(click_count) AS click_count
+            FROM schedule_performer_clicks
+            GROUP BY performer_name
+        ),
+        favorites AS (
+            SELECT
+                performer_name,
+                COUNT(*) AS favorite_count
+            FROM schedule_favorite_performers
+            GROUP BY performer_name
+        ),
+        all_performers AS (
+            SELECT performer_name FROM performer_genres
+            UNION
+            SELECT performer_name FROM clicks
+            UNION
+            SELECT performer_name FROM favorites
+        )
         SELECT
-            performer_name,
-            SUM(click_count) AS total_clicks
-        FROM schedule_performer_clicks
-        GROUP BY performer_name
-        ORDER BY total_clicks DESC, performer_name
+            p.performer_name,
+            COALESCE(g.genres, ARRAY[]::TEXT[]),
+            COALESCE(c.click_count, 0),
+            COALESCE(f.favorite_count, 0)
+        FROM all_performers p
+        LEFT JOIN performer_genres g
+            ON p.performer_name = g.performer_name
+        LEFT JOIN clicks c
+            ON p.performer_name = c.performer_name
+        LEFT JOIN favorites f
+            ON p.performer_name = f.performer_name
     """)
 
-    performer_ranking = cur.fetchall()
+    performer_status = []
+
+    for name, genres, clicks, favorites in cur.fetchall():
+
+        if selected_genre and selected_genre not in genres:
+            continue
+
+        performer_status.append({
+            "name": name,
+            "genres": genres,
+            "clicks": clicks,
+            "favorites": favorites
+        })
+
+    # 同数の場合は名前順で安定させる
+    performer_status.sort(
+        key=lambda p: performer_sort_key(p["name"])
+    )
+
+    sort_key = (
+        "favorites" if sort_by == "favorites"
+        else "clicks"
+    )
+
+    performer_status.sort(
+        key=lambda p: p[sort_key],
+        reverse=(sort_order == "desc")
+    )
+
+    total_performers = len(performer_status)
+    total_pages = max(
+        1,
+        (total_performers + per_page - 1) // per_page
+    )
+
+    page = min(page, total_pages)
+
+    start_index = (page - 1) * per_page
+
+    performer_status = performer_status[
+        start_index:start_index + per_page
+    ]
 
     cur.execute("""
         SELECT
@@ -1245,13 +1348,21 @@ def schedule_admin_stats():
         today_views=today_views,
         month_views=month_views,
         total_views=total_views,
-        performer_ranking=performer_ranking,
+        performer_status=performer_status,
+        selected_genre=selected_genre,
+        sort_by=sort_by,
+        sort_order=sort_order,
+        page=page,
+        per_page=per_page,
+        total_pages=total_pages,
+        total_performers=total_performers,
         daily_views=daily_views,
         device_views=device_views,
         today_unique=today_unique,
         month_unique=month_unique,
         total_unique=total_unique
     )
+
 
 @event_schedule_bp.route(
     "/schedule/admin/block-ip",
