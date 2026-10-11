@@ -44,8 +44,18 @@ def decrypt_edit_password(encrypted_password):
     fernet = Fernet(EVENT_PASSWORD_KEY.encode())
     return fernet.decrypt(encrypted_password.encode()).decode()
 
+
+def clean_performer_text(text):
+    return "".join(
+        char for char in text
+        if unicodedata.category(char) != "Cf"
+    )
+
 def performer_sort_key(name):
-    normalized = unicodedata.normalize("NFKC", name.strip())
+    normalized = unicodedata.normalize(
+        "NFKC",
+        clean_performer_text(name).strip()
+    )
 
     if not normalized:
         return (4, "")
@@ -229,7 +239,9 @@ def schedule_add():
         location = request.form.get("location", "").strip()
         event_name = request.form.get("event_name", "").strip()
         genre = request.form.get("genre", "").strip()
-        performers = request.form.get("performers", "").strip()
+        performers = clean_performer_text(
+            request.form.get("performers", "")
+        ).strip()
         streaming_available = request.form.get("streaming_available") == "1"
         edit_password = request.form.get("edit_password", "")
 
@@ -888,9 +900,10 @@ def schedule_edit_update(event_id):
     location = request.form.get("location", "").strip()
     event_name = request.form.get("event_name", "").strip()
     genre = request.form.get("genre", "").strip()
-    performers = request.form.get("performers", "").strip()
+    performers = clean_performer_text(
+        request.form.get("performers", "")
+    ).strip()
     streaming_available = request.form.get("streaming_available") == "1"
-    
     if len(event_name) > 40:
         return "イベント名は全角・半角問わず40文字以内で入力してください。", 400
 
