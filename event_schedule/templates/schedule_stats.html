@@ -20,12 +20,27 @@
             display: inline-block;
             margin-bottom: 20px;
         }
-
+        
         .stats-section {
             border: 1px solid #ccc;
             border-radius: 5px;
-            padding: 20px;
-            margin-bottom: 20px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+            width: 100%;
+            max-width: var(--section-width, 700px);
+        }
+
+        .stats-section h2 {
+            margin-top: 0;
+        }
+
+        .stats-section p {
+            margin: 10px 0;
+        }
+
+        .stats-section table {
+            width: 100%;
         }
 
         .stats-section h2 {
@@ -92,21 +107,21 @@
 
     <h1>イベントスケジュール アクセス統計</h1>
 
-    <div class="stats-section">
+    <div class="stats-section" style="--section-width: 350px;">
         <h2>閲覧数</h2>
         <p>今日：{{ today_views }} 回</p>
         <p>今月：{{ month_views }} 回</p>
         <p>累計：{{ total_views }} 回</p>
     </div>
 
-    <div class="stats-section">
+    <div class="stats-section" style="--section-width: 350px;">
         <h2>ユニークユーザー数</h2>
         <p>今日：{{ today_unique }} 人</p>
         <p>今月：{{ month_unique }} 人</p>
         <p>累計：{{ total_unique }} 人</p>
     </div>
 
-    <div class="stats-section">
+    <div class="stats-section" style="--section-width: 500px;">
         <h2>閲覧端末</h2>
 
         {% if device_views %}
@@ -141,7 +156,7 @@
         {% endif %}
     </div>
 
-    <div class="stats-section">
+    <div class="stats-section" style="--section-width: 850px;">
         <h2>出演者ステータス</h2>
 
         <form class="stats-filter"
@@ -256,7 +271,7 @@
         {% endif %}
     </div>
 
-    <div class="stats-section">
+    <div class="stats-section" style="--section-width: 500px;">
         <h2>日別閲覧数（直近30日間）</h2>
 
         {% if daily_views %}
