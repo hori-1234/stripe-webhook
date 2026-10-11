@@ -339,6 +339,8 @@ def schedule_add():
 @event_schedule_bp.route("/schedule")
 def schedule():
 
+    create_schedule_memo_users_table()
+
     visitor_id = request.cookies.get("schedule_visitor_id")
 
     if not visitor_id:
