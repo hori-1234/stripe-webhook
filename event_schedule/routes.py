@@ -1122,6 +1122,80 @@ def schedule_performer_favorite():
     return {"success": True, "favorite": favorite}
 
 
+@event_schedule_bp.route(
+    "/schedule/performer-favorites/save",
+    methods=["POST"]
+)
+def schedule_performer_favorites_save():
+
+    user_id = session.get("memo_user_id")
+
+    if not user_id:
+        return {"error": "ログインが必要です"}, 401
+
+    data = request.get_json(silent=True)
+
+    if not isinstance(data, dict):
+        return {"error": "不正なリクエストです"}, 400
+
+    performers = data.get("performers")
+
+    if (
+        not isinstance(performers, list)
+        or len(performers) > 5000
+        or any(
+            not isinstance(name, str)
+            or not name.strip()
+            or len(name) > 200
+            for name in performers
+        )
+    ):
+        return {"error": "入力値が正しくありません"}, 400
+
+    performers = list(dict.fromkeys(
+        name.strip() for name in performers
+    ))
+
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+
+    try:
+        # 同じユーザーの同時保存を直列化
+        cur.execute(
+            "SELECT pg_advisory_xact_lock(%s, %s)",
+            (739201, int(user_id))
+        )
+
+        cur.execute("""
+            DELETE FROM schedule_favorite_performers
+            WHERE user_id = %s
+        """, (user_id,))
+
+        for performer_name in performers:
+            cur.execute("""
+                INSERT INTO schedule_favorite_performers (
+                    user_id,
+                    performer_name
+                )
+                VALUES (%s, %s)
+            """, (user_id, performer_name))
+
+        conn.commit()
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        cur.close()
+        conn.close()
+
+    return {
+        "success": True,
+        "count": len(performers)
+    }
+
+
 @event_schedule_bp.route("/schedule/performer-click", methods=["POST"])
 def schedule_performer_click():
     performer_name = request.form.get("performer", "").strip()
