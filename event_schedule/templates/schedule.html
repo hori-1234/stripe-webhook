@@ -1360,6 +1360,95 @@
 
 </div>
 
+{% if show_google_link_prompt %}
+<div
+    id="google-link-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="google-link-title"
+    style="
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.55);
+        z-index: 10000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        box-sizing: border-box;
+    "
+>
+    <div style="
+        width: 100%;
+        max-width: 420px;
+        background: white;
+        padding: 28px;
+        border-radius: 10px;
+        box-sizing: border-box;
+        text-align: center;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+    ">
+        <h2 id="google-link-title" style="margin-top: 0;">
+            Googleアカウント連携のご案内
+        </h2>
+
+        <p style="line-height: 1.8;">
+            Googleアカウントを連携すると、
+            次回からメール認証コードを入力せずに
+            ログインできるようになります。
+        </p>
+
+        <p style="font-size: 13px; color: #666;">
+            現在保存されているマイメモはそのまま引き継がれます。
+        </p>
+
+        <a
+            href="/schedule/google/link"
+            style="
+                display: block;
+                padding: 13px;
+                margin: 20px 0 12px;
+                background: #fff;
+                border: 1px solid #777;
+                border-radius: 5px;
+                color: #222;
+                font-weight: bold;
+                text-decoration: none;
+            "
+        >
+            Googleアカウントを連携する
+        </a>
+
+        <form
+            method="POST"
+            action="/schedule/google/link/snooze"
+            style="margin: 0;"
+        >
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ google_link_csrf_token }}"
+            >
+
+            <button
+                type="submit"
+                style="
+                    padding: 10px 20px;
+                    border: none;
+                    background: transparent;
+                    color: #666;
+                    cursor: pointer;
+                    font-size: 14px;
+                "
+            >
+                今はしない（30日間表示しない）
+            </button>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+    
 <script>
     let isMyMemoMode =
         new URLSearchParams(window.location.search).get("mymemo") === "1";
