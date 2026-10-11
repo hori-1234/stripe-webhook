@@ -31,6 +31,56 @@
         .stats-section h2 {
             margin-top: 0;
         }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .stats-filter {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .stats-filter select,
+        .stats-filter button {
+            padding: 8px;
+            font-size: 14px;
+        }
+
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .pagination a {
+            padding: 8px 14px;
+            border: 1px solid #777;
+            color: #222;
+            text-decoration: none;
+        }
+
+        .pagination .disabled {
+            color: #aaa;
+            border-color: #ddd;
+            padding: 8px 14px;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
     </style>
 </head>
 
@@ -57,35 +107,152 @@
     </div>
 
     <div class="stats-section">
-        <h2>出演者クリックランキング</h2>
-        
-        {% if performer_ranking %}
-            <table style="width: 100%; border-collapse: collapse;">
-                <thead>
-                    <tr>
-                        <th style="border: 1px solid #ccc; padding: 10px;">順位</th>
-                        <th style="border: 1px solid #ccc; padding: 10px;">出演者名</th>
-                        <th style="border: 1px solid #ccc; padding: 10px;">クリック数</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for performer in performer_ranking %}
-                    <tr>
-                        <td style="border: 1px solid #ccc; padding: 10px;">
-                            {{ loop.index }}
-                        </td>
-                        <td style="border: 1px solid #ccc; padding: 10px;">
-                            {{ performer[0] }}
-                        </td>
-                        <td style="border: 1px solid #ccc; padding: 10px;">
-                            {{ performer[1] }} 回
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <h2>閲覧端末</h2>
+
+        {% if device_views %}
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>端末</th>
+                            <th>閲覧数</th>
+                            <th>割合</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for device in device_views %}
+                        <tr>
+                            <td>{{ device[0] }}</td>
+                            <td>{{ device[1] }} 回</td>
+                            <td>
+                                {% if total_views %}
+                                    {{ (device[1] / total_views * 100) | round(1) }} %
+                                {% else %}
+                                    0 %
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         {% else %}
-            <p>まだクリックデータがありません。</p>
+            <p>まだ閲覧データがありません。</p>
+        {% endif %}
+    </div>
+
+    <div class="stats-section">
+        <h2>出演者ステータス</h2>
+
+        <form class="stats-filter"
+              method="GET"
+              action="/schedule/admin/stats">
+
+            <label for="genre">ジャンル</label>
+
+            <select name="genre" id="genre">
+                {% for value, label in [
+                    ('', 'すべて'),
+                    ('歌', '歌'),
+                    ('踊', '踊'),
+                    ('歌踊', '歌踊'),
+                    ('アイドル', 'アイドル'),
+                    ('WS', 'WS'),
+                    ('オフ会', 'オフ会'),
+                    ('撮影会', '撮影会'),
+                    ('その他', 'その他')
+                ] %}
+                    <option value="{{ value }}"
+                        {% if selected_genre == value %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <label for="sort">並び替え</label>
+
+            <select name="sort" id="sort">
+                <option value="clicks"
+                    {% if sort_by == 'clicks' %}selected{% endif %}>
+                    クリック数
+                </option>
+                <option value="favorites"
+                    {% if sort_by == 'favorites' %}selected{% endif %}>
+                    お気に入り数
+                </option>
+            </select>
+
+            <select name="order" aria-label="並び順">
+                <option value="desc"
+                    {% if sort_order == 'desc' %}selected{% endif %}>
+                    多い順
+                </option>
+                <option value="asc"
+                    {% if sort_order == 'asc' %}selected{% endif %}>
+                    少ない順
+                </option>
+            </select>
+
+            <button type="submit">表示</button>
+        </form>
+
+        <p>該当出演者：{{ total_performers }} 人</p>
+
+        {% if performer_status %}
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ジャンル</th>
+                            <th>名前</th>
+                            <th>クリック数</th>
+                            <th>お気に入り数</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for performer in performer_status %}
+                        <tr>
+                            <td>
+                                {{ performer.genres | join('、') if performer.genres else '不明' }}
+                            </td>
+                            <td>{{ performer.name }}</td>
+                            <td>{{ performer.clicks }} 回</td>
+                            <td>{{ performer.favorites }} 人</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination">
+                {% if page > 1 %}
+                    <a href="{{ url_for(
+                        'event_schedule.schedule_admin_stats',
+                        genre=selected_genre,
+                        sort=sort_by,
+                        order=sort_order,
+                        page=page - 1
+                    ) }}">← 前へ</a>
+                {% else %}
+                    <span class="disabled">← 前へ</span>
+                {% endif %}
+
+                <span>{{ page }} / {{ total_pages }} ページ</span>
+
+                {% if page < total_pages %}
+                    <a href="{{ url_for(
+                        'event_schedule.schedule_admin_stats',
+                        genre=selected_genre,
+                        sort=sort_by,
+                        order=sort_order,
+                        page=page + 1
+                    ) }}">次へ →</a>
+                {% else %}
+                    <span class="disabled">次へ →</span>
+                {% endif %}
+            </div>
+        {% else %}
+            <p>該当する出演者はいません。</p>
         {% endif %}
     </div>
 
@@ -93,59 +260,26 @@
         <h2>日別閲覧数（直近30日間）</h2>
 
         {% if daily_views %}
-            <table style="width: 100%; border-collapse: collapse;">
-                <thead>
-                    <tr>
-                        <th style="border: 1px solid #ccc; padding: 10px;">日付</th>
-                        <th style="border: 1px solid #ccc; padding: 10px;">閲覧数</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for day in daily_views %}
-                    <tr>
-                        <td style="border: 1px solid #ccc; padding: 10px;">
-                            {{ day[0].strftime('%Y/%m/%d') }}
-                        </td>
-                        <td style="border: 1px solid #ccc; padding: 10px;">
-                            {{ day[1] }} 回
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p>まだ閲覧データがありません。</p>
-        {% endif %}
-    </div>
-
-    <div class="stats-section">
-        <h2>閲覧端末</h2>
-        
-        {% if device_views %}
-            <table style="width: 100%; border-collapse: collapse;">
-                <thead>
-                    <tr>
-                        <th style="border: 1px solid #ccc; padding: 10px;">端末</th>
-                        <th style="border: 1px solid #ccc; padding: 10px;">閲覧数</th>
-                        <th style="border: 1px solid #ccc; padding: 10px;">割合</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for device in device_views %}
-                    <tr>
-                        <td style="border: 1px solid #ccc; padding: 10px;">
-                            {{ device[0] }}
-                        </td>
-                        <td style="border: 1px solid #ccc; padding: 10px;">
-                            {{ device[1] }} 回
-                        </td>
-                        <td style="border: 1px solid #ccc; padding: 10px;">
-                            {{ (device[1] / total_views * 100) | round(1) }} %
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>日付</th>
+                            <th>閲覧数</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for day in daily_views %}
+                        <tr>
+                            <td>
+                                {{ day[0].strftime('%Y/%m/%d') }}
+                            </td>
+                            <td>{{ day[1] }} 回</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         {% else %}
             <p>まだ閲覧データがありません。</p>
         {% endif %}
