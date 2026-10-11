@@ -15,8 +15,9 @@ from top_set.cancel_policy import cancel_policy_bp
 from top_set.top import top_bp
 from admin_auth import admin_required, qr_required
 from unei_kanri import unei_kanri_bp
+
 from event_schedule.routes import event_schedule_bp
-from event_schedule.memo_auth import memo_auth_bp
+from event_schedule.memo_auth import memo_auth_bp, oauth
 from product import process_products
 from ticket_check import (
     check_ticket,
@@ -27,8 +28,10 @@ from ticket_check import (
 
 
 app = Flask(__name__)
+app.secret_key = os.environ.get("kuri_SECRET_KEY")
 app.config["PERMANENT_SESSION_LIFETIME"] = 60 * 60 * 24 * 365
 app.config["SESSION_REFRESH_EACH_REQUEST"] = True
+oauth.init_app(app)
 app.register_blueprint(unei_kanri_bp)
 app.register_blueprint(event_schedule_bp)
 app.register_blueprint(memo_auth_bp)
@@ -39,7 +42,6 @@ app.register_blueprint(tokushoho_bp)
 app.register_blueprint(shipping_bp)
 app.register_blueprint(privacy_bp)
 app.register_blueprint(kuri_move_sarch_bp)
-app.secret_key = os.environ.get("kuri_SECRET_KEY")
 
 r2 = boto3.client(
     "s3",
