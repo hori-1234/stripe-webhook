@@ -5,7 +5,11 @@ import jpholiday
 import secrets
 
 from zoneinfo import ZoneInfo
-from event_schedule.memo_auth import get_logged_in_memo_email
+from event_schedule.memo_auth import (
+    get_logged_in_memo_email,
+    should_show_google_link_prompt
+    get_google_link_csrf_token
+)
 from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, url_for, session, make_response
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -733,7 +737,9 @@ def schedule():
         saved_event_memos=saved_event_memos,
         saved_date_memos=saved_date_memos,
         today_views=today_views,
-        memo_login_email=get_logged_in_memo_email()
+        memo_login_email=get_logged_in_memo_email(),
+        show_google_link_prompt=should_show_google_link_prompt(),
+        google_link_csrf_token=get_google_link_csrf_token()
     ))
 
     response.set_cookie(
