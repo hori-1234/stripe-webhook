@@ -25,6 +25,134 @@ memo_auth_bp = Blueprint(
     __name__
 )
 
+
+@memo_auth_bp.route("/schedule/google/link")
+def google_link():
+    if not is_memo_logged_in():
+        return redirect(url_for("memo_auth.memo_login_page"))
+
+    # 通常ログイン用の古い情報を削除
+    session.pop("google_login_started_logged_out", None)
+    session.pop("google_login_oauth_state", None)
+
+    # 連携対象の会員情報を保存
+    session["google_link_user_id"] = session["memo_user_id"]
+    session["google_link_email"] = session.get("memo_user_email")
+
+    redirect_uri = url_for(
+        "memo_auth.google_callback",
+        _external=True,
+        _scheme="https"
+    )
+
+    oauth_state = secrets.token_urlsafe(32)
+    session["google_link_oauth_state"] = oauth_state
+
+    return oauth.google.authorize_redirect(
+        redirect_uri,
+        state=oauth_state
+    )
+
+
+@memo_auth_bp.route("/schedule/google/login")
+def google_login():
+    if is_memo_logged_in():
+        return redirect("/schedule")
+
+    # 連携用の古い情報を削除
+    session.pop("google_link_user_id", None)
+    session.pop("google_link_email", None)
+    session.pop("google_link_oauth_state", None)
+
+    session["google_login_started_logged_out"] = True
+
+    redirect_uri = url_for(
+        "memo_auth.google_callback",
+        _external=True,
+        _scheme="https"
+    )
+
+    oauth_state = secrets.token_urlsafe(32)
+    session["google_login_oauth_state"] = oauth_state
+
+    return oauth.google.authorize_redirect(
+        redirect_uri,
+        state=oauth_state
+    )
+
+
+@memo_auth_bp.route("/schedule/google/callback")
+def google_callback():
+    token = oauth.google.authorize_access_token()
+    user_info = token.get("userinfo")
+
+    if not user_info or not user_info.get("sub"):
+        return "Google認証に失敗しました", 401
+
+    google_sub = user_info["sub"]
+
+    # 認証開始時の情報を取り出す
+    link_user_id = session.pop("google_link_user_id", None)
+    link_email = session.pop("google_link_email", None)
+    link_oauth_state = session.pop("google_link_oauth_state", None)
+
+    login_oauth_state = session.pop("google_login_oauth_state", None)
+    login_started_logged_out = session.pop(
+        "google_login_started_logged_out", False
+    )
+
+    callback_state = request.args.get("state")
+
+    # Google連携として開始された認証
+    if link_user_id is not None and callback_state == link_oauth_state:
+        if (
+            session.get("memo_user_id") != link_user_id
+            or session.get("memo_user_email") != link_email
+        ):
+            return "ログイン状態が変更されました。再度お試しください。", 403
+
+        if not link_google_to_memo_user(link_user_id, google_sub):
+            return "Googleアカウントを連携できませんでした。", 409
+
+        return redirect("/schedule")
+
+    # 通常のGoogleログインとして開始された認証
+    if (
+        login_started_logged_out
+        and login_oauth_state
+        and callback_state == login_oauth_state
+    ):
+        if is_memo_logged_in():
+            return "認証中にログイン状態が変更されました。再度お試しください。", 403
+
+        user = get_memo_user_by_google_sub(google_sub)
+
+        if user is not None:
+            user_id, email = user
+            login_memo_user_by_id(user_id, email)
+            return redirect("/schedule")
+
+        google_email = user_info.get("email")
+
+        if user_info.get("email_verified") is not True:
+            return "Googleのメールアドレスが確認されていません", 403
+
+        user_id = create_google_memo_user(google_sub, google_email)
+
+        if user_id is None:
+            return (
+                "このメールアドレスは既に登録されています。"
+                "既存のメールログインでログインし、"
+                "Googleアカウントを連携してください。",
+                409
+            )
+
+        login_memo_user_by_id(user_id, google_email)
+        return redirect("/schedule")
+
+    return "Google認証の開始情報が一致しません。再度お試しください。", 403
+    
+
 def generate_login_code():
     return f"{secrets.randbelow(1000000):06d}"
 
@@ -377,6 +505,97 @@ def verify_login_code(email, code):
         cur.close()
         conn.close()
 
+
+def link_google_to_memo_user(user_id, google_sub):
+    if not user_id or not google_sub:
+        return False
+
+    conn = psycopg2.connect(os.environ["DATABASE_URL"])
+    cur = conn.cursor()
+
+    try:
+        cur.execute("""
+            UPDATE schedule_memo_users
+            SET google_sub = %s,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = %s
+              AND google_sub IS NULL
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM schedule_memo_users
+                  WHERE google_sub = %s
+              )
+            RETURNING id
+        """, (google_sub, user_id, google_sub))
+
+        updated = cur.fetchone() is not None
+        conn.commit()
+
+        return updated
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        cur.close()
+        conn.close()
+
+
+def create_google_memo_user(google_sub, email):
+    if not google_sub or not email:
+        return None
+
+    email = normalize_login_email(email)
+
+    if email is None:
+        return None
+
+    conn = psycopg2.connect(os.environ["DATABASE_URL"])
+    cur = conn.cursor()
+
+    try:
+        cur.execute("""
+            INSERT INTO schedule_memo_users (email, google_sub)
+            VALUES (%s, %s)
+            ON CONFLICT DO NOTHING
+            RETURNING id
+        """, (email, google_sub))
+
+        row = cur.fetchone()
+        conn.commit()
+
+        return row[0] if row else None
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        cur.close()
+        conn.close()
+
+
+def get_memo_user_by_google_sub(google_sub):
+    if not google_sub:
+        return None
+
+    conn = psycopg2.connect(os.environ["DATABASE_URL"])
+    cur = conn.cursor()
+
+    try:
+        cur.execute("""
+            SELECT id, email
+            FROM schedule_memo_users
+            WHERE google_sub = %s
+        """, (google_sub,))
+
+        return cur.fetchone()
+
+    finally:
+        cur.close()
+        conn.close()
+
 def get_or_create_memo_user(email):
     email = normalize_login_email(email)
 
@@ -427,8 +646,13 @@ def login_memo_user(email):
 
     return True
 
+
 def login_memo_user_by_id(user_id, email):
-    session.clear()
+    session.pop("memo_user_id", None)
+    session.pop("memo_user_email", None)
+    session.pop("memo_pending_email", None)
+    session.pop("google_link_user_id", None)
+
     session.permanent = True
     session["memo_user_id"] = user_id
     session["memo_user_email"] = email
@@ -443,14 +667,118 @@ def logout_memo_user():
 
     return True
 
+
 def is_memo_logged_in():
     return session.get("memo_user_id") is not None
+
 
 def get_logged_in_memo_email():
     if not is_memo_logged_in():
         return None
 
     return session.get("memo_user_email")
+
+
+def should_show_google_link_prompt():
+    user_id = session.get("memo_user_id")
+
+    if user_id is None:
+        return False
+
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+
+    try:
+        cur.execute("""
+            SELECT
+                google_sub,
+                google_link_prompt_snoozed_until
+            FROM schedule_memo_users
+            WHERE id = %s
+        """, (user_id,))
+
+        row = cur.fetchone()
+
+        if row is None:
+            return False
+
+        google_sub, snoozed_until = row
+
+        # Google連携済みなら案内しない
+        if google_sub is not None:
+            return False
+
+        # 30日間の非表示期間中なら案内しない
+        if (
+            snoozed_until is not None
+            and snoozed_until > datetime.now(timezone.utc)
+        ):
+            return False
+
+        return True
+
+    finally:
+        cur.close()
+        conn.close()
+
+
+def get_google_link_csrf_token():
+    if not should_show_google_link_prompt():
+        return ""
+
+    token = session.get("google_link_csrf_token")
+
+    if not token:
+        token = secrets.token_urlsafe(32)
+        session["google_link_csrf_token"] = token
+
+    return token
+
+
+# Google連携案内を30日間表示しない
+@memo_auth_bp.route("/schedule/google/link/snooze", methods=["POST"])
+def snooze_google_link_prompt():
+    user_id = session.get("memo_user_id")
+
+    if user_id is None:
+        return redirect(url_for("memo_auth.memo_login_page"))
+
+    submitted_token = request.form.get("csrf_token", "")
+    expected_token = session.get("google_link_csrf_token")
+
+    if (
+        not expected_token
+        or not secrets.compare_digest(submitted_token, expected_token)
+    ):
+        return "不正なリクエストです", 403
+
+    session.pop("google_link_csrf_token", None)
+
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+    
+    try:
+        cur.execute("""
+            UPDATE schedule_memo_users
+            SET google_link_prompt_snoozed_until =
+                    CURRENT_TIMESTAMP + INTERVAL '30 days',
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = %s
+              AND google_sub IS NULL
+        """, (user_id,))
+
+        conn.commit()
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        cur.close()
+        conn.close()
+
+    return redirect("/schedule")
+
 
 @memo_auth_bp.route("/schedule/login", methods=["GET"])
 def memo_login_page():
@@ -459,6 +787,7 @@ def memo_login_page():
 
     return """
     <!DOCTYPE html>
+
     <html lang="ja">
     <head>
         <meta charset="UTF-8">
@@ -479,6 +808,33 @@ def memo_login_page():
     </head>
     <body>
         <h2>イベスケ ログイン</h2>
+
+        <a
+            href="/schedule/google/login"
+            style="
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 300px;
+                max-width: 100%;
+                height: 50px;
+                box-sizing: border-box;
+                border: 1px solid #dadce0;
+                border-radius: 6px;
+                background: #fff;
+                color: #333;
+                font-size: 16px;
+                font-weight: bold;
+                text-decoration: none;
+                cursor: pointer;
+            "
+        >
+            Googleでログイン
+        </a>
+
+        <p style="margin: 24px 0; color: #666;">
+            またはメールでログイン
+        </p>
 
         <p>メールアドレスを入力してください。</p>
 
