@@ -215,8 +215,124 @@
             flex-shrink: 0;
         }
 
+
         .performer-star.is-favorite {
             color: #eab308;
+        }
+
+        /* お気に入り編集ボタン */
+        .favorite-edit-button {
+            padding: 5px 8px;
+            border: 1px solid #777;
+            border-radius: 4px;
+            background: #fff;
+            color: #222;
+            font-size: 12px;
+            font-weight: normal;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+
+        /* お気に入り編集窓 */
+        .favorite-editor-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            background: rgba(0, 0, 0, 0.45);
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+
+        .favorite-editor-overlay.open {
+            display: flex;
+        }
+
+        .favorite-editor-window {
+            width: 100%;
+            max-width: 420px;
+            max-height: 85vh;
+            background: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .favorite-editor-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .favorite-editor-header h2 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .favorite-editor-close {
+            border: none;
+            background: none;
+            font-size: 25px;
+            cursor: pointer;
+        }
+
+        .favorite-editor-search {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        .favorite-editor-list {
+            overflow-y: auto;
+            min-height: 80px;
+            flex: 1;
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        .favorite-editor-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 5px 0;
+        }
+
+        .favorite-editor-star {
+            border: none;
+            background: none;
+            color: #999;
+            font-size: 25px;
+            cursor: pointer;
+            padding: 0 3px;
+        }
+
+        .favorite-editor-star.is-favorite {
+            color: #eab308;
+        }
+
+        .favorite-editor-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .favorite-editor-actions button {
+            padding: 9px 15px;
+            border: 1px solid #777;
+            border-radius: 4px;
+            background: #fff;
+            cursor: pointer;
+        }
+
+        .favorite-editor-actions .favorite-save-button {
+            background: #222;
+            color: #fff;
         }
         
         .schedule-area {
@@ -821,12 +937,25 @@
                 </div>
 
             </form>
+
             
             <div class="registered-performers">
-                <div class="registered-performers-title">
-                    登録演者名
-                </div>
+                <div
+                    class="registered-performers-title"
+                    style="display: flex; align-items: center; justify-content: space-between; gap: 8px;"
+                >
+                    <span>登録演者名</span>
 
+                    {% if memo_login_email %}
+                        <button
+                            type="button"
+                            class="favorite-edit-button"
+                            onclick="openFavoriteEditor()"
+                        >
+                            お気に入り編集
+                        </button>
+                    {% endif %}
+                </div>
                 
                 {% for performer in registered_performers %}
 
@@ -1496,6 +1625,68 @@
 </div>
 {% endif %}
 
+{% if memo_login_email %}
+
+<div
+    id="favorite-editor-overlay"
+    class="favorite-editor-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-label="お気に入り編集"
+    onclick="if (event.target === this) closeFavoriteEditor()"
+>
+    <div class="favorite-editor-window">
+
+        <div class="favorite-editor-header">
+            <h2>お気に入り編集</h2>
+
+            <button
+                type="button"
+                class="favorite-editor-close"
+                onclick="closeFavoriteEditor()"
+                aria-label="閉じる"
+            >
+                ×
+            </button>
+        </div>
+
+        <input
+            type="text"
+            id="favorite-editor-search"
+            class="favorite-editor-search"
+            placeholder="演者名で検索"
+            oninput="renderFavoriteEditor()"
+        >
+
+        <div
+            id="favorite-editor-list"
+            class="favorite-editor-list"
+        ></div>
+
+        <div id="favorite-editor-count"></div>
+
+        <div class="favorite-editor-actions">
+            <button
+                type="button"
+                onclick="closeFavoriteEditor()"
+            >
+                キャンセル
+            </button>
+
+            <button
+                type="button"
+                id="favorite-editor-save"
+                class="favorite-save-button"
+                onclick="saveFavoriteEditor()"
+            >
+                保存
+            </button>
+        </div>
+
+    </div>
+</div>
+
+{% endif %}
     
 <script>
     let isMyMemoMode =
@@ -2058,7 +2249,258 @@
                 });
         });
     });
+
     
+        // お気に入り編集窓
+
+    const savedFavoritePerformers =
+        {{ favorite_performers | list | tojson }};
+
+    let editingFavoritePerformers = new Set();
+
+    let favoriteEditorNames = [];
+
+    let favoriteEditorSaving = false;
+
+
+    function openFavoriteEditor() {
+
+        const overlay = document.getElementById(
+            "favorite-editor-overlay"
+        );
+
+        if (!overlay) {
+            return;
+        }
+
+        // DBから取得済みのお気に入りを編集用にコピー
+        editingFavoritePerformers = new Set(
+            savedFavoritePerformers
+        );
+
+        // 現在表示中の演者を取得
+        const currentNames = Array.from(
+            document.querySelectorAll(
+                ".registered-performer-row .registered-performer"
+            )
+        ).map(button => button.dataset.performer);
+
+        // 出演予定がなくなったお気に入り演者も含める
+        favoriteEditorNames = Array.from(
+            new Set([
+                ...savedFavoritePerformers,
+                ...currentNames
+            ])
+        );
+
+        favoriteEditorNames.sort((a, b) => {
+
+            const aFavorite =
+                editingFavoritePerformers.has(a);
+
+            const bFavorite =
+                editingFavoritePerformers.has(b);
+
+            if (aFavorite !== bFavorite) {
+                return aFavorite ? -1 : 1;
+            }
+
+            return a.localeCompare(b, "ja");
+        });
+
+        document.getElementById(
+            "favorite-editor-search"
+        ).value = "";
+
+        renderFavoriteEditor();
+
+        overlay.classList.add("open");
+        document.body.style.overflow = "hidden";
+    }
+
+
+    function closeFavoriteEditor() {
+
+        if (favoriteEditorSaving) {
+            return;
+        }
+
+        const overlay = document.getElementById(
+            "favorite-editor-overlay"
+        );
+
+        if (overlay) {
+            overlay.classList.remove("open");
+        }
+
+        document.body.style.overflow = "";
+    }
+
+
+    function renderFavoriteEditor() {
+
+        const list = document.getElementById(
+            "favorite-editor-list"
+        );
+
+        if (!list) {
+            return;
+        }
+
+        const keyword = document.getElementById(
+            "favorite-editor-search"
+        ).value.trim().toLowerCase();
+
+        list.replaceChildren();
+
+        const filteredNames = favoriteEditorNames.filter(
+            name => name.toLowerCase().includes(keyword)
+        );
+
+        filteredNames.forEach(name => {
+
+            const row = document.createElement("div");
+            row.className = "favorite-editor-row";
+
+            const star = document.createElement("button");
+            star.type = "button";
+            star.className = "favorite-editor-star";
+
+            const isFavorite =
+                editingFavoritePerformers.has(name);
+
+            star.textContent = "★";
+
+            star.classList.toggle(
+                "is-favorite",
+                isFavorite
+            );
+
+            star.setAttribute(
+                "aria-label",
+                name + "のお気に入り切り替え"
+            );
+
+            star.setAttribute(
+                "aria-pressed",
+                String(isFavorite)
+            );
+
+            star.onclick = function () {
+
+                if (editingFavoritePerformers.has(name)) {
+                    editingFavoritePerformers.delete(name);
+                } else {
+                    editingFavoritePerformers.add(name);
+                }
+
+                const selected =
+                    editingFavoritePerformers.has(name);
+
+                star.classList.toggle(
+                    "is-favorite",
+                    selected
+                );
+
+                star.setAttribute(
+                    "aria-pressed",
+                    String(selected)
+                );
+
+                updateFavoriteEditorCount();
+            };
+
+            const label = document.createElement("span");
+            label.textContent = name;
+
+            row.appendChild(star);
+            row.appendChild(label);
+
+            list.appendChild(row);
+        });
+
+        if (filteredNames.length === 0) {
+
+            const empty = document.createElement("p");
+            empty.textContent = "該当する演者はいません。";
+
+            list.appendChild(empty);
+        }
+
+        updateFavoriteEditorCount();
+    }
+
+
+    function updateFavoriteEditorCount() {
+
+        const count = document.getElementById(
+            "favorite-editor-count"
+        );
+
+        if (count) {
+            count.textContent =
+                "お気に入り：" +
+                editingFavoritePerformers.size +
+                "人";
+        }
+    }
+
+
+    async function saveFavoriteEditor() {
+
+        if (favoriteEditorSaving) {
+            return;
+        }
+
+        const saveButton = document.getElementById(
+            "favorite-editor-save"
+        );
+
+        favoriteEditorSaving = true;
+        saveButton.disabled = true;
+        saveButton.textContent = "保存中...";
+
+        try {
+
+            const response = await fetch(
+                "/schedule/performer-favorites/save",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        performers: Array.from(
+                            editingFavoritePerformers
+                        )
+                    })
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error("保存に失敗しました");
+            }
+
+            // 保存成功後、DBの状態で一覧を再表示
+            const params = new URLSearchParams(
+                window.location.search
+            );
+
+            params.set("performer_refresh", "1");
+
+            window.location.href =
+                "/schedule?" + params.toString();
+
+        } catch (error) {
+
+            alert("お気に入りを保存できませんでした");
+
+            favoriteEditorSaving = false;
+            saveButton.disabled = false;
+            saveButton.textContent = "保存";
+        }
+    }
+
 </script>
 
 </body>
