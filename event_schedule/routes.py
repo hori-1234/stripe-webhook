@@ -45,7 +45,11 @@ def decrypt_edit_password(encrypted_password):
     return fernet.decrypt(encrypted_password.encode()).decode()
 
 def performer_sort_key(name):
-    normalized = unicodedata.normalize("NFKC", name)
+    normalized = unicodedata.normalize("NFKC", name.strip())
+
+    if not normalized:
+        return (4, "")
+
     first = normalized[0]
 
     if "\u3040" <= first <= "\u309f":
@@ -54,10 +58,12 @@ def performer_sort_key(name):
         group = 1
     elif "\u4e00" <= first <= "\u9fff":
         group = 2
-    else:
+    elif first.isascii() and first.isalnum():
         group = 3
+    else:
+        group = 4
 
-    return (group, normalized)
+    return (group, normalized.casefold())
 
 def delete_old_events():
     conn = psycopg2.connect(DATABASE_URL)
