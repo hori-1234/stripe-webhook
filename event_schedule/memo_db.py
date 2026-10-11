@@ -200,3 +200,26 @@ def create_schedule_memo_alarms_table():
         cur.close()
         conn.close()
 
+def create_schedule_favorite_performers_table():
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+
+    try:
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS schedule_favorite_performers (
+                user_id BIGINT NOT NULL
+                    REFERENCES schedule_memo_users(id)
+                    ON DELETE CASCADE,
+                performer_name TEXT NOT NULL,
+                created_at TIMESTAMPTZ NOT NULL
+                    DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (user_id, performer_name)
+            )
+        """)
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        cur.close()
+        conn.close()
