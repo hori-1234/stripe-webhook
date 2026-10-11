@@ -194,6 +194,31 @@
             background: #eee;
         }
 
+        .registered-performer-row {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .registered-performer-row .registered-performer {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .performer-star {
+            border: none;
+            background: none;
+            color: #999;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0 2px;
+            flex-shrink: 0;
+        }
+
+        .performer-star.is-favorite {
+            color: #eab308;
+        }
+        
         .schedule-area {
             width: 100%;
             overflow: visible;
@@ -802,16 +827,36 @@
                     登録演者名
                 </div>
 
+                
                 {% for performer in registered_performers %}
 
-                    <button
-                        type="button"
-                        class="registered-performer"
-                        onclick="searchPerformer('{{ performer | e }}')"
-                    >
-                        {{ performer }}
-                    </button>
+                    <div class="registered-performer-row">
+
+                        {% if memo_login_email %}
+                            <button
+                                type="button"
+                                class="performer-star {% if performer in favorite_performers %}is-favorite{% endif %}"
+                                data-performer="{{ performer }}"
+                                data-favorite="{{ 'true' if performer in favorite_performers else 'false' }}"
+                                onclick="togglePerformerFavorite(this)"
+                                aria-label="お気に入り切り替え"
+                                aria-pressed="{{ 'true' if performer in favorite_performers else 'false' }}"
+                            >★</button>
+                        {% endif %}
+
+                        <button
+                            type="button"
+                            class="registered-performer"
+                            data-performer="{{ performer }}"
+                            onclick="searchPerformer(this.dataset.performer)"
+                        >
+                            {{ performer }}
+                        </button>
+
+                    </div>
+
                 {% endfor %}
+                
             </div>
                 
     </div>
@@ -1510,7 +1555,94 @@
             currentList.scrollTop = scrollTop;
         }
     }
-    
+
+        async function togglePerformerFavorite(button) {
+
+        const performerName = button.dataset.performer;
+        const currentlyFavorite =
+            button.dataset.favorite === "true";
+
+        button.disabled = true;
+
+        try {
+            const response = await fetch(
+                "/schedule/performer-favorite",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        performer_name: performerName,
+                        favorite: !currentlyFavorite
+                    })
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error("保存に失敗しました");
+            }
+
+            const favorite = !currentlyFavorite;
+
+            button.dataset.favorite = String(favorite);
+            button.classList.toggle(
+                "is-favorite",
+                favorite
+            );
+            button.setAttribute(
+                "aria-pressed",
+                String(favorite)
+            );
+
+            const list = button.closest(
+                ".registered-performers"
+            );
+
+            const rows = Array.from(
+                list.querySelectorAll(
+                    ".registered-performer-row"
+                )
+            );
+
+            rows.sort((a, b) => {
+                const aFavorite = a.querySelector(
+                    ".performer-star"
+                )?.dataset.favorite === "true";
+
+                const bFavorite = b.querySelector(
+                    ".performer-star"
+                )?.dataset.favorite === "true";
+
+                if (aFavorite !== bFavorite) {
+                    return aFavorite ? -1 : 1;
+                }
+
+                const aName = a.querySelector(
+                    ".registered-performer"
+                ).dataset.performer;
+
+                const bName = b.querySelector(
+                    ".registered-performer"
+                ).dataset.performer;
+
+                return aName.localeCompare(
+                    bName,
+                    "ja"
+                );
+            });
+
+            rows.forEach(row => {
+                list.appendChild(row);
+            });
+
+        } catch (error) {
+            alert("お気に入りを保存できませんでした");
+        } finally {
+            button.disabled = false;
+        }
+    }
+
     function searchPerformer(performer) {
         const form = document.getElementById("schedule-search-form");
         const performerInput = form.querySelector('input[name="performer"]');
