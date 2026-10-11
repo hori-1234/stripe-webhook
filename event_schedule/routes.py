@@ -21,6 +21,7 @@ from .memo_db import (
     create_schedule_memo_login_codes_table,
     create_schedule_memos_table,
     create_schedule_memo_alarms_table,
+    create_schedule_favorite_performers_table,
 )
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
@@ -340,6 +341,7 @@ def schedule_add():
 def schedule():
 
     create_schedule_memo_users_table()
+    create_schedule_favorite_performers_table()
 
     visitor_id = request.cookies.get("schedule_visitor_id")
 
@@ -519,10 +521,28 @@ def schedule():
 
             if performer:
                 registered_performers.add(performer)
-                
+    
+    favorite_performers = set()
+
+    memo_user_id = session.get("memo_user_id")
+
+    if memo_user_id:
+        cur.execute("""
+            SELECT performer_name
+            FROM schedule_favorite_performers
+            WHERE user_id = %s
+        """, (memo_user_id,))
+
+        favorite_performers = {
+            row[0] for row in cur.fetchall()
+        }
+
     registered_performers = sorted(
         registered_performers,
-        key=performer_sort_key
+        key=lambda name: (
+            name not in favorite_performers,
+            performer_sort_key(name)
+        )
     )
     
     # 表示中の月に登録されている場所を重複なしで取得
@@ -734,8 +754,9 @@ def schedule():
         next_month=next_month,
         events=display_events,
         locations=locations,
-        performer_search_dates=performer_search_dates,
+        performer_search_dates=performer_search_dates,        
         registered_performers=registered_performers,
+        favorite_performers=favorite_performers,
         saved_event_memos=saved_event_memos,
         saved_date_memos=saved_date_memos,
         today_views=today_views,
@@ -1037,6 +1058,69 @@ def schedule_admin():
         "schedule_admin.html",
         events=admin_events
     )
+
+
+@event_schedule_bp.route(
+    "/schedule/performer-favorite",
+    methods=["POST"]
+)
+def schedule_performer_favorite():
+
+    user_id = session.get("memo_user_id")
+
+    if not user_id:
+        return {"error": "ログインが必要です"}, 401
+
+    data = request.get_json(silent=True)
+
+    if not isinstance(data, dict):
+        return {"error": "不正なリクエストです"}, 400
+
+    performer_name = data.get("performer_name")
+    favorite = data.get("favorite")
+
+    if (
+        not isinstance(performer_name, str)
+        or not performer_name.strip()
+        or len(performer_name) > 200
+        or type(favorite) is not bool
+    ):
+        return {"error": "入力値が正しくありません"}, 400
+
+    performer_name = performer_name.strip()
+
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+
+    try:
+        if favorite:
+            cur.execute("""
+                INSERT INTO schedule_favorite_performers (
+                    user_id, performer_name
+                )
+                VALUES (%s, %s)
+                ON CONFLICT (user_id, performer_name)
+                DO NOTHING
+            """, (user_id, performer_name))
+        else:
+            cur.execute("""
+                DELETE FROM schedule_favorite_performers
+                WHERE user_id = %s
+                  AND performer_name = %s
+            """, (user_id, performer_name))
+
+        conn.commit()
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        cur.close()
+        conn.close()
+
+    return {"success": True, "favorite": favorite}
+
 
 @event_schedule_bp.route("/schedule/performer-click", methods=["POST"])
 def schedule_performer_click():
