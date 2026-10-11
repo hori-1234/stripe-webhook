@@ -7,7 +7,7 @@ import secrets
 from zoneinfo import ZoneInfo
 from event_schedule.memo_auth import (
     get_logged_in_memo_email,
-    should_show_google_link_prompt
+    should_show_google_link_prompt,
     get_google_link_csrf_token
 )
 from datetime import datetime
