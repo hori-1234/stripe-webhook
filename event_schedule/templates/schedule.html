@@ -804,6 +804,19 @@
             }
         }
 
+        /* 縦モード専用 */
+        body.vertical-mode .time-header {
+            display: none;
+        }
+
+        body.vertical-mode .event-timeline {
+            display: none;
+        }
+
+        body.vertical-mode .event-bar {
+            display: none;
+        }
+
     </style>
 </head>
 
@@ -1738,6 +1751,8 @@
 
     function toggleVerticalMode() {
         isVerticalMode = !isVerticalMode;
+
+        document.body.classList.toggle("vertical-mode", isVerticalMode);
 
         const button = document.getElementById("vertical-mode-toggle-button");
 
