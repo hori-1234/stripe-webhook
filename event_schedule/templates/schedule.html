@@ -912,11 +912,26 @@
             position: relative;
         }
 
-        /* 付箋の位置をイベント情報の右側から調整 */
-        body.vertical-mode .event-sticky-label {
+        /* 縦モード：付箋を▼の右隣に表示 */
+        body.vertical-mode .event-info > .event-sticky-label {
             position: static !important;
             transform: none !important;
-            margin-right: 0 !important;
+            margin: 0 !important;
+            flex-shrink: 0;
+            max-width: 100%;
+            font-size: 12px;
+            z-index: auto;
+        }
+
+        /* 縦モード：新規追加を演者一覧の下に配置 */
+        body.vertical-mode .top-controls > .add-button {
+            position: static;
+            display: block;
+            width: 110px;
+            margin: 12px 0 0 0;
+            padding: 10px 0;
+            box-sizing: border-box;
+            text-align: center;
         }
 
     </style>
@@ -1852,7 +1867,38 @@
     let isVerticalMode = localStorage.getItem("scheduleVerticalMode") === "true";
 
     function updateVerticalMode() {
+
         document.body.classList.toggle("vertical-mode", isVerticalMode);
+
+        document.querySelectorAll(".event-content").forEach(content => {
+            const info = content.querySelector(".event-info");
+            const sticky = content.querySelector(".event-sticky-label");
+
+            if (!info || !sticky) return;
+
+            if (isVerticalMode) {
+                if (!sticky.dataset.originalPosition) {
+                    const placeholder = document.createComment("sticky-original-position");
+                    sticky.parentNode.insertBefore(placeholder, sticky);
+                    sticky._originalPlaceholder = placeholder;
+                    sticky.dataset.originalPosition = "saved";
+                }
+
+                const toggle = info.querySelector(".performer-toggle");
+
+                if (toggle) {
+                    toggle.insertAdjacentElement("afterend", sticky);
+                } else {
+                    const text = info.querySelector(".event-text");
+                    info.insertBefore(sticky, text);
+                }
+            } else if (sticky._originalPlaceholder) {
+                sticky._originalPlaceholder.parentNode.insertBefore(
+                    sticky,
+                    sticky._originalPlaceholder
+                );
+            }
+        });
 
         const button = document.getElementById("vertical-mode-toggle-button");
 
