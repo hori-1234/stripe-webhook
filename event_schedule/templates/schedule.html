@@ -762,7 +762,7 @@
             }
         }
 
-                @media (min-width: 1001px) {
+        @media (min-width: 1001px) {
             .schedule-title-area {
                 display: grid;
                 grid-template-columns: max-content max-content;
@@ -787,6 +787,23 @@
             }
         }
 
+        /* PC版：イベスケ、通常、横モードを横一列に配置 */
+        @media (min-width: 1001px) {
+            .schedule-title-area {
+                display: flex;
+                align-items: center;
+                gap: 20px;
+            }
+
+            .schedule-title-area h1,
+                #mymemo-toggle-button,
+                #vertical-mode-toggle-button {
+                grid-column: auto;
+                grid-row: auto;
+                margin: 0;
+            }
+        }
+
     </style>
 </head>
 
@@ -808,10 +825,22 @@
                 class="event-edit-button"
                 onclick="toggleMyMemoMode()"
                 style="width: 110px; padding: 10px 0; font-size: 16px; font-weight: bold; background: #fff; color: #000; cursor: pointer;"
+
             >
                 通常
             </button>
+            
+             <button
+                type="button"
+                id="vertical-mode-toggle-button"
+                class="event-edit-button"
+                onclick="toggleVerticalMode()"
+                style="width: 110px; padding: 10px 0; font-size: 16px; font-weight: bold; background: #fff; color: #000; cursor: pointer;"
+            >
+                横モード
+            </button>   
         </div>
+        あああ
      </div>
         
         <div style="flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
@@ -1705,6 +1734,24 @@
 {% endif %}
     
 <script>
+    let isVerticalMode = false;
+
+    function toggleVerticalMode() {
+        isVerticalMode = !isVerticalMode;
+
+        const button = document.getElementById("vertical-mode-toggle-button");
+
+        if (isVerticalMode) {
+            button.textContent = "縦モード";
+            button.style.background = "#d60000";
+            button.style.color = "#fff";
+        } else {
+            button.textContent = "横モード";
+            button.style.background = "#fff";
+            button.style.color = "#000";
+        }
+    }  
+
     let isMyMemoMode =
         new URLSearchParams(window.location.search).get("mymemo") === "1";
 
