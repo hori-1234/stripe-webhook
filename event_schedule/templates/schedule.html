@@ -787,7 +787,7 @@
             }
         }
 
-        /* PC版：イベスケ、通常、横モードを横一列に配置 */
+        /* PC版：イベスケ、全表示、横モードを横一列に配置 */
         @media (min-width: 1001px) {
             .schedule-title-area {
                 display: flex;
@@ -934,7 +934,7 @@
             text-align: center;
         }
 
-        /* スマホ：通常と縦モードのボタン間隔 */
+        /* スマホ：横モードと縦モードのボタン間隔 */
         @media (max-width: 1000px) {
             #vertical-mode-toggle-button {
                 display: block;
@@ -965,7 +965,7 @@
                 style="width: 110px; padding: 10px 0; font-size: 16px; font-weight: bold; background: #fff; color: #000; cursor: pointer;"
 
             >
-                通常
+                全表示
             </button>
             
              <button
@@ -1956,7 +1956,7 @@
             button.style.background = "yellow";
             button.style.color = "red";
         } else {
-            button.textContent = "通常";
+            button.textContent = "全表示";
             button.style.background = "#fff";
             button.style.color = "#000";
         }
