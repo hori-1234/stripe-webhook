@@ -817,6 +817,96 @@
             display: none;
         }
 
+        あああああ
+        /* 縦モード：カレンダー全体 */
+        body.vertical-mode .schedule-area {
+            width: 100%;
+            max-width: 500px;
+            box-sizing: border-box;
+        }
+
+        /* 日付とイベントの横幅制限を解除 */
+        body.vertical-mode .date-row,
+        body.vertical-mode .event-row {
+            min-width: 0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* イベントの配置 */
+        body.vertical-mode .event-content {
+            min-width: 0;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            box-sizing: border-box;
+        }
+
+        /* ジャンル・場所・イベント名の表示領域 */
+        body.vertical-mode .event-info {
+            width: auto;
+            min-width: 0;
+            flex: 1;
+            display: flex;
+            flex-wrap: wrap;
+            align-content: center;
+            align-items: center;
+            gap: 6px;
+            padding-right: 8px;
+        }
+
+        /* イベント名と時間を2段表示 */
+        body.vertical-mode .event-text {
+            position: static;
+            transform: none;
+            flex-basis: 100%;
+            width: 100%;
+            min-width: 0;
+            padding: 0;
+            white-space: normal;
+            overflow-wrap: anywhere;
+            pointer-events: auto;
+        }
+
+        /* イベント名・時間の折り返し */
+        body.vertical-mode .event-bar-name,
+        body.vertical-mode .event-bar-time {
+            display: block;
+            white-space: normal;
+            overflow-wrap: anywhere;
+        }
+
+        /* 横モード専用の空白を削除 */
+        body.vertical-mode .event-toggle-space {
+            display: none;
+        }
+
+        /* 編集・メモボタンの幅を確保 */
+        body.vertical-mode .event-edit-area {
+            width: 70px;
+            flex-shrink: 0;
+        }
+
+        body.vertical-mode .event-edit-button {
+            width: 60px;
+        }
+
+        /* スマホの横幅に合わせる */
+        @media (max-width: 700px) {
+            body.vertical-mode .schedule-area {
+                max-width: 100%;
+            }
+
+            body.vertical-mode .event-row {
+                padding-left: 6px;
+                padding-right: 6px;
+            }
+
+            body.vertical-mode .event-info {
+                padding-right: 4px;
+            }
+        }
+
     </style>
 </head>
 
