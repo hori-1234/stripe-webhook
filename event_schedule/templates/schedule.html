@@ -43,12 +43,9 @@
             font-weight: bold;
         }
 
-        あああ
         .top-controls {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) 95px;
-            align-items: end;
-            gap: 0;
+            display: block;
+            position: relative;
             margin-bottom: 25px;
         }
 
@@ -58,10 +55,14 @@
         }
 
         .top-controls > .add-button {
-            grid-column: 2;
-            justify-self: center;
-            align-self: end;
-            margin-right: 0;
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            width: 95px;
+            padding: 10px 0;
+            margin: 0;
+            box-sizing: border-box;
+            text-align: center;
         }
         
         .add-button {
