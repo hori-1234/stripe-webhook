@@ -907,6 +907,18 @@
             }
         }
 
+        /* 縦モード：付箋を▼の右隣に移動 */
+        body.vertical-mode .event-content {
+            position: relative;
+        }
+
+        /* 付箋の位置をイベント情報の右側から調整 */
+        body.vertical-mode .event-sticky-label {
+            position: static !important;
+            transform: none !important;
+            margin-right: 0 !important;
+        }
+
     </style>
 </head>
 
