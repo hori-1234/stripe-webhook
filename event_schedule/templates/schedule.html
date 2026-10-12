@@ -43,11 +43,25 @@
             font-weight: bold;
         }
 
+        あああ
         .top-controls {
-            display: flex;
-            align-items: center;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 95px;
+            align-items: end;
             gap: 0;
             margin-bottom: 25px;
+        }
+
+        .search-performer-area {
+            grid-column: 1;
+            min-width: 0;
+        }
+
+        .top-controls > .add-button {
+            grid-column: 2;
+            justify-self: center;
+            align-self: end;
+            margin-right: 0;
         }
         
         .add-button {
@@ -160,7 +174,8 @@
         .registered-performers {
             width: 300px;
             align-self: stretch;
-            margin-left: 1em;
+            margin-left: 0;
+            margin-top: 20px;
             padding: 10px 15px;
             border: 1px solid #777;
             box-sizing: border-box;
@@ -854,17 +869,11 @@
 
     </div>
 
-
     <div class="top-controls">
 
-        <a
-            href="/schedule/add"
-            class="add-button"
-        >
-            新規追加
-        </a>
+    <div class="search-performer-area">
 
-            <form id="schedule-search-form" class="search-form" method="GET" action="/schedule">
+        <form id="schedule-search-form" class="search-form" method="GET" action="/schedule">
 
                 <input type="hidden" name="year" value="{{ year }}">
                 <input type="hidden" name="month" value="{{ month }}">
@@ -988,12 +997,18 @@
                     </div>
 
                 {% endfor %}
-                
+
             </div>
-                
+
     </div>
 
-    <div class="schedule-area">
+    <a href="/schedule/add" class="add-button">
+        新規追加
+    </a>
+
+</div>
+
+<div class="schedule-area">
 
         <div class="time-header">
 
