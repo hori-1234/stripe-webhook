@@ -1836,14 +1836,15 @@
 {% endif %}
     
 <script>
-    let isVerticalMode = false;
+    
+    let isVerticalMode = localStorage.getItem("scheduleVerticalMode") === "true";
 
-    function toggleVerticalMode() {
-        isVerticalMode = !isVerticalMode;
-
+    function updateVerticalMode() {
         document.body.classList.toggle("vertical-mode", isVerticalMode);
 
         const button = document.getElementById("vertical-mode-toggle-button");
+
+        if (!button) return;
 
         if (isVerticalMode) {
             button.textContent = "縦モード";
@@ -1854,8 +1855,18 @@
             button.style.background = "#fff";
             button.style.color = "#000";
         }
-    }  
+    }
 
+    function toggleVerticalMode() {
+        isVerticalMode = !isVerticalMode;
+
+        localStorage.setItem("scheduleVerticalMode", String(isVerticalMode));
+
+        updateVerticalMode();
+    }
+
+    document.addEventListener("DOMContentLoaded", updateVerticalMode);
+    
     let isMyMemoMode =
         new URLSearchParams(window.location.search).get("mymemo") === "1";
 
