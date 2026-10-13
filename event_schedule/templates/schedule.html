@@ -601,6 +601,30 @@
             flex-shrink: 0;
         }
 
+        /* フライヤー表示領域 */
+        .event-flyer-area {
+            width: 80px;
+            height: 90px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            margin-right: 6px;
+        }
+
+        /* フライヤー画像 */
+        .event-flyer-thumbnail {
+            display: block;
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
         .event-edit-area {
             width: 95px;
             align-self: stretch;
@@ -1656,13 +1680,24 @@
                                     width: {{ event.width_percent }}%;
                                 "
                             ></div>
-                                
+                            
                         </div>
                         <div class="event-toggle-space"></div>
                         <div class="event-toggle-space"></div>
 
-                        {% set memo_tag = saved_event_memos.get(event.id, {}).get("tag", "") %}
+                        {% if event.flyer_thumbnail_url %}
+                            <div class="event-flyer-area">
+                                <img
+                                    src="{{ event.flyer_thumbnail_url }}"
+                                    alt="{{ event.event_name }}のフライヤー"
+                                    class="event-flyer-thumbnail"
+                                    loading="lazy"
+                                >
+                            </div>
+                        {% endif %}
 
+                        {% set memo_tag = saved_event_memos.get(event.id, {}).get("tag", "") %}
+                            
                         <div style="position: relative; flex-shrink: 0;">
 
                             {% if memo_tag %}
