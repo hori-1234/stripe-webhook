@@ -995,7 +995,8 @@
             position: relative !important;
         }
 
-        body.vertical-mode .event-flyer-area .event-flyer-sticky {
+        body.vertical-mode .event-flyer-area .event-flyer-sticky,
+        body:not(.vertical-mode) .event-flyer-area .event-flyer-sticky {
             position: absolute !important;
             left: 10px !important;
             right: auto !important;
