@@ -965,22 +965,26 @@
                 margin-top: 8px;
             }
         }
-
         
         /* フライヤーと付箋を重ねる */
         .event-flyer-area {
             position: relative;
+            overflow: visible;
         }
-
+            
         /* 画像があるイベントの付箋を画像右上に重ねる */
         .event-content:has(.event-flyer-area) .event-sticky-label {
+
+        .event-flyer-area .event-flyer-sticky {
             position: absolute !important;
-            right: 95px !important;
+            left: 0 !important;
+            right: auto !important;
             top: 0 !important;
-            transform: none !important;
-            margin-right: 0 !important;
-            z-index: 5;
-            }
+            transform: translate(-20%, -20%) !important;
+            margin: 0 !important;
+            z-index: 10;
+            pointer-events: none;
+        }
 
     </style>
 </head>
