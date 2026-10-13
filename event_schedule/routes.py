@@ -1086,8 +1086,6 @@ def schedule_edit_update(event_id):
         except Exception:
             # DB更新は成功しているため、編集処理は継続
             pass
-
-    is_admin_edit = session.pop(
     
     is_admin_edit = session.pop(
         f"schedule_admin_edit_{event_id}",
