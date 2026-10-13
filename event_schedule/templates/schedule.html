@@ -1972,6 +1972,8 @@
 
             if (!info || !sticky) return;
 
+            if (sticky.classList.contains("event-flyer-sticky")) return;
+
             if (isVerticalMode) {
                 if (!sticky.dataset.originalPosition) {
                     const placeholder = document.createComment("sticky-original-position");
