@@ -4,6 +4,7 @@ import calendar
 import jpholiday
 import secrets
 
+from .flyer_storage import upload_flyer_to_r2
 from zoneinfo import ZoneInfo
 from event_schedule.memo_auth import (
     get_logged_in_memo_email,
@@ -250,6 +251,8 @@ def schedule_add():
         streaming_available = request.form.get("streaming_available") == "1"
         edit_password = request.form.get("edit_password", "")
 
+        flyer_file = request.files.get("flyer_image")
+
         if len(event_name) > 40:
             return render_template(
                 "schedule_add.html",
@@ -301,10 +304,19 @@ def schedule_add():
 
         conn = None
         cur = None
+        flyer_thumbnail_key = None
+        flyer_image_key = None
 
         try:
+            # フライヤー画像が選択されている場合のみアップロード
+            if flyer_file and flyer_file.filename:
+                flyer_thumbnail_key, flyer_image_key = upload_flyer_to_r2(
+                    flyer_file
+                )
+
             conn = psycopg2.connect(DATABASE_URL)
             cur = conn.cursor()
+        
 
             cur.execute("""
                 INSERT INTO event_schedules (
