@@ -517,7 +517,9 @@ def schedule():
             event_name,
             genre,
             performers,
-            streaming_available
+            streaming_available,
+            flyer_thumbnail_key,
+            flyer_image_key
         FROM event_schedules
     """
     if performer_keyword:
@@ -779,6 +781,8 @@ def schedule():
             "genre": event[6],
             "performers": event[7],
             "streaming_available": event[8],
+            "flyer_thumbnail_key": event[9],
+            "flyer_image_key": event[10],
             "left_percent": left_percent,
             "width_percent": width_percent
         })
