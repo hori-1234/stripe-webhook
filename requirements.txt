@@ -10,3 +10,4 @@ requests
 jpholiday
 cryptography
 Authlib
+Pillow
