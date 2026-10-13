@@ -174,8 +174,13 @@ def create_event_schedule_table():
 
     cur.execute("""
         ALTER TABLE event_schedules
-        ADD COLUMN IF NOT EXISTS registration_ip TEXT
+        ADD COLUMN IF NOT EXISTS flyer_thumbnail_key TEXT
     """)
+
+    cur.execute("""
+        ALTER TABLE event_schedules
+        ADD COLUMN IF NOT EXISTS flyer_image_key TEXT
+    """)    
 
         # 終了時間「不明」を保存できるようにする
     cur.execute("""
