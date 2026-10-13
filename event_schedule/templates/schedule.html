@@ -2922,8 +2922,21 @@
         <button
             type="button"
             id="flyer-next"
-            onclick="changeFlyer(1)"
+            onclick="event.stopPropagation(); changeFlyer(1)"
             aria-label="次のフライヤー"
+            style="
+                position: absolute;
+                right: 10px;
+                top: 50%;
+                transform: translateY(-50%);
+                z-index: 2;
+                background: rgba(0, 0, 0, 0.5);
+                border: none;
+                color: white;
+                font-size: 36px;
+                cursor: pointer;
+                padding: 12px;
+            "
         >
             &#10095;
         </button>
