@@ -966,6 +966,22 @@
             }
         }
 
+        ああああああああ
+        /* フライヤーと付箋を重ねる */
+        .event-flyer-area {
+            position: relative;
+        }
+
+        /* 画像があるイベントの付箋を画像右上に重ねる */
+        .event-content:has(.event-flyer-area) .event-sticky-label {
+            position: absolute !important;
+            right: 95px !important;
+            top: 0 !important;
+            transform: none !important;
+            margin-right: 0 !important;
+            z-index: 5;
+            }
+
     </style>
 </head>
 
@@ -1694,7 +1710,7 @@
                                     loading="lazy"
                                 >
                             </div>
-                        {% endif %}
+                        {% endif %} 
 
                         {% set memo_tag = saved_event_memos.get(event.id, {}).get("tag", "") %}
                             
