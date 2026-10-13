@@ -84,6 +84,43 @@ def delete_old_events():
     conn = psycopg2.connect(DATABASE_URL)
     cur = conn.cursor()
 
+    # 開催日から2か月経過したフライヤーを取得
+    cur.execute("""
+        SELECT
+            id,
+            flyer_thumbnail_key,
+            flyer_image_key
+        FROM event_schedules
+        WHERE event_date < CURRENT_DATE - INTERVAL '2 months'
+          AND (
+              flyer_thumbnail_key IS NOT NULL
+              OR flyer_image_key IS NOT NULL
+          )
+    """)
+
+    expired_flyers = cur.fetchall()
+
+
+    # R2から削除できた画像だけ、DBの画像キーをNULLにする
+    for event_id, thumbnail_key, image_key in expired_flyers:
+        try:
+            delete_flyer_from_r2(thumbnail_key, image_key)
+
+            cur.execute("""
+                UPDATE event_schedules
+                SET
+                    flyer_thumbnail_key = NULL,
+                    flyer_image_key = NULL
+                WHERE id = %s
+            """, (event_id,))
+
+            conn.commit()
+
+        except Exception as e:
+            conn.rollback()
+            print(f"フライヤー自動削除失敗: event_id={event_id}, error={e}")
+
+    
     try:
         cur.execute("""
             DELETE FROM event_schedules
