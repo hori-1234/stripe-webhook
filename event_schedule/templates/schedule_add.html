@@ -122,7 +122,7 @@
     </a>
     </div>
     
-    <form method="POST">
+    <form method="POST" enctype="multipart/form-data">
 
         <div class="form-row">
             <label>日程</label>
@@ -250,6 +250,31 @@
 
                 <div class="description">
                     ※複数の出演者を登録する場合は、出演者名をスペースで区切って入力してください。
+                </div>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <label for="flyer_image">フライヤー画像</label>
+
+            <div style="width: 100%; max-width: 600px;">
+                <input
+                    type="file"
+                    id="flyer_image"
+                    name="flyer_image"
+                    accept="image/jpeg,image/png,image/webp"
+                >
+
+
+                <div class="description" style="color: #d60000; font-weight: bold;">
+                    ※現在実装中のため、まだご利用いただけません。
+                </div>
+
+
+                <div class="description">
+                    ※画像登録は任意です。<br>
+                    ※JPG・PNG・WebP形式、最大2MB。<br>
+                    ※イベント開催日から2か月後に自動削除されます。
                 </div>
             </div>
         </div>
