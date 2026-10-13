@@ -1064,9 +1064,13 @@ def schedule_edit_update(event_id):
         conn.rollback()
 
         # 新しい画像をアップロードしていた場合は削除
+        # 既存画像の削除指定では実行しない
         if (
-            new_thumbnail_key != old_thumbnail_key
-            or new_image_key != old_image_key
+            not delete_flyer
+            and (
+                new_thumbnail_key != old_thumbnail_key
+                or new_image_key != old_image_key
+            )
         ):
             try:
                 delete_flyer_from_r2(
@@ -1127,9 +1131,10 @@ def schedule_edit_delete(event_id):
     cur = conn.cursor()
 
     cur.execute("""
-        SELECT event_date
+        SELECT event_date, flyer_thumbnail_key, flyer_image_key
         FROM event_schedules
         WHERE id = %s
+        FOR UPDATE
     """, (event_id,))
 
     event = cur.fetchone()
@@ -1138,18 +1143,38 @@ def schedule_edit_delete(event_id):
         cur.close()
         conn.close()
         return "イベントが見つかりません。", 404
-
+    
     event_date = event[0]
+    flyer_thumbnail_key = event[1]
+    flyer_image_key = event[2]
 
-    cur.execute("""
-        DELETE FROM event_schedules
-        WHERE id = %s
-    """, (event_id,))
+    try:
+        cur.execute("""
+            DELETE FROM event_schedules
+            WHERE id = %s
+        """, (event_id,))
 
-    conn.commit()
-    cur.close()
-    conn.close()
+        conn.commit()
 
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        cur.close()
+        conn.close()
+
+    # DBからイベントを削除できた場合だけ、R2の画像も削除
+    if flyer_thumbnail_key or flyer_image_key:
+        try:
+            delete_flyer_from_r2(
+                flyer_thumbnail_key,
+                flyer_image_key
+            )
+        except Exception:
+            # R2の削除に失敗しても、イベント削除は完了させる
+            pass
+    
     is_admin_edit = session.pop(
         f"schedule_admin_edit_{event_id}",
         False
