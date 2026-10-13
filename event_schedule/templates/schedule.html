@@ -936,7 +936,6 @@
             position: relative;
         }
 
-        /* 縦モード：付箋を▼の右隣に表示 */
         body.vertical-mode .event-info > .event-sticky-label {
             position: static !important;
             transform: none !important;
@@ -946,6 +945,7 @@
             font-size: 12px;
             z-index: auto;
         }
+            
 
         /* 縦モード：新規追加を演者一覧の下に配置 */
         body.vertical-mode .top-controls > .add-button {
@@ -975,9 +975,6 @@
         /* 画像があるイベントの付箋を画像右上に重ねる */
         .event-content:has(.event-flyer-area) .event-sticky-label {
 
-
-        あああああああ
-
         body .event-content .event-flyer-area {
             position: relative !important;
             overflow: visible !important;
@@ -993,6 +990,23 @@
             margin: 0 !important;
             z-index: 10 !important;
             pointer-events: none;
+        }
+
+
+        /* スマホ縦モード：付箋をフライヤー左上に固定 */
+        body.vertical-mode .event-flyer-area {
+            position: relative !important;
+        }
+
+        body.vertical-mode .event-flyer-area .event-flyer-sticky {
+            position: absolute !important;
+            left: 0 !important;
+            right: auto !important;
+            top: 0 !important;
+            bottom: auto !important;
+            transform: translate(-20%, -20%) !important;
+            margin: 0 !important;
+            z-index: 20 !important;
         }
             
     </style>
