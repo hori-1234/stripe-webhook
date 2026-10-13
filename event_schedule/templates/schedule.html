@@ -2896,17 +2896,60 @@
             object-fit: contain;
         " onclick="event.stopPropagation()">
 
+
+        <button
+            type="button"
+            id="flyer-prev"
+            onclick="changeFlyer(-1)"
+            aria-label="前のフライヤー"
+        >
+            &#10094;
+        </button>
+
+        <button
+            type="button"
+            id="flyer-next"
+            onclick="changeFlyer(1)"
+            aria-label="次のフライヤー"
+        >
+            &#10095;
+        </button>
     </div>
 
 <script>
+let flyerImages = [];
+let currentFlyerIndex = 0;
+
 function openFlyerModal(element) {
     const imageUrl = element.dataset.fullImage;
     if (!imageUrl) return;
+
+    // 現在の画面に表示されているフライヤーを取得
+    flyerImages = Array.from(
+        document.querySelectorAll(".event-flyer-thumbnail")
+    ).filter(img => img.dataset.fullImage);
+
+    // クリックしたフライヤーが何枚目か記録
+    currentFlyerIndex = flyerImages.indexOf(element);
 
     document.getElementById("flyer-modal-image").src = imageUrl;
     document.getElementById("flyer-modal").style.display = "flex";
 }
 
+function changeFlyer(direction) {
+    if (flyerImages.length <= 1) return;
+
+    // 前後のフライヤーへ移動（最後の次は最初に戻る）
+    currentFlyerIndex =
+        (currentFlyerIndex + direction + flyerImages.length)
+        % flyerImages.length;
+
+    // 拡大画像を切り替える
+    const imageUrl = flyerImages[currentFlyerIndex].dataset.fullImage;
+
+    document.getElementById("flyer-modal-image").src = imageUrl;
+}
+    
 function closeFlyerModal() {
     document.getElementById("flyer-modal").style.display = "none";
     document.getElementById("flyer-modal-image").removeAttribute("src");
