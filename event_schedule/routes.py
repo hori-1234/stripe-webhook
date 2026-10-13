@@ -968,42 +968,127 @@ def schedule_edit_update(event_id):
     performers = clean_performer_text(
         request.form.get("performers", "")
     ).strip()
+
     streaming_available = request.form.get("streaming_available") == "1"
+
+    # 編集画面で選択されたフライヤー画像を取得
+    flyer_file = request.files.get("flyer_image")
+
     if len(event_name) > 40:
         return "イベント名は全角・半角問わず40文字以内で入力してください。", 400
 
     conn = psycopg2.connect(DATABASE_URL)
     cur = conn.cursor()
 
+    # 現在登録されているフライヤー画像を取得
     cur.execute("""
-        UPDATE event_schedules
-        SET
-            event_date = %s,
-            start_time = %s,
-            end_time = %s,
-            location = %s,
-            event_name = %s,
-            genre = %s,
-            performers = %s,
-            streaming_available = %s,
-            updated_at = CURRENT_TIMESTAMP
+        SELECT flyer_thumbnail_key, flyer_image_key
+        FROM event_schedules
         WHERE id = %s
-    """, (
-        event_date,
-        start_time,
-        end_time,
-        location,
-        event_name,
-        genre,
-        performers,
-        streaming_available,
-        event_id
-    ))
+        FOR UPDATE
+    """, (event_id,))
 
-    conn.commit()
-    cur.close()
-    conn.close()
+    existing_flyer = cur.fetchone()
 
+    if existing_flyer is None:
+        cur.close()
+        conn.close()
+        return "イベントが見つかりません。", 404
+        
+    old_thumbnail_key = existing_flyer[0]
+    old_image_key = existing_flyer[1]
+
+    # 初期状態では現在の画像を維持
+    new_thumbnail_key = old_thumbnail_key
+    new_image_key = old_image_key
+
+    # 新しい画像が選択された場合のみR2へアップロード
+    if flyer_file and flyer_file.filename:
+        try:
+            new_thumbnail_key, new_image_key = upload_flyer_to_r2(
+                flyer_file
+            )
+        except ValueError as e:
+            conn.rollback()
+            cur.close()
+            conn.close()
+            return str(e), 400
+        except Exception:
+            conn.rollback()
+            cur.close()
+            conn.close()
+            raise
+
+    try:
+        cur.execute("""
+            UPDATE event_schedules
+            SET
+                event_date = %s,
+                start_time = %s,
+                end_time = %s,
+                location = %s,
+                event_name = %s,
+                genre = %s,
+                performers = %s,
+                streaming_available = %s,
+                flyer_thumbnail_key = %s,
+                flyer_image_key = %s,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = %s
+        """, (
+            event_date,
+            start_time,
+            end_time,
+            location,
+            event_name,
+            genre,
+            performers,
+            streaming_available,
+            new_thumbnail_key,
+            new_image_key,
+            event_id
+        ))
+
+        conn.commit()
+
+    except Exception:
+        conn.rollback()
+
+        # 新しい画像をアップロードしていた場合は削除
+        if (
+            new_thumbnail_key != old_thumbnail_key
+            or new_image_key != old_image_key
+        ):
+            try:
+                delete_flyer_from_r2(
+                    new_thumbnail_key,
+                    new_image_key
+                )
+            except Exception:
+                pass
+
+        raise
+
+    finally:
+        cur.close()
+        conn.close()
+
+    # 画像を差し替えた場合、古い画像をR2から削除
+    if (
+        new_thumbnail_key != old_thumbnail_key
+        or new_image_key != old_image_key
+    ):
+        try:
+            delete_flyer_from_r2(
+                old_thumbnail_key,
+                old_image_key
+            )
+        except Exception:
+            # DB更新は成功しているため、編集処理は継続
+            pass
+
+    is_admin_edit = session.pop(
+    
     is_admin_edit = session.pop(
         f"schedule_admin_edit_{event_id}",
         False
