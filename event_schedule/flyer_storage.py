@@ -147,3 +147,19 @@ def delete_flyer_from_r2(thumbnail_key, image_key):
             Bucket=FLYER_BUCKET,
             Key=key
         )
+
+
+def get_flyer_url(image_key):
+    if not image_key:
+        return None
+
+    r2 = get_flyer_r2_client()
+
+    return r2.generate_presigned_url(
+        "get_object",
+        Params={
+            "Bucket": FLYER_BUCKET,
+            "Key": image_key
+        },
+        ExpiresIn=3600
+    )
