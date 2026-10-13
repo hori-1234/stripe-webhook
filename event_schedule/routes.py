@@ -4,7 +4,11 @@ import calendar
 import jpholiday
 import secrets
 
-from .flyer_storage import upload_flyer_to_r2, delete_flyer_from_r2
+from .flyer_storage import (
+    upload_flyer_to_r2,
+    delete_flyer_from_r2,
+    get_flyer_url
+)
 from zoneinfo import ZoneInfo
 from event_schedule.memo_auth import (
     get_logged_in_memo_email,
@@ -783,6 +787,8 @@ def schedule():
             "streaming_available": event[8],
             "flyer_thumbnail_key": event[9],
             "flyer_image_key": event[10],
+            "flyer_thumbnail_url": get_flyer_url(event[9]),
+            "flyer_image_url": get_flyer_url(event[10]),
             "left_percent": left_percent,
             "width_percent": width_percent
         })
