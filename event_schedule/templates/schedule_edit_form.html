@@ -127,6 +127,7 @@
     <form
         method="post"
         action="/schedule/edit/{{ event[0] }}/update"
+        enctype="multipart/form-data"
     >
 
         <div class="form-row">
@@ -298,11 +299,30 @@
             >{{ event[7] or "" }}</textarea>
         </div>
 
-        {% if error_message %}
-            <div style="color: red; margin-bottom: 15px;">
-                {{ error_message }}
+        <div class="form-row">
+            <label for="flyer_image">フライヤー画像</label>
+
+            <div style="width: 100%; max-width: 600px;">
+                <input
+                    type="file"
+                    id="flyer_image"
+                    name="flyer_image"
+                    accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                >
+
+                <div style="margin-top: 6px; font-size: 14px; color: #666;">
+                    ※JPG・PNG・WebP形式、2MB以内
+                </div>
+
+                <div style="margin-top: 6px; font-size: 14px; color: #666;">
+                    ※画像を選択しない場合は、現在の画像を維持します。
+                </div>
+
+                <div style="margin-top: 6px; font-size: 14px; color: #c00;">
+                    ※画像の変更機能は現在実装中です。
+                </div>
             </div>
-        {% endif %}
+        </div>
 
         <div class="button-area">
              <a href="/schedule">戻る</a>
