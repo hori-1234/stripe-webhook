@@ -4,7 +4,7 @@ import calendar
 import jpholiday
 import secrets
 
-from .flyer_storage import upload_flyer_to_r2
+from .flyer_storage import upload_flyer_to_r2, delete_flyer_from_r2
 from zoneinfo import ZoneInfo
 from event_schedule.memo_auth import (
     get_logged_in_memo_email,
@@ -306,6 +306,7 @@ def schedule_add():
         cur = None
         flyer_thumbnail_key = None
         flyer_image_key = None
+        db_committed = False
 
         try:
             # フライヤー画像が選択されている場合のみアップロード
@@ -316,8 +317,8 @@ def schedule_add():
 
             conn = psycopg2.connect(DATABASE_URL)
             cur = conn.cursor()
-        
 
+            
             cur.execute("""
                 INSERT INTO event_schedules (
                     event_date,
@@ -330,9 +331,14 @@ def schedule_add():
                     streaming_available,
                     edit_password_hash,
                     edit_password_encrypted,
-                    registration_ip
+                    registration_ip,
+                    flyer_thumbnail_key,
+                    flyer_image_key
                 )
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                VALUES (
+                    %s, %s, %s, %s, %s, %s, %s,
+                    %s, %s, %s, %s, %s, %s
+                )
             """, (
                 event_date,
                 start_time,
@@ -344,14 +350,45 @@ def schedule_add():
                 streaming_available,
                 edit_password_hash,
                 edit_password_encrypted,
-                registration_ip
+                registration_ip,
+                flyer_thumbnail_key,
+                flyer_image_key
             ))
 
             conn.commit()
+            db_committed = True
+
+        except ValueError as e:
+            if conn:
+                conn.rollback()
+
+            if flyer_thumbnail_key or flyer_image_key:
+                delete_flyer_from_r2(
+                    flyer_thumbnail_key,
+                    flyer_image_key
+                )
+
+            return render_template(
+                "schedule_add.html",
+                error_message=str(e),
+                form_data=request.form,
+                copy_event=copy_event
+            ), 400
 
         except Exception:
             if conn:
                 conn.rollback()
+
+            # DB登録に失敗した場合、R2の画像も削除
+            if not db_committed and (flyer_thumbnail_key or flyer_image_key):
+                try:
+                    delete_flyer_from_r2(
+                        flyer_thumbnail_key,
+                        flyer_image_key
+                    )
+                except Exception:
+                    pass            
+
             raise
 
         finally:
@@ -360,6 +397,7 @@ def schedule_add():
 
             if conn:
                 conn.close()
+
         
         return render_template(
             "schedule_add.html",
