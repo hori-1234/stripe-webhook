@@ -109,6 +109,26 @@
                 margin-left: 0;
             }
         }
+
+        /* 新規登録処理中のローディングスピナー */
+        .add-loading-spinner {
+            width: 52px;
+            height: 52px;
+            border: 6px solid rgba(255, 255, 255, 0.25);
+            border-top: 6px solid #ffffff;
+            border-radius: 50%;
+            animation: add-loading-spin 0.8s linear infinite;
+        }
+
+        @keyframes add-loading-spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
     </style>
 </head>
 
@@ -120,9 +140,15 @@
         <a href="/schedule">
             ← スケジュールに戻る
     </a>
+
     </div>
     
-    <form method="POST" enctype="multipart/form-data">
+    <form
+        id="event-add-form"
+        method="POST"
+        enctype="multipart/form-data"
+        onsubmit="showAddLoading(event)"
+    >
 
         <div class="form-row">
             <label>日程</label>
@@ -314,6 +340,26 @@
 
     </form>
 
+    </form>
+
+<!-- 新規登録処理中のローディング画面 -->
+<div id="add-loading" style="
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    z-index: 99999;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    color: white;
+">
+    <div class="add-loading-spinner"></div>
+    <p style="margin-top: 20px; font-size: 18px;">
+        処理中です...
+    </p>
+</div>
+    
 <script>
     const endTimeInput = document.getElementById("end_time");
     const endTimeUnknown = document.getElementById("end_time_unknown");
@@ -331,6 +377,36 @@
     endTimeUnknown.addEventListener("change", updateEndTimeInput);
 
     updateEndTimeInput();
+
+    // 二重送信防止
+    let isAddSubmitting = false;
+
+    function showAddLoading(event) {
+        // すでに送信中なら再送信を防止
+        if (isAddSubmitting) {
+            event.preventDefault();
+            return;
+        }
+
+        isAddSubmitting = true;
+
+        // ローディング画面を表示
+        const loading = document.getElementById("add-loading");
+
+        if (loading) {
+            loading.style.display = "flex";
+        }
+
+        // 登録ボタンを無効化
+        const submitButton = document.querySelector(
+            "#event-add-form button[type='submit']"
+        );
+
+        if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.textContent = "処理中...";
+        }
+    }
 </script>
     
 </body>
