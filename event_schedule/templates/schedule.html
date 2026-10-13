@@ -2958,6 +2958,15 @@ function openFlyerModal(element) {
     // クリックしたフライヤーが何枚目か記録
     currentFlyerIndex = flyerImages.indexOf(element);
 
+    // フライヤーが2枚以上ある場合だけ前後ボタンを表示
+    const showNavigation = flyerImages.length > 1;
+
+    document.getElementById("flyer-prev").style.display =
+        showNavigation ? "block" : "none";
+
+    document.getElementById("flyer-next").style.display =
+        showNavigation ? "block" : "none";
+
     document.getElementById("flyer-modal-image").src = imageUrl;
     document.getElementById("flyer-modal").style.display = "flex";
 }
