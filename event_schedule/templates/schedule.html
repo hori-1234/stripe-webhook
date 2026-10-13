@@ -1731,9 +1731,11 @@
                             <div class="event-flyer-area">
                                 <img
                                     src="{{ event.flyer_thumbnail_url }}"
+                                    data-full-image="{{ event.flyer_image_url }}"
                                     alt="{{ event.event_name }}のフライヤー"
                                     class="event-flyer-thumbnail"
                                     loading="lazy"
+                                    onclick="openFlyerModal(this)"
                                 >
 
                                 {% if memo_tag %}
@@ -2835,6 +2837,53 @@
         }
     }
 
+    </script>
+
+    <div id="flyer-modal" style="
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.9);
+        z-index: 20000;
+        align-items: center;
+        justify-content: center;
+        padding: 45px 15px;
+        box-sizing: border-box;
+    " onclick="closeFlyerModal()">
+
+        <button type="button" onclick="closeFlyerModal()" style="
+            position: absolute;
+            top: 12px;
+            right: 18px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 36px;
+            cursor: pointer;
+        ">×</button>
+
+        <img id="flyer-modal-image" alt="フライヤー拡大画像" style="
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        " onclick="event.stopPropagation()">
+
+    </div>
+
+<script>
+function openFlyerModal(element) {
+    const imageUrl = element.dataset.fullImage;
+    if (!imageUrl) return;
+
+    document.getElementById("flyer-modal-image").src = imageUrl;
+    document.getElementById("flyer-modal").style.display = "flex";
+}
+
+function closeFlyerModal() {
+    document.getElementById("flyer-modal").style.display = "none";
+    document.getElementById("flyer-modal-image").removeAttribute("src");
+}
+   
 </script>
 
 </body>
