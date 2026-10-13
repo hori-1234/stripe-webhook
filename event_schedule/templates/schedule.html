@@ -1015,7 +1015,19 @@
             margin: 0 !important;
             z-index: 20 !important;
         }
-            
+
+                /* スマホ縦モード：出演者一覧 */
+        @media (max-width: 700px) and (orientation: portrait) {
+            body.vertical-mode .performer-list {
+                width: 100%;
+                padding: 12px;
+                box-sizing: border-box;
+                font-size: 16px;
+                line-height: 1.8;
+                overflow-wrap: normal;
+                word-break: keep-all;
+            }
+        }   
     </style>
 </head>
 
