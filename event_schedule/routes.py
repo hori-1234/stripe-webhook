@@ -974,6 +974,9 @@ def schedule_edit_update(event_id):
     # 編集画面で選択されたフライヤー画像を取得
     flyer_file = request.files.get("flyer_image")
 
+    # 現在の画像を削除するかどうか
+    delete_flyer = request.form.get("delete_flyer") == "1"
+
     if len(event_name) > 40:
         return "イベント名は全角・半角問わず40文字以内で入力してください。", 400
 
@@ -1002,8 +1005,14 @@ def schedule_edit_update(event_id):
     new_thumbnail_key = old_thumbnail_key
     new_image_key = old_image_key
 
-    # 新しい画像が選択された場合のみR2へアップロード
-    if flyer_file and flyer_file.filename:
+    # 削除が指定された場合は画像キーを空にする
+    if delete_flyer:
+        new_thumbnail_key = None
+        new_image_key = None
+
+    # 削除指定がない場合だけ新しい画像をアップロード
+    elif flyer_file and flyer_file.filename:
+    
         try:
             new_thumbnail_key, new_image_key = upload_flyer_to_r2(
                 flyer_file
