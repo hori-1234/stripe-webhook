@@ -6,8 +6,45 @@
 
     <title>イベスケ</title>
 
-    <style>
+     <style>
+        /* 最上部ヘッダー */
+        .site-header {
+            margin: -30px -30px 30px;
+            background: linear-gradient(to top, #0879d7, #39b9eb);
+            color: #fff;
+            padding: 18px 12px;
+            box-sizing: border-box;
+        }
+
+        .site-header-nav {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .site-header-separator {
+            color: #fff;
+        }
+
+        /* スマホ：ヘッダーの余白調整 */
+        @media (max-width: 700px) {
+            .site-header {
+                margin: -15px -15px 25px;
+                padding: 14px 8px;
+            }
+
+            .site-header-nav {
+                gap: 8px;
+                font-size: 12px;
+            }
+        }
+
         body {
+    
             font-family: sans-serif;
             margin: 0;
             padding: 30px;
