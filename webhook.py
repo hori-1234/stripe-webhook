@@ -18,6 +18,7 @@ from unei_kanri import unei_kanri_bp
 from event_schedule.routes import event_schedule_bp
 from event_schedule.memo_auth import memo_auth_bp, oauth
 from event_schedule.ibesuke_mokuteki import ibesuke_mokuteki
+from event_schedule.riyoukiyaku import riyoukiyaku
 from product import process_products
 from ticket_check import (
     check_ticket,
@@ -36,6 +37,7 @@ app.register_blueprint(unei_kanri_bp)
 app.register_blueprint(event_schedule_bp)
 app.register_blueprint(memo_auth_bp)
 app.register_blueprint(ibesuke_mokuteki)
+app.register_blueprint(riyoukiyaku)
 app.register_blueprint(top_bp)
 app.register_blueprint(cancel_policy_bp)
 app.register_blueprint(contact_bp)
