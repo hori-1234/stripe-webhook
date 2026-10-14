@@ -1186,6 +1186,10 @@
                 <input type="hidden" name="year" value="{{ year }}">
                 <input type="hidden" name="month" value="{{ month }}">
 
+                {% if request.args.get('mymemo') == '1' %}
+                <input type="hidden" name="mymemo" value="1">
+                {% endif %}
+
                 <!-- ジャンル -->
                 <div class="search-row">
                     <label>ジャンル</label>
@@ -2143,6 +2147,10 @@
         if (isMyMemoMode) {
             params.delete("mymemo");
         } else {
+            params.delete("genre");
+            params.delete("location");
+            params.delete("event_name");
+            params.delete("performer");
             params.set("mymemo", "1");
         }
 
