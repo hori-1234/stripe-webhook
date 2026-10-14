@@ -1066,7 +1066,26 @@
                 overflow-wrap: normal;
                 word-break: keep-all;
             }
-        }   
+        }
+
+                 /* 画面切り替え中のローディングスピナー */
+        .add-loading-spinner {
+            width: 52px;
+            height: 52px;
+            border: 6px solid rgba(255, 255, 255, 0.25);
+            border-top: 6px solid #ffffff;
+            border-radius: 50%;
+            animation: add-loading-spin 0.8s linear infinite;
+        }
+
+        @keyframes add-loading-spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 </head>
 
@@ -2141,6 +2160,7 @@
     let isMyMemoMode =
         new URLSearchParams(window.location.search).get("mymemo") === "1";
 
+    
     function toggleMyMemoMode() {
         const params = new URLSearchParams(window.location.search);
 
@@ -2154,9 +2174,16 @@
             params.set("mymemo", "1");
         }
 
+        // ローディング画面を表示
+        const loading = document.getElementById("schedule-loading");
+
+        if (loading) {
+            loading.style.display = "flex";
+        }
+
         window.location.href = "/schedule?" + params.toString();
     }
-
+    ああああああ
     function updateMyMemoButton() {
         const button = document.getElementById("mymemo-toggle-button");
 
@@ -3087,5 +3114,23 @@ function closeFlyerModal() {
     <a href="/privacy" style="color: #555; text-decoration: none;">プライバシーポリシー</a>
 </footer>
 
+<!-- 全表示・マイメモ切り替え中のローディング画面 -->
+<div id="schedule-loading" style="
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    z-index: 99999;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    color: white;
+">
+    <div class="add-loading-spinner"></div>
+    <p style="margin-top: 20px; font-size: 18px;">
+        処理中です...
+    </p>
+</div>
+    
 </body>
 </html>
