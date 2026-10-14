@@ -15,7 +15,7 @@ from top_set.cancel_policy import cancel_policy_bp
 from top_set.top import top_bp
 from admin_auth import admin_required, qr_required
 from unei_kanri import unei_kanri_bp
-
+　
 from event_schedule.routes import event_schedule_bp
 from event_schedule.memo_auth import memo_auth_bp, oauth
 from event_schedule.ibesuke_mokuteki import ibesuke_mokuteki_bp
