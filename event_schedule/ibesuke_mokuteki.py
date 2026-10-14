@@ -1,7 +1,7 @@
 
 from flask import Blueprint, render_template_string
 
-purpose_bp = Blueprint("purpose", __name__)
+purpose_bp = Blueprint("ibesuke_mokuteki", __name__)
 
 
 @purpose_bp.route("/purpose")
