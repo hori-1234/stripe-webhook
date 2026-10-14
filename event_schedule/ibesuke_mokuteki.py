@@ -50,7 +50,7 @@ def purpose():
 
         .purpose-section p {
             margin: 0;
-            padding: 18px 15px;
+            padding: 4px 15px;
             border-bottom: 1px solid rgba(0, 0, 0, 0.2);
         }
 
@@ -118,7 +118,7 @@ def purpose():
     </section>
 
     <section class="purpose-section">
-        <h2>演者様・イベント主催者様へ</h2>
+        <h2>演者様へ</h2>
 
         <p>
             また、ファンの方だけでなく、
