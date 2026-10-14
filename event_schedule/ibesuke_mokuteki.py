@@ -51,7 +51,6 @@ def purpose():
         .purpose-section p {
             margin: 0;
             padding: 4px 15px;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.2);
         }
 
         .purpose-highlight {
@@ -158,7 +157,7 @@ def purpose():
         <h2>ご利用について</h2>
 
         <p>
-            なお、イベスケは無料でご利用いただけます。
+            イベスケは無料でご利用いただけます。
         </p>
     </section>
 
