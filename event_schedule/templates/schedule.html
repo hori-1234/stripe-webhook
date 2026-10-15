@@ -1200,7 +1200,11 @@
 
     <div class="search-performer-area">
 
-        <form id="schedule-search-form" class="search-form" method="GET" action="/schedule">
+        <form id="schedule-search-form"
+          class="search-form"
+          method="GET"
+          action="/schedule"
+          onsubmit="document.getElementById('schedule-loading').style.display = 'flex';">
 
                 <input type="hidden" name="year" value="{{ year }}">
                 <input type="hidden" name="month" value="{{ month }}">
@@ -2201,6 +2205,7 @@
     document.addEventListener("DOMContentLoaded", updateMyMemoButton);
 
     function clearSearch() {
+        document.getElementById("schedule-loading").style.display = "flex";
         sessionStorage.removeItem("performerScrollTop");
         window.location.href = "/schedule";
     }
