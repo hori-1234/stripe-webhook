@@ -1,6 +1,6 @@
 
 <div id="memo-{{ event.id }}" class="event-memo-area" style="display: none;">
-    <div class="event-memo-title">メモ</div>
+    <div class="event-memo-title">マイメモ</div>
 
     <div class="event-memo-sticky">
         <label for="memo-sticky-{{ event.id }}">付箋</label>
@@ -27,7 +27,6 @@
     </div>
 
     <div class="event-memo-text">
-        <label for="memo-text-{{ event.id }}">メモ</label>
         <textarea id="memo-text-{{ event.id }}" name="memo_text" rows="3" placeholder="メモを入力" style="display: block; width: 100%; max-width: 600px; box-sizing: border-box; padding: 8px; font-size: 14px;">{{ saved_event_memos.get(event.id, {}).get("memo_text", "") | e }}</textarea>
     </div>
 
