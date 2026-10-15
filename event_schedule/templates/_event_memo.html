@@ -39,6 +39,32 @@
         >
             保存
         </button>
+
+        <button
+            type="button"
+            onclick="
+                const memo = document.getElementById('memo-text-{{ event.id }}');
+                const expanded = this.dataset.expanded === '1';
+
+                if (expanded) {
+                    memo.style.height = '';
+                    memo.style.overflowY = '';
+                    this.textContent = 'メモ全体';
+                    this.dataset.expanded = '0';
+                } else {
+                    memo.style.height = 'auto';
+                    memo.style.height = memo.scrollHeight + 'px';
+                    memo.style.overflowY = 'hidden';
+                    this.textContent = '元に戻す';
+                    this.dataset.expanded = '1';
+                }
+            "
+            style="padding: 7px 20px; font-size: 14px; cursor: pointer;"
+        >
+            メモ全体
+        </button>
+    </div>
+        
     </div>
 
     <div class="event-memo-alarm" style="display: none;">
