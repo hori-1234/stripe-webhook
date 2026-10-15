@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, redirect
 import os
 import boto3
 import psycopg2
@@ -45,6 +45,23 @@ app.register_blueprint(tokushoho_bp)
 app.register_blueprint(shipping_bp)
 app.register_blueprint(privacy_bp)
 app.register_blueprint(kuri_move_sarch_bp)
+
+
+@app.before_request
+def redirect_old_schedule_domain():
+
+    if request.host.lower() != "stripe-webhook-t3xu.onrender.com":
+        return
+
+    if request.path == "/schedule" or request.path.startswith("/schedule/"):
+
+        new_url = "https://nwoshi.com" + request.full_path
+
+        if new_url.endswith("?"):
+            new_url = new_url[:-1]
+
+        return redirect(new_url, code=302)
+
 
 r2 = boto3.client(
     "s3",
