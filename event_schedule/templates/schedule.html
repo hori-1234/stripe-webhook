@@ -1184,7 +1184,8 @@
 
     <div class="month-navigation">
 
-        <a href="/schedule?year={{ prev_year }}&month={{ prev_month }}">
+        <a href="/schedule?year={{ prev_year }}&month={{ prev_month }}"
+           onclick="document.getElementById('schedule-loading').style.display = 'flex';">
             ＜ 先月
         </a>
 
@@ -1192,7 +1193,8 @@
             {{ year }}年{{ month }}月
         </div>
 
-        <a href="/schedule?year={{ next_year }}&month={{ next_month }}">
+        <a href="/schedule?year={{ next_year }}&month={{ next_month }}"
+           onclick="document.getElementById('schedule-loading').style.display = 'flex';">
             翌月 ＞
         </a>
 
