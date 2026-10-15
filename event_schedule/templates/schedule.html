@@ -1091,6 +1091,13 @@
                 transform: rotate(360deg);
             }
         }
+
+         /* PC横モード：時間軸とバーの幅を合わせる */
+        @media (min-width: 1001px) {
+            body:not(.vertical-mode) .event-timeline {
+                margin-right: 0;
+            }
+        }
     </style>
 </head>
 
