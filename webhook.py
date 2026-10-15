@@ -60,7 +60,7 @@ def redirect_old_schedule_domain():
         if new_url.endswith("?"):
             new_url = new_url[:-1]
 
-        return redirect(new_url, code=302)
+        return redirect(new_url, code=301)
 
 
 r2 = boto3.client(
