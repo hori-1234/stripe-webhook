@@ -1139,6 +1139,38 @@ body.vertical-mode .event-bar-time {
             }
         }
 
+         /* スマホ縦モード：文字とフライヤーの重なり防止 */
+        @media (max-width: 700px) {
+            body.vertical-mode .event-info {
+                min-width: 0;
+                flex: 1 1 0;
+                align-content: flex-start;
+            }
+
+            body.vertical-mode .event-text {
+                position: static;
+                flex-basis: 100%;
+                width: 100%;
+                min-width: 0;
+                order: 10;
+            }
+
+            body.vertical-mode .event-bar-name {
+                display: -webkit-box;
+                -webkit-box-orient: vertical;
+                -webkit-line-clamp: 2;
+                line-clamp: 2;
+                overflow: hidden;
+                overflow-wrap: anywhere;
+                white-space: normal;
+            }
+
+            body.vertical-mode .event-flyer-area {
+                margin-left: 0;
+                flex-shrink: 0;
+            }
+        }
+
     </style>
 </head>
 
