@@ -11,3 +11,4 @@ jpholiday
 cryptography
 Authlib
 Pillow
+Flask-Limiter
