@@ -3503,7 +3503,7 @@ document.addEventListener('DOMContentLoaded', function () {
 <!-- スマホ用スクロールボタン -->
 <style>
 @media (max-width: 700px) {
-    .mobile-scroll-control {
+    .mobile-scroll-control.is-visible {
         display: flex !important;
     }
 }
@@ -3554,5 +3554,38 @@ document.addEventListener('DOMContentLoaded', function () {
     onclick="window.scrollBy({top: window.innerHeight, behavior: 'smooth'});"
 >▼</button>
 
+<script>
+let mobileScrollHideTimer = null;
+let mobileScrollLastY = window.scrollY;
+
+function showMobileScrollButtons() {
+    if (window.innerWidth > 700) return;
+
+    const buttons = document.querySelectorAll(".mobile-scroll-control");
+
+    buttons.forEach(button => {
+        button.classList.add("is-visible");
+    });
+
+    clearTimeout(mobileScrollHideTimer);
+
+    mobileScrollHideTimer = setTimeout(() => {
+        buttons.forEach(button => {
+            button.classList.remove("is-visible");
+        });
+    }, 5000);
+}
+
+window.addEventListener("scroll", () => {
+    const currentY = window.scrollY;
+
+    if (Math.abs(currentY - mobileScrollLastY) > 0) {
+        showMobileScrollButtons();
+    }
+
+    mobileScrollLastY = currentY;
+}, { passive: true });
+</script>
+    
 </body>
 </html>
