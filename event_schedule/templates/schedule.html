@@ -941,6 +941,11 @@
             padding-right: 8px;
         }
 
+        /* 縦モード：フライヤーとイベント名の重なりを解除 */
+        body.vertical-mode .event-flyer-area {
+            margin-left: 0;
+        }
+
         /* イベント名と時間を2段表示 */
         body.vertical-mode .event-text {
             position: static;
@@ -2374,55 +2379,18 @@ body.vertical-mode .event-bar-time {
             button.style.color = "#000";
         }
     }
+
     
-    function adjustVerticalEventNameIndent() {
-        document.querySelectorAll(".event-content").forEach(content => {
-            const info = content.querySelector(".event-info");
-            const toggle = info?.querySelector(".performer-toggle");
-            const name = info?.querySelector(".event-bar-name");
-            const flyer = content.querySelector(".event-flyer-thumbnail");
-
-            if (!name) return;
-
-            name.style.paddingLeft = "";
-            name.style.textIndent = "";
-
-            if (
-                !document.body.classList.contains("vertical-mode") ||
-                !window.matchMedia("(max-width: 700px) and (orientation: portrait)").matches ||
-                !toggle ||
-                !flyer
-            ) {
-                return;
-            }
-
-            const nameLeft = name.getBoundingClientRect().left;
-            const toggleLeft = toggle.getBoundingClientRect().left;
-            const indent = Math.max(0, toggleLeft - nameLeft);
-
-            name.style.boxSizing = "border-box";
-            name.style.paddingLeft = `${indent}px`;
-            name.style.textIndent = `-${indent}px`;
-        });
-    }
-
     function toggleVerticalMode() {
         isVerticalMode = !isVerticalMode;
 
         localStorage.setItem("scheduleVerticalMode", String(isVerticalMode));
 
         updateVerticalMode();
-        adjustVerticalEventNameIndent();
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
-        updateVerticalMode();
-        adjustVerticalEventNameIndent();
-    });
-
-    window.addEventListener("resize", adjustVerticalEventNameIndent);
-
-
+    document.addEventListener("DOMContentLoaded", updateVerticalMode);
+    
     
     let isMyMemoMode =
         new URLSearchParams(window.location.search).get("mymemo") === "1";
