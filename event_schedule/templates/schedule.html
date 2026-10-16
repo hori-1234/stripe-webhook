@@ -3630,10 +3630,9 @@ function stopMobileScroll(event) {
     if (!wasRepeated && event.type === "pointerup") {
         window.scrollBy({
             top: direction * window.innerHeight,
-            behavior: "smooth"
+            behavior: "instant"
         });
     }
-}
 
 window.addEventListener("blur", () => {
     mobileScrollActive = false;
