@@ -1723,6 +1723,18 @@
                 {% endif %}
         
             {% endfor %}
+    
+            {% if request.args.get('mymemo') == '1' %}
+                {% set registered_events = events
+                    | selectattr('event_date', 'equalto', search_date.date)
+                    | list %}
+
+                {% if registered_events | length == 0 %}
+                    <div class="event-row" style="padding: 14px 10px; color: #777;">
+                        イベント登録無
+                    </div>
+                {% endif %}
+            {% endif %}
         
         {% endfor %}
         
