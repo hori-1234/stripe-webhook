@@ -2,6 +2,29 @@
 <div id="memo-{{ event.id }}" class="event-memo-area" style="display: none;">
     <div class="event-memo-title">マイメモ</div>
 
+        <div style="position: relative;">
+        <button
+            type="button"
+            onclick="
+                document.getElementById('memo-sticky-{{ event.id }}').value = '';
+                document.getElementById('memo-text-{{ event.id }}').value = '';
+            "
+            style="
+                position: absolute;
+                right: 30px;
+                top: 0;
+                background: black;
+                color: white;
+                border: 1px solid white;
+                padding: 5px 15px;
+                cursor: pointer;
+                font-size: 14px;
+            "
+        >
+            クリア
+        </button>
+    </div>
+
     <div class="event-memo-sticky">
         <label for="memo-sticky-{{ event.id }}">付箋</label>
 
