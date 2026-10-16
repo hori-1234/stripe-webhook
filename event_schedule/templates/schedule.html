@@ -955,12 +955,23 @@
         }
 
         /* イベント名・時間の折り返し */
-        body.vertical-mode .event-bar-name,
-        body.vertical-mode .event-bar-time {
-            display: block;
-            white-space: normal;
+        body.vertical-mode .event-bar-name {
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            overflow: hidden;
             overflow-wrap: anywhere;
+            white-space: normal;
         }
+
+body.vertical-mode .event-bar-time {
+    display: block;
+    white-space: nowrap;
+}
+
+
+         
 
         /* 横モード専用の空白を削除 */
         body.vertical-mode .event-toggle-space {
