@@ -1163,6 +1163,40 @@ body.vertical-mode .event-bar-time {
             overflow-wrap: anywhere;
         }
 
+                 /* 終了分ボタン：PC・スマホ横は新規追加の下 */
+        #finished-events-button {
+            display: none;
+            position: absolute;
+            right: 0;
+            bottom: -48px;
+            width: 95px;
+            padding: 10px 0;
+            margin: 0;
+            border: 1px solid #333;
+            background: #fff;
+            color: #222;
+            box-sizing: border-box;
+            text-align: center;
+            font-size: 16px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        /* スマホ縦画面だけ横並び */
+        @media (max-width: 700px) and (orientation: portrait) {
+            body.vertical-mode .top-controls > .add-button {
+                display: inline-block;
+                vertical-align: middle;
+            }
+
+            body.vertical-mode #finished-events-button {
+                position: static;
+                vertical-align: middle;
+                width: 110px;
+                margin: 12px 0 0 8px;
+            }
+        }
+
     </style>
 </head>
 
@@ -1442,6 +1476,10 @@ body.vertical-mode .event-bar-time {
     <a href="/schedule/add" class="add-button">
         新規追加
     </a>
+
+    <button type="button" id="finished-events-button" onclick="toggleFinishedEvents()">
+        終了分
+    </button>
 
 </div>
 
@@ -3370,6 +3408,20 @@ function closeFlyerModal() {
 </div>
 
 <script>
+let finishedEventsExpanded = false;
+let finishedEventElements = [];
+
+function toggleFinishedEvents() {
+    finishedEventsExpanded = !finishedEventsExpanded;
+
+    finishedEventElements.forEach(function (element) {
+        element.style.display = finishedEventsExpanded ? '' : 'none';
+    });
+
+    const button = document.getElementById('finished-events-button');
+    button.setAttribute('aria-expanded', String(finishedEventsExpanded));
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     const today = new Date();
     const todayString =
@@ -3377,8 +3429,19 @@ document.addEventListener('DOMContentLoaded', function () {
         String(today.getMonth() + 1).padStart(2, '0') + '-' +
         String(today.getDate()).padStart(2, '0');
 
+    const isCurrentMonth =
+        Number('{{ year }}') === today.getFullYear() &&
+        Number('{{ month }}') === today.getMonth() + 1;
+
+    const button = document.getElementById('finished-events-button');
+
+    if (isCurrentMonth && button) {
+        button.style.display = 'block';
+        button.setAttribute('aria-expanded', 'false');
+    }
+
     document.querySelectorAll('.date-row[data-date]').forEach(function (row) {
-        
+
         if (row.dataset.date < todayString) {
             row.classList.add('past-date');
 
@@ -3392,6 +3455,21 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
+        if (isCurrentMonth && row.dataset.date < todayString) {
+            finishedEventElements.push(row);
+
+            let next = row.nextElementSibling;
+
+            while (next && !next.classList.contains('date-row')) {
+                finishedEventElements.push(next);
+                next = next.nextElementSibling;
+            }
+        }
+
+    });
+
+    finishedEventElements.forEach(function (element) {
+        element.style.display = 'none';
     });
 });
 </script>
