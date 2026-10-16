@@ -1113,9 +1113,9 @@ body.vertical-mode .event-bar-time {
             }
         }
 
+        /* スマホ縦モード専用 */
+        @media (max-width: 700px) and (orientation: portrait) {
 
-         /* スマホ縦モード：文字とフライヤーの重なり防止 */
-        @media (max-width: 700px) {
             body.vertical-mode .event-info {
                 min-width: 0;
                 flex: 1 1 0;
@@ -1139,8 +1139,9 @@ body.vertical-mode .event-bar-time {
                 overflow-wrap: anywhere;
                 white-space: normal;
             }
+        }
 
-         /* 横モード専用 */
+        /* 横モード専用 */
         body:not(.vertical-mode) .event-text {
             width: min(600px, calc(100vw - 230px));
             max-width: none;
@@ -1155,7 +1156,6 @@ body.vertical-mode .event-bar-time {
             overflow: hidden;
             overflow-wrap: anywhere;
         }
-
 
     </style>
 </head>
