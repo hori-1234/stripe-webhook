@@ -3544,104 +3544,15 @@ document.addEventListener('DOMContentLoaded', function () {
     type="button"
     class="mobile-scroll-control mobile-scroll-up"
     aria-label="1画面上にスクロール"
-    onpointerdown="startMobileScroll(event, -1)"
-    onpointerup="stopMobileScroll(event)"
-    onpointercancel="stopMobileScroll(event)"
-    onlostpointercapture="stopMobileScroll(event)"
-    oncontextmenu="event.preventDefault()"
+    onclick="window.scrollBy({top: -window.innerHeight, behavior: 'instant'});"
 >▲</button>
 
 <button
     type="button"
     class="mobile-scroll-control mobile-scroll-down"
     aria-label="1画面下にスクロール"
-    onpointerdown="startMobileScroll(event, 1)"
-    onpointerup="stopMobileScroll(event)"
-    onpointercancel="stopMobileScroll(event)"
-    onlostpointercapture="stopMobileScroll(event)"
-    oncontextmenu="event.preventDefault()"
+    onclick="window.scrollBy({top: window.innerHeight, behavior: 'instant'});"
 >▼</button>
 
-<script>
-let mobileScrollTimeout = null;
-let mobileScrollAnimation = null;
-let mobileScrollActive = false;
-let mobileScrollRepeated = false;
-let mobileScrollPointerId = null;
-let mobileScrollDirection = 0;
-
-function startMobileScroll(event, direction) {
-    if (event.button !== 0) return;
-    if (mobileScrollActive) return;
-
-    event.preventDefault();
-
-    mobileScrollActive = true;
-    mobileScrollRepeated = false;
-    mobileScrollPointerId = event.pointerId;
-    mobileScrollDirection = direction;
-
-    event.currentTarget.setPointerCapture(event.pointerId);
-
-    mobileScrollTimeout = setTimeout(() => {
-        if (!mobileScrollActive) return;
-
-        mobileScrollRepeated = true;
-        mobileScrollTimeout = null;
-
-        function continuousScroll() {
-            if (!mobileScrollActive) return;
-
-            window.scrollBy(0, mobileScrollDirection * 12);
-
-            mobileScrollAnimation = requestAnimationFrame(continuousScroll);
-        }
-
-        continuousScroll();
-    }, 350);
-}
-
-function stopMobileScrollTimer() {
-    if (mobileScrollTimeout !== null) {
-        clearTimeout(mobileScrollTimeout);
-        mobileScrollTimeout = null;
-    }
-
-    if (mobileScrollAnimation !== null) {
-        cancelAnimationFrame(mobileScrollAnimation);
-        mobileScrollAnimation = null;
-    }
-}
-
-function stopMobileScroll(event) {
-    if (!mobileScrollActive) return;
-    if (event.pointerId !== mobileScrollPointerId) return;
-
-    const wasRepeated = mobileScrollRepeated;
-    const direction = mobileScrollDirection;
-
-    mobileScrollActive = false;
-    stopMobileScrollTimer();
-
-    mobileScrollPointerId = null;
-    mobileScrollDirection = 0;
-    mobileScrollRepeated = false;
-
-    if (!wasRepeated && event.type === "pointerup") {
-        window.scrollBy({
-            top: direction * window.innerHeight,
-            behavior: "instant"
-        });
-    }
-
-window.addEventListener("blur", () => {
-    mobileScrollActive = false;
-    stopMobileScrollTimer();
-    mobileScrollPointerId = null;
-    mobileScrollDirection = 0;
-    mobileScrollRepeated = false;
-});
-    
-</script>
 </body>
 </html>
