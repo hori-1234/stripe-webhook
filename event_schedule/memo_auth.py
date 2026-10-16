@@ -859,6 +859,11 @@ def memo_login_page():
             </p>
         </form>
 
+        <div style="max-width: 300px; font-size: 13px; line-height: 1.6; color: #d60000;">
+            ※メール認証には、システムの仕様上、1日あたりの送信数に上限があります。<br>
+            認証メールが届かない場合は、Google認証をご利用ください。
+        </div>
+
         <p>初回利用の場合は、認証後に自動登録されます。</p>
         
         <script>
