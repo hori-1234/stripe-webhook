@@ -17,7 +17,6 @@ from event_schedule.memo_auth import (
 )
 from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, url_for, session, make_response
-from flask_limiter import Limiter
 from werkzeug.security import generate_password_hash, check_password_hash
 from cryptography.fernet import Fernet
 from admin_auth import admin_required
@@ -37,12 +36,6 @@ event_schedule_bp = Blueprint(
     "event_schedule",
     __name__,
     template_folder="templates"
-)
-
-limiter = Limiter(
-    key_func=lambda: request.remote_addr,
-    default_limits=[],
-    storage_uri="memory://"
 )
 
 
