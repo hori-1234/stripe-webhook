@@ -458,6 +458,10 @@
             color: #555;
         }
 
+         .event-row.past-event {
+            background: #d0d0d0 !important;
+        }
+
         .date-row .date-memo-button {
             position: static;
             float: right !important;
@@ -3259,9 +3263,20 @@ document.addEventListener('DOMContentLoaded', function () {
         String(today.getDate()).padStart(2, '0');
 
     document.querySelectorAll('.date-row[data-date]').forEach(function (row) {
+        
         if (row.dataset.date < todayString) {
             row.classList.add('past-date');
+
+            let next = row.nextElementSibling;
+
+            while (next && !next.classList.contains('date-row')) {
+                if (next.classList.contains('event-row')) {
+                    next.classList.add('past-event');
+                }
+                next = next.nextElementSibling;
+            }
         }
+
     });
 });
 </script>
