@@ -453,6 +453,11 @@
             align-items: center;
         }
 
+         .date-row.past-date {
+            background: #e8e8e8;
+            color: #555;
+        }
+
         .date-row .date-memo-button {
             position: static;
             float: right !important;
@@ -1708,7 +1713,8 @@
             {% elif date.weekday_number == 6 %}
                 sunday
             {% endif %}
-        ">
+        "
+        data-date="{{ '%04d-%02d-%02d'|format(year, month, date.day) }}">
         
             {{ month }}/{{ date.day }} {{ date.weekday }}
 
@@ -3241,6 +3247,21 @@ function closeFlyerModal() {
         処理中です...
     </p>
 </div>
-    
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const today = new Date();
+    const todayString =
+        today.getFullYear() + '-' +
+        String(today.getMonth() + 1).padStart(2, '0') + '-' +
+        String(today.getDate()).padStart(2, '0');
+
+    document.querySelectorAll('.date-row[data-date]').forEach(function (row) {
+        if (row.dataset.date < todayString) {
+            row.classList.add('past-date');
+        }
+    });
+});
+</script>
 </body>
 </html>
