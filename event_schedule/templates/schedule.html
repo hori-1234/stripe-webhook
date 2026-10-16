@@ -1433,9 +1433,33 @@
             </div>
 
             <div id="date-memo-{{ search_date.date.isoformat() }}" class="event-memo-area" style="display: none;">
-                <div class="event-memo-title">マイメモ</div>
+                <div class="event-memo-title" style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>マイメモ</span>
+
+                    <button
+                        type="button"
+                        onclick="
+                            document.getElementById('date-memo-sticky-{{ search_date.date.isoformat() }}').value = '';
+                            document.getElementById('date-memo-text-{{ search_date.date.isoformat() }}').value = '';
+                        "
+                        style="
+                            background: black;
+                            color: white;
+                            border: 1px solid white;
+                            border-radius: 4px;
+                            padding: 7px 12px;
+                            font-size: 14px;
+                            line-height: 1.2;
+                            cursor: pointer;
+                            flex-shrink: 0;
+                        "
+                    >
+                        クリア
+                    </button>
+                </div>
 
                 <div class="event-memo-sticky">
+
                     <label for="date-memo-sticky-{{ search_date.date.isoformat() }}">付箋</label>
 
                     <select id="date-memo-sticky-{{ search_date.date.isoformat() }}" name="sticky" style="width: 85px; padding: 2px 4px; font-size: 13px;">
@@ -1714,10 +1738,34 @@
         </div>
 
         <div id="date-memo-{{ year }}-{{ '%02d'|format(month) }}-{{ '%02d'|format(date.day) }}" class="event-memo-area" style="display: none;">
-           
-            <div class="event-memo-title">マイメモ</div>
+
+            <div class="event-memo-title" style="display: flex; justify-content: space-between; align-items: center;">
+                <span>マイメモ</span>
+
+                <button
+                    type="button"
+                    onclick="
+                        document.getElementById('date-memo-sticky-{{ year }}-{{ '%02d'|format(month) }}-{{ '%02d'|format(date.day) }}').value = '';
+                        document.getElementById('date-memo-text-{{ year }}-{{ '%02d'|format(month) }}-{{ '%02d'|format(date.day) }}').value = '';
+                    "
+                    style="
+                        background: black;
+                        color: white;
+                        border: 1px solid white;
+                        border-radius: 4px;
+                        padding: 7px 12px;
+                        font-size: 14px;
+                        line-height: 1.2;
+                        cursor: pointer;
+                        flex-shrink: 0;
+                    "
+                >
+                    クリア
+                </button>
+            </div>
 
             {% set date_memo = saved_date_memos.get('%04d-%02d-%02d'|format(year, month, date.day), {}) %}
+            
             {% set date_tag = date_memo.get('tag', '') %}
             {% set date_color = date_memo.get('tag_color', '#ffff99') %}
 
