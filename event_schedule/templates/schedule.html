@@ -952,6 +952,7 @@
             white-space: normal;
             overflow-wrap: anywhere;
             pointer-events: auto;
+            order: 10;
         }
 
         /* イベント名・時間の折り返し */
@@ -1109,6 +1110,32 @@ body.vertical-mode .event-bar-time {
             }
             to {
                 transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 700px) {
+            body.vertical-mode .event-info {
+                align-content: flex-start;
+            }
+
+            body.vertical-mode .event-text {
+                flex-basis: 100%;
+                order: 10;
+            }
+
+            body.vertical-mode .event-bar-name {
+                display: -webkit-box;
+                -webkit-box-orient: vertical;
+                -webkit-line-clamp: 2;
+                line-clamp: 2;
+                overflow: hidden;
+                white-space: normal;
+                overflow-wrap: anywhere;
+            }
+
+            body.vertical-mode .event-bar-time {
+                display: block;
+                white-space: nowrap;
             }
         }
 
