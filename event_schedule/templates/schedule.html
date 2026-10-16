@@ -653,13 +653,6 @@
             text-overflow: clip;
         }
 
-        .event-bar-time {
-            display: block;
-            white-space: nowrap;
-            overflow: visible;
-            text-overflow: clip;
-        }
-
         .event-toggle-space {
             width: 40px;
             height: 42px;
@@ -1120,31 +1113,6 @@ body.vertical-mode .event-bar-time {
             }
         }
 
-        @media (max-width: 700px) {
-            body.vertical-mode .event-info {
-                align-content: flex-start;
-            }
-
-            body.vertical-mode .event-text {
-                flex-basis: 100%;
-                order: 10;
-            }
-
-            body.vertical-mode .event-bar-name {
-                display: -webkit-box;
-                -webkit-box-orient: vertical;
-                -webkit-line-clamp: 2;
-                line-clamp: 2;
-                overflow: hidden;
-                white-space: normal;
-                overflow-wrap: anywhere;
-            }
-
-            body.vertical-mode .event-bar-time {
-                display: block;
-                white-space: nowrap;
-            }
-        }
 
          /* スマホ縦モード：文字とフライヤーの重なり防止 */
         @media (max-width: 700px) {
@@ -1172,12 +1140,6 @@ body.vertical-mode .event-bar-time {
                 white-space: normal;
             }
 
-            body.vertical-mode .event-flyer-area {
-                margin-left: 0;
-                flex-shrink: 0;
-            }
-        }
-
          /* 横モード専用 */
         body:not(.vertical-mode) .event-text {
             width: min(600px, calc(100vw - 230px));
@@ -1194,18 +1156,6 @@ body.vertical-mode .event-bar-time {
             overflow-wrap: anywhere;
         }
 
-        /* スマホ縦モード専用 */
-        @media (max-width: 700px) {
-            body.vertical-mode .event-bar-name {
-                display: -webkit-box;
-                -webkit-box-orient: vertical;
-                -webkit-line-clamp: 2;
-                line-clamp: 2;
-                white-space: normal;
-                overflow: hidden;
-                overflow-wrap: anywhere;
-            }
-        }
 
     </style>
 </head>
