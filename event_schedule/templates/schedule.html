@@ -1745,7 +1745,12 @@
         {% set date_memo = saved_date_memos.get('%04d-%02d-%02d'|format(year, month, date.day), {}) %}
         {% set date_tag = date_memo.get('tag', '') %}
         {% set date_color = date_memo.get('tag_color', '#ffff99') %}
-        {% set day_events = events | selectattr('event_date', 'equalto', date.date) | list %}
+        {% set day_events = namespace(count=0) %}
+        {% for event in events %}
+            {% if event.event_date.day == date.day %}
+                {% set day_events.count = day_events.count + 1 %}
+            {% endif %}
+        {% endfor %}
 
         <div class="
             date-row
@@ -1765,7 +1770,7 @@
                 （{{ date.holiday_name }}）
             {% endif %}
 
-            {% if day_events | length == 0 %}
+            {% if day_events.count == 0 %}
                 <span style="margin-left: 10px; color: #777; font-weight: normal;">
                     イベント登録無
                 </span>
