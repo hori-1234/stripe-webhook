@@ -1210,6 +1210,7 @@
                 type="month"
                 id="month-picker"
                 aria-label="表示する年月を選択"
+                onclick="if (typeof this.showPicker === 'function') this.showPicker();"
                 value="{{ '%04d-%02d'|format(year, month) }}"
                 onchange="
                     if (this.value) {
