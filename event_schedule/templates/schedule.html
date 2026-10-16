@@ -1185,13 +1185,16 @@ body.vertical-mode .event-bar-time {
         /* スマホ縦画面だけ横並び */
         @media (max-width: 700px) and (orientation: portrait) {
             body.vertical-mode .top-controls > .add-button {
+                position: static;
                 display: inline-block;
                 vertical-align: middle;
+                width: 110px;
                 margin: 12px 20px 0 0;
             }
 
             body.vertical-mode #finished-events-button {
                 position: static;
+                display: inline-block !important;
                 vertical-align: middle;
                 width: 110px;
                 margin: 12px 0 0 0;
