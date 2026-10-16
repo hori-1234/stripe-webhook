@@ -1441,6 +1441,21 @@
                     （{{ search_date.holiday_name }}）
                 {% endif %}
 
+                {% if request.args.get('mymemo') == '1' %}
+                    {% set day_events = namespace(count=0) %}
+                    {% for event in events %}
+                        {% if event.event_date == search_date.date %}
+                            {% set day_events.count = day_events.count + 1 %}
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if day_events.count == 0 %}
+                        <span style="margin-left: 10px; color: #777; font-weight: normal;">
+                            イベント登録無
+                        </span>
+                    {% endif %}
+                {% endif %}
+
                 {% set date_memo = saved_date_memos.get(search_date.date.isoformat(), {}) %}
                 {% set date_tag = date_memo.get('tag', '') %}
                 {% set date_color = date_memo.get('tag_color') or '#ffff99' %}
@@ -1723,18 +1738,6 @@
                 {% endif %}
         
             {% endfor %}
-    
-            {% if request.args.get('mymemo') == '1' %}
-                {% set registered_events = events
-                    | selectattr('event_date', 'equalto', search_date.date)
-                    | list %}
-
-                {% if registered_events | length == 0 %}
-                    <div class="event-row" style="padding: 14px 10px; color: #777;">
-                        イベント登録無
-                    </div>
-                {% endif %}
-            {% endif %}
         
         {% endfor %}
         
