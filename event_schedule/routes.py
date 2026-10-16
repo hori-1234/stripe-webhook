@@ -3,7 +3,7 @@ import psycopg2
 import calendar
 import jpholiday
 import secrets
-　
+
 from .flyer_storage import (
     upload_flyer_to_r2,
     delete_flyer_from_r2,
