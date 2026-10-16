@@ -1189,7 +1189,10 @@ body.vertical-mode .event-bar-time {
                 display: inline-block;
                 vertical-align: middle;
                 width: 110px;
-                margin: 12px 20px 0 0;
+                height: 42px;
+                line-height: 20px;
+                margin: 12px 0 0 0;
+                order: 2;
             }
 
             body.vertical-mode #finished-events-button {
@@ -1197,7 +1200,19 @@ body.vertical-mode .event-bar-time {
                 display: inline-block !important;
                 vertical-align: middle;
                 width: 110px;
-                margin: 12px 0 0 0;
+                height: 42px;
+                line-height: 20px;
+                margin: 12px 20px 0 0;
+                order: 1;
+            }
+
+            body.vertical-mode .top-controls {
+                display: flex;
+                flex-wrap: wrap;
+            }
+
+            body.vertical-mode .search-performer-area {
+                flex-basis: 100%;
             }
         }
 
