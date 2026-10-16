@@ -3499,5 +3499,57 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
+
+<!-- スマホ用スクロールボタン -->
+<style>
+@media (max-width: 700px) {
+    .mobile-scroll-control {
+        display: flex !important;
+    }
+}
+
+.mobile-scroll-control {
+    display: none;
+    position: fixed;
+    left: 0;
+    z-index: 9999;
+    width: 40px;
+    height: 48px;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: rgba(80, 80, 80, 0.4);
+    font-size: 26px;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.mobile-scroll-up {
+    top: 16.6667%;
+    transform: translateY(-50%);
+}
+
+.mobile-scroll-down {
+    top: 83.3333%;
+    transform: translateY(-50%);
+}
+</style>
+
+<button
+    type="button"
+    class="mobile-scroll-control mobile-scroll-up"
+    aria-label="1画面上にスクロール"
+    onclick="window.scrollBy({top: -window.innerHeight, behavior: 'smooth'});"
+>▲</button>
+
+<button
+    type="button"
+    class="mobile-scroll-control mobile-scroll-down"
+    aria-label="1画面下にスクロール"
+    onclick="window.scrollBy({top: window.innerHeight, behavior: 'smooth'});"
+>▼</button>
+    
 </body>
 </html>
