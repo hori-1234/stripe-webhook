@@ -911,6 +911,7 @@ def schedule():
     return response
 
 @event_schedule_bp.route("/schedule/edit/<int:event_id>", methods=["GET", "POST"])
+@limiter.limit("5 per 5 minutes", methods=["POST"])
 def schedule_edit(event_id):
     create_event_schedule_table()
 
