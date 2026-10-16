@@ -1478,7 +1478,7 @@ body.vertical-mode .event-bar-time {
     </a>
 
     <button type="button" id="finished-events-button" onclick="toggleFinishedEvents()">
-        終了分
+        終了分開閉
     </button>
 
 </div>
@@ -3415,7 +3415,14 @@ function toggleFinishedEvents() {
     finishedEventsExpanded = !finishedEventsExpanded;
 
     finishedEventElements.forEach(function (element) {
-        element.style.display = finishedEventsExpanded ? '' : 'none';
+        if (finishedEventsExpanded) {
+            if (element.classList.contains('event-memo-area')) {
+                return;
+            }
+            element.style.display = '';
+        } else {
+            element.style.display = 'none';
+        }
     });
 
     const button = document.getElementById('finished-events-button');
