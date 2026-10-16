@@ -3528,7 +3528,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 .mobile-scroll-up {
     top: 16.6667%;
-    transform: translateY(-50%);
+    transform: translateY(-50%) scale(2.5);
 }
 
 .mobile-scroll-down {
@@ -3541,15 +3541,76 @@ document.addEventListener('DOMContentLoaded', function () {
     type="button"
     class="mobile-scroll-control mobile-scroll-up"
     aria-label="1画面上にスクロール"
-    onclick="window.scrollBy({top: -window.innerHeight, behavior: 'smooth'});"
+    onpointerdown="startMobileScroll(event, -1)"
+    onpointerup="stopMobileScroll(event)"
+    onpointercancel="stopMobileScroll(event)"
+    onlostpointercapture="stopMobileScroll(event)"
+    oncontextmenu="event.preventDefault()"
 >▲</button>
 
 <button
     type="button"
     class="mobile-scroll-control mobile-scroll-down"
     aria-label="1画面下にスクロール"
-    onclick="window.scrollBy({top: window.innerHeight, behavior: 'smooth'});"
+    onpointerdown="startMobileScroll(event, 1)"
+    onpointerup="stopMobileScroll(event)"
+    onpointercancel="stopMobileScroll(event)"
+    onlostpointercapture="stopMobileScroll(event)"
+    oncontextmenu="event.preventDefault()"
 >▼</button>
+
+<script>
+let mobileScrollTimer = null;
+let mobileScrollStart = 0;
+let mobileScrollRepeated = false;
+
+function startMobileScroll(event, direction) {
+    if (event.button !== 0) return;
+
+    stopMobileScrollTimer();
+
+    event.preventDefault();
+    event.currentTarget.setPointerCapture(event.pointerId);
+
+    mobileScrollStart = Date.now();
+    mobileScrollRepeated = false;
+
+    mobileScrollTimer = setTimeout(() => {
+        mobileScrollRepeated = true;
+
+        function continuousScroll() {
+            window.scrollBy(0, direction * 12);
+            mobileScrollTimer = requestAnimationFrame(continuousScroll);
+        }
+
+        continuousScroll();
+    }, 350);
+}
+
+function stopMobileScrollTimer() {
+    if (mobileScrollTimer !== null) {
+        clearTimeout(mobileScrollTimer);
+        cancelAnimationFrame(mobileScrollTimer);
+        mobileScrollTimer = null;
+    }
+}
+
+function stopMobileScroll(event) {
+    if (mobileScrollTimer === null) return;
+
+    const direction = event.currentTarget.classList.contains("mobile-scroll-up") ? -1 : 1;
+    const wasRepeated = mobileScrollRepeated;
+
+    stopMobileScrollTimer();
+
+    if (!wasRepeated && event.type === "pointerup") {
+        window.scrollBy({
+            top: direction * window.innerHeight,
+            behavior: "smooth"
+        });
+    }
+}
     
+</script>
 </body>
 </html>
