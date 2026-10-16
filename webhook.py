@@ -6,6 +6,7 @@ import stripe
 import resend
 import time
 
+from event_schedule.schedule import limiter
 from top_set.kuri_move_sarch import kuri_move_sarch_bp
 from top_set.privacy import privacy_bp
 from top_set.shipping import shipping_bp
@@ -32,6 +33,7 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("kuri_SECRET_KEY")
 app.config["PERMANENT_SESSION_LIFETIME"] = 60 * 60 * 24 * 365
 app.config["SESSION_REFRESH_EACH_REQUEST"] = True
+limiter.init_app(app)
 oauth.init_app(app)
 app.register_blueprint(unei_kanri_bp)
 app.register_blueprint(event_schedule_bp)
