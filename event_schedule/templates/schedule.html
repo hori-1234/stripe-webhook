@@ -1745,6 +1745,7 @@
         {% set date_memo = saved_date_memos.get('%04d-%02d-%02d'|format(year, month, date.day), {}) %}
         {% set date_tag = date_memo.get('tag', '') %}
         {% set date_color = date_memo.get('tag_color', '#ffff99') %}
+        {% set day_events = events | selectattr('event_date', 'equalto', date.date) | list %}
 
         <div class="
             date-row
@@ -1762,6 +1763,12 @@
 
             {% if date.holiday_name %}
                 （{{ date.holiday_name }}）
+            {% endif %}
+
+            {% if day_events | length == 0 %}
+                <span style="margin-left: 10px; color: #777; font-weight: normal;">
+                    イベント登録無
+                </span>
             {% endif %}
 
             <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
