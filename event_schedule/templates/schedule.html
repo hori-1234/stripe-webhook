@@ -454,7 +454,7 @@
         }
 
          .date-row.past-date {
-            background: #e8e8e8;
+            background: #d0d0d0;
             color: #555;
         }
 
@@ -1403,7 +1403,9 @@
                 {% elif search_date.date.weekday() == 6 %}
                     sunday
                 {% endif %}
-            ">
+            "
+            data-date="{{ search_date.date.isoformat() }}">
+                
                 {{ search_date.date.month }}/{{ search_date.date.day }}
                 {{ ["月", "火", "水", "木", "金", "土", "日"][search_date.date.weekday()] }}
 
