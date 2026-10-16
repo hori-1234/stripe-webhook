@@ -3462,7 +3462,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-        if (isCurrentMonth && row.dataset.date < todayString) {
+        if (isCurrentMonth && !isMyMemoMode && row.dataset.date < todayString) {
             finishedEventElements.push(row);
 
             let next = row.nextElementSibling;
