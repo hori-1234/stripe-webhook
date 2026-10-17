@@ -274,6 +274,12 @@
                     アイドル
                 </option>
 
+                <option value="バトル"
+                    {% if event[6] == "バトル" %}selected{% endif %}
+                >
+                    バトル
+                </option>
+
                 <option value="WS"
                     {% if event[6] == "WS" %}selected{% endif %}
                 >
@@ -284,6 +290,12 @@
                     {% if event[6] == "オフ会" %}selected{% endif %}
                 >
                     オフ会
+                </option>
+
+                <option value="コスプレ"
+                    {% if event[6] == "コスプレ" %}selected{% endif %}
+                >
+                    コスプレ
                 </option>
 
                 <option value="撮影会"
