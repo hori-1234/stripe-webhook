@@ -979,6 +979,16 @@ def memo_login_send():
 
 @memo_auth_bp.route("/schedule/login/verify", methods=["POST"])
 def memo_login_verify():
+    csrf_token = request.form.get("csrf_token", "")
+    expected_token = session.get("memo_login_csrf_token", "")
+
+    if (
+        not csrf_token
+        or not expected_token
+        or not secrets.compare_digest(csrf_token, expected_token)
+    ):
+        return "不正なリクエストです", 403
+
     email = session.get("memo_pending_email")
     code = request.form.get("code", "").strip()
 
