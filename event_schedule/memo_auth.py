@@ -807,7 +807,16 @@ def memo_login_page():
         </style>
     </head>
     <body>
-        <h2>イベスケ ログイン</h2>
+        <h2>イベスケ</h2>
+        <h3>登録・ログイン</h3>
+
+        <div style="margin: 20px 0; line-height: 1.8;">
+            <strong>新規登録の方へ</strong>
+            <p>
+                Googleでログイン、または<br>
+                メールアドレスの認証完了で登録が完了します。
+            </p>
+        </div>
 
         <a
             href="/schedule/google/login"
