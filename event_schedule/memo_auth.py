@@ -1131,12 +1131,26 @@ def memo_account_delete_confirm():
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>イベスケ - 退会確認</title>
+        <title>イベスケ - 登録削除確認</title>
     </head>
     <body style="max-width: 500px; margin: 40px auto; padding: 20px; font-family: sans-serif;">
-        <h2>アカウント退会</h2>
 
-        <p>退会すると、以下のデータが削除されます。</p>
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 15px;">
+            <h2 style="margin: 0;">アカウント登録削除</h2>
+
+            <form method="POST" action="/schedule/account/delete"
+                  onsubmit="return confirm('本当に登録削除しますか？この操作は取り消せません。');"
+                  style="margin: 0;">
+                <input type="hidden" name="csrf_token" value="__CSRF_TOKEN__">
+
+                <button type="submit"
+                        style="background: #c62828; color: white; padding: 10px 16px; border: none; border-radius: 5px; cursor: pointer; white-space: nowrap;">
+                    登録削除
+                </button>
+            </form>
+        </div>
+
+        <p>登録削除すると、以下のデータが削除されます。</p>
 
         <ul>
             <li>アカウント情報</li>
@@ -1152,16 +1166,6 @@ def memo_account_delete_confirm():
             同じメールアドレスやGoogleアカウントで再登録できますが、
             以前のデータは引き継がれません。
         </p>
-
-        <form method="POST" action="/schedule/account/delete"
-              onsubmit="return confirm('本当に退会しますか？この操作は取り消せません。');">
-            <input type="hidden" name="csrf_token" value="__CSRF_TOKEN__">
-
-            <button type="submit"
-                    style="background: #c62828; color: white; padding: 12px 24px; border: none; border-radius: 5px; cursor: pointer;">
-                退会する
-            </button>
-        </form>
 
         <p style="margin-top: 25px;">
             <a href="/schedule">キャンセルして戻る</a>
