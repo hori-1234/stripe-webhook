@@ -943,6 +943,7 @@ def memo_login_send():
         <p>メールに記載された6桁の認証コードを入力してください。</p>
 
         <form method="POST" action="/schedule/login/verify">
+            <input type="hidden" name="csrf_token" value="__LOGIN_CSRF_TOKEN__">
             <input
                 type="text"
                 name="code"
@@ -970,7 +971,11 @@ def memo_login_send():
         <p><a href="/schedule/login">ログイン画面に戻る</a></p>
     </body>
     </html>
-    """
+    """.replace(
+        "__LOGIN_CSRF_TOKEN__",
+        session["memo_login_csrf_token"]
+    )
+
 
 @memo_auth_bp.route("/schedule/login/verify", methods=["POST"])
 def memo_login_verify():
