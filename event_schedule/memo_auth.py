@@ -1052,3 +1052,120 @@ def memo_logout():
     session.pop("memo_pending_email", None)
     session.pop("schedule_csrf_token", None)
     return redirect("/schedule")
+
+
+@memo_auth_bp.route("/schedule/account/delete", methods=["POST"])
+def memo_account_delete():
+    user_id = session.get("memo_user_id")
+
+    if user_id is None:
+        return redirect(url_for("memo_auth.memo_login_page"))
+
+    csrf_token = request.form.get("csrf_token", "")
+    expected_token = session.get("schedule_csrf_token", "")
+
+    if (
+        not csrf_token
+        or not expected_token
+        or not secrets.compare_digest(csrf_token, expected_token)
+    ):
+        return "不正なリクエストです", 403
+
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+
+    try:
+        cur.execute("""
+            SELECT email
+            FROM schedule_memo_users
+            WHERE id = %s
+            FOR UPDATE
+        """, (user_id,))
+
+        row = cur.fetchone()
+
+        if row is None:
+            conn.rollback()
+            return "アカウントが見つかりません", 404
+
+        email = row[0]
+
+        cur.execute("""
+            DELETE FROM schedule_memo_login_codes
+            WHERE email = %s
+        """, (email,))
+
+        cur.execute("""
+            DELETE FROM schedule_memo_users
+            WHERE id = %s
+        """, (user_id,))
+
+        conn.commit()
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        cur.close()
+        conn.close()
+
+    session.clear()
+
+    return redirect("/schedule")
+
+@memo_auth_bp.route("/schedule/account/delete", methods=["GET"])
+def memo_account_delete_confirm():
+    if not is_memo_logged_in():
+        return redirect(url_for("memo_auth.memo_login_page"))
+
+    csrf_token = session.get("schedule_csrf_token")
+
+    if not csrf_token:
+        csrf_token = secrets.token_urlsafe(32)
+        session["schedule_csrf_token"] = csrf_token
+
+    return """
+    <!DOCTYPE html>
+    <html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>イベスケ - 退会確認</title>
+    </head>
+    <body style="max-width: 500px; margin: 40px auto; padding: 20px; font-family: sans-serif;">
+        <h2>アカウント退会</h2>
+
+        <p>退会すると、以下のデータが削除されます。</p>
+
+        <ul>
+            <li>アカウント情報</li>
+            <li>マイメモ・付箋</li>
+            <li>お気に入り演者</li>
+        </ul>
+
+        <p style="color: red;">
+            削除されたデータは復元できません。
+        </p>
+
+        <p>
+            同じメールアドレスやGoogleアカウントで再登録できますが、
+            以前のデータは引き継がれません。
+        </p>
+
+        <form method="POST" action="/schedule/account/delete"
+              onsubmit="return confirm('本当に退会しますか？この操作は取り消せません。');">
+            <input type="hidden" name="csrf_token" value="__CSRF_TOKEN__">
+
+            <button type="submit"
+                    style="background: #c62828; color: white; padding: 12px 24px; border: none; border-radius: 5px; cursor: pointer;">
+                退会する
+            </button>
+        </form>
+
+        <p style="margin-top: 25px;">
+            <a href="/schedule">キャンセルして戻る</a>
+        </p>
+    </body>
+    </html>
+    """.replace("__CSRF_TOKEN__", csrf_token)
