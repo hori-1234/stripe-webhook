@@ -572,6 +572,12 @@
             color: #fff;
         }
 
+        /* バトル */
+        .genre-battle {
+            background: #008000;
+            color: #fff;
+        }
+
         /* WS */
         .genre-ws {
             background: #000;
@@ -582,6 +588,12 @@
         .genre-offkai {
             background: #38a9d6;
             color: #fff;
+        }
+
+        /* ｺｽﾌﾟﾚ */
+        .genre-cosplay {
+            background: #ffff00;
+            color: #0000ff;
         }
 
         /* 撮影会 */
@@ -1378,8 +1390,10 @@ body.vertical-mode .event-bar-time {
                         <option value="踊" {% if request.args.get('genre') == '踊' %}selected{% endif %}>踊</option>
                         <option value="歌踊" {% if request.args.get('genre') == '歌踊' %}selected{% endif %}>歌踊</option>
                         <option value="アイドル" {% if request.args.get('genre') == 'アイドル' %}selected{% endif %}>アイドル</option>
+                        <option value="バトル" {% if request.args.get('genre') == 'バトル' %}selected{% endif %}>バトル</option>
                         <option value="WS" {% if request.args.get('genre') == 'WS' %}selected{% endif %}>WS</option>
                         <option value="オフ会" {% if request.args.get('genre') == 'オフ会' %}selected{% endif %}>オフ会</option>
+                        <option value="ｺｽﾌﾟﾚ" {% if request.args.get('genre') == 'ｺｽﾌﾟﾚ' %}selected{% endif %}>ｺｽﾌﾟﾚ</option>
                         <option value="撮影会" {% if request.args.get('genre') == '撮影会' %}selected{% endif %}>撮影会</option>
                         <option value="その他" {% if request.args.get('genre') == 'その他' %}selected{% endif %}>その他</option>
                     </select>
@@ -1725,10 +1739,14 @@ body.vertical-mode .event-bar-time {
                                         genre-song-dance
                                     {% elif event.genre == 'アイドル' %}
                                         genre-idol
+                                    {% elif event.genre == 'バトル' %}
+                                        genre-battle
                                     {% elif event.genre == 'WS' %}
                                         genre-ws
                                     {% elif event.genre == 'オフ会' %}
                                         genre-offkai
+                                    {% elif event.genre == 'ｺｽﾌﾟﾚ' %}
+                                        genre-cosplay
                                     {% elif event.genre == '撮影会' %}
                                         genre-photo
                                     {% else %}
@@ -2091,10 +2109,14 @@ body.vertical-mode .event-bar-time {
                                     genre-song-dance
                                 {% elif event.genre == 'アイドル' %}
                                     genre-idol
+                                {% elif event.genre == 'バトル' %}
+                                    genre-battle
                                 {% elif event.genre == 'WS' %}
                                     genre-ws
                                 {% elif event.genre == 'オフ会' %}
                                     genre-offkai
+                                {% elif event.genre == 'ｺｽﾌﾟﾚ' %}
+                                    genre-cosplay
                                 {% elif event.genre == '撮影会' %}
                                     genre-photo
                                 {% else %}
