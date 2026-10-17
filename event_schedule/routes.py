@@ -2092,6 +2092,16 @@ def schedule_memo_date_save():
     if not user_id:
         return {"error": "ログインが必要です"}, 401
 
+    csrf_token = request.headers.get("X-CSRF-Token", "")
+    expected_token = session.get("schedule_csrf_token", "")
+
+    if (
+        not csrf_token
+        or not expected_token
+        or not secrets.compare_digest(csrf_token, expected_token)
+    ):
+        return {"error": "不正なリクエストです"}, 403
+
     data = request.get_json(silent=True)
 
     if not isinstance(data, dict):
