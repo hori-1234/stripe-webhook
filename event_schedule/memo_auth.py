@@ -173,7 +173,7 @@ def save_login_code(email, code, ip_address):
             VALUES (
                 %s,
                 %s,
-                CURRENT_TIMESTAMP + INTERVAL '10 minutes',
+                CURRENT_TIMESTAMP + INTERVAL '20 minutes',
                 %s
             )
         """, (email, code_hash, ip_address))
