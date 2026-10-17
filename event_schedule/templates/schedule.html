@@ -45,6 +45,15 @@
             }
         }
 
+        /* スマホ縦画面：登録削除をログアウトの真下に表示 */
+        @media (max-width: 700px) and (orientation: portrait) {
+            .account-delete-link {
+                display: inline-block !important;
+                margin-top: 8px;
+            }
+        }
+
+
         body {
     
             font-family: sans-serif;
@@ -1307,6 +1316,14 @@ body.vertical-mode .event-bar-time {
                     </form>
 
                 </div>
+
+                <a
+                    href="/schedule/account/delete"
+                    class="account-delete-link"
+                    style="display: none; padding: 8px 12px; border: 1px solid #c62828; background: #fff; color: #c62828; text-decoration: none; white-space: nowrap; font-size: 13px; box-sizing: border-box;"
+                >
+                    登録削除
+                </a>
 
             {% else %}
 
