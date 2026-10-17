@@ -985,6 +985,17 @@ def memo_login_verify():
 
 @memo_auth_bp.route("/schedule/logout", methods=["POST"])
 def memo_logout():
+    csrf_token = request.form.get("csrf_token", "")
+    expected_token = session.get("schedule_csrf_token", "")
+
+    if (
+        not csrf_token
+        or not expected_token
+        or not secrets.compare_digest(csrf_token, expected_token)
+    ):
+        return "不正なリクエストです", 403
+
     logout_memo_user()
     session.pop("memo_pending_email", None)
+    session.pop("schedule_csrf_token", None)
     return redirect("/schedule")
