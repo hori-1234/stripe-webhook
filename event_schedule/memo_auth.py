@@ -1011,6 +1011,7 @@ def memo_login_verify():
         return "認証処理でエラーが発生しました。", 500
 
     session.pop("memo_pending_email", None)
+    session.pop("memo_login_csrf_token", None)
 
     return redirect("/schedule")
 
