@@ -1689,6 +1689,43 @@ def schedule_admin_stats():
 
     registered_users, today_registrations, month_registrations = cur.fetchone()
 
+    # リピート率（今月・累計）
+    cur.execute("""
+        WITH visitor_counts AS (
+            SELECT
+                visitor_id,
+                COUNT(*) AS total_days,
+                COUNT(*) FILTER (
+                    WHERE visit_date >= DATE_TRUNC(
+                        'month',
+                        CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+                    )::date
+                ) AS month_days
+            FROM schedule_unique_visitors
+            GROUP BY visitor_id
+        )
+        SELECT
+            COALESCE(
+                ROUND(
+                    COUNT(*) FILTER (WHERE month_days >= 2) * 100.0
+                    / NULLIF(COUNT(*) FILTER (WHERE month_days >= 1), 0),
+                    1
+                ),
+                0
+            ),
+            COALESCE(
+                ROUND(
+                    COUNT(*) FILTER (WHERE total_days >= 2) * 100.0
+                    / NULLIF(COUNT(*), 0),
+                    1
+                ),
+                0
+            )
+        FROM visitor_counts
+    """)
+
+    month_repeat_rate, total_repeat_rate = cur.fetchone()
+
     cur.close()
     conn.close()
 
@@ -1709,7 +1746,10 @@ def schedule_admin_stats():
         device_views=device_views,
         today_unique=today_unique,
         month_unique=month_unique,
-        total_unique=total_unique
+        total_unique=total_unique,
+        registered_users=registered_users,
+        today_registrations=today_registrations,
+        month_registrations=month_registrations
     )
 
 
