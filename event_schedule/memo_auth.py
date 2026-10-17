@@ -966,7 +966,7 @@ def memo_login_send():
             </p>
         </form>
 
-        <p>認証コードの有効期限は10分間です。</p>
+        <p>認証コードの有効期限は20分間です。</p>
 
         <p><a href="/schedule/login">ログイン画面に戻る</a></p>
     </body>
