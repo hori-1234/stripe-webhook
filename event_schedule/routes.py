@@ -1749,7 +1749,8 @@ def schedule_admin_stats():
         total_unique=total_unique,
         registered_users=registered_users,
         today_registrations=today_registrations,
-        month_registrations=month_registrations
+        month_registrations=month_registrations,
+        total_repeat_rate=total_repeat_rate
     )
 
 
