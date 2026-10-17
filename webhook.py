@@ -33,6 +33,9 @@ limiter.init_app(app)
 app.secret_key = os.environ.get("kuri_SECRET_KEY")
 app.config["PERMANENT_SESSION_LIFETIME"] = 60 * 60 * 24 * 365
 app.config["SESSION_REFRESH_EACH_REQUEST"] = True
+app.config["SESSION_COOKIE_SECURE"] = True
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 oauth.init_app(app)
 app.register_blueprint(unei_kanri_bp)
 app.register_blueprint(event_schedule_bp)
