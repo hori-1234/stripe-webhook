@@ -3561,7 +3561,14 @@ document.addEventListener('DOMContentLoaded', function () {
     transform: translateY(-50%) scale(2.5);
 }
 </style>
-
+<button
+    type="button"
+    class="mobile-scroll-control"
+    aria-label="ページの一番上に戻る"
+    style="top: 15%; transform: translateY(-50%) scale(2.5); font-size: 14px;"
+    onclick="window.scrollTo({top: 0, behavior: 'smooth'});"
+>TOP</button>
+    
 <button
     type="button"
     class="mobile-scroll-control mobile-scroll-up"
