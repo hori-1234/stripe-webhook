@@ -808,7 +808,7 @@ def memo_login_page():
     </head>
     <body>
         <h2>イベスケ</h2>
-        <h3>登録・ログイン</h3>
+        <h3>新規登録・ログイン</h3>
 
         <div style="margin: 20px 0; line-height: 1.8;">
             <strong>新規登録の方へ</strong>
