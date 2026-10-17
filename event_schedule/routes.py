@@ -877,6 +877,9 @@ def schedule():
             for search_date in unique_dates
         ]
 
+    if "schedule_csrf_token" not in session:
+        session["schedule_csrf_token"] = secrets.token_urlsafe(32)
+
     response = make_response(render_template(
         "schedule.html",
         year=year,
@@ -896,7 +899,8 @@ def schedule():
         today_views=today_views,
         memo_login_email=get_logged_in_memo_email(),
         show_google_link_prompt=should_show_google_link_prompt(),
-        google_link_csrf_token=get_google_link_csrf_token()
+        google_link_csrf_token=get_google_link_csrf_token(),
+        schedule_csrf_token=session["schedule_csrf_token"]
     ))
 
     response.set_cookie(
