@@ -1297,6 +1297,7 @@ body.vertical-mode .event-bar-time {
                     </span>
 
                     <form action="/schedule/logout" method="POST" style="margin: 0;">
+                        <input type="hidden" name="csrf_token" value="{{ schedule_csrf_token }}">
                         <button
                             type="submit"
                             style="padding: 8px 12px; border: 1px solid #333; background: #fff; color: #222; cursor: pointer; white-space: nowrap; font-size: 13px;"
