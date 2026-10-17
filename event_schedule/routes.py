@@ -1750,6 +1750,7 @@ def schedule_admin_stats():
         registered_users=registered_users,
         today_registrations=today_registrations,
         month_registrations=month_registrations,
+        month_repeat_rate=month_repeat_rate,
         total_repeat_rate=total_repeat_rate
     )
 
