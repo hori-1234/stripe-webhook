@@ -1667,6 +1667,28 @@ def schedule_admin_stats():
 
     today_unique, month_unique, total_unique = cur.fetchone()
 
+    # ユーザー登録状況
+    cur.execute("""
+        SELECT
+            COUNT(*),
+            COUNT(*) FILTER (
+                WHERE (created_at AT TIME ZONE 'Asia/Tokyo')::date =
+                    (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo')::date
+            ),
+            COUNT(*) FILTER (
+                WHERE DATE_TRUNC(
+                    'month',
+                    created_at AT TIME ZONE 'Asia/Tokyo'
+                ) = DATE_TRUNC(
+                    'month',
+                    CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+                )
+            )
+        FROM schedule_memo_users
+    """)
+
+    registered_users, today_registrations, month_registrations = cur.fetchone()
+
     cur.close()
     conn.close()
 
