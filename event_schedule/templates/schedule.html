@@ -2998,6 +2998,7 @@ body.vertical-mode .event-bar-time {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
+                    "X-CSRF-Token": scheduleCsrfToken
                 },
                 body: JSON.stringify({
                     memo_date: dateKey,
