@@ -381,7 +381,7 @@ def issue_login_code(email, ip_address):
             VALUES (
                 %s,
                 %s,
-                CURRENT_TIMESTAMP + INTERVAL '10 minutes',
+                CURRENT_TIMESTAMP + INTERVAL '20 minutes',
                 %s
             )
             
@@ -640,6 +640,14 @@ def login_memo_user(email):
     if user_id is None:
         return False
 
+    session.pop("memo_user_id", None)
+    session.pop("memo_user_email", None)
+    session.pop("google_link_user_id", None)
+    session.pop("google_link_email", None)
+    session.pop("google_link_oauth_state", None)
+    session.pop("google_login_oauth_state", None)
+    session.pop("google_login_started_logged_out", None)
+
     session.permanent = True
     session["memo_user_id"] = user_id
     session["memo_user_email"] = email
@@ -651,7 +659,12 @@ def login_memo_user_by_id(user_id, email):
     session.pop("memo_user_id", None)
     session.pop("memo_user_email", None)
     session.pop("memo_pending_email", None)
+    session.pop("memo_login_csrf_token", None)
     session.pop("google_link_user_id", None)
+    session.pop("google_link_email", None)
+    session.pop("google_link_oauth_state", None)
+    session.pop("google_login_oauth_state", None)
+    session.pop("google_login_started_logged_out", None)
 
     session.permanent = True
     session["memo_user_id"] = user_id
@@ -663,6 +676,14 @@ def login_memo_user_by_id(user_id, email):
 def logout_memo_user():
     session.pop("memo_user_id", None)
     session.pop("memo_user_email", None)
+    session.pop("memo_pending_email", None)
+    session.pop("memo_login_csrf_token", None)
+    session.pop("google_link_user_id", None)
+    session.pop("google_link_email", None)
+    session.pop("google_link_oauth_state", None)
+    session.pop("google_login_oauth_state", None)
+    session.pop("google_login_started_logged_out", None)
+    session.pop("google_link_csrf_token", None)
     session.permanent = False
 
     return True
