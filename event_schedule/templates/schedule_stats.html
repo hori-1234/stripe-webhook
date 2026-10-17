@@ -106,19 +106,40 @@
     </a>
 
     <h1>イベントスケジュール アクセス統計</h1>
+    
+<div style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;">
 
-    <div class="stats-section" style="--section-width: 350px;">
-        <h2>閲覧数</h2>
-        <p>今日：{{ today_views }} 回</p>
-        <p>今月：{{ month_views }} 回</p>
-        <p>累計：{{ total_views }} 回</p>
-    </div>
+    <div style="width: 350px; max-width: 100%;">
 
-    <div class="stats-section" style="--section-width: 350px;">
-        <h2>ユニークユーザー数</h2>
-        <p>今日：{{ today_unique }} 人</p>
-        <p>今月：{{ month_unique }} 人</p>
-        <p>累計：{{ total_unique }} 人</p>
+        <div class="stats-section" style="--section-width: 350px;">
+            <h2>閲覧数</h2>
+            <p>今日：{{ today_views }} 回</p>
+            <p>今月：{{ month_views }} 回</p>
+            <p>累計：{{ total_views }} 回</p>
+        </div>
+
+        <div class="stats-section" style="--section-width: 350px;">
+            <h2>ユニークユーザー数</h2>
+            <p>今日：{{ today_unique }} 人</p>
+            <p>今月：{{ month_unique }} 人</p>
+            <p>累計：{{ total_unique }} 人</p>
+        </div>
+        
+        <div class="stats-section" style="--section-width: 350px;">
+            <h2>ユーザー登録状況</h2>
+
+            <h3>登録者数</h3>
+            <p>現在：{{ registered_users | default('未集計') }} 人</p>
+
+            <h3>新規登録者数</h3>
+            <p>今日：{{ today_registrations | default('未集計') }} 人</p>
+            <p>今月：{{ month_registrations | default('未集計') }} 人</p>
+
+            <h3>リピート率</h3>
+            <p>今月：{{ month_repeat_rate | default('未集計') }} %</p>
+            <p>累計：{{ total_repeat_rate | default('未集計') }} %</p>
+        </div>
+
     </div>
 
     <div class="stats-section" style="--section-width: 500px;">
