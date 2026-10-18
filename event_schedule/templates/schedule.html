@@ -2160,6 +2160,12 @@ body.vertical-mode .event-bar-time {
                                 class="event-text"
 
                             >
+                                {% if event.has_favorite_performer %}
+                                    <span style="display: block; color: #d97706; font-size: 13px; font-weight: bold;">
+                                        ★推し出演
+                                    </span>
+                                {% endif %}
+                                
                                 <span class="event-bar-name">
                                     {{ event.event_name }}
                                 </span>
