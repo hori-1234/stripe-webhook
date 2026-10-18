@@ -336,6 +336,26 @@
         </div>
 
         <div class="form-row">
+            <label for="organizer_sns_url">主催者SNS</label>
+
+            <div style="width: 100%; max-width: 600px;">
+                <input
+                    type="url"
+                    id="organizer_sns_url"
+                    name="organizer_sns_url"
+                    value="{{ event[10] or '' }}"
+                    placeholder="https://x.com/..."
+                    maxlength="500"
+                >
+
+                <div style="margin-top: 6px; font-size: 14px; color: #666;">
+                    ※入力は任意です。主催者の公式SNSのURLを入力してください。<br>
+                    ※URLを空欄にして保存すると、登録済みのURLを削除できます。
+                </div>
+            </div>
+        </div>
+
+        <div class="form-row">
             <label for="flyer_image">フライヤー画像</label>
 
             <div style="width: 100%; max-width: 600px;">
