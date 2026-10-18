@@ -1883,10 +1883,25 @@ body.vertical-mode .event-bar-time {
                             </div>      
                         </div>
                     </div>
-
-                        {% if event.performers %}
+                        
+                        {% if event.performers or event.organizer_sns_url %}
                             <div id="performers-{{ event.id }}" class="performer-list">
-                                出演者：{{ event.performers }}
+                                {% if event.performers %}
+                                    <div>出演者：{{ event.performers }}</div>
+                                {% endif %}
+
+                                {% if event.organizer_sns_url %}
+                                    <div style="margin-top: 10px;">
+                                        <a
+                                            href="{{ event.organizer_sns_url }}"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            style="display: inline-block; padding: 7px 12px; border: 1px solid #333; border-radius: 4px; background: #fff; color: #222; text-decoration: none;"
+                                        >
+                                            主催者SNS
+                                        </a>
+                                    </div>
+                                {% endif %}
                             </div>
                         {% endif %}
 
