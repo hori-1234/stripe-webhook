@@ -238,6 +238,11 @@ def create_event_schedule_table():
         ADD COLUMN IF NOT EXISTS flyer_image_key TEXT
     """)    
 
+    cur.execute("""
+        ALTER TABLE event_schedules
+        ADD COLUMN IF NOT EXISTS organizer_sns_url TEXT
+    """)
+
         # 終了時間「不明」を保存できるようにする
     cur.execute("""
         ALTER TABLE event_schedules
@@ -303,8 +308,34 @@ def schedule_add():
         performers = clean_performer_text(
             request.form.get("performers", "")
         ).strip()
+
+        organizer_sns_url = request.form.get("organizer_sns_url", "").strip()
         streaming_available = request.form.get("streaming_available") == "1"
         edit_password = request.form.get("edit_password", "")
+
+        if organizer_sns_url:
+            from urllib.parse import urlsplit
+
+            try:
+                parsed_url = urlsplit(organizer_sns_url)
+                valid_url = (
+                    parsed_url.scheme == "https"
+                    and bool(parsed_url.hostname)
+                    and not parsed_url.username
+                    and not parsed_url.password
+                    and not any(char.isspace() for char in organizer_sns_url)
+                    and len(organizer_sns_url) <= 500
+                )
+            except ValueError:
+                valid_url = False
+
+            if not valid_url:
+                return render_template(
+                    "schedule_add.html",
+                    error_message="主催者SNSには有効なHTTPSのURLを入力してください（500文字以内）。",
+                    form_data=request.form,
+                    copy_event=copy_event
+                ), 400
 
         flyer_file = request.files.get("flyer_image")
 
@@ -373,7 +404,7 @@ def schedule_add():
             conn = psycopg2.connect(DATABASE_URL)
             cur = conn.cursor()
 
-            
+
             cur.execute("""
                 INSERT INTO event_schedules (
                     event_date,
@@ -383,6 +414,7 @@ def schedule_add():
                     event_name,
                     genre,
                     performers,
+                    organizer_sns_url,
                     streaming_available,
                     edit_password_hash,
                     edit_password_encrypted,
@@ -392,7 +424,7 @@ def schedule_add():
                 )
                 VALUES (
                     %s, %s, %s, %s, %s, %s, %s,
-                    %s, %s, %s, %s, %s, %s
+                    %s, %s, %s, %s, %s, %s, %s
                 )
             """, (
                 event_date,
@@ -402,6 +434,7 @@ def schedule_add():
                 event_name,
                 genre,
                 performers,
+                organizer_sns_url,
                 streaming_available,
                 edit_password_hash,
                 edit_password_encrypted,
@@ -409,6 +442,7 @@ def schedule_add():
                 flyer_thumbnail_key,
                 flyer_image_key
             ))
+
 
             conn.commit()
             db_committed = True
@@ -937,7 +971,8 @@ def schedule_edit(event_id):
             genre,
             performers,
             edit_password_hash,
-            streaming_available
+            streaming_available,
+            organizer_sns_url
         FROM event_schedules
         WHERE id = %s
     """, (event_id,))
@@ -1029,6 +1064,27 @@ def schedule_edit_update(event_id):
         request.form.get("performers", "")
     ).strip()
 
+    organizer_sns_url = request.form.get("organizer_sns_url", "").strip()
+
+    if organizer_sns_url:
+        from urllib.parse import urlsplit
+
+        try:
+            parsed_url = urlsplit(organizer_sns_url)
+            valid_url = (
+                parsed_url.scheme == "https"
+                and bool(parsed_url.hostname)
+                and not parsed_url.username
+                and not parsed_url.password
+                and not any(char.isspace() for char in organizer_sns_url)
+                and len(organizer_sns_url) <= 500
+            )
+        except ValueError:
+            valid_url = False
+
+        if not valid_url:
+            return "主催者SNSには有効なHTTPSのURLを入力してください（500文字以内）。", 400
+
     streaming_available = request.form.get("streaming_available") == "1"
 
     # 編集画面で選択されたフライヤー画像を取得
@@ -1099,6 +1155,7 @@ def schedule_edit_update(event_id):
                 event_name = %s,
                 genre = %s,
                 performers = %s,
+                organizer_sns_url = %s,
                 streaming_available = %s,
                 flyer_thumbnail_key = %s,
                 flyer_image_key = %s,
@@ -1112,6 +1169,7 @@ def schedule_edit_update(event_id):
             event_name,
             genre,
             performers,
+            organizer_sns_url,
             streaming_available,
             new_thumbnail_key,
             new_image_key,
