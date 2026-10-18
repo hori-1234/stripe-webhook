@@ -826,6 +826,9 @@ def schedule():
             * 100
         )
 
+        event_performers = set((event[7] or "").split())
+        matched_favorites = event_performers & favorite_performers
+
         display_events.append({
             "id": event[0],
             "event_date": event[1],
@@ -835,6 +838,7 @@ def schedule():
             "event_name": event[5],
             "genre": event[6],
             "performers": event[7],
+            "has_favorite_performer": bool(matched_favorites),
             "streaming_available": event[8],
             "flyer_thumbnail_key": event[9],
             "flyer_image_key": event[10],
