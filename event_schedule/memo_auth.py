@@ -1086,7 +1086,8 @@ def memo_account_delete():
 
         if row is None:
             conn.rollback()
-            return "アカウントが見つかりません", 404
+            session.clear()
+            return redirect("/schedule")
 
         email = row[0]
 
