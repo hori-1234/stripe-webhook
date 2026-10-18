@@ -608,7 +608,8 @@ def schedule():
             performers,
             streaming_available,
             flyer_thumbnail_key,
-            flyer_image_key
+            flyer_image_key,
+            organizer_sns_url
         FROM event_schedules
     """
     if performer_keyword:
@@ -876,6 +877,7 @@ def schedule():
             "streaming_available": event[8],
             "flyer_thumbnail_key": event[9],
             "flyer_image_key": event[10],
+            "organizer_sns_url": event[11],
             "flyer_thumbnail_url": get_flyer_url(event[9]),
             "flyer_image_url": get_flyer_url(event[10]),
             "left_percent": left_percent,
@@ -1926,6 +1928,7 @@ def schedule_admin_edit(event_id):
             performers,
             edit_password_hash,
             streaming_available
+            organizer_sns_url
         FROM event_schedules
         WHERE id = %s
     """, (event_id,))
