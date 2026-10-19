@@ -5,3 +5,8 @@ oshikatu_bp = Blueprint(
     __name__,
     url_prefix="/oshikatu"
 )
+
+
+@oshikatu_bp.route("/")
+def oshikatu_home():
+    return "推し活日記の接続成功"
