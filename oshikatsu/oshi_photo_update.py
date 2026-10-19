@@ -263,7 +263,7 @@ def insert_oshi_updated_photos(
 
         raise
 
-    return len(uploaded_keys)
+    return uploaded_keys
 
 
 def delete_oshi_updated_photos(
