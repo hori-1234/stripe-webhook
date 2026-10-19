@@ -19,6 +19,7 @@ from event_schedule.routes import event_schedule_bp, limiter
 from event_schedule.memo_auth import memo_auth_bp, oauth
 from event_schedule.ibesuke_mokuteki import ibesuke_mokuteki
 from event_schedule.riyoukiyaku import riyoukiyaku
+from oshikatu.oshi_keiro import oshikatu_bp
 from product import process_products
 from ticket_check import (
     check_ticket,
@@ -39,6 +40,7 @@ app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 oauth.init_app(app)
 app.register_blueprint(unei_kanri_bp)
 app.register_blueprint(event_schedule_bp)
+app.register_blueprint(oshikatu_bp)
 app.register_blueprint(memo_auth_bp)
 app.register_blueprint(ibesuke_mokuteki)
 app.register_blueprint(riyoukiyaku)
