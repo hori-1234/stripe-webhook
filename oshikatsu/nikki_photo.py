@@ -286,9 +286,29 @@ def render_nikki_photo_form(saved_photos=None):
                     item.appendChild(add);
                     preview.appendChild(item);
                 }
+
+                const photoItems = Array.from(
+                    preview.querySelectorAll(".nikki-photo-item")
+                ).filter(function (item) {
+                    return item.querySelector("img") !== null;
+                });
+
+                photoItems.forEach(function (item, index) {
+                    const label = item.querySelector("p");
+
+                    if (label) {
+                        label.textContent = index === 0
+                            ? "画像1（サムネ）"
+                            : "画像" + (index + 1);
+                    }
+
+                    item.dataset.photoOrder = String(index + 1);
+                });
             }
 
             input.addEventListener("change", function () {
+
+                    
                 const selected = Array.from(input.files);
 
                 if (selected.length === 0) {
