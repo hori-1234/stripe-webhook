@@ -48,6 +48,9 @@ def validate_oshi_photo_update(form, photos):
         if not isinstance(item, dict):
             raise ValueError("写真の並び順データが不正です")
 
+        if "photo_id" not in item or "new_photo_index" not in item:
+            raise ValueError("写真の識別情報が不正です")
+
         if item.get("photo_order") != index:
             raise ValueError("写真の並び順が不正です")
 
