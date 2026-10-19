@@ -49,3 +49,32 @@ def render_nikki_form(logged_in, csrf_token=""):
 </body>
 </html>
     """, logged_in=logged_in, csrf_token=csrf_token)
+
+
+def render_nikki_view(diary):
+    return render_template_string("""
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>推し活日記 - 閲覧</title>
+</head>
+<body>
+    <h2>推し活日記</h2>
+
+    <p><strong>日付：</strong>{{ diary[0] }}</p>
+
+    <p><strong>イベント名：</strong>{{ diary[1] }}</p>
+
+    <p><strong>場所：</strong>{{ diary[2] }}</p>
+
+    <p><strong>出演者：</strong>{{ diary[3] }}</p>
+
+    <p><strong>日記：</strong></p>
+    <p style="white-space: pre-wrap;">{{ diary[4] }}</p>
+
+    <p><a href="/oshikatsu/">戻る</a></p>
+</body>
+</html>
+    """, diary=diary)
