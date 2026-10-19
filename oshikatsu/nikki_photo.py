@@ -134,7 +134,31 @@ def render_nikki_photo_form(saved_photos=None):
             function renderPhotos() {
                 preview.innerHTML = "";
 
+                savedPhotos.forEach(function (photo, index) {
+                    const item = document.createElement("div");
+                    item.className = "nikki-photo-item";
+
+                    const box = document.createElement("div");
+                    box.className = "nikki-photo-box";
+
+                    const img = document.createElement("img");
+                    img.src = photo.url;
+                    img.alt = "保存済み画像" + (index + 1);
+
+                    box.appendChild(img);
+
+                    const label = document.createElement("p");
+                    label.textContent = index === 0
+                        ? "画像1（サムネ）"
+                        : "画像" + (index + 1);
+
+                    item.appendChild(box);
+                    item.appendChild(label);
+                    preview.appendChild(item);
+                });
+
                 photos.forEach(function (file, index) {
+
                     const item = document.createElement("div");
                     item.className = "nikki-photo-item";
 
