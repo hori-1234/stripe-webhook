@@ -152,9 +152,6 @@ def render_nikki_photo_form(saved_photos=None):
                 }
             }
 
-            function renderPhotos() {                
-            }
-
             function renderPhotos() {
                 preview.innerHTML = "";
 
