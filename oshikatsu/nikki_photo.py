@@ -232,9 +232,11 @@ def render_nikki_photo_form(saved_photos=None):
 
                     const label = document.createElement("p");
 
-                    label.textContent = index === 0
+                    const photoNumber = savedPhotos.length + index + 1;
+
+                    label.textContent = photoNumber === 1
                         ? "画像1（サムネ）"
-                        : "画像" + (index + 1);
+                        : "画像" + photoNumber;
 
                     item.appendChild(box);
                     item.appendChild(remove);
@@ -304,6 +306,7 @@ def render_nikki_photo_form(saved_photos=None):
                 renderPhotos();
             });
 
+            updateFiles();
             renderPhotos();
         });
     </script>
