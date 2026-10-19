@@ -29,12 +29,12 @@ def test_oshi_r2_connection():
 
 def upload_oshi_photo(image_bytes, user_id, diary_id, photo_order):
     import uuid
+    from oshikatsu.oshi_image import compress_oshi_image
 
     if not 1 <= photo_order <= 10:
         raise ValueError("写真の番号は1～10で指定してください")
 
-    if len(image_bytes) > 300 * 1024:
-        raise ValueError("画像サイズが300KBを超えています")
+    compressed_bytes = compress_oshi_image(image_bytes)
 
     r2_key = (
         f"diaries/{user_id}/{diary_id}/"
@@ -45,7 +45,7 @@ def upload_oshi_photo(image_bytes, user_id, diary_id, photo_order):
     client.put_object(
         Bucket=get_oshi_r2_bucket(),
         Key=r2_key,
-        Body=image_bytes,
+        Body=compressed_bytes,
         ContentType="image/webp"
     )
 
