@@ -150,10 +150,43 @@ def render_nikki_photo_form(saved_photos=None):
 
                         form.appendChild(hidden);
                     });
+
+                    form.querySelectorAll(
+                        'input[name="photo_order_data"]'
+                    ).forEach(function (element) {
+                        element.remove();
+                    });
+
+                    const orderInput = document.createElement("input");
+                    orderInput.type = "hidden";
+                    orderInput.name = "photo_order_data";
+
+                    form.appendChild(orderInput);
+
+                    form.addEventListener("submit", function () {
+                        const photoOrderData = Array.from(
+                            preview.querySelectorAll(".nikki-photo-item")
+                        ).filter(function (item) {
+                            return item.querySelector("img") !== null;
+                        }).map(function (item, index) {
+                            return {
+                                photo_id: item.dataset.photoId || null,
+                                new_photo_index:
+                                    item.dataset.newPhotoIndex !== undefined
+                                        ? Number(item.dataset.newPhotoIndex)
+                                        : null,
+                                photo_order: index + 1
+                            };
+                        });
+
+                        orderInput.value = JSON.stringify(photoOrderData);
+                    }, { once: true });
+
                 }
             }
 
             function renderPhotos() {
+
                 preview.innerHTML = "";
 
                 savedPhotos.forEach(function (photo, index) {
