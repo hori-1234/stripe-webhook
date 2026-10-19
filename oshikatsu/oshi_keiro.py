@@ -247,34 +247,46 @@ def update_oshi_diary_route(diary_id):
     except ValueError as e:
         return str(e), 400
 
-    success, message = update_oshi_diary(
-        diary_id=diary_id,
-        user_id=user_id,
-        form=request.form
-    )
+        from oshikatsu.oshi_photo_update import apply_oshi_photo_update
 
-    if not success:
+    conn = psycopg2.connect(os.environ["DATABASE_URL"])
+
+    try:
+        with conn:
+            success, message = update_oshi_diary(
+                diary_id=diary_id,
+                user_id=user_id,
+                form=request.form,
+                conn=conn
+            )
+
+            if not success:
+                raise ValueError(message)
+
+            apply_oshi_photo_update(
+                diary_id=diary_id,
+                user_id=user_id,
+                order_data=order_data,
+                removed_ids=removed_ids,
+                new_photos=new_photos,
+                conn=conn
+            )
+
+    except ValueError as e:
+        message = str(e)
+
         if message == "日記が見つかりません":
             return message, 404
 
         return message, 400
 
-    from oshikatsu.oshi_photo_update import apply_oshi_photo_update
-
-    try:
-        apply_oshi_photo_update(
-            diary_id=diary_id,
-            user_id=user_id,
-            order_data=order_data,
-            removed_ids=removed_ids,
-            new_photos=new_photos
-        )
-    except ValueError as e:
-        return str(e), 400
     except Exception:
         import logging
-        logging.exception("推し活日記の写真更新に失敗しました")
-        return "写真の更新に失敗しました", 500
+        logging.exception("推し活日記の更新に失敗しました")
+        return "日記の更新に失敗しました", 500
+
+    finally:
+        conn.close()
 
     return redirect(
         url_for(
