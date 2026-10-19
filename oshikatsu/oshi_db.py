@@ -32,11 +32,21 @@ def init_oshi_db():
                         r2_key TEXT NOT NULL,
                         photo_order INTEGER NOT NULL
                             CHECK (photo_order BETWEEN 1 AND 10),
+
                         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                         UNIQUE (diary_id, photo_order)
                             DEFERRABLE INITIALLY DEFERRED
                     )
                 """)
-                
+
+                cur.execute("""
+                    CREATE TABLE IF NOT EXISTS oshi_photo_delete_queue (
+                        id BIGSERIAL PRIMARY KEY,
+                        r2_key TEXT NOT NULL UNIQUE,
+                        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                    )
+                """)
+
     finally:
         conn.close()
+                            
