@@ -1,0 +1,7 @@
+from flask import Blueprint
+
+oshikatu_bp = Blueprint(
+    "oshikatu",
+    __name__,
+    url_prefix="/oshikatu"
+)
