@@ -201,11 +201,18 @@ def edit_oshi_diary(diary_id):
         session["oshi_csrf_token"] = secrets.token_urlsafe(32)
 
     from oshikatsu.nikki_edit import render_nikki_edit
+    from oshikatsu.oshi_photo_list import get_oshi_edit_photos
+
+    saved_photos = get_oshi_edit_photos(
+        diary_id=diary_id,
+        user_id=user_id
+    )
 
     return render_nikki_edit(
         diary=diary,
         diary_id=diary_id,
-        csrf_token=session["oshi_csrf_token"]
+        csrf_token=session["oshi_csrf_token"],
+        saved_photos=saved_photos
     )
 
 
