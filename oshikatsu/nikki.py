@@ -1,4 +1,5 @@
 from flask import render_template_string
+from oshikatsu.nikki_photo import render_nikki_photo_form
 
 
 def render_nikki_form(logged_in, csrf_token=""):
@@ -40,6 +41,8 @@ def render_nikki_form(logged_in, csrf_token=""):
         <p>日記</p>
         <textarea name="diary_text"></textarea>
 
+        {{ photo_form }}
+
         {% if logged_in %}
             <p><button type="submit">保存</button></p>
         {% endif %}
@@ -48,7 +51,7 @@ def render_nikki_form(logged_in, csrf_token=""):
     <p><a href="/schedule">イベスケに戻る</a></p>
 </body>
 </html>
-    """, logged_in=logged_in, csrf_token=csrf_token)
+    """, logged_in=logged_in, csrf_token=csrf_token, photo_form=photo_form)
 
 
 def render_nikki_view(diary):
