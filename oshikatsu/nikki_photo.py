@@ -128,7 +128,7 @@ def render_nikki_photo_form(saved_photos=None):
                 input.files = dataTransfer.files;
 
                 count.textContent =
-                    "選択中：" + photos.length + " / 10枚";
+                    "写真：" + (savedPhotos.length + photos.length) + " / 10枚";
             }
 
             function renderPhotos() {
