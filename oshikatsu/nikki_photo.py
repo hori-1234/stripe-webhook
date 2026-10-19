@@ -235,4 +235,10 @@ def render_nikki_photo_form(saved_photos=None):
     </script>
     """
 
+    html += f"""
+    <script type="application/json" id="nikki-saved-photos">
+{saved_photos_json}
+    </script>
+    """
+
     return Markup(html)
