@@ -48,10 +48,16 @@ def save_oshi_diary():
 
     user_id = session.get("memo_user_id")
 
+    photos = request.files.getlist("photos")
+
+    if len(photos) > 10:
+        return "写真は最大10枚までです", 400
+
     try:
         event_date = date.fromisoformat(
             request.form.get("event_date", "")
         )
+    
     except ValueError:
         return "日付が正しくありません", 400
 
