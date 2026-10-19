@@ -109,6 +109,7 @@ def render_nikki_photo_form(saved_photos=None):
 
             let photos = [];
             let editingIndex = null;
+            let editingSavedIndex = null;
 
             const savedPhotosElement = document.getElementById(
                 "nikki-saved-photos"
@@ -167,6 +168,12 @@ def render_nikki_photo_form(saved_photos=None):
                     img.alt = "保存済み画像" + (index + 1);
 
                     box.appendChild(img);
+
+                    box.addEventListener("click", function () {
+                        editingSavedIndex = index;
+                        editingIndex = null;
+                        input.click();
+                    });
 
                     const remove = document.createElement("button");
                     remove.type = "button";
@@ -278,12 +285,27 @@ def render_nikki_photo_form(saved_photos=None):
                 const valid = selected.filter(function (file) {
                     return file.type.startsWith("image/");
                 });
+            
 
                 if (valid.length !== selected.length) {
                     alert("画像ファイルのみ選択できます");
                 }
 
-                if (editingIndex !== null) {
+                if (editingSavedIndex !== null) {
+                    if (valid.length > 0) {
+                        const oldPhoto = savedPhotos[editingSavedIndex];
+
+                        removedPhotoIds.push(oldPhoto.id);
+                        savedPhotos.splice(editingSavedIndex, 1);
+
+                        const replacementFile = valid[0];
+                        replacementFile.oshiDisplayPosition = editingSavedIndex;
+
+                        photos.push(replacementFile);
+                    }
+
+                    editingSavedIndex = null;
+                } else if (editingIndex !== null) {
                     if (valid.length > 0) {
                         photos[editingIndex] = valid[0];
                     }
