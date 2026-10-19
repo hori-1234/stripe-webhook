@@ -130,14 +130,6 @@ def view_oshi_diary(diary_id):
     if diary is None:
         return "日記が見つかりません", 404
 
-    from flask import render_template_string
+    from oshikatsu.nikki import render_nikki_view
 
-    return render_template_string("""
-        <h2>推し活日記</h2>
-        <p>日付：{{ diary[0] }}</p>
-        <p>イベント名：{{ diary[1] }}</p>
-        <p>場所：{{ diary[2] }}</p>
-        <p>出演者：{{ diary[3] }}</p>
-        <p>日記：{{ diary[4] }}</p>
-        <p><a href="/oshikatsu/">戻る</a></p>
-    """, diary=diary)
+    return render_nikki_view(diary)
