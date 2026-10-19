@@ -249,10 +249,23 @@ def render_nikki_photo_form(saved_photos=None):
                     item.appendChild(remove);
                     item.appendChild(label);
 
-                    preview.appendChild(item);
+                    if (Number.isInteger(file.oshiDisplayPosition)) {
+                        const position = file.oshiDisplayPosition;
+
+                        const target = preview.children[position];
+
+                        if (target) {
+                            preview.insertBefore(item, target);
+                        } else {
+                            preview.appendChild(item);
+                        }
+                    } else {
+                        preview.appendChild(item);
+                    }
                 });
 
                 if (savedPhotos.length + photos.length < 10) {
+                    
                     const item = document.createElement("div");
                     item.className = "nikki-photo-item";
 
