@@ -98,3 +98,46 @@ def save_oshi_diary():
         conn.close()
 
     return f"推し活日記を保存しました（ID：{diary_id}）"
+
+
+@oshikatsu_bp.route("/view/<int:diary_id>", methods=["GET"])
+def view_oshi_diary(diary_id):
+    if not is_memo_logged_in():
+        return "ログインが必要です", 401
+
+    user_id = session.get("memo_user_id")
+
+    conn = psycopg2.connect(os.environ["DATABASE_URL"])
+
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT
+                    event_date,
+                    event_name,
+                    place,
+                    performers,
+                    diary_text
+                FROM oshi_diaries
+                WHERE id = %s
+                  AND user_id = %s
+            """, (diary_id, str(user_id)))
+
+            diary = cur.fetchone()
+    finally:
+        conn.close()
+
+    if diary is None:
+        return "日記が見つかりません", 404
+
+    from flask import render_template_string
+
+    return render_template_string("""
+        <h2>推し活日記</h2>
+        <p>日付：{{ diary[0] }}</p>
+        <p>イベント名：{{ diary[1] }}</p>
+        <p>場所：{{ diary[2] }}</p>
+        <p>出演者：{{ diary[3] }}</p>
+        <p>日記：{{ diary[4] }}</p>
+        <p><a href="/oshikatsu/">戻る</a></p>
+    """, diary=diary)
