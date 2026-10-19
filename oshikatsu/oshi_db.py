@@ -22,5 +22,22 @@ def init_oshi_db():
                         updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
                     )
                 """)
+
+                                """)
+
+                cur.execute("""
+                    CREATE TABLE IF NOT EXISTS oshi_diary_photos (
+                        id BIGSERIAL PRIMARY KEY,
+                        diary_id BIGINT NOT NULL
+                            REFERENCES oshi_diaries(id)
+                            ON DELETE CASCADE,
+                        r2_key TEXT NOT NULL,
+                        photo_order INTEGER NOT NULL
+                            CHECK (photo_order BETWEEN 1 AND 10),
+                        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                        UNIQUE (diary_id, photo_order)
+                    )
+                """)
+                
     finally:
         conn.close()
