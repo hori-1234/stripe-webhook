@@ -1,12 +1,12 @@
 from flask import Blueprint
 
-oshikatu_bp = Blueprint(
-    "oshikatu",
+oshikatsu_bp = Blueprint(
+    "oshikatsu",
     __name__,
-    url_prefix="/oshikatu"
+    url_prefix="/oshikatsu"
 )
 
 
-@oshikatu_bp.route("/")
-def oshikatu_home():
+@oshikatsu_bp.route("/")
+def oshikatsu_home():
     return "推し活日記の接続成功"
