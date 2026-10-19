@@ -249,7 +249,10 @@ def render_nikki_photo_form(saved_photos=None):
 
                     editingIndex = null;
                 } else {
-                    const remaining = 10 - photos.length;
+                    const remaining = Math.max(
+                        0,
+                        10 - savedPhotos.length - photos.length
+                    );
 
                     if (valid.length > remaining) {
                         alert("写真は最大10枚までです");
