@@ -66,7 +66,15 @@ def render_nikki_view(diary, photo_view=""):
 
     {{ photo_view }}
 
+    <p>
+        <a href="/oshikatsu/edit/{{ diary_id }}">編集</a>
+    </p>
+
     <p><a href="/oshikatsu/">戻る</a></p>
 </body>
 </html>
-    """, diary_layout=diary_layout, photo_view=photo_view)
+    """,
+        diary_layout=diary_layout,
+        photo_view=photo_view,
+        diary_id=diary_id
+    )
