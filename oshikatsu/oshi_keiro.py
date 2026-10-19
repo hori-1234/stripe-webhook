@@ -237,6 +237,16 @@ def update_oshi_diary_route(diary_id):
 
     user_id = session.get("memo_user_id")
 
+    from oshikatsu.oshi_photo_update import validate_oshi_photo_update
+
+    try:
+        order_data, removed_ids, new_photos = validate_oshi_photo_update(
+            form=request.form,
+            photos=request.files.getlist("photos")
+        )
+    except ValueError as e:
+        return str(e), 400
+
     success, message = update_oshi_diary(
         diary_id=diary_id,
         user_id=user_id,
