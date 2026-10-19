@@ -450,53 +450,62 @@ def apply_oshi_photo_update(
     import psycopg2
     from oshikatsu.oshi_r2 import delete_oshi_photo
 
-    conn = psycopg2.connect(os.environ["DATABASE_URL"])
+    own_connection = conn is None
+
+    if own_connection:
+        conn = psycopg2.connect(os.environ["DATABASE_URL"])
+
     uploaded_keys = []
 
     try:
-        with conn:
-            saved_photos = get_oshi_photo_update_targets(
-                conn,
-                diary_id,
-                user_id
-            )
+        saved_photos = get_oshi_photo_update_targets(
+            conn,
+            diary_id,
+            user_id
+        )
 
-            check_oshi_photo_update_targets(
-                saved_photos,
-                order_data,
-                removed_ids,
-                new_photos
-            )
+        check_oshi_photo_update_targets(
+            saved_photos,
+            order_data,
+            removed_ids,
+            new_photos
+        )
 
-            delete_targets = delete_oshi_updated_photos(
-                conn,
-                saved_photos,
-                removed_ids
-            )
+        delete_targets = delete_oshi_updated_photos(
+            conn,
+            saved_photos,
+            removed_ids
+        )
 
-            queue_oshi_photo_deletions(
-                conn,
-                diary_id,
-                delete_targets
-            )
+        queue_oshi_photo_deletions(
+            conn,
+            diary_id,
+            delete_targets
+        )
 
-            reorder_oshi_updated_photos(
-                conn,
-                diary_id,
-                order_data
-            )
+        reorder_oshi_updated_photos(
+            conn,
+            diary_id,
+            order_data
+        )
 
-            uploaded_keys = insert_oshi_updated_photos(
-                conn,
-                diary_id,
-                user_id,
-                new_photos,
-                order_data
-            )
+        uploaded_keys = insert_oshi_updated_photos(
+            conn,
+            diary_id,
+            user_id,
+            new_photos,
+            order_data
+        )
+
+        if own_connection:
+            conn.commit()
 
         return True, "写真を更新しました"
 
     except Exception:
+        if own_connection:
+            conn.rollback()
+
         for r2_key in uploaded_keys:
             try:
                 delete_oshi_photo(r2_key)
@@ -508,7 +517,5 @@ def apply_oshi_photo_update(
         raise
 
     finally:
-        conn.close()
-
-
-
+        if own_connection:
+            conn.close()
