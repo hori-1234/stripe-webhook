@@ -20,6 +20,7 @@ from event_schedule.memo_auth import memo_auth_bp, oauth
 from event_schedule.ibesuke_mokuteki import ibesuke_mokuteki
 from event_schedule.riyoukiyaku import riyoukiyaku
 from oshikatsu.oshi_keiro import oshikatsu_bp
+from oshikatsu.oshi_db import init_oshi_db
 from product import process_products
 from ticket_check import (
     check_ticket,
