@@ -4,7 +4,7 @@ import psycopg2
 from datetime import date
 
 
-def update_oshi_diary(diary_id, user_id, form):
+def update_oshi_diary(diary_id, user_id, form, conn=None):
 
     try:
         event_date = date.fromisoformat(
@@ -26,39 +26,52 @@ def update_oshi_diary(diary_id, user_id, form):
     ):
         return False, "入力文字数が上限を超えています"
 
-    conn = psycopg2.connect(os.environ["DATABASE_URL"])
+    own_connection = conn is None
+
+    if own_connection:
+        conn = psycopg2.connect(os.environ["DATABASE_URL"])
 
     try:
-        with conn:
-            with conn.cursor() as cur:
-                cur.execute("""
-                    UPDATE oshi_diaries
-                    SET
-                        event_date = %s,
-                        event_name = %s,
-                        place = %s,
-                        performers = %s,
-                        diary_text = %s,
-                        updated_at = NOW()
-                    WHERE id = %s
-                      AND user_id = %s
-                    RETURNING id
-                """, (
-                    event_date,
-                    event_name,
-                    place,
-                    performers,
-                    diary_text,
-                    diary_id,
-                    str(user_id)
-                ))
+        with conn.cursor() as cur:
+            cur.execute("""
+                UPDATE oshi_diaries
+                SET
+                    event_date = %s,
+                    event_name = %s,
+                    place = %s,
+                    performers = %s,
+                    diary_text = %s,
+                    updated_at = NOW()
+                WHERE id = %s
+                  AND user_id = %s
+                RETURNING id
+            """, (
+                event_date,
+                event_name,
+                place,
+                performers,
+                diary_text,
+                diary_id,
+                str(user_id)
+            ))
 
-                updated = cur.fetchone()
+            updated = cur.fetchone()
+
+        if updated is None:
+            if own_connection:
+                conn.rollback()
+            return False, "日記が見つかりません"
+
+        if own_connection:
+            conn.commit()
+
+        return True, "更新しました"
+
+    except Exception:
+        if own_connection:
+            conn.rollback()
+        raise
 
     finally:
-        conn.close()
-
-    if updated is None:
-        return False, "日記が見つかりません"
-
-    return True, "更新しました"
+        if own_connection:
+            conn.close()
