@@ -34,6 +34,7 @@ def init_oshi_db():
                             CHECK (photo_order BETWEEN 1 AND 10),
                         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                         UNIQUE (diary_id, photo_order)
+                            DEFERRABLE INITIALLY DEFERRED
                     )
                 """)
                 
