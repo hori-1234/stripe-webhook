@@ -336,4 +336,178 @@ def reorder_oshi_updated_photos(
     return len(saved_items)
 
 
+def queue_oshi_photo_deletions(
+    conn,
+    diary_id,
+    delete_targets
+):
+    """
+    削除対象の写真をDBから削除し、
+    R2削除待ちキューに登録する。
+
+    呼び出し元のトランザクション内で実行する。
+    この関数ではcommitしない。
+    """
+
+    with conn.cursor() as cur:
+        for photo in delete_targets:
+            cur.execute("""
+                INSERT INTO oshi_photo_delete_queue (r2_key)
+                VALUES (%s)
+                ON CONFLICT (r2_key) DO NOTHING
+            """, (photo["r2_key"],))
+
+            cur.execute("""
+                DELETE FROM oshi_diary_photos
+                WHERE id = %s
+                  AND diary_id = %s
+                  AND r2_key = %s
+            """, (
+                photo["id"],
+                diary_id,
+                photo["r2_key"]
+            ))
+
+            if cur.rowcount != 1:
+                raise RuntimeError(
+                    "写真の削除対象が一致しません"
+                )
+
+    return len(delete_targets)
+
+
+def process_oshi_photo_delete_queue(limit=20):
+    """
+    削除待ちのR2画像を処理する。
+    R2削除に失敗した場合はキューに残す。
+    """
+
+    import os
+    import logging
+    import psycopg2
+    from oshikatsu.oshi_r2 import delete_oshi_photo
+
+    conn = psycopg2.connect(os.environ["DATABASE_URL"])
+    deleted_count = 0
+
+    try:
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT id, r2_key
+                    FROM oshi_photo_delete_queue
+                    ORDER BY id
+                    LIMIT %s
+                    FOR UPDATE SKIP LOCKED
+                """, (limit,))
+
+                targets = cur.fetchall()
+
+                for queue_id, r2_key in targets:
+                    try:
+                        delete_oshi_photo(r2_key)
+                    except Exception:
+                        logging.exception(
+                            "R2写真削除に失敗しました: %s",
+                            r2_key
+                        )
+                        continue
+
+                    cur.execute("""
+                        DELETE FROM oshi_photo_delete_queue
+                        WHERE id = %s
+                          AND r2_key = %s
+                    """, (queue_id, r2_key))
+
+                    if cur.rowcount != 1:
+                        raise RuntimeError(
+                            "写真削除キューの更新に失敗しました"
+                        )
+
+                    deleted_count += 1
+
+    finally:
+        conn.close()
+
+    return deleted_count
+
+
+def apply_oshi_photo_update(
+    diary_id,
+    user_id,
+    order_data,
+    removed_ids,
+    new_photos
+):
+    """
+    写真の追加・削除・並び替えをまとめて実行する。
+    削除対象のR2キーは削除待ちキューへ登録する。
+    """
+
+    import os
+    import logging
+    import psycopg2
+    from oshikatsu.oshi_r2 import delete_oshi_photo
+
+    conn = psycopg2.connect(os.environ["DATABASE_URL"])
+    uploaded_keys = []
+
+    try:
+        with conn:
+            saved_photos = get_oshi_photo_update_targets(
+                conn,
+                diary_id,
+                user_id
+            )
+
+            check_oshi_photo_update_targets(
+                saved_photos,
+                order_data,
+                removed_ids,
+                new_photos
+            )
+
+            delete_targets = delete_oshi_updated_photos(
+                conn,
+                saved_photos,
+                removed_ids
+            )
+
+            queue_oshi_photo_deletions(
+                conn,
+                diary_id,
+                delete_targets
+            )
+
+            reorder_oshi_updated_photos(
+                conn,
+                diary_id,
+                order_data
+            )
+
+            uploaded_keys = insert_oshi_updated_photos(
+                conn,
+                diary_id,
+                user_id,
+                new_photos,
+                order_data
+            )
+
+        return True, "写真を更新しました"
+
+    except Exception:
+        for r2_key in uploaded_keys:
+            try:
+                delete_oshi_photo(r2_key)
+            except Exception:
+                logging.exception(
+                    "写真更新失敗後のR2後片付けに失敗: %s",
+                    r2_key
+                )
+        raise
+
+    finally:
+        conn.close()
+
+
 
