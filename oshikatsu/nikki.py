@@ -61,19 +61,10 @@ def render_nikki_view(diary):
 </head>
 <body>
     <h2>推し活日記</h2>
-
-    <p><strong>日付：</strong>{{ diary[0] }}</p>
-
-    <p><strong>イベント名：</strong>{{ diary[1] }}</p>
-
-    <p><strong>場所：</strong>{{ diary[2] }}</p>
-
-    <p><strong>出演者：</strong>{{ diary[3] }}</p>
-
-    <p><strong>日記：</strong></p>
-    <p style="white-space: pre-wrap;">{{ diary[4] }}</p>
+    
+    {{ diary_layout }}
 
     <p><a href="/oshikatsu/">戻る</a></p>
 </body>
 </html>
-    """, diary=diary)
+    """, diary_layout=diary_layout)
