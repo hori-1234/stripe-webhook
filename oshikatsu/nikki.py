@@ -30,21 +30,8 @@ def render_nikki_form(logged_in, csrf_token=""):
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
         {% endif %}
 
-        <p>日付</p>
-        <input type="date" name="event_date" required>
-
-        <p>イベント名</p>
-        <input type="text" name="event_name">
-
-        <p>場所</p>
-        <input type="text" name="place">
-
-        <p>出演者</p>
-        <textarea name="performers"></textarea>
-
-        <p>日記</p>
-        <textarea name="diary_text"></textarea>
-
+        {{ diary_layout }}
+        
         {{ photo_form }}
 
         {% if logged_in %}
@@ -55,7 +42,7 @@ def render_nikki_form(logged_in, csrf_token=""):
     <p><a href="/schedule">イベスケに戻る</a></p>
 </body>
 </html>
-    """, logged_in=logged_in, csrf_token=csrf_token, photo_form=photo_form)
+    """, logged_in=logged_in, csrf_token=csrf_token, photo_form=photo_form, diary_layout=diary_layout)
 
 
 def render_nikki_view(diary):
