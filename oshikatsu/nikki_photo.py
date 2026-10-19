@@ -1,7 +1,17 @@
+import json
+
 from markupsafe import Markup
 
 
-def render_nikki_photo_form():
+def render_nikki_photo_form(saved_photos=None):
+    if saved_photos is None:
+        saved_photos = []
+
+    saved_photos_json = json.dumps(
+        saved_photos,
+        ensure_ascii=False
+    ).replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
+
     html = """
     <div class="nikki-photo-section">
         <h3>写真（最大10枚）</h3>
