@@ -118,6 +118,8 @@ def render_nikki_photo_form(saved_photos=None):
                 ? JSON.parse(savedPhotosElement.textContent)
                 : [];
 
+            const removedPhotoIds = [];
+
             function updateFiles() {
                 const dataTransfer = new DataTransfer();
 
@@ -147,12 +149,29 @@ def render_nikki_photo_form(saved_photos=None):
 
                     box.appendChild(img);
 
+                    const remove = document.createElement("button");
+                    remove.type = "button";
+                    remove.className = "nikki-photo-remove";
+                    remove.textContent = "×";
+
+                    remove.addEventListener("click", function () {
+                        if (!confirm("この写真を削除しますか？")) {
+                            return;
+                        }
+
+                        savedPhotos.splice(index, 1);
+
+                        updateFiles();
+                        renderPhotos();
+                    });
+
                     const label = document.createElement("p");
                     label.textContent = index === 0
                         ? "画像1（サムネ）"
                         : "画像" + (index + 1);
 
                     item.appendChild(box);
+                    item.appendChild(remove);
                     item.appendChild(label);
                     preview.appendChild(item);
                 });
