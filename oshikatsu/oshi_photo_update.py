@@ -295,3 +295,45 @@ def delete_oshi_updated_photos(
         delete_targets.append(photo)
 
     return delete_targets
+
+
+def reorder_oshi_updated_photos(
+    conn,
+    diary_id,
+    order_data
+):
+    """
+    保存済み写真の表示順を更新する。
+
+    UNIQUE制約はトランザクション終了時に検証される。
+    この関数ではcommitしない。
+    """
+
+    saved_items = [
+        item
+        for item in order_data
+        if item["photo_id"] is not None
+    ]
+
+    with conn.cursor() as cur:
+        for item in saved_items:
+            cur.execute("""
+                UPDATE oshi_diary_photos
+                SET photo_order = %s
+                WHERE id = %s
+                  AND diary_id = %s
+            """, (
+                item["photo_order"],
+                int(item["photo_id"]),
+                diary_id
+            ))
+
+            if cur.rowcount != 1:
+                raise ValueError(
+                    "並び替え対象の写真が見つかりません"
+                )
+
+    return len(saved_items)
+
+
+
