@@ -32,6 +32,7 @@ from ticket_check import (
 
 app = Flask(__name__)
 limiter.init_app(app)
+init_oshi_db()
 app.secret_key = os.environ.get("kuri_SECRET_KEY")
 app.config["PERMANENT_SESSION_LIFETIME"] = 60 * 60 * 24 * 365
 app.config["SESSION_REFRESH_EACH_REQUEST"] = True
