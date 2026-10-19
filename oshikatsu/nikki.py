@@ -45,7 +45,7 @@ def render_nikki_form(logged_in, csrf_token=""):
     """, logged_in=logged_in, csrf_token=csrf_token, photo_form=photo_form, diary_layout=diary_layout)
 
 
-def render_nikki_view(diary):
+def render_nikki_view(diary, photo_view=""):
     diary_layout = render_nikki_layout(
         diary=diary,
         mode="view"
@@ -61,10 +61,12 @@ def render_nikki_view(diary):
 </head>
 <body>
     <h2>推し活日記</h2>
-    
+
     {{ diary_layout }}
+
+    {{ photo_view }}
 
     <p><a href="/oshikatsu/">戻る</a></p>
 </body>
 </html>
-    """, diary_layout=diary_layout)
+    """, diary_layout=diary_layout, photo_view=photo_view)
