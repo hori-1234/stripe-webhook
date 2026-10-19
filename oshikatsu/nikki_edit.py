@@ -1,13 +1,18 @@
 from flask import render_template_string
 
 from oshikatsu.nikki_layout import render_nikki_layout
+from oshikatsu.nikki_photo import render_nikki_photo_form
 
 
-def render_nikki_edit(diary, diary_id, csrf_token):
+def render_nikki_edit(diary, diary_id, csrf_token, saved_photos=None):
 
     diary_layout = render_nikki_layout(
         diary=diary,
         mode="edit"
+    )
+
+    photo_form = render_nikki_photo_form(
+        saved_photos=saved_photos
     )
 
     return render_template_string("""
