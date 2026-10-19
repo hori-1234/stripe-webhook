@@ -25,3 +25,28 @@ def test_oshi_r2_connection():
     client.head_bucket(Bucket=bucket)
 
     return True
+
+
+def upload_oshi_photo(image_bytes, user_id, diary_id, photo_order):
+    import uuid
+
+    if not 1 <= photo_order <= 10:
+        raise ValueError("写真の番号は1～10で指定してください")
+
+    if len(image_bytes) > 300 * 1024:
+        raise ValueError("画像サイズが300KBを超えています")
+
+    r2_key = (
+        f"diaries/{user_id}/{diary_id}/"
+        f"{uuid.uuid4().hex}.webp"
+    )
+
+    client = get_oshi_r2_client()
+    client.put_object(
+        Bucket=get_oshi_r2_bucket(),
+        Key=r2_key,
+        Body=image_bytes,
+        ContentType="image/webp"
+    )
+
+    return r2_key
