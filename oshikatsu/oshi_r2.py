@@ -50,3 +50,32 @@ def upload_oshi_photo(image_bytes, user_id, diary_id, photo_order):
     )
 
     return r2_key
+
+
+def delete_oshi_photo(r2_key):
+    if not r2_key or not r2_key.startswith("diaries/"):
+        raise ValueError("不正な写真の保存先です")
+
+    client = get_oshi_r2_client()
+
+    client.delete_object(
+        Bucket=get_oshi_r2_bucket(),
+        Key=r2_key
+    )
+
+
+def get_oshi_photo(r2_key):
+    if not r2_key or not r2_key.startswith("diaries/"):
+        raise ValueError("不正な写真の保存先です")
+
+    client = get_oshi_r2_client()
+
+    response = client.get_object(
+        Bucket=get_oshi_r2_bucket(),
+        Key=r2_key
+    )
+
+    try:
+        return response["Body"].read()
+    finally:
+        response["Body"].close()
