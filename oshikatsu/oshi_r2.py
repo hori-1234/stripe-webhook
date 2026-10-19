@@ -16,3 +16,12 @@ def get_oshi_r2_client():
 
 def get_oshi_r2_bucket():
     return os.environ["OSHI_R2_BUCKET_NAME"]
+    
+
+def test_oshi_r2_connection():
+    client = get_oshi_r2_client()
+    bucket = get_oshi_r2_bucket()
+
+    client.head_bucket(Bucket=bucket)
+
+    return True
