@@ -40,6 +40,8 @@ def render_nikki_edit(diary, diary_id, csrf_token, saved_photos=None):
 
         {{ diary_layout }}
 
+        {{ photo_form }}
+
         <p>
             <button type="submit">変更を保存</button>
         </p>
@@ -54,6 +56,7 @@ def render_nikki_edit(diary, diary_id, csrf_token, saved_photos=None):
 </html>
     """,
         diary_layout=diary_layout,
+        photo_form=photo_form,
         diary_id=diary_id,
         csrf_token=csrf_token
     )
