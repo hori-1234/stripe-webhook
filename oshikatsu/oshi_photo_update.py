@@ -272,42 +272,26 @@ def delete_oshi_updated_photos(
     removed_ids
 ):
     """
-    削除指定された写真をR2から削除し、
-    成功した写真だけPostgreSQLから削除する。
-
-    呼び出し元で所有者確認と
-    トランザクション管理を行う。
+    削除対象を検証して返す。
+    R2やDBの削除はここでは実行しない。
     """
 
-    from oshikatsu.oshi_r2 import delete_oshi_photo
-
-    removed_set = set(removed_ids)
-
-    delete_targets = [
-        photo
+    saved_by_id = {
+        photo["id"]: photo
         for photo in saved_photos
-        if photo["id"] in removed_set
-    ]
+    }
 
-    with conn.cursor() as cur:
-        for photo in delete_targets:
-            # R2側の削除を先に実行する
-            delete_oshi_photo(photo["r2_key"])
+    if len(removed_ids) != len(set(removed_ids)):
+        raise ValueError("削除対象の写真IDが重複しています")
 
-            # R2削除成功後にDB側の情報を削除する
-            cur.execute("""
-                DELETE FROM oshi_diary_photos
-                WHERE id = %s
-                  AND r2_key = %s
-            """, (
-                photo["id"],
-                photo["r2_key"]
-            ))
+    delete_targets = []
 
-            if cur.rowcount != 1:
-                raise RuntimeError(
-                    "写真のDB削除に失敗しました"
-                )
+    for photo_id in removed_ids:
+        photo = saved_by_id.get(photo_id)
 
-    return len(delete_targets)
+        if photo is None:
+            raise ValueError("削除対象の写真が見つかりません")
 
+        delete_targets.append(photo)
+
+    return delete_targets
