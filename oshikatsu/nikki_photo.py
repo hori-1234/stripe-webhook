@@ -159,6 +159,7 @@ def render_nikki_photo_form(saved_photos=None):
                             return;
                         }
 
+                        removedPhotoIds.push(photo.id);
                         savedPhotos.splice(index, 1);
 
                         updateFiles();
