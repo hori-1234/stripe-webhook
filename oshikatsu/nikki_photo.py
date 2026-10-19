@@ -209,8 +209,10 @@ def render_nikki_photo_form(saved_photos=None):
 
                     const item = document.createElement("div");
                     item.className = "nikki-photo-item";
+                    item.dataset.newPhotoIndex = String(index);
 
                     const box = document.createElement("div");
+
                     box.className = "nikki-photo-box";
 
                     const img = document.createElement("img");
