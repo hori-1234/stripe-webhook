@@ -147,5 +147,15 @@ def view_oshi_diary(diary_id):
         return "日記が見つかりません", 404
 
     from oshikatsu.nikki import render_nikki_view
+    from oshikatsu.nikki_photo_view import render_nikki_photo_view
 
-    return render_nikki_view(diary)
+    photo_view = render_nikki_photo_view(
+        diary_id=diary_id,
+        user_id=user_id
+    )
+
+    return render_nikki_view(
+        diary,
+        photo_view=photo_view
+    )
+
