@@ -46,6 +46,11 @@ def render_nikki_form(logged_in, csrf_token=""):
 
 
 def render_nikki_view(diary):
+    diary_layout = render_nikki_layout(
+        diary=diary,
+        mode="view"
+    )
+
     return render_template_string("""
 <!DOCTYPE html>
 <html lang="ja">
