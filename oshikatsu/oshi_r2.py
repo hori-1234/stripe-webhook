@@ -208,3 +208,26 @@ def delete_orphan_oshi_photos(min_age_hours=24):
             conn.close()
 
     return deleted_count
+
+
+def cleanup_oshi_photos():
+    """
+    削除待ち画像と孤立画像を整理する。
+    """
+
+    from oshikatsu.oshi_photo_update import (
+        process_oshi_photo_delete_queue
+    )
+
+    queued_deleted = process_oshi_photo_delete_queue(
+        limit=20
+    )
+
+    orphan_deleted = delete_orphan_oshi_photos(
+        min_age_hours=24
+    )
+
+    return {
+        "queued_deleted": queued_deleted,
+        "orphan_deleted": orphan_deleted
+    }
