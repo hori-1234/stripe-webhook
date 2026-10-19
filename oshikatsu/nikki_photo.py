@@ -110,6 +110,14 @@ def render_nikki_photo_form(saved_photos=None):
             let photos = [];
             let editingIndex = null;
 
+            const savedPhotosElement = document.getElementById(
+                "nikki-saved-photos"
+            );
+
+            const savedPhotos = savedPhotosElement
+                ? JSON.parse(savedPhotosElement.textContent)
+                : [];
+
             function updateFiles() {
                 const dataTransfer = new DataTransfer();
 
