@@ -204,7 +204,7 @@ def render_nikki_photo_form(saved_photos=None):
                     preview.appendChild(item);
                 });
 
-                if (photos.length < 10) {
+                if (savedPhotos.length + photos.length < 10) {
                     const item = document.createElement("div");
                     item.className = "nikki-photo-item";
 
