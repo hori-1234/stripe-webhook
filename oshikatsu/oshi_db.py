@@ -23,8 +23,6 @@ def init_oshi_db():
                     )
                 """)
 
-                                """)
-
                 cur.execute("""
                     CREATE TABLE IF NOT EXISTS oshi_diary_photos (
                         id BIGSERIAL PRIMARY KEY,
