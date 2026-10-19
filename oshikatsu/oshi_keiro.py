@@ -100,6 +100,16 @@ def save_oshi_diary():
                 ))
 
                 diary_id = cur.fetchone()[0]
+                
+                from oshikatsu.oshi_photo_save import save_oshi_photos
+
+                save_oshi_photos(
+                    conn=conn,
+                    photos=photos,
+                    user_id=user_id,
+                    diary_id=diary_id
+                )
+    
     finally:
         conn.close()
 
