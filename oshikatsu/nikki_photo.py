@@ -131,6 +131,28 @@ def render_nikki_photo_form(saved_photos=None):
 
                 count.textContent =
                     "写真：" + (savedPhotos.length + photos.length) + " / 10枚";
+
+                document.querySelectorAll(
+                    'input[name="remove_photo_ids"]'
+                ).forEach(function (element) {
+                    element.remove();
+                });
+
+                const form = input.closest("form");
+
+                if (form) {
+                    removedPhotoIds.forEach(function (photoId) {
+                        const hidden = document.createElement("input");
+                        hidden.type = "hidden";
+                        hidden.name = "remove_photo_ids";
+                        hidden.value = photoId;
+
+                        form.appendChild(hidden);
+                    });
+                }
+            }
+
+            function renderPhotos() {                
             }
 
             function renderPhotos() {
