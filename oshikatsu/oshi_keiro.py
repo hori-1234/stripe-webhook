@@ -7,12 +7,6 @@ oshikatsu_bp = Blueprint(
     url_prefix="/oshikatsu"
 )
 
-oshikatsu_bp = Blueprint(
-    "oshikatsu",
-    __name__,
-    url_prefix="/oshikatsu"
-)
-
 
 @oshikatsu_bp.route("/")
 def oshikatsu_home():
