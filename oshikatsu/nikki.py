@@ -3,6 +3,8 @@ from oshikatsu.nikki_photo import render_nikki_photo_form
 
 
 def render_nikki_form(logged_in, csrf_token=""):
+    photo_form = render_nikki_photo_form()
+    
     return render_template_string("""
 <!DOCTYPE html>
 <html lang="ja">
