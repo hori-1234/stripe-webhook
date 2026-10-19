@@ -159,3 +159,51 @@ def view_oshi_diary(diary_id):
         photo_view=photo_view
     )
 
+
+@oshikatsu_bp.route("/edit/<int:diary_id>", methods=["GET"])
+def edit_oshi_diary(diary_id):
+    import secrets
+
+    if not is_memo_logged_in():
+        return "ログインが必要です", 401
+
+    user_id = session.get("memo_user_id")
+
+    conn = psycopg2.connect(os.environ["DATABASE_URL"])
+
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT
+                    event_date,
+                    event_name,
+                    place,
+                    performers,
+                    diary_text
+                FROM oshi_diaries
+                WHERE id = %s
+                  AND user_id = %s
+            """, (
+                diary_id,
+                str(user_id)
+            ))
+
+            diary = cur.fetchone()
+
+    finally:
+        conn.close()
+
+    if diary is None:
+        return "日記が見つかりません", 404
+
+    if not session.get("oshi_csrf_token"):
+        session["oshi_csrf_token"] = secrets.token_urlsafe(32)
+
+    from oshikatsu.nikki_edit import render_nikki_edit
+
+    return render_nikki_edit(
+        diary=diary,
+        diary_id=diary_id,
+        csrf_token=session["oshi_csrf_token"]
+    )
+
