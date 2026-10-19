@@ -175,3 +175,139 @@ def check_oshi_photo_update_targets(
         raise ValueError("写真は最大10枚までです")
 
     return True
+
+
+def insert_oshi_updated_photos(
+    conn,
+    diary_id,
+    user_id,
+    new_photos,
+    order_data
+):
+    """
+    新規写真をR2へアップロードし、
+    PostgreSQLへ登録する。
+
+    呼び出し元で写真ID・枚数・表示順の検証と
+    トランザクション管理を行う。
+    """
+
+    from oshikatsu.oshi_r2 import (
+        upload_oshi_photo,
+        delete_oshi_photo
+    )
+
+    uploaded_keys = []
+
+    try:
+        with conn.cursor() as cur:
+            for item in order_data:
+                new_index = item["new_photo_index"]
+
+                if new_index is None:
+                    continue
+
+                photo = new_photos[new_index]
+
+                if not photo.mimetype.startswith("image/"):
+                    raise ValueError(
+                        "画像ファイル以外は登録できません"
+                    )
+
+                image_bytes = photo.read()
+
+                if not image_bytes:
+                    raise ValueError(
+                        "空の画像ファイルは登録できません"
+                    )
+
+                if len(image_bytes) > 20 * 1024 * 1024:
+                    raise ValueError(
+                        "画像は1枚20MB以下にしてください"
+                    )
+
+                photo_order = item["photo_order"]
+
+                r2_key = upload_oshi_photo(
+                    image_bytes=image_bytes,
+                    user_id=str(user_id),
+                    diary_id=diary_id,
+                    photo_order=photo_order
+                )
+
+                uploaded_keys.append(r2_key)
+
+                cur.execute("""
+                    INSERT INTO oshi_diary_photos (
+                        diary_id,
+                        r2_key,
+                        photo_order
+                    )
+                    VALUES (%s, %s, %s)
+                """, (
+                    diary_id,
+                    r2_key,
+                    photo_order
+                ))
+
+    except Exception:
+        for r2_key in uploaded_keys:
+            try:
+                delete_oshi_photo(r2_key)
+            except Exception:
+                import logging
+                logging.exception(
+                    "写真更新時のR2後片付けに失敗しました: %s",
+                    r2_key
+                )
+
+        raise
+
+    return len(uploaded_keys)
+
+
+def delete_oshi_updated_photos(
+    conn,
+    saved_photos,
+    removed_ids
+):
+    """
+    削除指定された写真をR2から削除し、
+    成功した写真だけPostgreSQLから削除する。
+
+    呼び出し元で所有者確認と
+    トランザクション管理を行う。
+    """
+
+    from oshikatsu.oshi_r2 import delete_oshi_photo
+
+    removed_set = set(removed_ids)
+
+    delete_targets = [
+        photo
+        for photo in saved_photos
+        if photo["id"] in removed_set
+    ]
+
+    with conn.cursor() as cur:
+        for photo in delete_targets:
+            # R2側の削除を先に実行する
+            delete_oshi_photo(photo["r2_key"])
+
+            # R2削除成功後にDB側の情報を削除する
+            cur.execute("""
+                DELETE FROM oshi_diary_photos
+                WHERE id = %s
+                  AND r2_key = %s
+            """, (
+                photo["id"],
+                photo["r2_key"]
+            ))
+
+            if cur.rowcount != 1:
+                raise RuntimeError(
+                    "写真のDB削除に失敗しました"
+                )
+
+    return len(delete_targets)
+
