@@ -163,7 +163,7 @@ def render_nikki_photo_form(saved_photos=None):
 
                     form.appendChild(orderInput);
 
-                    form.addEventListener("submit", function () {
+                    form.onsubmit = function () {
                         const photoOrderData = Array.from(
                             preview.querySelectorAll(".nikki-photo-item")
                         ).filter(function (item) {
@@ -180,7 +180,7 @@ def render_nikki_photo_form(saved_photos=None):
                         });
 
                         orderInput.value = JSON.stringify(photoOrderData);
-                    }, { once: true });
+                    };
 
                 }
             }
