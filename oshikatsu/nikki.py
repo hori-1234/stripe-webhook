@@ -45,7 +45,7 @@ def render_nikki_form(logged_in, csrf_token=""):
     """, logged_in=logged_in, csrf_token=csrf_token, photo_form=photo_form, diary_layout=diary_layout)
 
 
-def render_nikki_view(diary, photo_view=""):
+def render_nikki_view(diary, photo_view="", diary_id=None):
     diary_layout = render_nikki_layout(
         diary=diary,
         mode="view"
