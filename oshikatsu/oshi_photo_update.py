@@ -437,7 +437,8 @@ def apply_oshi_photo_update(
     user_id,
     order_data,
     removed_ids,
-    new_photos
+    new_photos,
+    conn=None
 ):
     """
     写真の追加・削除・並び替えをまとめて実行する。
