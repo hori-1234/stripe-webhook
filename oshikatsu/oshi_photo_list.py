@@ -29,3 +29,23 @@ def get_oshi_diary_photos(diary_id, user_id):
         conn.close()
 
     return photos
+
+
+def get_oshi_edit_photos(diary_id, user_id):
+    """
+    編集画面で使用する保存済み写真の一覧を取得する。
+    """
+
+    photos = get_oshi_diary_photos(
+        diary_id=diary_id,
+        user_id=user_id
+    )
+
+    return [
+        {
+            "id": photo_id,
+            "order": photo_order,
+            "url": f"/oshikatsu/photo/{photo_id}"
+        }
+        for photo_id, photo_order in photos
+    ]
