@@ -361,28 +361,28 @@ def list_oshi_diaries():
     performer = request.args.get("performer", "").strip()
     keyword = request.args.get("keyword", "").strip()
 
-    conditions = ["user_id = %s"]
+    conditions = ["d.user_id = %s"]
     params = [str(user_id)]
 
     if start_date:
-        conditions.append("event_date >= %s")
+        conditions.append("d.event_date >= %s")
         params.append(start_date)
 
     if end_date:
-        conditions.append("event_date <= %s")
+        conditions.append("d.event_date <= %s")
         params.append(end_date)
 
     if performer:
-        conditions.append("performers ILIKE %s")
+        conditions.append("d.performers ILIKE %s")
         params.append(f"%{performer}%")
 
     if keyword:
         conditions.append("""
             (
-                event_name ILIKE %s
-                OR place ILIKE %s
-                OR performers ILIKE %s
-                OR diary_text ILIKE %s
+                d.event_name ILIKE %s
+                OR d.place ILIKE %s
+                OR d.performers ILIKE %s
+                OR d.diary_text ILIKE %s
             )
         """)
         params.extend([f"%{keyword}%"] * 4)
@@ -393,15 +393,23 @@ def list_oshi_diaries():
 
     try:
         with conn.cursor() as cur:
+            
             cur.execute(f"""
                 SELECT
-                    id,
-                    event_date,
-                    event_name,
-                    performers
-                FROM oshi_diaries
+                    d.id,
+                    d.event_date,
+                    d.event_name,
+                    d.performers,
+                    (
+                        SELECT p.id
+                        FROM oshi_diary_photos AS p
+                        WHERE p.diary_id = d.id
+                        ORDER BY p.photo_order, p.id
+                        LIMIT 1
+                    ) AS thumbnail_id
+                FROM oshi_diaries AS d
                 WHERE {where_sql}
-                ORDER BY event_date DESC, id DESC
+                ORDER BY d.event_date DESC, d.id DESC
             """, params)
 
             diaries = cur.fetchall()
