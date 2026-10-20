@@ -97,8 +97,15 @@ def render_nikki_photo_view(diary_id, user_id):
             height: 85px;
             font-size: 42px;
             background: rgba(0, 0, 0, 0.3);
+            transition: opacity 0.3s ease;
         }
 
+        .nikki-photo-lightbox-prev.is-hidden,
+        .nikki-photo-lightbox-next.is-hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+ 
         .nikki-photo-lightbox-prev {
             left: 0;
         }
