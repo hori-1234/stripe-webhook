@@ -205,7 +205,9 @@ def view_oshi_diary(diary_id):
     return render_nikki_view(
         diary,
         photo_view=photo_view,
-        diary_id=diary_id
+        diary_id=diary_id,
+        prev_diary_id=prev_diary_id,
+        next_diary_id=next_diary_id
     )
 
 
