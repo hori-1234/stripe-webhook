@@ -140,6 +140,54 @@ def view_oshi_diary(diary_id):
             """, (diary_id, str(user_id)))
 
             diary = cur.fetchone()
+
+            prev_diary_id = None
+            next_diary_id = None
+
+            if diary is not None:
+
+                cur.execute("""
+                    SELECT id
+                    FROM oshi_diaries
+                    WHERE user_id = %s
+                      AND (
+                          event_date < %s
+                          OR (event_date = %s AND id < %s)
+                      )
+                    ORDER BY event_date DESC, id DESC
+                    LIMIT 1
+                """, (
+                    str(user_id),
+                    diary[0],
+                    diary[0],
+                    diary_id
+                ))
+
+                row = cur.fetchone()
+                if row:
+                    prev_diary_id = row[0]
+
+                cur.execute("""
+                    SELECT id
+                    FROM oshi_diaries
+                    WHERE user_id = %s
+                      AND (
+                          event_date > %s
+                          OR (event_date = %s AND id > %s)
+                      )
+                    ORDER BY event_date ASC, id ASC
+                    LIMIT 1
+                """, (
+                    str(user_id),
+                    diary[0],
+                    diary[0],
+                    diary_id
+                ))
+
+                row = cur.fetchone()
+                if row:
+                    next_diary_id = row[0]
+
     finally:
         conn.close()
 
