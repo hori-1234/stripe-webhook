@@ -91,7 +91,9 @@ def render_nikki_form(logged_in, csrf_token=""):
         <p>ログイン中</p>
     {% else %}
         <p>未ログイン：入力内容は保存できません。</p>
-         <a href="/schedule/login" class="login-button" id="nikki-login-button">新規登録・ログイン</a>
+        
+        <!--メモ：一時非表示-->
+         <!-- <a href="/schedule/login" class="login-button" id="nikki-login-button">新規登録・ログイン</a> -->
     {% endif %}
 
     <form method="POST" action="/oshikatsu/save" enctype="multipart/form-data">
