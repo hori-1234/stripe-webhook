@@ -73,9 +73,115 @@ def render_nikki_form(logged_in, csrf_token=""):
         }
 
         .nikki-demo-button:hover {
-            background: #e5e5e5;
+            background: #e3d1b7;
+        }
+
+        /* 新規登録画面：ノート・手帳風 */
+        body {
+            margin: 0;
+            padding: 30px 15px 60px;
+            background: #f5f0e6;
+            color: #493c30;
+            font-family: sans-serif;
+            line-height: 1.7;
+        }
+
+        body > h2,
+        #nikki-save-form,
+        body > p,
+        #demo-preview-screen {
+            max-width: 760px;
+            margin-left: auto;
+            margin-right: auto;
+            box-sizing: border-box;
+        }
+
+        .nikki-title {
+            margin-top: 0;
+            margin-bottom: 0;
+            padding: 28px 30px 15px;
+            background: #fffdf8;
+            border: 1px solid #e2d4bf;
+            border-bottom: none;
+            border-radius: 12px 12px 0 0;
+            color: #725334;
+            font-size: 24px;
+        }
+
+        #nikki-save-form {
+            padding: 20px 30px 35px;
+            background: #fffdf8;
+            border: 1px solid #e2d4bf;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(94, 72, 44, 0.10);
+        }
+
+        input[type="text"],
+        input[type="date"],
+        input[type="datetime-local"],
+        textarea,
+        select {
+            max-width: 100%;
+            box-sizing: border-box;
+            background: #fffefa;
+            color: #493c30;
+            border: 1px solid #d8c8b2;
+            border-radius: 5px;
+            padding: 9px;
+            font-size: 16px;
+        }
+
+        textarea {
+            line-height: 1.9;
+            background-image: repeating-linear-gradient(
+                to bottom,
+                transparent 0,
+                transparent calc(1.9em - 1px),
+                #e9dfcf calc(1.9em - 1px),
+                #e9dfcf 1.9em
+            );
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: 2px solid #c8a77c;
+            outline-offset: 1px;
+        }
+
+        .nikki-demo-button {
+            border-color: #bca789;
+            background: #eee2d0;
+            color: #493c30;
+        }
+
+        #nikki-save-form img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 15px 10px 40px;
+            }
+
+            .nikki-title {
+                padding: 20px 16px 12px;
+                font-size: 21px;
+            }
+
+            #nikki-save-form {
+                padding: 20px 16px 25px;
+            }
+
+            .nikki-demo-button {
+                min-width: 120px;
+                padding: 10px 15px;
+                font-size: 16px;
+            }
         }
     </style>
+
 </head>
 
 <body>
@@ -775,7 +881,121 @@ def render_nikki_view(
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
+
+        /* 閲覧画面：ノート・手帳風 */
+        body {
+            margin: 0;
+            padding: 30px 15px 60px;
+            background: #f5f0e6;
+            color: #493c30;
+            font-family: sans-serif;
+            line-height: 1.7;
+        }
+
+        /* 日記の見出し */
+        .nikki-view-header {
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 15px 20px;
+            box-sizing: border-box;
+            background: #fffdf8;
+            border: 1px solid #e2d4bf;
+            border-bottom: none;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .nikki-view-header h2 {
+            color: #725334;
+            font-size: 24px;
+        }
+
+        /* 日記本文・写真を紙面風に配置 */
+        .nikki-view-header ~ .nikki-paper {
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 25px 30px 35px;
+            box-sizing: border-box;
+            background: #fffdf8;
+            border: 1px solid #e2d4bf;
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+            box-shadow: 0 8px 24px rgba(94, 72, 44, 0.10);
+        }
+
+        /* 日記帳の中の写真 */
+        .nikki-paper img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* スマートフォン */
+        @media (max-width: 600px) {
+            .nikki-view-header ~ .nikki-paper {
+                padding: 20px 16px 25px;
+            }
+        }
+
+        /* 前後の日記へ移動するボタン */
+        .nikki-move-button {
+            color: #725334;
+            background: #eee2d0;
+            border: 1px solid #d8c8b2;
+        }
+
+        .nikki-move-button:hover {
+            background: #e3d1b7;
+        }
+
+        /* 編集・日記全集ボタン */
+        .nikki-action-button {
+            border-color: #bca789;
+            background: #eee2d0;
+            color: #493c30;
+        }
+
+        .nikki-action-button:hover {
+            background: #e3d1b7;
+        }
+
+        /* 閲覧内容 */
+        .nikki-view-header ~ p {
+            max-width: 760px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* スマートフォン */
+        @media (max-width: 600px) {
+            body {
+                padding: 15px 10px 40px;
+            }
+
+            .nikki-view-header {
+                padding: 12px 10px;
+            }
+
+            .nikki-view-header h2 {
+                font-size: 21px;
+            }
+
+            .nikki-move-button,
+            .nikki-move-empty {
+                width: 42px;
+                height: 52px;
+            }
+
+            .nikki-move-button {
+                font-size: 30px;
+            }
+
+            .nikki-action-button {
+                min-width: 120px;
+                padding: 10px 15px;
+                font-size: 16px;
+            }
+        }
     </style>
+
 </head>
 
 <body>
@@ -799,16 +1019,22 @@ def render_nikki_view(
         {% endif %}
     </div>
 
+    <div class="nikki-paper">
+
     {{ diary_layout }}
 
     {{ photo_view }}
 
-     <p>
+    <p style="display: flex; justify-content: center; align-items: center; gap: 12px; flex-wrap: wrap;">
         <a href="/oshikatsu/edit/{{ diary_id }}" class="nikki-action-button">
             編集
         </a>
+
+        <a href="/oshikatsu/list" class="nikki-action-button">
+            日記全集
+        </a>
     </p>
-    
+
     <p>
         <a href="/oshikatsu/list" class="nikki-action-button">
             日記全集
