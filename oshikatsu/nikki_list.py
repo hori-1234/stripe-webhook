@@ -225,6 +225,21 @@ def render_nikki_list(
             color: #fff;
             font-weight: bold;
         }
+
+        .site-header {
+            background: #222;
+            color: #fff;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .site-header-nav {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
         
         .nikki-title-row {
             position: relative;
@@ -240,36 +255,7 @@ def render_nikki_list(
             text-align: center;
         }
 
-        .nikki-back-button {
-            position: absolute;
-            left: 10px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 70px;
-            min-height: 36px;
-            padding: 6px 12px;
-            box-sizing: border-box;
-            border: 1px solid #888;
-            border-radius: 6px;
-            background: #f5f5f5;
-            color: #000;
-            font-size: 14px;
-            font-weight: bold;
-            text-decoration: none;
-        }
-
-        .nikki-back-button:hover {
-            background: #e5e5e5;
-        }
-        
-        @media (min-width: 701px) {
-            .nikki-back-button {
-                left: 10px;
-            }
-        }
-
-                .nikki-loading {
+        .nikki-loading {
             display: none;
             position: fixed;
             inset: 0;
@@ -307,12 +293,15 @@ def render_nikki_list(
 </head>
 
 <body>
-    <main class="nikki-list-layout">
+    <header class="site-header">
 
+        <nav class="site-header-nav" style="font-size: 18px;">
+            <a href="/schedule" style="color: inherit; text-decoration: none;">イベスケ</a>
+        </nav>
+    </header>
+
+    <main class="nikki-list-layout">
         <div class="nikki-title-row">
-            <a href="/schedule" class="nikki-back-button">
-                戻る
-            </a>
             <h2>推し活日記全集</h2>
         </div>
 
