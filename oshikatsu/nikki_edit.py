@@ -66,7 +66,9 @@ def render_nikki_edit(diary, diary_id, csrf_token, saved_photos=None):
     </form>
 
     <p>
-        <a href="/oshikatsu/view/{{ diary_id }}">
+        <a href="/oshikatsu/view/{{ diary_id }}"
+           class="nikki-demo-button"
+           style="display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; text-decoration: none;">
             キャンセル
         </a>
     </p>
