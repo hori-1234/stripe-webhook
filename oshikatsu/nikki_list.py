@@ -163,6 +163,13 @@ def render_nikki_list(
             font-size: 12px;
         }
 
+        .nikki-list-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
         .nikki-list-arrow {
             font-size: 20px;
             color: #888;
@@ -262,7 +269,15 @@ def render_nikki_list(
                 </div>
 
                 <div class="nikki-list-thumbnail">
-                    画像なし
+                    {% if diary.thumbnail_id %}
+                        <img
+                            src="/oshikatsu/photo/{{ diary.thumbnail_id }}"
+                            alt="サムネイル"
+                            loading="lazy"
+                        >
+                    {% else %}
+                        画像なし
+                    {% endif %}
                 </div>
 
                 <span class="nikki-list-arrow">›</span>
@@ -286,7 +301,8 @@ def render_nikki_list(
                 "id": row[0],
                 "event_date": row[1],
                 "event_name": row[2],
-                "performers": row[3] or ""
+                "performers": row[3] or "",
+                "thumbnail_id": row[4]
             }
             for row in diaries
         ],
