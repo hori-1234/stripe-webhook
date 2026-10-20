@@ -215,8 +215,8 @@ def render_nikki_photo_form(saved_photos=None):
                             return;
                         }
 
-                        editingIndex = index;
-                        editingSavedIndex = null;
+                        editingSavedIndex = index;
+                        editingIndex = null;
                         input.click();
                     });
 
@@ -293,8 +293,8 @@ def render_nikki_photo_form(saved_photos=None):
                             return;
                         }
 
-                        editingSavedIndex = index;
-                        editingIndex = null;
+                        editingIndex = index;
+                        editingSavedIndex = null;
                         input.click();
                     });
                     
@@ -440,7 +440,7 @@ def render_nikki_photo_form(saved_photos=None):
                         savedPhotos.splice(editingSavedIndex, 1);
 
                         const replacementFile = valid[0];
-                        replacementFile.oshiDisplayPosition = displayPosition;
+                        replacementFile.oshiDisplayPosition = 0;
 
                         photos.push(replacementFile);
                     }
