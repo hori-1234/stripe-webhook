@@ -1,3 +1,195 @@
+import json
+
+from markupsafe import Markup
+
+
+def render_nikki_photo_form(saved_photos=None):
+    if saved_photos is None:
+        saved_photos = []
+
+    saved_photos_json = json.dumps(
+        saved_photos,
+        ensure_ascii=False
+    ).replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
+
+    html = """
+    <div class="nikki-photo-section">
+        <h3>写真（最大10枚）</h3>
+
+        <div id="nikki-photo-preview"></div>
+
+        <p id="nikki-photo-count">選択中：0 / 10枚</p>
+
+        <input
+            type="file"
+            id="nikki-photo-input"
+            name="photos"
+            accept="image/*"
+            multiple
+            hidden
+        >
+    </div>
+
+    <style>
+        #nikki-photo-preview {
+            display: grid;
+            grid-template-columns: repeat(
+                auto-fill,
+                minmax(120px, 1fr)
+            );
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .nikki-photo-item {
+            position: relative;
+            min-width: 0;
+        }
+
+        .nikki-photo-box {
+            width: 100%;
+            aspect-ratio: 1;
+            border: 2px dashed #aaa;
+            border-radius: 8px;
+            box-sizing: border-box;
+            background: #f8f8f8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .nikki-photo-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .nikki-photo-add {
+            font-size: 40px;
+            color: #777;
+        }
+
+        .nikki-photo-remove {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 28px;
+            height: 28px;
+            border: none;
+            border-radius: 50%;
+            background: #e83e75;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 1;
+        }
+
+        .nikki-photo-item p {
+            text-align: center;
+            margin: 5px 0;
+            font-size: 13px;
+        }
+    </style>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const input = document.getElementById("nikki-photo-input");
+            const preview = document.getElementById("nikki-photo-preview");
+            const count = document.getElementById("nikki-photo-count");
+            const form = input.closest("form");
+            const savedPhotosElement = document.getElementById("nikki-saved-photos");
+            const savedPhotos = savedPhotosElement
+                ? JSON.parse(savedPhotosElement.textContent)
+                : [];
+
+            // 表示順を唯一の配列で管理する（保存済み・新規を混在させる）。
+            const entries = savedPhotos.map(function (photo) {
+                return { kind: "saved", id: photo.id, url: photo.url };
+            });
+            const removedPhotoIds = new Set();
+            let editingPosition = null;
+
+            // picker は選択専用。input は送信専用。
+            const picker = document.createElement("input");
+            picker.type = "file";
+            picker.accept = "image/*";
+            picker.hidden = true;
+            input.insertAdjacentElement("afterend", picker);
+
+            const orderInput = document.createElement("input");
+            orderInput.type = "hidden";
+            orderInput.name = "photo_order_data";
+            if (form) {
+                form.querySelectorAll('input[name="photo_order_data"]').forEach(
+                    function (element) { element.remove(); }
+                );
+                form.appendChild(orderInput);
+            }
+
+            function syncFiles() {
+                const transfer = new DataTransfer();
+                entries.forEach(function (entry) {
+                    if (entry.kind === "new") {
+                        transfer.items.add(entry.file);
+                    }
+                });
+                input.files = transfer.files;
+                count.textContent = "写真：" + entries.length + " / 10枚";
+
+                if (form) {
+                    form.querySelectorAll('input[name="remove_photo_ids"]').forEach(
+                        function (element) { element.remove(); }
+                    );
+                    removedPhotoIds.forEach(function (id) {
+                        const hidden = document.createElement("input");
+                        hidden.type = "hidden";
+                        hidden.name = "remove_photo_ids";
+                        hidden.value = String(id);
+                        form.appendChild(hidden);
+                    });
+                }
+            }
+
+            function syncOrder() {
+                let newIndex = 0;
+                const data = entries.map(function (entry, index) {
+                    return {
+                        photo_id: entry.kind === "saved" ? String(entry.id) : null,
+                        new_photo_index: entry.kind === "new" ? newIndex++ : null,
+                        photo_order: index + 1
+                    };
+                });
+                orderInput.value = JSON.stringify(data);
+            }
+
+            function openPicker(position) {
+                editingPosition = position;
+                picker.multiple = position === null;
+                picker.value = "";
+                picker.click();
+            }
+
+            function renderPhotos() {
+                preview.innerHTML = "";
+                entries.forEach(function (entry, index) {
+                    const item = document.createElement("div");
+                    item.className = "nikki-photo-item";
+                    const box = document.createElement("div");
+                    box.className = "nikki-photo-box";
+                    const img = document.createElement("img");
+                    if (entry.kind === "saved") {
+                        img.src = entry.url;
+                        img.alt = "保存済み画像" + (index + 1);
+                    } else {
+                        const url = URL.createObjectURL(entry.file);
+                        img.src = url;
+                        img.onload = function () { URL.revokeObjectURL(url); };
+                        img.onerror = function () { URL.revokeObjectURL(url); };
+                        img.alt = "新規画像" + (index + 1);
+                    }
+                    box.appendChild(img);
                     // 1枚目（サムネイル）のみ差し替え可能。
                     if (index === 0) {
                         box.addEventListener("click", function () {
