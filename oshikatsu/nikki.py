@@ -1035,13 +1035,8 @@ def render_nikki_view(
         </a>
     </p>
 
-    <p>
-        <a href="/oshikatsu/list" class="nikki-action-button">
-            日記全集
-        </a>
-    </p>
-
     <div class="nikki-page-loading" id="nikki-page-loading">
+
         <div class="nikki-page-loading-spinner"></div>
     </div>
 
