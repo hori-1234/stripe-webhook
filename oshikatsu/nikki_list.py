@@ -135,6 +135,44 @@ def render_nikki_list(
             box-shadow: 0 5px 16px rgba(35, 100, 145, 0.15);
         }
 
+        /* 日記カードのスワイプ領域 */
+        .nikki-swipe-container {
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 14px;
+            border-radius: 12px;
+        }
+
+        .nikki-swipe-container .nikki-list-item {
+            position: relative;
+            z-index: 1;
+            margin-bottom: 0;
+            background: #ffffff;
+            touch-action: pan-y;
+            user-select: none;
+            -webkit-user-select: none;
+            transition: transform 0.2s ease;
+        }
+
+        /* スワイプすると現れる削除ボタン */
+        .nikki-swipe-delete {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 90px;
+            height: 100%;
+            border: none;
+            background: #d9534f;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .nikki-swipe-delete:hover {
+            background: #c9302c;
+        }
+
         .nikki-list-info {
             flex: 1;
             min-width: 0;
@@ -382,42 +420,52 @@ def render_nikki_list(
 
         {% for diary in diaries %}
 
-            <a class="nikki-list-item"
-               href="/oshikatsu/view/{{ diary.id }}">
+            <div class="nikki-swipe-container" data-diary-id="{{ diary.id }}">
 
-                <div class="nikki-list-info">
+                <button type="button"
+                        class="nikki-swipe-delete"
+                        data-diary-id="{{ diary.id }}">
+                    削除
+                </button>
 
-                    <div class="nikki-list-date">
-                        {{ diary.event_date.strftime('%-m/%-d') }}
+                <a class="nikki-list-item"
+                   href="/oshikatsu/view/{{ diary.id }}">
+
+                    <div class="nikki-list-info">
+
+                        <div class="nikki-list-date">
+                            {{ diary.event_date.strftime('%-m/%-d') }}
+                        </div>
+
+                        <div class="nikki-list-event">
+                            {{ diary.event_name }}
+                        </div>
+
+                        <div class="nikki-list-performers">
+                            {% for name in diary.performers.split() %}
+                                <span>{{ name }}</span>
+                            {% endfor %}
+                        </div>
+
                     </div>
 
-                    <div class="nikki-list-event">
-                        {{ diary.event_name }}
+                    <div class="nikki-list-thumbnail">
+                        {% if diary.thumbnail_id %}
+                            <img
+                                src="/oshikatsu/photo/{{ diary.thumbnail_id }}"
+                                alt="サムネイル"
+                                loading="lazy"
+                            >
+                        {% else %}
+                            画像なし
+                        {% endif %}
                     </div>
 
-                    <div class="nikki-list-performers">
-                        {% for name in diary.performers.split() %}
-                            <span>{{ name }}</span>
-                        {% endfor %}
-                    </div>
+                    <span class="nikki-list-arrow">›</span>
 
-                </div>
+                </a>
 
-                <div class="nikki-list-thumbnail">
-                    {% if diary.thumbnail_id %}
-                        <img
-                            src="/oshikatsu/photo/{{ diary.thumbnail_id }}"
-                            alt="サムネイル"
-                            loading="lazy"
-                        >
-                    {% else %}
-                        画像なし
-                    {% endif %}
-                </div>
-
-                <span class="nikki-list-arrow">›</span>
-
-            </a>
+            </div>
 
         {% else %}
 
@@ -467,17 +515,105 @@ def render_nikki_list(
     </div>
 
     <script>
-        document.querySelectorAll(".nikki-list-item").forEach(function (item) {
-            item.addEventListener("click", function () {
-                document.getElementById("nikki-loading").style.display = "flex";
+        const nikkiLoading = document.getElementById("nikki-loading");
+        const swipeWidth = 90;
+
+        document.querySelectorAll(".nikki-swipe-container").forEach(function (container) {
+            const card = container.querySelector(".nikki-list-item");
+
+            let startX = 0;
+            let startY = 0;
+            let startOffset = 0;
+            let currentOffset = 0;
+            let dragging = false;
+            let moved = false;
+            let suppressClick = false;
+
+            card.addEventListener("pointerdown", function (e) {
+                if (e.pointerType === "mouse" && e.button !== 0) return;
+
+                startX = e.clientX;
+                startY = e.clientY;
+                startOffset = currentOffset;
+                dragging = true;
+                moved = false;
+                suppressClick = false;
+            });
+
+            card.addEventListener("pointermove", function (e) {
+                if (!dragging) return;
+
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+
+                if (!moved && Math.abs(dy) > Math.abs(dx)) {
+                    return;
+                }
+
+                if (Math.abs(dx) > 8) {
+                    moved = true;
+                    suppressClick = true;
+                }
+
+                if (!moved) return;
+
+                if (e.pointerType === "mouse" && e.buttons !== 1) return;
+
+                const nextOffset = Math.max(
+                    -swipeWidth,
+                    Math.min(0, startOffset + dx)
+                );
+
+                currentOffset = nextOffset;
+                card.style.transition = "none";
+                card.style.transform = `translateX(${currentOffset}px)`;
+            });
+
+            function finishSwipe() {
+                if (!dragging) return;
+
+                dragging = false;
+
+                if (!moved) return;
+
+                currentOffset = currentOffset < -45 ? -swipeWidth : 0;
+
+                card.style.transition = "transform 0.2s ease";
+                card.style.transform = `translateX(${currentOffset}px)`;
+            }
+
+            card.addEventListener("pointerup", finishSwipe);
+            card.addEventListener("pointercancel", finishSwipe);
+
+            card.addEventListener("dragstart", function (e) {
+                e.preventDefault();
+            });
+
+            card.addEventListener("click", function (e) {
+                if (suppressClick) {
+                    e.preventDefault();
+                    suppressClick = false;
+                    return;
+                }
+
+                if (currentOffset !== 0) {
+                    e.preventDefault();
+
+                    currentOffset = 0;
+                    card.style.transition = "transform 0.2s ease";
+                    card.style.transform = "translateX(0px)";
+                    return;
+                }
+
+                nikkiLoading.style.display = "flex";
             });
         });
 
         window.addEventListener("pageshow", function () {
-            document.getElementById("nikki-loading").style.display = "none";
+            nikkiLoading.style.display = "none";
         });
-
     </script>
+
 </body>
 </html>
         
