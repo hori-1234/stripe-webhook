@@ -199,6 +199,17 @@ def render_nikki_form(logged_in, csrf_token=""):
             min-height: 20px;
         }
 
+        #demo-performers {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px 12px;
+        }
+
+        .demo-performer-name {
+            white-space: nowrap;
+            overflow-wrap: normal;
+        }
+
         .demo-preview-layout strong {
             display: block;
             margin-bottom: 5px;
@@ -421,6 +432,21 @@ def render_nikki_form(logged_in, csrf_token=""):
 
                 Object.keys(fields).forEach(function (id) {
                     document.getElementById(id).textContent = getValue(fields[id]);
+                });
+
+                const performersContainer = document.getElementById("demo-performers");
+                const performerNames = getValue("performers").trim().split(/[\s\u3000]+/);
+
+                performersContainer.replaceChildren();
+
+                performerNames.forEach(function (name) {
+                    if (!name) return;
+
+                    const span = document.createElement("span");
+                    span.className = "demo-performer-name";
+                    span.textContent = name;
+
+                    performersContainer.appendChild(span);
                 });
 
                 const photosContainer = document.getElementById("demo-preview-photos");
