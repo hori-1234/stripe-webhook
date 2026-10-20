@@ -225,9 +225,19 @@ def render_nikki_list(
             color: #fff;
             font-weight: bold;
         }
-        .nikki-back-area {
-            text-align: center;
+        
+        .nikki-title-row {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 70px;
             margin-bottom: 20px;
+        }
+
+        .nikki-title-row h2 {
+            margin: 0;
+            text-align: center;
         }
 
         .nikki-back-button {
@@ -255,7 +265,7 @@ def render_nikki_list(
         
         @media (min-width: 701px) {
             .nikki-back-button {
-                left: 0;
+                left: 10px;
             }
         }
     </style>
