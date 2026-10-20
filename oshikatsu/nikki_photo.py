@@ -95,9 +95,17 @@ def render_nikki_photo_form(saved_photos=None):
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
+            
             const input = document.getElementById(
                 "nikki-photo-input"
             );
+
+            const picker = document.createElement("input");
+            picker.type = "file";
+            picker.accept = "image/*";
+            picker.multiple = true;
+            picker.hidden = true;
+            input.insertAdjacentElement("afterend", picker);
 
             const preview = document.getElementById(
                 "nikki-photo-preview"
@@ -215,8 +223,8 @@ def render_nikki_photo_form(saved_photos=None):
                             return;
                         }
 
-                        editingSavedIndex = index;
-                        editingIndex = null;
+                        editingIndex = index;
+                        editingSavedIndex = null;
                         input.click();
                     });
 
