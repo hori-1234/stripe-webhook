@@ -232,7 +232,7 @@ def render_nikki_list(
 
         .nikki-back-button {
             position: absolute;
-            left: 0;
+            left: 10px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
