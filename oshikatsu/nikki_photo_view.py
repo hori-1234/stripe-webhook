@@ -80,8 +80,10 @@ def render_nikki_photo_view(diary_id, user_id):
         .nikki-photo-lightbox-next {
             top: 50%;
             transform: translateY(-50%);
-            width: 44px;
-            height: 64px;
+            width: 60px;
+            height: 85px;
+            font-size: 42px;
+            background: rgba(0, 0, 0, 0.3);
         }
 
         .nikki-photo-lightbox-prev {
@@ -107,11 +109,45 @@ def render_nikki_photo_view(diary_id, user_id):
         @media (max-width: 600px) {
             .nikki-photo-lightbox-prev,
             .nikki-photo-lightbox-next {
-                width: 36px;
-                height: 56px;
-                font-size: 26px;
+                width: 50px;
+                height: 75px;
+                font-size: 36px;
             }
         }
+
+        
+        .nikki-photo-loading {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        .nikki-photo-loading.is-loading {
+            display: flex;
+        }
+
+        .nikki-photo-loading-spinner {
+            width: 52px;
+            height: 52px;
+            border: 6px solid rgba(255, 255, 255, 0.25);
+            border-top: 6px solid #ffffff;
+            border-radius: 50%;
+            animation: nikki-photo-loading-spin 0.8s linear infinite;
+        }
+
+        @keyframes nikki-photo-loading-spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
     </style>
 
     <div class="nikki-photo-view">
@@ -145,6 +181,10 @@ def render_nikki_photo_view(diary_id, user_id):
         <button type="button"
                 class="nikki-photo-lightbox-prev"
                 aria-label="前の写真">＜</button>
+
+        <div class="nikki-photo-loading">
+            <div class="nikki-photo-loading-spinner"></div>
+        </div>
 
         <img class="nikki-photo-lightbox-image" alt="拡大写真">
 
@@ -185,10 +225,34 @@ def render_nikki_photo_view(diary_id, user_id):
         let previousOverflow = "";
 
         function showImage(index) {
-            currentIndex = (index + images.length) % images.length;
+        
+        const loading = lightbox.querySelector(
+            ".nikki-photo-loading"
+        );
 
-            enlarged.src = images[currentIndex].src;
-            enlarged.alt = images[currentIndex].alt;
+        currentIndex = (index + images.length) % images.length;
+
+            const source = images[currentIndex];
+
+            enlarged.style.visibility = "hidden";
+            loading.classList.add("is-loading");
+
+            enlarged.onload = function () {
+                loading.classList.remove("is-loading");
+                enlarged.style.visibility = "visible";
+            };
+
+            enlarged.onerror = function () {
+                loading.classList.remove("is-loading");
+            };
+
+            enlarged.alt = source.alt;
+            enlarged.src = source.src;
+
+            if (enlarged.complete && enlarged.naturalWidth > 0) {
+                loading.classList.remove("is-loading");
+                enlarged.style.visibility = "visible";
+            }
 
             counter.textContent =
                 (currentIndex + 1) + " / " + images.length;
