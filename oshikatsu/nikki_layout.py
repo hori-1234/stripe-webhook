@@ -33,7 +33,7 @@ def render_nikki_layout(diary=None, mode="input"):
         ("イベント名", "event_name", event_name),
         ("場所", "place", place),
         ("出演者", "performers", performers),
-        ("日記", "diary_text", diary_text),
+        ("日記(本文)", "diary_text", diary_text),
     ]
 
     html = '<div class="nikki-common-layout">'
@@ -159,6 +159,10 @@ def render_nikki_layout(diary=None, mode="input"):
         .nikki-field textarea {
             min-height: 80px;
             resize: vertical;
+        }
+
+        .nikki-field textarea[name="diary_text"] {
+            min-height: 200px;
         }
 
         .nikki-value {
