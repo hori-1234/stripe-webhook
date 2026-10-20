@@ -1035,6 +1035,8 @@ def render_nikki_view(
         </a>
     </p>
 
+    </div>
+
     <div class="nikki-page-loading" id="nikki-page-loading">
 
         <div class="nikki-page-loading-spinner"></div>
