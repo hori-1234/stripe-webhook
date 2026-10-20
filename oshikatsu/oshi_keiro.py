@@ -113,7 +113,21 @@ def save_oshi_diary():
     finally:
         conn.close()
 
-    return f"推し活日記を保存しました（ID：{diary_id}）"
+    from flask import redirect, url_for
+
+    response = redirect(
+        url_for("oshikatsu.list_oshi_diaries")
+    )
+
+    response.set_cookie(
+        "oshi_save_success",
+        "1",
+        max_age=60,
+        httponly=True,
+        samesite="Lax"
+    )
+
+    return response
 
 
 @oshikatsu_bp.route("/view/<int:diary_id>", methods=["GET"])
