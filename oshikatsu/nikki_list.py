@@ -252,6 +252,12 @@ def render_nikki_list(
         .nikki-back-button:hover {
             background: #e5e5e5;
         }
+        
+        @media (min-width: 701px) {
+            .nikki-back-button {
+                left: 0;
+            }
+        }
     </style>
 </head>
 
