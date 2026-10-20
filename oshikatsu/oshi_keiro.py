@@ -361,6 +361,13 @@ def list_oshi_diaries():
     performer = request.args.get("performer", "").strip()
     keyword = request.args.get("keyword", "").strip()
 
+    try:
+        page = max(1, int(request.args.get("page", "1")))
+    except ValueError:
+        page = 1
+
+    per_page = 10
+
     conditions = ["d.user_id = %s"]
     params = [str(user_id)]
 
@@ -393,7 +400,16 @@ def list_oshi_diaries():
 
     try:
         with conn.cursor() as cur:
-            
+            cur.execute(f"""
+                SELECT COUNT(*)
+                FROM oshi_diaries AS d
+                WHERE {where_sql}
+            """, params)
+
+            total_count = cur.fetchone()[0]
+            total_pages = max(1, (total_count + per_page - 1) // per_page)
+            page = min(page, total_pages)
+
             cur.execute(f"""
                 SELECT
                     d.id,
@@ -410,7 +426,8 @@ def list_oshi_diaries():
                 FROM oshi_diaries AS d
                 WHERE {where_sql}
                 ORDER BY d.event_date DESC, d.id DESC
-            """, params)
+                LIMIT %s OFFSET %s
+            """, params + [per_page, (page - 1) * per_page])
 
             diaries = cur.fetchall()
 
@@ -422,5 +439,8 @@ def list_oshi_diaries():
         start_date=start_date,
         end_date=end_date,
         performer=performer,
-        keyword=keyword
+        keyword=keyword,
+        page=page,
+        total_pages=total_pages,
+        total_count=total_count
     )
