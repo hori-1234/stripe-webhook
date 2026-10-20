@@ -130,6 +130,17 @@ def render_nikki_layout(diary=None, mode="input"):
 
     html += """
     <style>
+        .nikki-performers {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px 12px;
+        }
+
+        .nikki-performer-name {
+            white-space: nowrap;
+            overflow-wrap: normal;
+        }
+    
         .nikki-common-layout {
             width: 100%;
             max-width: 700px;
