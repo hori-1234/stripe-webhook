@@ -236,9 +236,9 @@ def render_nikki_list(
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            min-width: 100px;
-            min-height: 48px;
-            padding: 10px 16px;
+            min-width: 70px;
+            min-height: 36px;
+            padding: 6px 12px;
             box-sizing: border-box;
             border: 1px solid #888;
             border-radius: 6px;
