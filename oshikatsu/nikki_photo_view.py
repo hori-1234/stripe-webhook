@@ -22,13 +22,26 @@ def render_nikki_photo_view(diary_id, user_id):
             gap: 10px;
             margin-top: 15px;
         }
-
+        
         .nikki-photo-view img {
             width: 150px;
             height: 150px;
             object-fit: cover;
-            border-radius: 6px;
+            border: 6px solid #fffdf8;
+            border-radius: 4px;
+            box-sizing: border-box;
+            background: #f2e8d9;
+            box-shadow: 0 3px 10px rgba(94, 72, 44, 0.18);
             cursor: pointer;
+        }
+
+        /* 写真の下の文字をアルバム風に */
+        .nikki-photo-view > div > div {
+            margin-top: 8px;
+            color: #725334;
+            font-size: 13px;
+            text-align: center;
+            font-weight: 500;
         }
 
         .nikki-photo-lightbox {
