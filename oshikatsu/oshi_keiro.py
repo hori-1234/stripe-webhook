@@ -123,7 +123,7 @@ def save_oshi_diary():
         "oshi_save_success",
         "1",
         max_age=60,
-        httponly=True,
+        httponly=False,
         samesite="Lax"
     )
 
