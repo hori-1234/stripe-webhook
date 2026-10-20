@@ -1,4 +1,4 @@
-from flask import render_template_string
+from flask import render_template_string, request
 from urllib.parse import urlencode
 
 
@@ -398,6 +398,14 @@ def render_nikki_list(
         {% endif %}
 
     </main>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            if (document.cookie.includes("oshi_save_success=1")) {
+                alert("推し活日記を保存しました");
+                document.cookie = "oshi_save_success=; path=/oshikatsu; max-age=0";
+            }
+        });
+    </script>
 </body>
 </html>
         
