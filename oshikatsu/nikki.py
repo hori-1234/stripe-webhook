@@ -17,6 +17,23 @@ def render_nikki_form(logged_in, csrf_token=""):
     <title>推し活日記</title>
 
     <style>
+
+        .nikki-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nikki-demo-label {
+            display: inline-block;
+            background: #000;
+            color: #fff;
+            font-size: 1em;
+            font-weight: bold;
+            padding: 3px 10px;
+            white-space: nowrap;
+        }
+    
         .login-button {
             display: inline-block;
             padding: 6px 12px;
@@ -30,13 +47,36 @@ def render_nikki_form(logged_in, csrf_token=""):
         .login-button:hover {
             background: #e5e5e5;
         }
+
+        .nikki-demo-button {
+            min-width: 150px;
+            min-height: 48px;
+            padding: 10px 24px;
+            font-size: 18px;
+            font-weight: bold;
+            border: 1px solid #888;
+            border-radius: 6px;
+            background: #f5f5f5;
+            color: #000;
+            cursor: pointer;
+        }
+
+        .nikki-demo-button:hover {
+            background: #e5e5e5;
+        }
     </style>
 </head>
 
 <body>
-    <h2>推し活日記</h2>
+    <h2 class="nikki-title">
+        推し活日記
+        {% if not logged_in %}
+            <span class="nikki-demo-label">デモ画面</span>
+        {% endif %}
+    </h2>
 
     {% if logged_in %}
+    
         <p>ログイン中</p>
     {% else %}
         <p>未ログイン：入力内容は保存できません。</p>
@@ -55,14 +95,18 @@ def render_nikki_form(logged_in, csrf_token=""):
         {% if logged_in %}
             <p><button type="submit">保存</button></p>
         {% else %}
-            <p><button type="button" id="demo-preview-button">プレビュー</button></p>
+            <p><button type="button" id="demo-preview-button" class="nikki-demo-button">プレビュー</button></p>
         {% endif %}
     </form>
 
     {% if not logged_in %}
+    
     <div id="demo-preview-screen" hidden>
-        <h2>推し活日記（プレビュー）</h2>
-
+        <h2 class="nikki-title">
+            推し活日記
+            <span class="nikki-demo-label">デモ画面</span>
+        </h2>
+        
         <div class="demo-preview-layout">
             <div class="demo-preview-date-place">
                 <div>
@@ -92,7 +136,7 @@ def render_nikki_form(logged_in, csrf_token=""):
             <div id="demo-preview-photos"></div>
         </div>
 
-        <p><button type="button" id="demo-preview-back">入力画面に戻る</button></p>
+        <p><button type="button" id="demo-preview-back" class="nikki-demo-button">編集画面</button></p>
     </div>
 
     <div class="demo-photo-lightbox" id="demo-photo-lightbox"
