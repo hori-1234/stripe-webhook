@@ -244,7 +244,7 @@ def render_nikki_list(
             border-radius: 6px;
             background: #f5f5f5;
             color: #000;
-            font-size: 18px;
+            font-size: 14px;
             font-weight: bold;
             text-decoration: none;
         }
