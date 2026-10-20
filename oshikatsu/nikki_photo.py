@@ -205,8 +205,18 @@ def render_nikki_photo_form(saved_photos=None):
                     box.appendChild(img);
 
                     box.addEventListener("click", function () {
-                        editingSavedIndex = index;
-                        editingIndex = null;
+                        const displayedPhotos = Array.from(
+                            preview.querySelectorAll(".nikki-photo-item")
+                        ).filter(function (item) {
+                            return item.querySelector("img") !== null;
+                        });
+
+                        if (displayedPhotos[0] !== item) {
+                            return;
+                        }
+
+                        editingIndex = index;
+                        editingSavedIndex = null;
                         input.click();
                     });
 
@@ -273,11 +283,21 @@ def render_nikki_photo_form(saved_photos=None):
                     box.appendChild(img);
 
                     box.addEventListener("click", function () {
-                        editingIndex = index;
-                        editingSavedIndex = null;
+                        const displayedPhotos = Array.from(
+                            preview.querySelectorAll(".nikki-photo-item")
+                        ).filter(function (item) {
+                            return item.querySelector("img") !== null;
+                        });
+
+                        if (displayedPhotos[0] !== item) {
+                            return;
+                        }
+
+                        editingSavedIndex = index;
+                        editingIndex = null;
                         input.click();
                     });
-
+                    
                     const remove = document.createElement("button");
                     remove.type = "button";
                     remove.className = "nikki-photo-remove";
