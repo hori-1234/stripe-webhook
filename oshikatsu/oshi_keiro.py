@@ -366,7 +366,66 @@ def list_oshi_diaries():
     from oshikatsu.nikki_list import render_nikki_list
 
     if not is_memo_logged_in():
-        return "ログインが必要です", 401
+        return """
+        <!DOCTYPE html>
+        <html lang="ja">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>ログイン確認</title>
+            <style>
+                body {
+                    margin: 0;
+                    min-height: 100vh;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: rgba(0, 0, 0, 0.35);
+                    font-family: sans-serif;
+                }
+
+                .login-dialog {
+                    width: 280px;
+                    max-width: calc(100% - 40px);
+                    padding: 25px;
+                    box-sizing: border-box;
+                    background: white;
+                    border-radius: 10px;
+                    text-align: center;
+                    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+                }
+
+                .login-dialog p {
+                    margin: 15px 0 25px;
+                }
+
+                .login-dialog-buttons {
+                    display: flex;
+                    justify-content: center;
+                    gap: 15px;
+                }
+
+                .login-dialog-buttons a {
+                    padding: 10px 25px;
+                    border: 1px solid #888;
+                    border-radius: 6px;
+                    background: #f5f5f5;
+                    color: #222;
+                    text-decoration: none;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="login-dialog">
+                <p>ログインが必要です</p>
+                <div class="login-dialog-buttons">
+                    <a href="/schedule/login">OK</a>
+                    <a href="/schedule">戻る</a>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
 
     user_id = session.get("memo_user_id")
 
