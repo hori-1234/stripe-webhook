@@ -60,18 +60,17 @@ def render_nikki_edit(diary, diary_id, csrf_token, saved_photos=None):
 
         {{ photo_form }}
 
-        <p>
+        <p style="display: flex; align-items: center; gap: 12px;">
             <button type="submit" class="nikki-demo-button">保存</button>
+
+            <a href="/oshikatsu/view/{{ diary_id }}"
+               class="nikki-demo-button"
+               style="display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; text-decoration: none;">
+                戻る
+            </a>
         </p>
     </form>
 
-    <p>
-        <a href="/oshikatsu/view/{{ diary_id }}"
-           class="nikki-demo-button"
-           style="display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; text-decoration: none;">
-            キャンセル
-        </a>
-    </p>
 </body>
 </html>
     """,
