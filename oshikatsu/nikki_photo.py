@@ -238,7 +238,21 @@ def render_nikki_photo_form(saved_photos=None):
                     preview.appendChild(item);
                 });
 
-                photos.forEach(function (file, index) {
+                photos
+                    .map(function (file, index) {
+                        return { file: file, index: index };
+                    })
+                    .sort(function (a, b) {
+                        const aPosition = Number.isInteger(a.file.oshiDisplayPosition)
+                            ? a.file.oshiDisplayPosition
+                            : Infinity;
+                        const bPosition = Number.isInteger(b.file.oshiDisplayPosition)
+                            ? b.file.oshiDisplayPosition
+                            : Infinity;
+
+                        return aPosition - bPosition;
+                    })
+                    .forEach(function ({ file, index }) {
 
                     const item = document.createElement("div");
                     item.className = "nikki-photo-item";
@@ -287,22 +301,44 @@ def render_nikki_photo_form(saved_photos=None):
                     item.appendChild(remove);
                     item.appendChild(label);
 
-                    if (Number.isInteger(file.oshiDisplayPosition)) {
-                        const position = file.oshiDisplayPosition;
+                    preview.appendChild(item);
 
-                        const target = preview.children[position];
+                });
 
-                        if (target) {
-                            preview.insertBefore(item, target);
-                        } else {
-                            preview.appendChild(item);
-                        }
-                    } else {
-                        preview.appendChild(item);
+                const positionedPhotos = Array.from(
+                    preview.querySelectorAll(".nikki-photo-item")
+                ).filter(function (item) {
+                    return item.dataset.newPhotoIndex !== undefined;
+                }).filter(function (item) {
+                    const index = Number(item.dataset.newPhotoIndex);
+                    return Number.isInteger(photos[index].oshiDisplayPosition);
+                }).sort(function (a, b) {
+                    const aIndex = Number(a.dataset.newPhotoIndex);
+                    const bIndex = Number(b.dataset.newPhotoIndex);
+
+                    return photos[aIndex].oshiDisplayPosition -
+                           photos[bIndex].oshiDisplayPosition;
+                });
+
+                positionedPhotos.forEach(function (item) {
+                    const index = Number(item.dataset.newPhotoIndex);
+                    const position = photos[index].oshiDisplayPosition;
+
+                    const items = Array.from(
+                        preview.querySelectorAll(".nikki-photo-item")
+                    ).filter(function (element) {
+                        return element.querySelector("img") !== null;
+                    });
+
+                    const target = items[position];
+
+                    if (target && target !== item) {
+                        preview.insertBefore(item, target);
                     }
                 });
 
                 if (savedPhotos.length + photos.length < 10) {
+
                     
                     const item = document.createElement("div");
                     item.className = "nikki-photo-item";
@@ -365,24 +401,47 @@ def render_nikki_photo_form(saved_photos=None):
 
                 if (editingSavedIndex !== null) {
                     if (valid.length > 0) {
+                    
                         const oldPhoto = savedPhotos[editingSavedIndex];
+
+                        const currentItems = Array.from(
+                            preview.querySelectorAll(".nikki-photo-item")
+                        ).filter(function (item) {
+                            return item.querySelector("img") !== null;
+                        });
+
+                        const displayPosition = currentItems.findIndex(
+                            function (item) {
+                                return item.dataset.photoId === String(oldPhoto.id);
+                            }
+                        );
 
                         removedPhotoIds.push(oldPhoto.id);
                         savedPhotos.splice(editingSavedIndex, 1);
 
                         const replacementFile = valid[0];
-                        replacementFile.oshiDisplayPosition = editingSavedIndex;
+                        replacementFile.oshiDisplayPosition = displayPosition;
 
                         photos.push(replacementFile);
                     }
 
                     editingSavedIndex = null;
+                
                 } else if (editingIndex !== null) {
                     if (valid.length > 0) {
-                        photos[editingIndex] = valid[0];
+                        const oldFile = photos[editingIndex];
+                        const replacementFile = valid[0];
+
+                        if (Number.isInteger(oldFile.oshiDisplayPosition)) {
+                            replacementFile.oshiDisplayPosition =
+                                oldFile.oshiDisplayPosition;
+                        }
+
+                        photos[editingIndex] = replacementFile;
                     }
 
                     editingIndex = null;
+                    
                 } else {
                     const remaining = Math.max(
                         0,
