@@ -145,10 +145,11 @@ def render_nikki_layout(diary=None, mode="input"):
             font-weight: bold;
             margin-bottom: 5px;
         }
-
+        
         .nikki-field input,
         .nikki-field textarea {
-            width: 100%;
+            width: 90%;
+            max-width: 100%;
             padding: 8px;
             box-sizing: border-box;
             border: 1px solid #aaa;
@@ -156,9 +157,18 @@ def render_nikki_layout(diary=None, mode="input"):
             font-size: 16px;
         }
 
+        .nikki-field input[type="date"] {
+            width: 170px;
+            max-width: 100%;
+        }
+
         .nikki-field textarea {
             min-height: 80px;
             resize: vertical;
+        }
+
+        .nikki-field textarea[name="diary_text"] {
+            min-height: 200px;
         }
 
         .nikki-field textarea[name="diary_text"] {
