@@ -225,16 +225,49 @@ def render_nikki_list(
             color: #fff;
             font-weight: bold;
         }
+        .nikki-back-area {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .nikki-back-button {
+            position: absolute;
+            left: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 100px;
+            min-height: 48px;
+            padding: 10px 16px;
+            box-sizing: border-box;
+            border: 1px solid #888;
+            border-radius: 6px;
+            background: #f5f5f5;
+            color: #000;
+            font-size: 18px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .nikki-back-button:hover {
+            background: #e5e5e5;
+        }
     </style>
 </head>
 
 <body>
     <main class="nikki-list-layout">
 
-        <h2>推し活日記全集</h2>
+        <div class="nikki-title-row">
+            <a href="/schedule" class="nikki-back-button">
+                戻る
+            </a>
+            <h2>推し活日記全集</h2>
+        </div>
 
         <details class="nikki-search"
                  {% if start_date or end_date or performer or keyword %}open{% endif %}>
+
             <summary>検索</summary>
 
             <form method="GET" action="/oshikatsu/list"
