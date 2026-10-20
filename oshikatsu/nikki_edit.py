@@ -197,6 +197,31 @@ def render_nikki_edit(diary, diary_id, csrf_token, saved_photos=None):
             </a>
         </p>
     </form>
+    
+    <div class="nikki-edit-loading" id="nikki-edit-loading">
+        <div class="nikki-edit-loading-spinner"></div>
+    </div>
+
+    <script>
+        const nikkiEditLoading = document.getElementById("nikki-edit-loading");
+
+        // 保存時にローディング表示
+        document.querySelector('form[action^="/oshikatsu/update/"]')
+            .addEventListener("submit", function () {
+                nikkiEditLoading.classList.add("is-loading");
+            });
+
+        // 戻るボタンを押した際にローディング表示
+        document.querySelector('a[href^="/oshikatsu/view/"]')
+            .addEventListener("click", function () {
+                nikkiEditLoading.classList.add("is-loading");
+            });
+
+        // ブラウザの戻る操作で復帰した場合は解除
+        window.addEventListener("pageshow", function () {
+            nikkiEditLoading.classList.remove("is-loading");
+        });
+    </script>
 
 </body>
 </html>
