@@ -133,13 +133,7 @@ def render_nikki_form(logged_in, csrf_token=""):
 
         textarea {
             line-height: 1.9;
-            background-image: repeating-linear-gradient(
-                to bottom,
-                transparent 0,
-                transparent calc(1.9em - 1px),
-                #e9dfcf calc(1.9em - 1px),
-                #e9dfcf 1.9em
-            );
+            background-image: none;
         }
 
         input:focus,
