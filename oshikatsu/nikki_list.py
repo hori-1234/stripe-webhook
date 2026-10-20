@@ -467,17 +467,16 @@ def render_nikki_list(
     </div>
 
     <script>
-        document.getElementById("nikki-save-form").addEventListener("submit", function() {
-            const loading = document.getElementById("nikki-loading");
-
-            loading.style.display = "flex";
-
-            const saveButton = this.querySelector('button[type="submit"]');
-
-            if (saveButton) {
-                saveButton.style.pointerEvents = "none";
-            }
+        document.querySelectorAll(".nikki-list-item").forEach(function (item) {
+            item.addEventListener("click", function () {
+                document.getElementById("nikki-loading").style.display = "flex";
+            });
         });
+
+        window.addEventListener("pageshow", function () {
+            document.getElementById("nikki-loading").style.display = "none";
+        });
+
     </script>
 </body>
 </html>
