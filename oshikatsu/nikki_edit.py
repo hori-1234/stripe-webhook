@@ -137,6 +137,35 @@ def render_nikki_edit(diary, diary_id, csrf_token, saved_photos=None):
                 font-size: 15px;
             }
         }
+
+        /* 保存・戻る操作時のローディング */
+        .nikki-edit-loading {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 100000;
+            background: rgba(0, 0, 0, 0.65);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nikki-edit-loading.is-loading {
+            display: flex;
+        }
+
+        .nikki-edit-loading-spinner {
+            width: 52px;
+            height: 52px;
+            border: 6px solid rgba(255, 255, 255, 0.25);
+            border-top: 6px solid #ffffff;
+            border-radius: 50%;
+            animation: nikki-edit-spin 0.8s linear infinite;
+        }
+
+        @keyframes nikki-edit-spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
     </style>
 
 </head>
