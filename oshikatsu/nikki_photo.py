@@ -260,6 +260,7 @@ def render_nikki_photo_form(saved_photos=None):
 
                     box.addEventListener("click", function () {
                         editingIndex = index;
+                        editingSavedIndex = null;
                         input.click();
                     });
 
