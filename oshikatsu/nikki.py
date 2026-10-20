@@ -78,7 +78,7 @@ def render_nikki_form(logged_in, csrf_token=""):
     <h2 class="nikki-title">
         推し活日記
         {% if not logged_in %}
-            <span class="nikki-demo-label">デモ画面</span>
+            <span class="nikki-demo-label" id="nikki-demo-label">デモ画面(編集)</span>
         {% endif %}
     </h2>
 
@@ -87,7 +87,7 @@ def render_nikki_form(logged_in, csrf_token=""):
         <p>ログイン中</p>
     {% else %}
         <p>未ログイン：入力内容は保存できません。</p>
-         <a href="/schedule/login" class="login-button">新規登録・ログイン</a>
+         <a href="/schedule/login" class="login-button" id="nikki-login-button">新規登録・ログイン</a>
     {% endif %}
 
     <form method="POST" action="/oshikatsu/save" enctype="multipart/form-data">
@@ -400,8 +400,10 @@ def render_nikki_form(logged_in, csrf_token=""):
             }
 
             const title = document.querySelector("body > h2");
+            const demoLabel = document.getElementById("nikki-demo-label");
             const loginNotice = form.previousElementSibling;
             const returnLink = document.getElementById("nikki-schedule-back");
+            const loginButton = document.getElementById("nikki-login-button");
 
             function getValue(name) {
                 const field = form.elements.namedItem(name);
@@ -462,8 +464,9 @@ def render_nikki_form(logged_in, csrf_token=""):
                 form.hidden = true;
                 previewScreen.hidden = false;
 
-                if (title) title.hidden = true;
+                if (demoLabel) demoLabel.textContent = "デモ画面(プレビュー)";
                 if (returnLink) returnLink.hidden = true;
+                if (loginButton) loginButton.hidden = true;
                 window.scrollTo(0, 0);
             });
 
@@ -471,8 +474,9 @@ def render_nikki_form(logged_in, csrf_token=""):
                 previewScreen.hidden = true;
                 form.hidden = false;
 
-                if (title) title.hidden = false;
+                if (demoLabel) demoLabel.textContent = "デモ画面(編集)";
                 if (returnLink) returnLink.hidden = false;
+                if (loginButton) loginButton.hidden = false;
                 window.scrollTo(0, 0);
             });
 
