@@ -244,10 +244,11 @@ def update_oshi_diary_route(diary_id):
             form=request.form,
             photos=request.files.getlist("photos")
         )
+
     except ValueError as e:
         return str(e), 400
 
-        from oshikatsu.oshi_photo_update import apply_oshi_photo_update
+    from oshikatsu.oshi_photo_update import apply_oshi_photo_update
 
     conn = psycopg2.connect(os.environ["DATABASE_URL"])
 
