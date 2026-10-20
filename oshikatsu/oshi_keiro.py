@@ -345,3 +345,74 @@ def update_oshi_diary_route(diary_id):
             diary_id=diary_id
         )
     )
+
+@oshikatsu_bp.route("/list", methods=["GET"])
+def list_oshi_diaries():
+    from flask import request
+    from oshikatsu.nikki_list import render_nikki_list
+
+    if not is_memo_logged_in():
+        return "ログインが必要です", 401
+
+    user_id = session.get("memo_user_id")
+
+    start_date = request.args.get("start_date", "").strip()
+    end_date = request.args.get("end_date", "").strip()
+    performer = request.args.get("performer", "").strip()
+    keyword = request.args.get("keyword", "").strip()
+
+    conditions = ["user_id = %s"]
+    params = [str(user_id)]
+
+    if start_date:
+        conditions.append("event_date >= %s")
+        params.append(start_date)
+
+    if end_date:
+        conditions.append("event_date <= %s")
+        params.append(end_date)
+
+    if performer:
+        conditions.append("performers ILIKE %s")
+        params.append(f"%{performer}%")
+
+    if keyword:
+        conditions.append("""
+            (
+                event_name ILIKE %s
+                OR place ILIKE %s
+                OR performers ILIKE %s
+                OR diary_text ILIKE %s
+            )
+        """)
+        params.extend([f"%{keyword}%"] * 4)
+
+    where_sql = " AND ".join(conditions)
+
+    conn = psycopg2.connect(os.environ["DATABASE_URL"])
+
+    try:
+        with conn.cursor() as cur:
+            cur.execute(f"""
+                SELECT
+                    id,
+                    event_date,
+                    event_name,
+                    performers
+                FROM oshi_diaries
+                WHERE {where_sql}
+                ORDER BY event_date DESC, id DESC
+            """, params)
+
+            diaries = cur.fetchall()
+
+    finally:
+        conn.close()
+
+    return render_nikki_list(
+        diaries=diaries,
+        start_date=start_date,
+        end_date=end_date,
+        performer=performer,
+        keyword=keyword
+    )
