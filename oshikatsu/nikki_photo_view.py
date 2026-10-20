@@ -243,9 +243,22 @@ def render_nikki_photo_view(diary_id, user_id):
 
         let currentIndex = 0;
         let previousOverflow = "";
+        let arrowHideTimer = null;
+
+        function showPhotoArrows() {
+            prevButton.classList.remove("is-hidden");
+            nextButton.classList.remove("is-hidden");
+
+            clearTimeout(arrowHideTimer);
+
+            arrowHideTimer = setTimeout(function () {
+                prevButton.classList.add("is-hidden");
+                nextButton.classList.add("is-hidden");
+            }, 3000);
+        }
 
         function showImage(index) {
-        
+                
         const loading = lightbox.querySelector(
             ".nikki-photo-loading"
         );
@@ -280,9 +293,12 @@ def render_nikki_photo_view(diary_id, user_id):
             const multiple = images.length > 1;
             prevButton.style.display = multiple ? "flex" : "none";
             nextButton.style.display = multiple ? "flex" : "none";
+
+            showPhotoArrows();
         }
 
         function openLightbox(index) {
+
             previousOverflow = document.body.style.overflow;
             document.body.style.overflow = "hidden";
             lightbox.classList.add("is-open");
@@ -290,6 +306,9 @@ def render_nikki_photo_view(diary_id, user_id):
         }
 
         function closeLightbox() {
+            clearTimeout(arrowHideTimer);
+            arrowHideTimer = null;
+
             lightbox.classList.remove("is-open");
             document.body.style.overflow = previousOverflow;
             enlarged.removeAttribute("src");
@@ -302,6 +321,10 @@ def render_nikki_photo_view(diary_id, user_id):
         });
 
         closeButton.addEventListener("click", closeLightbox);
+
+        enlarged.addEventListener("click", function () {
+            showPhotoArrows();
+        });
 
         prevButton.addEventListener("click", function () {
             showImage(currentIndex - 1);
