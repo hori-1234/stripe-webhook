@@ -417,7 +417,7 @@ def list_oshi_diaries():
         </head>
         <body>
             <div class="login-dialog">
-                <p>ログインが必要です</p>
+                <p>新規登録・ログインが必要です</p>
                 <div class="login-dialog-buttons">
                     <a href="/schedule/login">OK</a>
                     <a href="/schedule">戻る</a>
