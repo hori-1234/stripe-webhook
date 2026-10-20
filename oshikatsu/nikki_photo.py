@@ -49,15 +49,16 @@ def render_nikki_photo_form(saved_photos=None):
         .nikki-photo-box {
             width: 100%;
             aspect-ratio: 1;
-            border: 2px dashed #aaa;
-            border-radius: 8px;
+            border: 6px solid #fffdf8;
+            border-radius: 4px;
             box-sizing: border-box;
-            background: #f8f8f8;
+            background: #f2e8d9;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             overflow: hidden;
+            box-shadow: 0 3px 10px rgba(94, 72, 44, 0.18);
         }
 
         .nikki-photo-box img {
