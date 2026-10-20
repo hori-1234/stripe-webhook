@@ -809,8 +809,8 @@ def render_nikki_view(
     </p>
     
     <p>
-        <a href="/schedule" class="nikki-action-button">
-            イベスケに戻る
+        <a href="/oshikatsu/list" class="nikki-action-button">
+            日記全集
         </a>
     </p>
 
