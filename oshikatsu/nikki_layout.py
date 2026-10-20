@@ -1,3 +1,4 @@
+
 from markupsafe import Markup, escape
 
 
@@ -17,9 +18,7 @@ def render_nikki_layout(diary=None, mode="input"):
     if diary is None:
         diary = ("", "", "", "", "")
 
-    event_date, event_name, place, performers, diary_text = (
-        diary
-    )
+    event_date, event_name, place, performers, diary_text = diary
 
     def safe(value):
         return escape(
@@ -39,62 +38,93 @@ def render_nikki_layout(diary=None, mode="input"):
 
     html = '<div class="nikki-common-layout">'
 
-    for label, name, value in fields:
-        html += '<div class="nikki-field">'
+    if mode == "view":
 
-    if not (mode == "view" and name == "diary_text"):
-        html += f'<label>{label}</label>'
+        # 日付と場所を横並びに表示
+        html += """
+        <div class="nikki-view-date-place">
+        """
 
-        if mode == "view":
+        html += (
+            '<div class="nikki-field">'
+            '<label>日付</label>'
+            f'<div class="nikki-value">{safe(event_date)}</div>'
+            '</div>'
+        )
 
-            if name == "diary_text":
-                html += """
-                <details class="nikki-diary-first">
-                    <summary aria-label="詳細を開く"></summary>
+        html += (
+            '<div class="nikki-field">'
+            '<label>場所</label>'
+            f'<div class="nikki-value">{safe(place)}</div>'
+            '</div>'
+        )
 
-                    <details class="nikki-diary-second">
-                        <summary>日記内容</summary>
-                """
+        html += '</div>'
 
+        # イベント名
+        html += (
+            '<div class="nikki-field">'
+            '<label>イベント名</label>'
+            f'<div class="nikki-value">{safe(event_name)}</div>'
+            '</div>'
+        )
+
+        # 出演者
+        html += (
+            '<div class="nikki-field">'
+            '<label>出演者</label>'
+            f'<div class="nikki-value">{safe(performers)}</div>'
+            '</div>'
+        )
+
+        # 日記本文の2段階トグル
+        html += """
+        <details class="nikki-diary-first">
+            <summary aria-label="詳細を開く"></summary>
+
+            <details class="nikki-diary-second">
+                <summary>日記内容</summary>
+        """
+
+        html += (
+            '<div class="nikki-value">'
+            f'{safe(diary_text)}'
+            '</div>'
+        )
+
+        html += """
+            </details>
+        </details>
+        """
+
+    else:
+
+        # 新規登録・編集画面は従来どおり
+        for label, name, value in fields:
+
+            html += '<div class="nikki-field">'
+            html += f'<label>{label}</label>'
+
+            if name == "event_date":
                 html += (
-                    '<div class="nikki-value">'
-                    f'{safe(value)}'
-                    '</div>'
+                    f'<input type="date" name="{name}" '
+                    f'value="{safe(value)}" required>'
                 )
 
-                html += """
-                    </details>
-                </details>
-                """
+            elif name in ("performers", "diary_text"):
+                html += (
+                    f'<textarea name="{name}">'
+                    f'{safe(value)}'
+                    '</textarea>'
+                )
 
             else:
                 html += (
-                    '<div class="nikki-value">'
-                    f'{safe(value)}'
-                    '</div>'
+                    f'<input type="text" name="{name}" '
+                    f'value="{safe(value)}">'
                 )
-        
 
-        elif name == "event_date":
-            html += (
-                f'<input type="date" name="{name}" '
-                f'value="{safe(value)}" required>'
-            )
-
-        elif name in ("performers", "diary_text"):
-            html += (
-                f'<textarea name="{name}">'
-                f'{safe(value)}'
-                '</textarea>'
-            )
-
-        else:
-            html += (
-                f'<input type="text" name="{name}" '
-                f'value="{safe(value)}">'
-            )
-
-        html += '</div>'
+            html += '</div>'
 
     html += '</div>'
 
@@ -107,6 +137,7 @@ def render_nikki_layout(diary=None, mode="input"):
 
         .nikki-field {
             margin-bottom: 16px;
+            min-width: 0;
         }
 
         .nikki-field label {
@@ -135,11 +166,20 @@ def render_nikki_layout(diary=None, mode="input"):
             border: 1px solid #ddd;
             border-radius: 5px;
             background: #f8f8f8;
+            color: #222;
             white-space: pre-wrap;
             overflow-wrap: anywhere;
         }
 
-                .nikki-diary-first > summary {
+        /* 日付と場所を横並び */
+        .nikki-view-date-place {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        /* 1段階目 */
+        .nikki-diary-first > summary {
             cursor: pointer;
             list-style: none;
             text-align: center;
@@ -160,6 +200,7 @@ def render_nikki_layout(diary=None, mode="input"):
             content: "▲";
         }
 
+        /* 2段階目 */
         .nikki-diary-second {
             margin-top: 10px;
         }
