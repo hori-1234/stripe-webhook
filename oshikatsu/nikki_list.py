@@ -227,19 +227,37 @@ def render_nikki_list(
         }
 
         .site-header {
-            background: #222;
+            margin: -16px -16px 30px;
+            background: linear-gradient(to top, #0879d7, #39b9eb);
             color: #fff;
-            padding: 12px 16px;
-            margin-bottom: 20px;
-            text-align: center;
+            padding: 18px 12px;
+            box-sizing: border-box;
         }
 
         .site-header-nav {
             display: flex;
-            align-items: center;
             justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
             gap: 12px;
+            font-size: 14px;
+            font-weight: bold;
         }
+
+        @media (max-width: 700px) {
+            .site-header {
+                padding: 14px 8px;
+                margin-bottom: 25px;
+            }
+
+            .site-header-nav {
+                flex-wrap: nowrap;
+                gap: 8px;
+                font-size: 12px;
+                white-space: nowrap;
+            }
+        }
+
         
         .nikki-title-row {
             position: relative;
