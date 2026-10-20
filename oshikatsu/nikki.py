@@ -13,8 +13,26 @@ def render_nikki_form(logged_in, csrf_token=""):
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>推し活日記</title>
+
+    <style>
+        .login-button {
+            display: inline-block;
+            padding: 6px 12px;
+            border: 1px solid #888;
+            background: #f5f5f5;
+            color: #000;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .login-button:hover {
+            background: #e5e5e5;
+        }
+    </style>
 </head>
+
 <body>
     <h2>推し活日記</h2>
 
@@ -22,7 +40,7 @@ def render_nikki_form(logged_in, csrf_token=""):
         <p>ログイン中</p>
     {% else %}
         <p>未ログイン：入力内容は保存できません。</p>
-        <a href="/schedule/login">ログイン</a>
+         <a href="/schedule/login" class="login-button">新規登録・ログイン</a>
     {% endif %}
 
     <form method="POST" action="/oshikatsu/save" enctype="multipart/form-data">
