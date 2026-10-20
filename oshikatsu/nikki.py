@@ -109,12 +109,8 @@ def render_nikki_form(logged_in, csrf_token=""):
     {% if not logged_in %}
     
     <div id="demo-preview-screen" hidden>
-        <h2 class="nikki-title">
-            推し活日記
-            <span class="nikki-demo-label">デモ画面</span>
-        </h2>
-        
         <div class="demo-preview-layout">
+
             <div class="demo-preview-date-place">
                 <div>
                     <strong>日付</strong>
@@ -133,12 +129,23 @@ def render_nikki_form(logged_in, csrf_token=""):
             <div class="demo-preview-value" id="demo-performers"></div>
 
             <details class="demo-diary-first">
-                <summary aria-label="日記を表示"></summary>
-                <details class="demo-diary-second">
-                    <summary>日記内容</summary>
-                    <div class="demo-preview-value" id="demo-diary-text"></div>
-                </details>
-            </details>
+    <summary aria-label="日記を表示">
+        <span class="demo-diary-first-guide">
+            ※日記は折りたたんで表示できます
+        </span>
+    </summary>
+
+    <details class="demo-diary-second">
+        <summary>
+            日記内容
+            <span class="demo-diary-second-guide">
+                ※タップすると本文を表示
+            </span>
+        </summary>
+
+        <div class="demo-preview-value" id="demo-diary-text"></div>
+    </details>
+</details>
 
             <div id="demo-preview-photos"></div>
         </div>
@@ -230,6 +237,24 @@ def render_nikki_form(logged_in, csrf_token=""):
             padding: 10px;
         }
 
+        .demo-diary-first-guide,
+        .demo-diary-second-guide {
+            font-size: 12px;
+            font-weight: normal;
+            color: #777;
+            margin-left: 8px;
+        }
+
+        /* 1段階開いたら、最初の説明を非表示 */
+        .demo-diary-first[open] > summary .demo-diary-first-guide {
+            display: none;
+        }
+
+        /* 本文を開いたら、2段階目の説明を非表示 */
+        .demo-diary-second[open] > summary .demo-diary-second-guide {
+            display: none;
+        }
+        
         #demo-preview-photos {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
