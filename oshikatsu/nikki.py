@@ -105,7 +105,7 @@ def render_nikki_form(logged_in, csrf_token=""):
         {{ photo_form }}
 
         {% if logged_in %}
-            <p><button type="submit">保存</button></p>
+            <p><button type="submit" class="nikki-demo-button">保存</button></p>
         {% else %}
             <p><button type="button" id="demo-preview-button" class="nikki-demo-button">プレビュー</button></p>
         {% endif %}
