@@ -95,7 +95,7 @@ def render_nikki_form(logged_in, csrf_token=""):
         <a href="/schedule/login" class="login-button" id="nikki-login-button">新規登録・ログイン</a>
     {% endif %}
 
-    <form method="POST" action="/oshikatsu/save" enctype="multipart/form-data">
+    <form method="POST" action="/oshikatsu/save" enctype="multipart/form-data" id="nikki-save-form">
         {% if logged_in %}
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
         {% endif %}
