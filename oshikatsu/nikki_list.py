@@ -1,5 +1,5 @@
-
 from flask import render_template_string
+from urllib.parse import urlencode
 
 
 def render_nikki_list(
@@ -7,8 +7,12 @@ def render_nikki_list(
     start_date="",
     end_date="",
     performer="",
-    keyword=""
+    keyword="",
+    page=1,
+    total_pages=1,
+    total_count=0
 ):
+
     return render_template_string("""
 <!DOCTYPE html>
 <html lang="ja">
@@ -191,6 +195,36 @@ def render_nikki_list(
                 gap: 4px;
             }
         }
+
+        .nikki-pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 24px 0;
+        }
+
+        .nikki-pagination a,
+        .nikki-pagination .current-page {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            min-height: 40px;
+            padding: 6px 10px;
+            box-sizing: border-box;
+            border: 1px solid #888;
+            border-radius: 5px;
+            color: #222;
+            text-decoration: none;
+        }
+
+        .nikki-pagination .current-page {
+            background: #222;
+            color: #fff;
+            font-weight: bold;
+        }
     </style>
 </head>
 
@@ -242,7 +276,7 @@ def render_nikki_list(
         </details>
 
         <div class="nikki-list-heading">
-            登録した日記（{{ diaries|length }}件）
+            登録した日記（{{ total_count }}件）
         </div>
 
         {% for diary in diaries %}
@@ -292,9 +326,32 @@ def render_nikki_list(
 
         {% endfor %}
 
+        {% if total_pages > 1 %}
+            <nav class="nikki-pagination" aria-label="ページ切り替え">
+
+                {% if page > 1 %}
+                    <a href="{{ page_url }}{{ page - 1 }}">前へ</a>
+                {% endif %}
+
+                {% for p in range(1, total_pages + 1) %}
+                    {% if p == page %}
+                        <span class="current-page">{{ p }}</span>
+                    {% else %}
+                        <a href="{{ page_url }}{{ p }}">{{ p }}</a>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page < total_pages %}
+                    <a href="{{ page_url }}{{ page + 1 }}">次へ</a>
+                {% endif %}
+
+            </nav>
+        {% endif %}
+
     </main>
 </body>
 </html>
+        
     """,
         diaries=[
             {
@@ -309,5 +366,18 @@ def render_nikki_list(
         start_date=start_date,
         end_date=end_date,
         performer=performer,
-        keyword=keyword
+        keyword=keyword,
+        page=page,
+        total_pages=total_pages,
+        total_count=total_count,
+        page_url=(
+            "/oshikatsu/list?"
+            + urlencode({
+                "start_date": start_date,
+                "end_date": end_date,
+                "performer": performer,
+                "keyword": keyword
+            })
+            + "&page="
+        )
     )
