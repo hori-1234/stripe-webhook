@@ -83,7 +83,7 @@ def render_nikki_layout(diary=None, mode="input"):
             <summary aria-label="詳細を開く"></summary>
 
             <details class="nikki-diary-second">
-                <summary>日記内容</summary>
+                <summary>日記(本文)</summary>
         """
 
         html += (
