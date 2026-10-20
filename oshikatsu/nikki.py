@@ -621,7 +621,31 @@ def render_nikki_view(
             background: rgba(128, 128, 128, 0.3);
         }
 
-                .nikki-page-loading {
+        .nikki-action-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            min-width: 150px;
+            min-height: 48px;
+            padding: 10px 24px;
+            font-size: 18px;
+            font-weight: bold;
+            border: 1px solid #888;
+            border-radius: 6px;
+            background: #f5f5f5;
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .nikki-action-button:hover {
+            background: #e5e5e5;
+        }
+
+
+
+        .nikki-page-loading {
             display: none;
             position: fixed;
             inset: 0;
@@ -676,11 +700,17 @@ def render_nikki_view(
 
     {{ photo_view }}
 
-    <p>
-        <a href="/oshikatsu/edit/{{ diary_id }}">編集</a>
+     <p>
+        <a href="/oshikatsu/edit/{{ diary_id }}" class="nikki-action-button">
+            編集
+        </a>
     </p>
     
-    <p><a href="/schedule">イベスケへ戻る</a></p>
+    <p>
+        <a href="/schedule" class="nikki-action-button">
+            イベスケに戻る
+        </a>
+    </p>
 
     <div class="nikki-page-loading" id="nikki-page-loading">
         <div class="nikki-page-loading-spinner"></div>
