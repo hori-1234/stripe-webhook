@@ -268,6 +268,41 @@ def render_nikki_list(
                 left: 10px;
             }
         }
+
+                .nikki-loading {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(0, 0, 0, 0.45);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nikki-loading-box {
+            background: #fff;
+            padding: 30px 45px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .nikki-spinner {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 20px;
+            border: 5px solid #ddd;
+            border-top-color: #1689dc;
+            border-radius: 50%;
+            animation: nikki-spin 0.8s linear infinite;
+        }
+
+        @keyframes nikki-spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 </head>
 
@@ -403,6 +438,27 @@ def render_nikki_list(
             if (document.cookie.includes("oshi_save_success=1")) {
                 alert("推し活日記を保存しました");
                 document.cookie = "oshi_save_success=; path=/oshikatsu; max-age=0";
+            }
+        });
+    </script>
+    
+    <div id="nikki-loading" class="nikki-loading">
+        <div class="nikki-loading-box">
+            <div class="nikki-spinner"></div>
+            保存中です…
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("nikki-save-form").addEventListener("submit", function() {
+            const loading = document.getElementById("nikki-loading");
+
+            loading.style.display = "flex";
+
+            const saveButton = this.querySelector('button[type="submit"]');
+
+            if (saveButton) {
+                saveButton.style.pointerEvents = "none";
             }
         });
     </script>
