@@ -55,6 +55,10 @@ def render_nikki_form(logged_in, csrf_token=""):
             background: #e5e5e5;
         }
 
+        .login-button[hidden] {
+            display: none;
+        }
+
         .nikki-demo-button {
             min-width: 150px;
             min-height: 48px;
@@ -148,6 +152,10 @@ def render_nikki_form(logged_in, csrf_token=""):
 </details>
 
             <div id="demo-preview-photos"></div>
+
+            <p class="demo-photo-guide">
+                ※タップすると画像が拡大します
+            </p>
         </div>
 
         <p><button type="button" id="demo-preview-back" class="nikki-demo-button">編集画面</button></p>
@@ -265,12 +273,18 @@ def render_nikki_form(logged_in, csrf_token=""):
         .demo-diary-second[open] > summary .demo-diary-second-guide {
             display: none;
         }
-        
+
         #demo-preview-photos {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
             gap: 12px;
             margin-top: 20px;
+        }
+
+        .demo-photo-guide {
+            font-size: 12px;
+            color: #777;
+            margin-top: 8px;
         }
 
         .demo-preview-photo img {
