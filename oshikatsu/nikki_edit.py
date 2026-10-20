@@ -23,6 +23,24 @@ def render_nikki_edit(diary, diary_id, csrf_token, saved_photos=None):
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
     <title>推し活日記 - 編集</title>
+    <style>
+        .nikki-demo-button {
+            min-width: 150px;
+            min-height: 48px;
+            padding: 10px 24px;
+            font-size: 18px;
+            font-weight: bold;
+            border: 1px solid #888;
+            border-radius: 6px;
+            background: #f5f5f5;
+            color: #000;
+            cursor: pointer;
+        }
+
+        .nikki-demo-button:hover {
+            background: #e5e5e5;
+        }
+    </style>
 </head>
 <body>
     <h2>推し活日記 - 編集</h2>
@@ -43,7 +61,7 @@ def render_nikki_edit(diary, diary_id, csrf_token, saved_photos=None):
         {{ photo_form }}
 
         <p>
-            <button type="submit">変更を保存</button>
+            <button type="submit" class="nikki-demo-button">保存</button>
         </p>
     </form>
 
