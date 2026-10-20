@@ -317,6 +317,7 @@ def render_nikki_photo_form(saved_photos=None):
 
                     add.addEventListener("click", function () {
                         editingIndex = null;
+                        editingSavedIndex = null;
                         input.click();
                     });
 
