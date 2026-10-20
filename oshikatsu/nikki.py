@@ -137,7 +137,7 @@ def render_nikki_form(logged_in, csrf_token=""):
 
     <details class="demo-diary-second">
         <summary>
-            日記内容
+            日記(本文)
             <span class="demo-diary-second-guide">
                 ※タップすると本文を表示
             </span>
