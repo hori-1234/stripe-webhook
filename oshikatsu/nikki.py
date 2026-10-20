@@ -17,6 +17,13 @@ def render_nikki_form(logged_in, csrf_token=""):
     <title>推し活日記</title>
 
     <style>
+        .nikki-back-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            text-decoration: none;
+        }
 
         .nikki-title {
             display: flex;
@@ -547,7 +554,12 @@ def render_nikki_form(logged_in, csrf_token=""):
     </script>
     {% endif %}
     
-    <p><a href="/schedule">イベスケに戻る</a></p>
+    <p>
+        <a href="/schedule" class="nikki-demo-button nikki-back-button">
+            イベスケに戻る
+        </a>
+    </p>
+    
 </body>
 </html>
     """, logged_in=logged_in, csrf_token=csrf_token, photo_form=photo_form, diary_layout=diary_layout)
