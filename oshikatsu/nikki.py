@@ -1037,7 +1037,7 @@ def render_nikki_view(
     </div>
 
     <script>
-        document.querySelectorAll(".nikki-move-button").forEach(function (button) {
+        document.querySelectorAll(".nikki-move-button, .nikki-action-button").forEach(function (button) {
             button.addEventListener("click", function () {
                 document.getElementById("nikki-page-loading")
                     .classList.add("is-loading");
