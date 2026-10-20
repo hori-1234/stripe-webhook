@@ -41,14 +41,39 @@ def render_nikki_layout(diary=None, mode="input"):
 
     for label, name, value in fields:
         html += '<div class="nikki-field">'
+
+    if not (mode == "view" and name == "diary_text"):
         html += f'<label>{label}</label>'
 
         if mode == "view":
-            html += (
-                '<div class="nikki-value">'
-                f'{safe(value)}'
-                '</div>'
-            )
+
+            if name == "diary_text":
+                html += """
+                <details class="nikki-diary-first">
+                    <summary aria-label="詳細を開く"></summary>
+
+                    <details class="nikki-diary-second">
+                        <summary>日記内容</summary>
+                """
+
+                html += (
+                    '<div class="nikki-value">'
+                    f'{safe(value)}'
+                    '</div>'
+                )
+
+                html += """
+                    </details>
+                </details>
+                """
+
+            else:
+                html += (
+                    '<div class="nikki-value">'
+                    f'{safe(value)}'
+                    '</div>'
+                )
+        
 
         elif name == "event_date":
             html += (
@@ -112,6 +137,41 @@ def render_nikki_layout(diary=None, mode="input"):
             background: #f8f8f8;
             white-space: pre-wrap;
             overflow-wrap: anywhere;
+        }
+
+                .nikki-diary-first > summary {
+            cursor: pointer;
+            list-style: none;
+            text-align: center;
+            padding: 10px;
+            font-size: 20px;
+            user-select: none;
+        }
+
+        .nikki-diary-first > summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .nikki-diary-first > summary::after {
+            content: "▼";
+        }
+
+        .nikki-diary-first[open] > summary::after {
+            content: "▲";
+        }
+
+        .nikki-diary-second {
+            margin-top: 10px;
+        }
+
+        .nikki-diary-second > summary {
+            cursor: pointer;
+            padding: 10px;
+            font-weight: bold;
+        }
+
+        .nikki-diary-second .nikki-value {
+            margin-top: 10px;
         }
     </style>
     """
