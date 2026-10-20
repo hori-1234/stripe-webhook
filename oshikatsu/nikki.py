@@ -335,6 +335,15 @@ def render_nikki_form(logged_in, csrf_token=""):
             display: none;
         }
 
+        .demo-photo-arrow.is-hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .demo-photo-arrow {
+            transition: opacity 0.3s ease;
+        }
+
         .demo-photo-counter {
             position: absolute;
             bottom: 20px;
@@ -392,7 +401,7 @@ def render_nikki_form(logged_in, csrf_token=""):
 
             const title = document.querySelector("body > h2");
             const loginNotice = form.previousElementSibling;
-            const returnLink = document.querySelector('a[href="/schedule"]');
+            const returnLink = document.getElementById("nikki-schedule-back");
 
             function getValue(name) {
                 const field = form.elements.namedItem(name);
@@ -454,6 +463,7 @@ def render_nikki_form(logged_in, csrf_token=""):
                 previewScreen.hidden = false;
 
                 if (title) title.hidden = true;
+                if (returnLink) returnLink.hidden = true;
                 window.scrollTo(0, 0);
             });
 
@@ -462,6 +472,7 @@ def render_nikki_form(logged_in, csrf_token=""):
                 form.hidden = false;
 
                 if (title) title.hidden = false;
+                if (returnLink) returnLink.hidden = false;
                 window.scrollTo(0, 0);
             });
 
@@ -476,8 +487,22 @@ def render_nikki_form(logged_in, csrf_token=""):
 
             let currentPhotoIndex = 0;
             let previewPhotoUrls = [];
+            let arrowHideTimer = null;
+
+            function showPhotoArrows() {
+                prevButton.classList.remove("is-hidden");
+                nextButton.classList.remove("is-hidden");
+
+                clearTimeout(arrowHideTimer);
+
+                arrowHideTimer = setTimeout(function () {
+                    prevButton.classList.add("is-hidden");
+                    nextButton.classList.add("is-hidden");
+                }, 3000);
+            }
 
             enlarged.addEventListener("load", function () {
+            
                 photoLoading.classList.remove("is-loading");
                 enlarged.style.visibility = "visible";
             });
@@ -511,9 +536,12 @@ def render_nikki_form(logged_in, csrf_token=""):
 
                 prevButton.disabled = index === 0;
                 nextButton.disabled = index === previewPhotoUrls.length - 1;
+
+                showPhotoArrows();
             }
 
             function closeDemoPhoto() {
+                clearTimeout(arrowHideTimer);
                 lightbox.classList.remove("is-open");
                 enlarged.removeAttribute("src");
                 document.body.style.overflow = "";
@@ -548,7 +576,12 @@ def render_nikki_form(logged_in, csrf_token=""):
 
             closeButton.addEventListener("click", closeDemoPhoto);
 
+            enlarged.addEventListener("click", function () {
+                showPhotoArrows();
+            });
+
             prevButton.addEventListener("click", function () {
+            
                 showDemoPhoto(currentPhotoIndex - 1);
             });
 
@@ -579,12 +612,12 @@ def render_nikki_form(logged_in, csrf_token=""):
     </script>
     {% endif %}
     
-    <p>
+    <p id="nikki-schedule-back">
         <a href="/schedule" class="nikki-demo-button nikki-back-button">
             イベスケに戻る
         </a>
     </p>
-    
+
 </body>
 </html>
     """, logged_in=logged_in, csrf_token=csrf_token, photo_form=photo_form, diary_layout=diary_layout)
