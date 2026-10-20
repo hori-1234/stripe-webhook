@@ -45,7 +45,13 @@ def render_nikki_form(logged_in, csrf_token=""):
     """, logged_in=logged_in, csrf_token=csrf_token, photo_form=photo_form, diary_layout=diary_layout)
 
 
-def render_nikki_view(diary, photo_view="", diary_id=None):
+def render_nikki_view(
+    diary,
+    photo_view="",
+    diary_id=None,
+    prev_diary_id=None,
+    next_diary_id=None
+):    
     diary_layout = render_nikki_layout(
         diary=diary,
         mode="view"
@@ -58,9 +64,65 @@ def render_nikki_view(diary, photo_view="", diary_id=None):
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>推し活日記 - 閲覧</title>
+
+    <style>
+        .nikki-view-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 700px;
+            gap: 12px;
+        }
+
+        .nikki-view-header h2 {
+            margin: 16px 0;
+            text-align: center;
+        }
+
+        .nikki-move-button,
+        .nikki-move-empty {
+            width: 50px;
+            height: 60px;
+            flex-shrink: 0;
+        }
+
+        .nikki-move-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            color: #222;
+            background: rgba(128, 128, 128, 0.15);
+            border-radius: 6px;
+            text-decoration: none;
+        }
+
+        .nikki-move-button:hover {
+            background: rgba(128, 128, 128, 0.3);
+        }
+    </style>
 </head>
+
 <body>
-    <h2>推し活日記</h2>
+    <div class="nikki-view-header">
+        {% if prev_diary_id is not none %}
+            <a href="/oshikatsu/view/{{ prev_diary_id }}"
+               class="nikki-move-button"
+               aria-label="前の日記">＜</a>
+        {% else %}
+            <span class="nikki-move-empty"></span>
+        {% endif %}
+
+        <h2>推し活日記</h2>
+
+        {% if next_diary_id is not none %}
+            <a href="/oshikatsu/view/{{ next_diary_id }}"
+               class="nikki-move-button"
+               aria-label="次の日記">＞</a>
+        {% else %}
+            <span class="nikki-move-empty"></span>
+        {% endif %}
+    </div>
 
     {{ diary_layout }}
 
@@ -70,11 +132,13 @@ def render_nikki_view(diary, photo_view="", diary_id=None):
         <a href="/oshikatsu/edit/{{ diary_id }}">編集</a>
     </p>
 
-    <p><a href="/oshikatsu/">戻る</a></p>
+    <p><a href="/schedule">イベスケへ戻る</a></p>
 </body>
 </html>
     """,
         diary_layout=diary_layout,
         photo_view=photo_view,
-        diary_id=diary_id
+        diary_id=diary_id,
+        prev_diary_id=prev_diary_id,
+        next_diary_id=next_diary_id                          
     )
