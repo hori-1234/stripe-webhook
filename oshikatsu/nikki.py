@@ -100,6 +100,34 @@ def render_nikki_view(
         .nikki-move-button:hover {
             background: rgba(128, 128, 128, 0.3);
         }
+
+                .nikki-page-loading {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 100000;
+            background: rgba(0, 0, 0, 0.65);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nikki-page-loading.is-loading {
+            display: flex;
+        }
+
+        .nikki-page-loading-spinner {
+            width: 52px;
+            height: 52px;
+            border: 6px solid rgba(255, 255, 255, 0.25);
+            border-top: 6px solid #ffffff;
+            border-radius: 50%;
+            animation: nikki-page-spin 0.8s linear infinite;
+        }
+
+        @keyframes nikki-page-spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 
@@ -131,8 +159,26 @@ def render_nikki_view(
     <p>
         <a href="/oshikatsu/edit/{{ diary_id }}">編集</a>
     </p>
-
+    
     <p><a href="/schedule">イベスケへ戻る</a></p>
+
+    <div class="nikki-page-loading" id="nikki-page-loading">
+        <div class="nikki-page-loading-spinner"></div>
+    </div>
+
+    <script>
+        document.querySelectorAll(".nikki-move-button").forEach(function (button) {
+            button.addEventListener("click", function () {
+                document.getElementById("nikki-page-loading")
+                    .classList.add("is-loading");
+            });
+        });
+
+        window.addEventListener("pageshow", function () {
+            document.getElementById("nikki-page-loading")
+                .classList.remove("is-loading");
+        });
+    </script>
 </body>
 </html>
     """,
