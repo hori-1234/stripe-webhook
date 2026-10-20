@@ -25,8 +25,8 @@ def render_nikki_list(
         body {
             margin: 0;
             padding: 16px;
-            background: #fff;
-            color: #222;
+            background: #eaf5fc;
+            color: #23465e;
             font-family: sans-serif;
         }
 
@@ -43,14 +43,18 @@ def render_nikki_list(
 
         .nikki-search {
             margin-bottom: 24px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
+            border: 1px solid #c5dfed;
+            border-radius: 12px;
+            background: #ffffff;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(35, 100, 145, 0.08);
         }
 
         .nikki-search > summary {
-            padding: 14px;
+            padding: 14px 16px;
             font-weight: bold;
-            background: #f5f5f5;
+            background: #dff1fc;
+            color: #23465e;
             cursor: pointer;
         }
 
@@ -115,14 +119,20 @@ def render_nikki_list(
             display: flex;
             align-items: center;
             gap: 14px;
-            padding: 16px 4px;
-            border-bottom: 1px solid #ddd;
+            padding: 16px;
+            margin-bottom: 14px;
+            background: #fff;
+            border: 1px solid #c5dfed;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(35, 100, 145, 0.08);
             color: inherit;
             text-decoration: none;
+            transition: background 0.2s, box-shadow 0.2s;
         }
 
         .nikki-list-item:hover {
-            background: #f8f8f8;
+            background: #f5fbff;
+            box-shadow: 0 5px 16px rgba(35, 100, 145, 0.15);
         }
 
         .nikki-list-info {
