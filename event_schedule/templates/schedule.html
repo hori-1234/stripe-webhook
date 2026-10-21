@@ -1595,14 +1595,14 @@ body.vertical-mode .event-bar-time {
                     （{{ search_date.holiday_name }}）
                 {% endif %}
 
-                {% if request.args.get('mymemo') == '1' %}
-                    {% set day_events = namespace(count=0) %}
-                    {% for event in events %}
-                        {% if event.event_date == search_date.date %}
-                            {% set day_events.count = day_events.count + 1 %}
-                        {% endif %}
-                    {% endfor %}
+                {% set day_events = namespace(count=0) %}
+                {% for event in events %}
+                    {% if event.event_date == search_date.date %}
+                        {% set day_events.count = day_events.count + 1 %}
+                    {% endif %}
+                {% endfor %}
 
+                {% if request.args.get('mymemo') == '1' %}
                     {% if day_events.count == 0 %}
                         <span style="margin-left: 10px; color: #777; font-weight: normal;">
                             イベント登録無
