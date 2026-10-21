@@ -63,7 +63,7 @@ def oshikatsu_home():
     if logged_in and not session.get("oshi_csrf_token"):
         session["oshi_csrf_token"] = secrets.token_urlsafe(32)
 
-    if logged_in and event_data is not None:
+    if logged_in and event_data is not None and event_id is not None:
         from flask import redirect, url_for
 
         user_id = session.get("memo_user_id")
@@ -139,7 +139,12 @@ def save_oshi_diary():
         return "日付が正しくありません", 400
 
     event_id = request.form.get("event_id", type=int)
+    
+    if event_id is None:
+        return "イベントIDが指定されていません", 400
+
     event_name = request.form.get("event_name", "").strip()
+
     place = request.form.get("place", "").strip()
     performers = request.form.get("performers", "").strip()
     diary_text = request.form.get("diary_text", "").strip()
@@ -155,11 +160,22 @@ def save_oshi_diary():
     conn = psycopg2.connect(os.environ["DATABASE_URL"])
 
     try:
+        
         with conn:
             with conn.cursor() as cur:
                 cur.execute("""
                     SELECT id
+                    FROM event_schedules
+                    WHERE id = %s
+                """, (event_id,))
+
+                if cur.fetchone() is None:
+                    return "指定されたイベントが見つかりません", 400
+
+                cur.execute("""
+                    SELECT id
                     FROM oshi_diaries
+            
                     WHERE user_id = %s
                       AND event_id = %s
                     ORDER BY id DESC
