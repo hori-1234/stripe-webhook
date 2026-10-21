@@ -785,6 +785,57 @@ def render_nikki_form(logged_in, csrf_token="", event_data=None):
         </a>
     </p>
 
+    <div id="nikki-form-loading" style="
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        background: rgba(0, 0, 0, 0.65);
+        align-items: center;
+        justify-content: center;
+    ">
+        <div style="
+            width: 52px;
+            height: 52px;
+            border: 6px solid rgba(255, 255, 255, 0.25);
+            border-top: 6px solid #ffffff;
+            border-radius: 50%;
+            animation: nikki-form-spin 0.8s linear infinite;
+        "></div>
+    </div>
+
+    <style>
+        @keyframes nikki-form-spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const loading = document.getElementById("nikki-form-loading");
+            const form = document.getElementById("nikki-save-form");
+            const backLink = document.querySelector("#nikki-schedule-back a");
+
+            if (form) {
+                form.addEventListener("submit", function (event) {
+                    if (event.defaultPrevented || !form.checkValidity()) return;
+                    loading.style.display = "flex";
+                });
+            }
+
+            if (backLink) {
+                backLink.addEventListener("click", function () {
+                    loading.style.display = "flex";
+                });
+            }
+
+            window.addEventListener("pageshow", function () {
+                loading.style.display = "none";
+            });
+        });
+    </script>
+    
 </body>
 </html>
     """, logged_in=logged_in, csrf_token=csrf_token, photo_form=photo_form, diary_layout=diary_layout)
