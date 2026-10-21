@@ -360,10 +360,16 @@ def render_nikki_list(
 </head>
 
 <body>
+
     <header class="site-header">
 
         <nav class="site-header-nav" style="font-size: 18px;">
             <a href="/oshikatsu/purpose" style="color: inherit; text-decoration: none;">目的</a>
+            <span>|</span>
+            <a href="https://ameblo.jp/minawoshi/entry-12982267896.html"
+               target="_blank"
+               rel="noopener noreferrer"
+               style="color: inherit; text-decoration: none;">使用方法</a>
             <span>|</span>
             <a href="/schedule" style="color: inherit; text-decoration: none;">イベスケ</a>
         </nav>
