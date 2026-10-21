@@ -1630,9 +1630,20 @@ body.vertical-mode .event-bar-time {
                         </span>
                     {% endif %}
 
-                    <button type="button" class="event-edit-button date-memo-button" onclick="toggleDateMemo('{{ search_date.date.isoformat() }}')" style="float: none; cursor: pointer; {% if date_memo.get('memo_text') or (date_tag and date_tag != '付箋なし') %}background: yellow; color: red;{% endif %}">
-                        メモ
-                    </button>
+                    <div style="display: flex; flex-direction: column; gap: 4px; width: 70px; flex-shrink: 0;">
+
+                        <button type="button" class="event-edit-button date-memo-button" onclick="toggleDateMemo('{{ search_date.date.isoformat() }}')" style="float: none; cursor: pointer; {% if date_memo.get('memo_text') or (date_tag and date_tag != '付箋なし') %}background: yellow; color: red;{% endif %}">
+                            メモ
+                        </button>
+
+                        <a href="/oshikatsu/add"
+                           class="event-edit-button"
+                           style="width: 70px; padding: 7px 0;">
+                            日記
+                        </a>
+
+                    </div> 
+
                 </div>
             </div>
 
@@ -1885,6 +1896,10 @@ body.vertical-mode .event-bar-time {
                                 <button type="button" class="event-edit-button event-memo-button" onclick="toggleMemo({{ event.id }})" style="{% if saved_event_memos.get(event.id, {}).get('memo_text') or saved_event_memos.get(event.id, {}).get('tag') %}background: yellow; color: red;{% endif %}">
                                     メモ
                                 </button>
+
+                                <a href="/oshikatsu/add?event_id={{ event.id }}" class="event-edit-button">
+                                    日記
+                                </a>
                             </div>      
                         </div>
                     </div>
@@ -1973,13 +1988,23 @@ body.vertical-mode .event-bar-time {
                         {{ date_tag }}
                     </span>
                 {% endif %}
-
-                <button type="button" class="event-edit-button date-memo-button" onclick="toggleDateMemo('{{ year }}-{{ '%02d'|format(month) }}-{{ '%02d'|format(date.day) }}')" style="float: none; cursor: pointer; {% if date_memo.get('memo_text') or (date_tag and date_tag != '付箋なし') %}background: yellow; color: red;{% endif %}">
-                    メモ
-                </button>
                 
+                <div style="display: flex; flex-direction: column; gap: 4px; width: 70px; flex-shrink: 0;">
+
+                    <button type="button" class="event-edit-button date-memo-button" onclick="toggleDateMemo('{{ year }}-{{ '%02d'|format(month) }}-{{ '%02d'|format(date.day) }}')" style="float: none; cursor: pointer; {% if date_memo.get('memo_text') or (date_tag and date_tag != '付箋なし') %}background: yellow; color: red;{% endif %}">
+                        メモ
+                    </button>
+
+                    <a href="/oshikatsu/add"
+                       class="event-edit-button"
+                       style="width: 70px; padding: 7px 0;">
+                        日記
+                    </a>
+
+                </div>
+
             </div>
-        </div>
+        </div>                    
 
         <div id="date-memo-{{ year }}-{{ '%02d'|format(month) }}-{{ '%02d'|format(date.day) }}" class="event-memo-area" style="display: none;">
 
@@ -2275,6 +2300,10 @@ body.vertical-mode .event-bar-time {
                                 <button type="button" class="event-edit-button event-memo-button" onclick="toggleMemo({{ event.id }})" style="{% if saved_event_memos.get(event.id, {}).get('memo_text') or saved_event_memos.get(event.id, {}).get('tag') %}background: yellow; color: red;{% endif %}">
                                     メモ
                                 </button>
+
+                                <a href="/oshikatsu/add?event_id={{ event.id }}" class="event-edit-button">
+                                    日記
+                                </a>
                             </div>
 
                         </div>
