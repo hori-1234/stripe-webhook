@@ -1246,11 +1246,16 @@ body.vertical-mode .event-bar-time {
 <body>
 
 <header class="site-header">
-    <nav class="site-header-nav" style="font-size: 18px;">
+    <nav class="site-header-nav" style="font-size: 18px;" onclick="
+        if (event.target.closest('a')) {
+            document.getElementById('schedule-loading').style.display = 'flex';
+        }
+    ">
         <a href="/purpose"
            style="color: inherit; text-decoration: none;">
             目的
         </a>
+
         <span class="site-header-separator">│</span>
         <a href="https://ameblo.jp/minawoshi/entry-12980773392.html"
            target="_blank"
@@ -1259,10 +1264,13 @@ body.vertical-mode .event-bar-time {
             使用方法
         </a>
         <span class="site-header-separator">│</span>
+        
         <a href="/oshikatsu/list"
+           onclick="document.getElementById('schedule-loading').style.display = 'flex';"
            style="color: inherit; text-decoration: none;">
             日記全集
         </a>
+
     </nav>
 </header>
 
@@ -3532,6 +3540,23 @@ function closeFlyerModal() {
     <span style="margin: 0 10px; color: #999;">│</span>
     <a href="/privacy" style="color: #555; text-decoration: none;">プライバシーポリシー</a>
 </footer>
+    
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(
+        '.event-edit-area a[href^="/schedule/edit/"], ' +
+        '.event-edit-area a[href^="/oshikatsu/add"]'
+    ).forEach(function (link) {
+        link.addEventListener("click", function () {
+            document.getElementById("schedule-loading").style.display = "flex";
+        });
+    });
+
+    window.addEventListener("pageshow", function () {
+        document.getElementById("schedule-loading").style.display = "none";
+    });
+});
+</script>
 
 <!-- 全表示・マイメモ切り替え中のローディング画面 -->
 <div id="schedule-loading" style="
