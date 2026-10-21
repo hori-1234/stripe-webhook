@@ -517,7 +517,6 @@ def render_nikki_list(
     <div id="nikki-loading" class="nikki-loading">
         <div class="nikki-loading-box">
             <div class="nikki-spinner"></div>
-            保存中です…
         </div>
     </div>
 
