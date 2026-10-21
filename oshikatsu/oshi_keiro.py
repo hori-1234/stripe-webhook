@@ -139,6 +139,7 @@ def save_oshi_diary():
     except ValueError:
         return "日付が正しくありません", 400
 
+    event_id = request.form.get("event_id", type=int)
     event_name = request.form.get("event_name", "").strip()
     place = request.form.get("place", "").strip()
     performers = request.form.get("performers", "").strip()
@@ -161,14 +162,12 @@ def save_oshi_diary():
                     SELECT id
                     FROM oshi_diaries
                     WHERE user_id = %s
-                      AND event_date = %s
-                      AND event_name = %s
+                      AND event_id = %s
                     ORDER BY id DESC
                     LIMIT 1
                 """, (
                     str(user_id),
-                    event_date,
-                    event_name
+                    event_id
                 ))
 
                 existing_diary = cur.fetchone()
@@ -186,24 +185,11 @@ def save_oshi_diary():
 
                 cur.execute("""
                     INSERT INTO oshi_diaries (
-
-                        user_id,
-                        event_date,
-                        event_name,
-                        place,
-                        performers,
-                        diary_text
+                        user_id, event_id, event_date, event_name, place, performers, diary_text
                     )
-                    VALUES (%s, %s, %s, %s, %s, %s)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
                     RETURNING id
-                """, (
-                    str(user_id),
-                    event_date,
-                    event_name,
-                    place,
-                    performers,
-                    diary_text
-                ))
+                """, (str(user_id), event_id, event_date, event_name, place, performers, diary_text))
 
                 diary_id = cur.fetchone()[0]
                 
