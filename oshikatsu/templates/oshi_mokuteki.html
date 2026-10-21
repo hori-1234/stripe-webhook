@@ -57,5 +57,44 @@
   <div class="footmark">✦　✦　✦</div>
 </article>
 </main>
+  <div id="page-loading" style="
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    z-index: 99999;
+    align-items: center;
+    justify-content: center;
+">
+    <div style="
+        width: 52px;
+        height: 52px;
+        border: 6px solid rgba(255, 255, 255, 0.25);
+        border-top: 6px solid #ffffff;
+        border-radius: 50%;
+        animation: loading-spin 0.8s linear infinite;
+    "></div>
+</div>
+
+<style>
+    @keyframes loading-spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+</style>
+
+<script>
+    const backLink = document.querySelector(".back");
+    const pageLoading = document.getElementById("page-loading");
+
+    backLink.addEventListener("click", function () {
+        pageLoading.style.display = "flex";
+    });
+
+    window.addEventListener("pageshow", function () {
+        pageLoading.style.display = "none";
+    });
+</script>
+
 </body>
 </html>
