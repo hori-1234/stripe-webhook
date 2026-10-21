@@ -724,14 +724,26 @@ def schedule():
     locations = [
         row[0] for row in cur.fetchall()
     ]
-
+    
     # ログイン中のユーザーのイベントメモを取得
     saved_event_memos = {}
     saved_date_memos = {}
+    saved_diary_event_ids = set()
 
     memo_user_id = session.get("memo_user_id")
 
     if memo_user_id:
+        cur.execute("""
+            SELECT event_id
+            FROM oshi_diaries
+            WHERE user_id = %s
+              AND event_id IS NOT NULL
+        """, (str(memo_user_id),))
+
+        saved_diary_event_ids = {
+            row[0] for row in cur.fetchall()
+        }
+
         cur.execute("""
             SELECT
                 event_id,
@@ -936,6 +948,7 @@ def schedule():
         favorite_performers=favorite_performers,
         saved_event_memos=saved_event_memos,
         saved_date_memos=saved_date_memos,
+        saved_diary_event_ids=saved_diary_event_ids,
         today_views=today_views,
         memo_login_email=get_logged_in_memo_email(),
         show_google_link_prompt=should_show_google_link_prompt(),
