@@ -523,8 +523,19 @@ def render_nikki_list(
     </div>
 
     <script>
+    
         const nikkiLoading = document.getElementById("nikki-loading");
         const swipeWidth = 90;
+
+        document.querySelectorAll(".site-header-nav a").forEach(function (link) {
+            link.addEventListener("click", function () {
+                nikkiLoading.style.display = "flex";
+            });
+        });
+
+        window.addEventListener("pageshow", function () {
+            nikkiLoading.style.display = "none";
+        });
 
         document.querySelectorAll(".nikki-swipe-container").forEach(function (container) {
             const card = container.querySelector(".nikki-list-item");
