@@ -499,11 +499,17 @@ def render_nikki_list(
         {% endif %}
 
     </main>
+    
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             if (document.cookie.includes("oshi_save_success=1")) {
                 alert("推し活日記を保存しました");
                 document.cookie = "oshi_save_success=; path=/oshikatsu; max-age=0";
+            }
+
+            if (document.cookie.includes("oshi_delete_success=1")) {
+                alert("推し活日記を削除しました");
+                document.cookie = "oshi_delete_success=; path=/oshikatsu; max-age=0";
             }
         });
     </script>
