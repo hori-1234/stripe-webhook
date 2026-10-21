@@ -3,7 +3,7 @@ from oshikatsu.nikki_photo import render_nikki_photo_form
 from oshikatsu.nikki_layout import render_nikki_layout
 
 
-def render_nikki_form(logged_in, csrf_token=""):
+def render_nikki_form(logged_in, csrf_token="", event_data=None):
     photo_form = render_nikki_photo_form()
     diary_layout = render_nikki_layout(
         mode="input",
