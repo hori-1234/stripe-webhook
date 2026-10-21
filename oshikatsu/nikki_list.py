@@ -10,10 +10,11 @@ def render_nikki_list(
     keyword="",
     page=1,
     total_pages=1,
-    total_count=0
+    total_count=0,
+    csrf_token=""
 ):
-
     return render_template_string("""
+    
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -631,17 +632,32 @@ def render_nikki_list(
                 const diaryId = deleteButton.dataset.diaryId;
 
                 const confirmed = window.confirm(
-                    "この日記を削除しますか？\n\n削除すると元に戻せません。"
+                    "この日記を削除しますか？\\n削除すると元に戻せません。"
                 );
 
                 if (!confirmed) {
                     return;
                 }
 
-                // 次の工程でFlaskの削除処理を接続する
-                alert("削除処理はまだ実装されていません。対象ID: " + diaryId);
+                // 削除リクエストをPOSTで送信
+                const form = document.createElement("form");
+                form.method = "POST";
+                form.action = "/oshikatsu/delete/" + encodeURIComponent(diaryId);
+
+                // CSRFトークン
+                const csrfInput = document.createElement("input");
+                csrfInput.type = "hidden";
+                csrfInput.name = "csrf_token";
+                csrfInput.value = "{{ csrf_token }}";
+
+                form.appendChild(csrfInput);
+                document.body.appendChild(form);
+
+                // 二重送信を防止
+                deleteButton.disabled = true;
+
+                form.submit();
             });
-        });
 
         window.addEventListener("pageshow", function () {
             nikkiLoading.style.display = "none";
@@ -679,5 +695,6 @@ def render_nikki_list(
                 "keyword": keyword
             })
             + "&page="
-        )
+        ),
+        csrf_token=csrf_token
     )
