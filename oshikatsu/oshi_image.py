@@ -1,21 +1,35 @@
 from io import BytesIO
+import warnings
 from PIL import Image, ImageOps, UnidentifiedImageError
 
 
 MAX_IMAGE_BYTES = 300 * 1024
 MAX_IMAGE_WIDTH = 1600
 MAX_IMAGE_HEIGHT = 1600
+MAX_UPLOAD_PIXELS = 25_000_000
+
+Image.MAX_IMAGE_PIXELS = MAX_UPLOAD_PIXELS
+warnings.filterwarnings("error", category=Image.DecompressionBombWarning)
 
 
 def compress_oshi_image(image_bytes):
     if not image_bytes:
         raise ValueError("画像データがありません")
-
+    
     try:
         with Image.open(BytesIO(image_bytes)) as original:
+            if original.width * original.height > MAX_UPLOAD_PIXELS:
+                raise ValueError("画像の解像度は2500万ピクセル以下にしてください")
+
             image = ImageOps.exif_transpose(original)
             image.load()
-    except (UnidentifiedImageError, OSError, ValueError):
+    except Image.DecompressionBombWarning:
+        raise ValueError("画像の解像度は2500万ピクセル以下にしてください")
+    except Image.DecompressionBombError:
+        raise ValueError("画像の解像度は2500万ピクセル以下にしてください")
+    except ValueError:
+        raise
+    except (UnidentifiedImageError, OSError):
         raise ValueError("対応していない画像形式です")
 
     # 大きな画像は縦横比を維持して縮小
