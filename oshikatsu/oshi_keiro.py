@@ -39,7 +39,12 @@ def oshikatsu_home():
                 """, (event_id,))
 
                 event_data = cur.fetchone()
-                print(f"推し活日記 イベント検索: event_id={event_id}, found={event_data is not None}", flush=True)
+                print(
+                    f"推し活日記 イベント検索: event_id={event_id}, "
+                    f"found={event_data is not None}, "
+                    f"values_present={[value is not None and str(value).strip() != '' for value in event_data] if event_data else None}",
+                    flush=True
+                )
 
         finally:
             conn.close()
