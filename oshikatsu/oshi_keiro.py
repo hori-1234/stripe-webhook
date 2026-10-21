@@ -20,11 +20,22 @@ def oshikatsu_home():
     logged_in = is_memo_logged_in()
 
     event_id = request.args.get("event_id", type=int)
+    event_date = request.args.get("event_date", "").strip()
 
     event_data = None
 
+    if event_id is None and event_date:
+        from datetime import date
+
+        try:
+            selected_date = date.fromisoformat(event_date)
+            event_data = (selected_date, "", "", "")
+        except ValueError:
+            pass
+
     if event_id is not None:
         conn = psycopg2.connect(os.environ["DATABASE_URL"])
+
 
         try:
             with conn.cursor() as cur:
