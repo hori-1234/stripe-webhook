@@ -63,7 +63,6 @@ def oshikatsu_home():
     if logged_in and not session.get("oshi_csrf_token"):
         session["oshi_csrf_token"] = secrets.token_urlsafe(32)
 
-    return render_nikki_form(
         if logged_in and event_data is not None:
         from flask import redirect, url_for
 
