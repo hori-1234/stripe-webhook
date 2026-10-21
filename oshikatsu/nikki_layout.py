@@ -120,7 +120,15 @@ def render_nikki_layout(diary=None, mode="input", event_data=None):
                     f'value="{safe(value)}" required>'
                 )
 
-            elif name in ("performers", "diary_text"):
+            elif name == "performers":
+                html += (
+                    f'<textarea name="{name}" '
+                    'style="word-break: keep-all; overflow-wrap: normal;">'
+                    f'{safe(value)}'
+                    '</textarea>'
+                )
+
+            elif name == "diary_text":
                 html += (
                     f'<textarea name="{name}">'
                     f'{safe(value)}'
