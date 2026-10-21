@@ -199,7 +199,7 @@ def render_nikki_form(logged_in, csrf_token="", event_data=None, event_id=None):
     </h2>
 
     {% if not logged_in %}
-        <p style="margin-top: 8px; margin-bottom: 8px;">
+        <p id="nikki-guide-buttons" style="margin-top: 8px; margin-bottom: 8px;">
             <a href="/oshikatsu/purpose"
                class="login-button"
                onclick="document.getElementById('nikki-form-loading').style.display='flex';">
@@ -567,6 +567,7 @@ def render_nikki_form(logged_in, csrf_token="", event_data=None, event_id=None):
     </style>
 
     <script>
+        
         document.addEventListener("DOMContentLoaded", function () {
             const form = document.querySelector('form[action="/oshikatsu/save"]');
             const previewButton = document.getElementById("demo-preview-button");
@@ -582,6 +583,7 @@ def render_nikki_form(logged_in, csrf_token="", event_data=None, event_id=None):
             const loginNotice = form.previousElementSibling;
             const returnLink = document.getElementById("nikki-schedule-back");
             const loginButton = document.getElementById("nikki-login-button");
+            const guideButtons = document.getElementById("nikki-guide-buttons");
 
             function getValue(name) {
                 const field = form.elements.namedItem(name);
@@ -664,6 +666,7 @@ def render_nikki_form(logged_in, csrf_token="", event_data=None, event_id=None):
                 if (demoLabel) demoLabel.textContent = "デモ画面(プレビュー)";
                 if (returnLink) returnLink.hidden = true;
                 if (loginButton) loginButton.hidden = true;
+                if (guideButtons) guideButtons.hidden = true;
                 window.scrollTo(0, 0);
 
                 requestAnimationFrame(function () {
@@ -681,6 +684,7 @@ def render_nikki_form(logged_in, csrf_token="", event_data=None, event_id=None):
                 if (demoLabel) demoLabel.textContent = "デモ画面(編集)";
                 if (returnLink) returnLink.hidden = false;
                 if (loginButton) loginButton.hidden = false;
+                if (guideButtons) guideButtons.hidden = false;
                 window.scrollTo(0, 0);
 
                 requestAnimationFrame(function () {
