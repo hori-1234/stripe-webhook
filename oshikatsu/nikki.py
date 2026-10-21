@@ -648,6 +648,7 @@ def render_nikki_form(logged_in, csrf_token="", event_data=None, event_id=None):
 
                 requestAnimationFrame(function () {
                     loading.style.display = "none";
+                });
             });
 
             backButton.addEventListener("click", function () {
