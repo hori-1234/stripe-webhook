@@ -229,14 +229,17 @@ def render_nikki_form(logged_in, csrf_token="", event_data=None, event_id=None):
         {{ diary_layout }}
         
         {{ photo_form }}
-
+        
         {% if logged_in %}
             <p style="display: flex; gap: 12px; align-items: center;">
                 <button type="submit" class="nikki-demo-button">保存</button>
                 <a href="/schedule" class="nikki-demo-button nikki-back-button">戻る</a>
             </p>
         {% else %}
-            <p><button type="button" id="demo-preview-button" class="nikki-demo-button">プレビュー</button></p>
+            <p style="display: flex; gap: 12px; align-items: center;">
+                <button type="button" id="demo-preview-button" class="nikki-demo-button">プレビュー</button>
+                <a href="/schedule" class="nikki-demo-button nikki-back-button">戻る</a>
+            </p>
         {% endif %}
     </form>
 
