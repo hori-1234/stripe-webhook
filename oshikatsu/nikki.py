@@ -190,6 +190,7 @@ def render_nikki_form(logged_in, csrf_token="", event_data=None, event_id=None):
 </head>
 
 <body>
+
     <h2 class="nikki-title">
         推し活日記
         {% if not logged_in %}
@@ -197,7 +198,18 @@ def render_nikki_form(logged_in, csrf_token="", event_data=None, event_id=None):
         {% endif %}
     </h2>
 
+    {% if not logged_in %}
+        <p style="margin-top: 8px; margin-bottom: 8px;">
+            <a href="/purpose"
+               class="login-button"
+               onclick="document.getElementById('nikki-form-loading').style.display='flex';">
+                目的
+            </a>
+        </p>
+    {% endif %}
+
     <script>
+
         if (document.cookie.split("; ").includes("oshi_save_success=1")) {
             const message = document.createElement("p");
             message.textContent = "日記を保存しました。";
