@@ -2,7 +2,7 @@
 from markupsafe import Markup, escape
 
 
-def render_nikki_layout(diary=None, mode="input"):
+def render_nikki_layout(diary=None, mode="input", event_data=None):
     """
     推し活日記の共通レイアウト
 
