@@ -359,6 +359,85 @@ def update_oshi_diary_route(diary_id):
             diary_id=diary_id
         )
     )
+    
+@oshikatsu_bp.route("/delete/<int:diary_id>", methods=["POST"])
+def delete_oshi_diary(diary_id):
+    import secrets
+    import logging
+    from flask import request, redirect, url_for
+    from oshikatsu.oshi_photo_update import (
+        get_oshi_photo_update_targets,
+        queue_oshi_photo_deletions
+    )
+
+    if not is_memo_logged_in():
+        return "ログインが必要です", 401
+
+    csrf_token = request.form.get("csrf_token", "")
+    expected_token = session.get("oshi_csrf_token", "")
+
+    if (
+        not csrf_token
+        or not expected_token
+        or not secrets.compare_digest(csrf_token, expected_token)
+    ):
+        return "不正なリクエストです", 403
+
+    user_id = session.get("memo_user_id")
+
+    if not user_id:
+        return "ログインが必要です", 401
+
+    conn = psycopg2.connect(os.environ["DATABASE_URL"])
+
+    try:
+        with conn:
+            saved_photos = get_oshi_photo_update_targets(
+                conn=conn,
+                diary_id=diary_id,
+                user_id=user_id
+            )
+
+            queue_oshi_photo_deletions(
+                conn=conn,
+                diary_id=diary_id,
+                delete_targets=saved_photos
+            )
+
+            with conn.cursor() as cur:
+                cur.execute("""
+                    DELETE FROM oshi_diaries
+                    WHERE id = %s
+                      AND user_id = %s
+                """, (
+                    diary_id,
+                    str(user_id)
+                ))
+
+                if cur.rowcount != 1:
+                    raise RuntimeError(
+                        "日記の削除対象が一致しません"
+                    )
+
+    except ValueError as e:
+        if str(e) == "日記が見つかりません":
+            return "日記が見つかりません", 404
+
+        logging.exception("日記の削除に失敗しました")
+        return "日記の削除に失敗しました", 500
+
+    except Exception:
+        logging.exception("日記の削除に失敗しました")
+        return "日記の削除に失敗しました", 500
+
+    finally:
+        conn.close()
+
+    return redirect(
+        url_for("oshikatsu.list_oshi_diaries"),
+        code=303
+    )
+
 
 @oshikatsu_bp.route("/list", methods=["GET"])
 def list_oshi_diaries():
