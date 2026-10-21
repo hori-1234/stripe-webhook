@@ -567,9 +567,13 @@ def render_nikki_form(logged_in, csrf_token="", event_data=None, event_id=None):
                 const field = form.elements.namedItem(name);
                 return field ? field.value : "";
             }
-
+            
             previewButton.addEventListener("click", function () {
+                const loading = document.getElementById("nikki-form-loading");
+                loading.style.display = "flex";
+
                 const fields = {
+
                     "demo-event-date": "event_date",
                     "demo-place": "place",
                     "demo-event-name": "event_name",
@@ -641,9 +645,15 @@ def render_nikki_form(logged_in, csrf_token="", event_data=None, event_id=None):
                 if (returnLink) returnLink.hidden = true;
                 if (loginButton) loginButton.hidden = true;
                 window.scrollTo(0, 0);
+
+                requestAnimationFrame(function () {
+                    loading.style.display = "none";
             });
 
             backButton.addEventListener("click", function () {
+                const loading = document.getElementById("nikki-form-loading");
+                loading.style.display = "flex";
+
                 previewScreen.hidden = true;
                 form.hidden = false;
 
@@ -651,6 +661,10 @@ def render_nikki_form(logged_in, csrf_token="", event_data=None, event_id=None):
                 if (returnLink) returnLink.hidden = false;
                 if (loginButton) loginButton.hidden = false;
                 window.scrollTo(0, 0);
+
+                requestAnimationFrame(function () {
+                    loading.style.display = "none";
+                });
             });
 
             const lightbox = document.getElementById("demo-photo-lightbox");
@@ -788,14 +802,6 @@ def render_nikki_form(logged_in, csrf_token="", event_data=None, event_id=None):
         });
     </script>
     {% endif %}
-    
-    {% if not logged_in %}
-    <p id="nikki-schedule-back">
-        <a href="/schedule" class="nikki-demo-button nikki-back-button">
-            戻る
-        </a>
-    </p>
-    {% endif %}
 
     <div id="nikki-form-loading" style="
         display: none;
@@ -829,6 +835,7 @@ def render_nikki_form(logged_in, csrf_token="", event_data=None, event_id=None):
             const form = document.getElementById("nikki-save-form");
             const backLinks = document.querySelectorAll(
                 "#nikki-schedule-back a, #nikki-save-form .nikki-back-button"
+            );
 
             if (form) {
                 form.addEventListener("submit", function (event) {
