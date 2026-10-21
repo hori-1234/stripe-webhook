@@ -1885,6 +1885,10 @@ body.vertical-mode .event-bar-time {
                                 <button type="button" class="event-edit-button event-memo-button" onclick="toggleMemo({{ event.id }})" style="{% if saved_event_memos.get(event.id, {}).get('memo_text') or saved_event_memos.get(event.id, {}).get('tag') %}background: yellow; color: red;{% endif %}">
                                     メモ
                                 </button>
+
+                                <a href="/oshikatsu/add?event_id={{ event.id }}" class="event-edit-button">
+                                    日記
+                                </a>
                             </div>      
                         </div>
                     </div>
@@ -2275,6 +2279,10 @@ body.vertical-mode .event-bar-time {
                                 <button type="button" class="event-edit-button event-memo-button" onclick="toggleMemo({{ event.id }})" style="{% if saved_event_memos.get(event.id, {}).get('memo_text') or saved_event_memos.get(event.id, {}).get('tag') %}background: yellow; color: red;{% endif %}">
                                     メモ
                                 </button>
+
+                                <a href="/oshikatsu/add?event_id={{ event.id }}" class="event-edit-button">
+                                    日記
+                                </a>
                             </div>
 
                         </div>
