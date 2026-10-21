@@ -49,6 +49,7 @@ def oshikatsu_home():
     return render_nikki_form(
         logged_in=logged_in,
         csrf_token=session.get("oshi_csrf_token", "")
+        event_data=event_data
     )
 
 
