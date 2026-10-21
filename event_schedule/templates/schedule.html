@@ -1590,11 +1590,19 @@ body.vertical-mode .event-bar-time {
                 
                 {{ search_date.date.month }}/{{ search_date.date.day }}
                 {{ ["月", "火", "水", "木", "金", "土", "日"][search_date.date.weekday()] }}
-
+                
                 {% if search_date.holiday_name %}
-                    （{{ search_date.holiday_name }}）
-                {% endif %}
+                    <span style="display: inline-flex; flex-direction: column; margin-left: 8px;">
+                        <span>（{{ search_date.holiday_name }}）</span>
 
+                        {% if request.args.get('mymemo') == '1' and day_events.count == 0 %}
+                            <span style="color: white; font-weight: normal;">
+                                イベント登録無
+                            </span>
+                        {% endif %}
+                    </span>
+                {% endif %}
+                
                 {% set day_events = namespace(count=0) %}
                 {% for event in events %}
                     {% if event.event_date == search_date.date %}
