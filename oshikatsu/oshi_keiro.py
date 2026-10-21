@@ -100,7 +100,7 @@ def oshikatsu_home():
     return render_nikki_form(
         logged_in=logged_in,
         csrf_token=session.get("oshi_csrf_token", ""),
-        event_data=event_data
+        event_data=event_data,
         event_id=event_id
     )
 
@@ -163,14 +163,20 @@ def save_oshi_diary():
         
         with conn:
             with conn.cursor() as cur:
+
                 cur.execute("""
-                    SELECT id
+                    SELECT event_date, event_name
                     FROM event_schedules
                     WHERE id = %s
                 """, (event_id,))
 
-                if cur.fetchone() is None:
+                event_row = cur.fetchone()
+
+                if event_row is None:
                     return "指定されたイベントが見つかりません", 400
+
+                if event_date != event_row[0] or event_name != event_row[1]:
+                    return "イベント情報が一致しません", 400
 
                 cur.execute("""
                     SELECT id
