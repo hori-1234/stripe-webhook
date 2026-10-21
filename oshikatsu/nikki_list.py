@@ -661,6 +661,9 @@ def render_nikki_list(
                 // 二重送信を防止
                 deleteButton.disabled = true;
 
+                // 削除処理中のローディングを表示
+                nikkiLoading.style.display = "flex";
+
                 form.submit();
             });
         });
