@@ -76,14 +76,12 @@ def oshikatsu_home():
                     SELECT id
                     FROM oshi_diaries
                     WHERE user_id = %s
-                      AND event_date = %s
-                      AND event_name = %s
+                      AND event_id = %s
                     ORDER BY id DESC
                     LIMIT 1
                 """, (
                     str(user_id),
-                    event_data[0],
-                    event_data[1]
+                    event_id
                 ))
 
                 existing_diary = cur.fetchone()
@@ -103,6 +101,7 @@ def oshikatsu_home():
         logged_in=logged_in,
         csrf_token=session.get("oshi_csrf_token", ""),
         event_data=event_data
+        event_id=event_id
     )
 
 @oshikatsu_bp.route("/save", methods=["POST"])
