@@ -155,11 +155,10 @@ def save_oshi_diary():
     
     finally:
         conn.close()
-
     from flask import redirect, url_for
 
     response = redirect(
-        url_for("oshikatsu.list_oshi_diaries")
+        url_for("oshikatsu.oshikatsu_home")
     )
 
     response.set_cookie(
@@ -167,11 +166,11 @@ def save_oshi_diary():
         "1",
         max_age=60,
         httponly=False,
-        samesite="Lax"
+        samesite="Lax",
+        path="/oshikatsu"
     )
 
     return response
-
 
 @oshikatsu_bp.route("/view/<int:diary_id>", methods=["GET"])
 def view_oshi_diary(diary_id):
