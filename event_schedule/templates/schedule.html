@@ -1995,11 +1995,9 @@ body.vertical-mode .event-bar-time {
                         メモ
                     </button>
 
-                    {% if day_events.count == 0 %}
                         <a href="/oshikatsu/add?event_date={{ '%04d-%02d-%02d'|format(year, month, date.day) }}" class="event-edit-button" style="width: 70px; box-sizing: border-box;">
                             日記
                         </a>
-                    {% endif %}
 
                 </div>
                 
