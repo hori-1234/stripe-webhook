@@ -1,8 +1,7 @@
 
 from markupsafe import Markup, escape
 
-
-def render_nikki_layout(diary=None, mode="input"):
+def render_nikki_layout(diary=None, mode="input", event_data=None):
     """
     推し活日記の共通レイアウト
 
@@ -18,8 +17,17 @@ def render_nikki_layout(diary=None, mode="input"):
     if diary is None:
         diary = ("", "", "", "", "")
 
-    event_date, event_name, place, performers, diary_text = diary
+    if mode == "input" and event_data is not None:
+        diary = (
+            event_data[0].isoformat() if event_data[0] else "",
+            event_data[1] or "",
+            event_data[2] or "",
+            event_data[3] or "",
+            ""
+        )
 
+    event_date, event_name, place, performers, diary_text = diary
+    
     def safe(value):
         return escape(
             "" if value is None else str(value)
