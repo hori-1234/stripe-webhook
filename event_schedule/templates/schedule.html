@@ -729,6 +729,11 @@
             font-size: 14px;
             box-sizing: border-box;
         }
+
+        .event-edit-button.diary-saved {
+            background: #795548;
+            color: #fff;
+        }
         
         .performer-toggle {
             margin-left: 0;
@@ -1895,7 +1900,7 @@ body.vertical-mode .event-bar-time {
                                     メモ
                                 </button>
 
-                                <a href="/oshikatsu/add?event_id={{ event.id }}" class="event-edit-button">
+                                <a href="/oshikatsu/add?event_id={{ event.id }}" class="event-edit-button {% if event.id in saved_diary_event_ids %}diary-saved{% endif %}">
                                     日記
                                 </a>
                             </div>      
@@ -2299,7 +2304,7 @@ body.vertical-mode .event-bar-time {
                                     メモ
                                 </button>
 
-                                <a href="/oshikatsu/add?event_id={{ event.id }}" class="event-edit-button">
+                                <a href="/oshikatsu/add?event_id={{ event.id }}" class="event-edit-button {% if event.id in saved_diary_event_ids %}diary-saved{% endif %}">
                                     日記
                                 </a>
                             </div>
