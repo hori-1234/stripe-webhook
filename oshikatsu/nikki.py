@@ -197,6 +197,17 @@ def render_nikki_form(logged_in, csrf_token="", event_data=None):
         {% endif %}
     </h2>
 
+    <script>
+        if (document.cookie.split("; ").includes("oshi_save_success=1")) {
+            const message = document.createElement("p");
+            message.textContent = "日記を保存しました。";
+            message.style.color = "green";
+            message.style.fontWeight = "bold";
+            document.currentScript.before(message);
+            document.cookie = "oshi_save_success=; Max-Age=0; Path=/oshikatsu";
+        }
+    </script>
+
     {% if logged_in %}
     
         <p>ログイン中</p>
