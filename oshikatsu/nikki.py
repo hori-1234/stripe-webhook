@@ -3,7 +3,7 @@ from oshikatsu.nikki_photo import render_nikki_photo_form
 from oshikatsu.nikki_layout import render_nikki_layout
 
 
-def render_nikki_form(logged_in, csrf_token="", event_data=None):
+def render_nikki_form(logged_in, csrf_token="", event_data=None, event_id=None):
     photo_form = render_nikki_photo_form()
     diary_layout = render_nikki_layout(
         mode="input",
@@ -220,6 +220,10 @@ def render_nikki_form(logged_in, csrf_token="", event_data=None):
     <form method="POST" action="/oshikatsu/save" enctype="multipart/form-data" id="nikki-save-form">
         {% if logged_in %}
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        {% endif %}
+
+        {% if event_id is not none %}
+            <input type="hidden" name="event_id" value="{{ event_id }}">
         {% endif %}
 
         {{ diary_layout }}
@@ -838,7 +842,7 @@ def render_nikki_form(logged_in, csrf_token="", event_data=None):
     
 </body>
 </html>
-    """, logged_in=logged_in, csrf_token=csrf_token, photo_form=photo_form, diary_layout=diary_layout)
+        """, logged_in=logged_in, csrf_token=csrf_token, photo_form=photo_form, diary_layout=diary_layout, event_id=event_id)
 
 
 def render_nikki_view(
