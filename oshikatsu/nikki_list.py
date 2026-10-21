@@ -538,6 +538,11 @@ def render_nikki_list(
                 dragging = true;
                 moved = false;
                 suppressClick = false;
+
+                // PCではカードの外にマウスが出ても操作を追跡
+                if (e.pointerType === "mouse") {
+                    card.setPointerCapture(e.pointerId);
+                }
             });
 
             card.addEventListener("pointermove", function (e) {
@@ -583,12 +588,23 @@ def render_nikki_list(
             }
 
             card.addEventListener("pointerup", finishSwipe);
-            card.addEventListener("pointercancel", finishSwipe);
+
+            card.addEventListener("pointercancel", function () {
+                if (!dragging) return;
+
+                dragging = false;
+
+                // 操作が中断された場合は開始前の位置に戻す
+                currentOffset = startOffset;
+
+                card.style.transition = "transform 0.2s ease";
+                card.style.transform = `translateX(${currentOffset}px)`;
+            });
 
             card.addEventListener("dragstart", function (e) {
                 e.preventDefault();
             });
-
+            
             card.addEventListener("click", function (e) {
                 if (suppressClick) {
                     e.preventDefault();
@@ -607,11 +623,30 @@ def render_nikki_list(
 
                 nikkiLoading.style.display = "flex";
             });
+
+            // 削除ボタンを押したときの確認処理
+            const deleteButton = container.querySelector(".nikki-swipe-delete");
+
+            deleteButton.addEventListener("click", function () {
+                const diaryId = deleteButton.dataset.diaryId;
+
+                const confirmed = window.confirm(
+                    "この日記を削除しますか？\n\n削除すると元に戻せません。"
+                );
+
+                if (!confirmed) {
+                    return;
+                }
+
+                // 次の工程でFlaskの削除処理を接続する
+                alert("削除処理はまだ実装されていません。対象ID: " + diaryId);
+            });
         });
 
         window.addEventListener("pageshow", function () {
             nikkiLoading.style.display = "none";
-        });
+        });            
+
     </script>
 
 </body>
