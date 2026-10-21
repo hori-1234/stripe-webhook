@@ -1,4 +1,5 @@
 from flask import Flask, request, redirect
+from werkzeug.exceptions import RequestEntityTooLarge
 import os
 import boto3
 import psycopg2
@@ -33,6 +34,7 @@ from ticket_check import (
 
 
 app = Flask(__name__)
+app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024
 limiter.init_app(app)
 init_oshi_db()
 app.secret_key = os.environ.get("kuri_SECRET_KEY")
@@ -41,6 +43,15 @@ app.config["SESSION_REFRESH_EACH_REQUEST"] = True
 app.config["SESSION_COOKIE_SECURE"] = True
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+
+@app.errorhandler(RequestEntityTooLarge)
+def handle_large_upload(error):
+    return (
+        "アップロードできる合計容量は100MiBまでです。"
+        "画像の容量を減らして再度お試しください。",
+        413
+    )
+
 oauth.init_app(app)
 app.register_blueprint(unei_kanri_bp)
 app.register_blueprint(event_schedule_bp)
