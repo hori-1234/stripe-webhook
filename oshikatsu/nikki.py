@@ -205,6 +205,14 @@ def render_nikki_form(logged_in, csrf_token="", event_data=None, event_id=None):
                onclick="document.getElementById('nikki-form-loading').style.display='flex';">
                 目的
             </a>
+
+            <a href="https://ameblo.jp/minawoshi/entry-12982267896.html"
+               class="login-button"
+               target="_blank"
+               rel="noopener noreferrer"
+               style="display: inline-block; margin-left: 0;">
+                使用方法
+            </a>
         </p>
     {% endif %}
 
