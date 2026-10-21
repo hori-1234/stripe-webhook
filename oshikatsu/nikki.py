@@ -60,6 +60,7 @@ def render_nikki_form(logged_in, csrf_token="", event_data=None):
                 width: fit-content;
                 margin-left: max(0px, calc((100% - 760px) / 2));
             }
+        }
 
         .login-button:hover {
             background: #e5e5e5;
