@@ -254,10 +254,16 @@ def render_nikki_form(logged_in, csrf_token="", event_data=None, event_id=None):
         {{ photo_form }}
         
         {% if logged_in %}
+            <p id="nikki-upload-error"
+               role="alert"
+               hidden
+               style="color: #b00020; font-weight: bold;"></p>
+
             <p style="display: flex; gap: 12px; align-items: center;">
                 <button type="submit" class="nikki-demo-button">保存</button>
                 <a href="/schedule" class="nikki-demo-button nikki-back-button">戻る</a>
             </p>
+
         {% else %}
             <p style="display: flex; gap: 12px; align-items: center;">
                 <button type="button" id="demo-preview-button" class="nikki-demo-button">プレビュー</button>
@@ -865,10 +871,46 @@ def render_nikki_form(logged_in, csrf_token="", event_data=None, event_id=None):
             const backLinks = document.querySelectorAll(
                 "#nikki-schedule-back a, #nikki-save-form .nikki-back-button"
             );
-
+            
             if (form) {
                 form.addEventListener("submit", function (event) {
                     if (event.defaultPrevented || !form.checkValidity()) return;
+
+                    const photoInput = document.getElementById("nikki-photo-input");
+
+                    if (photoInput) {
+                        const files = Array.from(photoInput.files);
+                        const totalBytes = files.reduce(function (total, file) {
+                            return total + file.size;
+                        }, 0);
+
+                        if (totalBytes > 99 * 1024 * 1024) {
+                            event.preventDefault();
+
+                            const errorMessage = document.getElementById("nikki-upload-error");
+
+                            if (errorMessage) {
+                                errorMessage.textContent = "画像の合計容量は99MiB以下にしてください。";
+                                errorMessage.hidden = false;
+                                errorMessage.scrollIntoView({
+                                    behavior: "smooth",
+                                    block: "center"
+                                });
+                            }
+
+                            
+                            return;
+                        }
+
+                    }
+
+                    const errorMessage = document.getElementById("nikki-upload-error");
+
+                    if (errorMessage) {
+                        errorMessage.textContent = "";
+                        errorMessage.hidden = true;
+                    }
+
                     loading.style.display = "flex";
                 });
             }
