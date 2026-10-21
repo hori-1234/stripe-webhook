@@ -1633,6 +1633,12 @@ body.vertical-mode .event-bar-time {
                     <button type="button" class="event-edit-button date-memo-button" onclick="toggleDateMemo('{{ search_date.date.isoformat() }}')" style="float: none; cursor: pointer; {% if date_memo.get('memo_text') or (date_tag and date_tag != '付箋なし') %}background: yellow; color: red;{% endif %}">
                         メモ
                     </button>
+
+                    {% if day_events.count == 0 %}
+                        <a href="/oshikatsu/add?event_date={{ search_date.date.isoformat() }}" class="event-edit-button">
+                            日記
+                        </a>
+                    {% endif %}
                 </div>
             </div>
 
@@ -1981,6 +1987,12 @@ body.vertical-mode .event-bar-time {
                 <button type="button" class="event-edit-button date-memo-button" onclick="toggleDateMemo('{{ year }}-{{ '%02d'|format(month) }}-{{ '%02d'|format(date.day) }}')" style="float: none; cursor: pointer; {% if date_memo.get('memo_text') or (date_tag and date_tag != '付箋なし') %}background: yellow; color: red;{% endif %}">
                     メモ
                 </button>
+
+                {% if day_events.count == 0 %}
+                    <a href="/oshikatsu/add?event_date={{ '%04d-%02d-%02d'|format(year, month, date.day) }}" class="event-edit-button">
+                        日記
+                    </a>
+                {% endif %}
                 
             </div>
         </div>
