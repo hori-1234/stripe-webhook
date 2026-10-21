@@ -231,7 +231,10 @@ def render_nikki_form(logged_in, csrf_token="", event_data=None, event_id=None):
         {{ photo_form }}
 
         {% if logged_in %}
-            <p><button type="submit" class="nikki-demo-button">保存</button></p>
+            <p style="display: flex; gap: 12px; align-items: center;">
+                <button type="submit" class="nikki-demo-button">保存</button>
+                <a href="/schedule" class="nikki-demo-button nikki-back-button">戻る</a>
+            </p>
         {% else %}
             <p><button type="button" id="demo-preview-button" class="nikki-demo-button">プレビュー</button></p>
         {% endif %}
@@ -783,11 +786,13 @@ def render_nikki_form(logged_in, csrf_token="", event_data=None, event_id=None):
     </script>
     {% endif %}
     
+    {% if not logged_in %}
     <p id="nikki-schedule-back">
         <a href="/schedule" class="nikki-demo-button nikki-back-button">
-            イベスケに戻る
+            戻る
         </a>
     </p>
+    {% endif %}
 
     <div id="nikki-form-loading" style="
         display: none;
