@@ -438,6 +438,16 @@ def delete_oshi_diary(diary_id):
         code=303
     )
 
+    response.set_cookie(
+        "oshi_delete_success",
+        "1",
+        max_age=60,
+        httponly=False,
+        samesite="Lax",
+        path="/oshikatsu"
+    )
+
+    return response
 
 @oshikatsu_bp.route("/list", methods=["GET"])
 def list_oshi_diaries():
@@ -586,6 +596,11 @@ def list_oshi_diaries():
     finally:
         conn.close()
 
+    import secrets
+
+    if not session.get("oshi_csrf_token"):
+        session["oshi_csrf_token"] = secrets.token_urlsafe(32)
+
     return render_nikki_list(
         diaries=diaries,
         start_date=start_date,
@@ -594,5 +609,6 @@ def list_oshi_diaries():
         keyword=keyword,
         page=page,
         total_pages=total_pages,
-        total_count=total_count
+        total_count=total_count,
+        csrf_token=session["oshi_csrf_token"]
     )
