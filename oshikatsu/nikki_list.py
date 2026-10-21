@@ -664,6 +664,7 @@ def render_nikki_list(
 
                 form.submit();
             });
+        });
 
         window.addEventListener("pageshow", function () {
             nikkiLoading.style.display = "none";
