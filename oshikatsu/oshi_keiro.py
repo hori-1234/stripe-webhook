@@ -10,13 +10,38 @@ oshikatsu_bp = Blueprint(
     url_prefix="/oshikatsu"
 )
 
-
 @oshikatsu_bp.route("/")
+@oshikatsu_bp.route("/add", methods=["GET"])
 def oshikatsu_home():
     import secrets
+    from flask import request
     from oshikatsu.nikki import render_nikki_form
 
     logged_in = is_memo_logged_in()
+
+    event_id = request.args.get("event_id", type=int)
+
+    event_data = None
+
+    if event_id is not None:
+        conn = psycopg2.connect(os.environ["DATABASE_URL"])
+
+        try:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT
+                        event_date,
+                        event_name,
+                        location,
+                        performers
+                    FROM event_schedules
+                    WHERE id = %s
+                """, (event_id,))
+
+                event_data = cur.fetchone()
+
+        finally:
+            conn.close()
 
     if logged_in and not session.get("oshi_csrf_token"):
         session["oshi_csrf_token"] = secrets.token_urlsafe(32)
