@@ -64,11 +64,47 @@ def oshikatsu_home():
         session["oshi_csrf_token"] = secrets.token_urlsafe(32)
 
     return render_nikki_form(
+        if logged_in and event_data is not None:
+        from flask import redirect, url_for
+
+        user_id = session.get("memo_user_id")
+
+        conn = psycopg2.connect(os.environ["DATABASE_URL"])
+
+        try:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT id
+                    FROM oshi_diaries
+                    WHERE user_id = %s
+                      AND event_date = %s
+                      AND event_name = %s
+                    ORDER BY id DESC
+                    LIMIT 1
+                """, (
+                    str(user_id),
+                    event_data[0],
+                    event_data[1]
+                ))
+
+                existing_diary = cur.fetchone()
+
+        finally:
+            conn.close()
+
+        if existing_diary:
+            return redirect(
+                url_for(
+                    "oshikatsu.view_oshi_diary",
+                    diary_id=existing_diary[0]
+                )
+            )
+
+    return render_nikki_form(
         logged_in=logged_in,
         csrf_token=session.get("oshi_csrf_token", ""),
         event_data=event_data
     )
-
 
 @oshikatsu_bp.route("/save", methods=["POST"])
 def save_oshi_diary():
