@@ -824,7 +824,8 @@ def render_nikki_form(logged_in, csrf_token="", event_data=None, event_id=None):
         document.addEventListener("DOMContentLoaded", function () {
             const loading = document.getElementById("nikki-form-loading");
             const form = document.getElementById("nikki-save-form");
-            const backLink = document.querySelector("#nikki-schedule-back a");
+            const backLinks = document.querySelectorAll(
+                "#nikki-schedule-back a, #nikki-save-form .nikki-back-button"
 
             if (form) {
                 form.addEventListener("submit", function (event) {
@@ -833,7 +834,7 @@ def render_nikki_form(logged_in, csrf_token="", event_data=None, event_id=None):
                 });
             }
 
-            if (backLink) {
+            backLinks.forEach(function (backLink) {
                 backLink.addEventListener("click", function () {
                     loading.style.display = "flex";
                 });
