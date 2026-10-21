@@ -1590,7 +1590,14 @@ body.vertical-mode .event-bar-time {
                 
                 {{ search_date.date.month }}/{{ search_date.date.day }}
                 {{ ["月", "火", "水", "木", "金", "土", "日"][search_date.date.weekday()] }}
-                
+
+                {% set day_events = namespace(count=0) %}
+                {% for event in events %}
+                    {% if event.event_date == search_date.date %}
+                        {% set day_events.count = day_events.count + 1 %}
+                    {% endif %}
+                {% endfor %}
+
                 {% if search_date.holiday_name %}
                     <span style="display: inline-flex; flex-direction: column; margin-left: 8px;">
                         <span>（{{ search_date.holiday_name }}）</span>
@@ -1601,23 +1608,12 @@ body.vertical-mode .event-bar-time {
                             </span>
                         {% endif %}
                     </span>
+                {% elif request.args.get('mymemo') == '1' and day_events.count == 0 %}
+                    <span style="margin-left: 10px; color: {% if search_date.date.weekday() >= 5 %}white{% else %}#777{% endif %}; font-weight: normal;">
+                        イベント登録無
+                    </span>
                 {% endif %}
                 
-                {% set day_events = namespace(count=0) %}
-                {% for event in events %}
-                    {% if event.event_date == search_date.date %}
-                        {% set day_events.count = day_events.count + 1 %}
-                    {% endif %}
-                {% endfor %}
-
-                {% if request.args.get('mymemo') == '1' %}
-                    {% if day_events.count == 0 %}
-                        <span style="margin-left: 10px; color: {% if date.holiday_name or date.weekday_number >= 5 %}white{% else %}#777{% endif %}; font-weight: normal;">
-                            イベント登録無
-                        </span>
-                    {% endif %}
-                {% endif %}
-
                 {% set date_memo = saved_date_memos.get(search_date.date.isoformat(), {}) %}
                 {% set date_tag = date_memo.get('tag', '') %}
                 {% set date_color = date_memo.get('tag_color') or '#ffff99' %}
@@ -1644,11 +1640,9 @@ body.vertical-mode .event-bar-time {
                             メモ
                         </button>
 
-                        {% if day_events.count == 0 %}
                             <a href="/oshikatsu/add?event_date={{ search_date.date.isoformat() }}" class="event-edit-button" style="width: 70px; box-sizing: border-box;">
                                 日記
                             </a>
-                        {% endif %}
 
                     </div>
                 </div>
@@ -1982,7 +1976,7 @@ body.vertical-mode .event-bar-time {
                     {% endif %}
                 </span>
             {% elif day_events.count == 0 %}
-                <span style="margin-left: 10px; color: {% if search_date.holiday_name or search_date.date.weekday() >= 5 %}white{% else %}#777{% endif %}; font-weight: normal;">
+                <span style="margin-left: 10px; color: {% if date.weekday_number >= 5 %}white{% else %}#777{% endif %}; font-weight: normal;">
                     イベント登録無
                 </span>
             {% endif %}
