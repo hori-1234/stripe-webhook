@@ -292,7 +292,7 @@ def render_nikki_form(logged_in, csrf_token="", event_data=None, event_id=None):
             <details class="demo-diary-first">
     <summary aria-label="日記を表示">
         <span class="demo-diary-first-guide">
-            ※日記は折りたたんで表示できます
+            ※日記(本文)の表示は折りたたみ式です
         </span>
     </summary>
 
