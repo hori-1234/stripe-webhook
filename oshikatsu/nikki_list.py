@@ -287,7 +287,7 @@ def render_nikki_list(
             display: flex;
             justify-content: center;
             align-items: center;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
             gap: 12px;
             font-size: 14px;
             font-weight: bold;
@@ -363,6 +363,7 @@ def render_nikki_list(
     <header class="site-header">
 
         <nav class="site-header-nav" style="font-size: 18px;">
+            <a href="/oshikatsu/purpose" style="color: inherit; text-decoration: none;">目的</a>
             <a href="/schedule" style="color: inherit; text-decoration: none;">イベスケ</a>
         </nav>
     </header>
