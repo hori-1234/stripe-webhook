@@ -153,7 +153,6 @@ def save_oshi_diary():
         return "入力文字数が上限を超えています", 400
         
     conn = psycopg2.connect(os.environ["DATABASE_URL"])
-        conn = psycopg2.connect(os.environ["DATABASE_URL"])
 
     try:
         with conn:
