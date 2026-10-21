@@ -151,14 +151,43 @@ def save_oshi_diary():
         or len(diary_text) > 50000
     ):
         return "入力文字数が上限を超えています", 400
-
+        
     conn = psycopg2.connect(os.environ["DATABASE_URL"])
+        conn = psycopg2.connect(os.environ["DATABASE_URL"])
 
     try:
         with conn:
             with conn.cursor() as cur:
                 cur.execute("""
+                    SELECT id
+                    FROM oshi_diaries
+                    WHERE user_id = %s
+                      AND event_date = %s
+                      AND event_name = %s
+                    ORDER BY id DESC
+                    LIMIT 1
+                """, (
+                    str(user_id),
+                    event_date,
+                    event_name
+                ))
+
+                existing_diary = cur.fetchone()
+
+                if existing_diary:
+                    from flask import redirect, url_for
+
+                    return redirect(
+                        url_for(
+                            "oshikatsu.view_oshi_diary",
+                            diary_id=existing_diary[0]
+                        ),
+                        code=303
+                    )
+
+                cur.execute("""
                     INSERT INTO oshi_diaries (
+
                         user_id,
                         event_date,
                         event_name,
