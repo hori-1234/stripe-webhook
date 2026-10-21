@@ -220,7 +220,7 @@ def cleanup_oshi_photos():
     )
 
     queued_deleted = process_oshi_photo_delete_queue(
-        limit=20
+        limit=200
     )
 
     orphan_deleted = delete_orphan_oshi_photos(
