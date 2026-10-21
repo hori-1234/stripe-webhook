@@ -21,6 +21,7 @@ from event_schedule.ibesuke_mokuteki import ibesuke_mokuteki
 from event_schedule.riyoukiyaku import riyoukiyaku
 from oshikatsu.oshi_keiro import oshikatsu_bp
 from oshikatsu.oshi_photo_view import oshi_photo_bp
+from oshikatsu.oshi_mokuteki import oshi_mokuteki_bp
 from oshikatsu.oshi_db import init_oshi_db
 from product import process_products
 from ticket_check import (
@@ -45,6 +46,7 @@ app.register_blueprint(unei_kanri_bp)
 app.register_blueprint(event_schedule_bp)
 app.register_blueprint(oshikatsu_bp)
 app.register_blueprint(oshi_photo_bp)
+app.register_blueprint(oshi_mokuteki_bp)
 app.register_blueprint(memo_auth_bp)
 app.register_blueprint(ibesuke_mokuteki)
 app.register_blueprint(riyoukiyaku)
