@@ -1604,7 +1604,7 @@ body.vertical-mode .event-bar-time {
 
                 {% if request.args.get('mymemo') == '1' %}
                     {% if day_events.count == 0 %}
-                        <span style="margin-left: 10px; color: #777; font-weight: normal;">
+                        <span style="margin-left: 10px; color: {% if date.holiday_name or date.weekday_number >= 5 %}white{% else %}#777{% endif %}; font-weight: normal;">
                             イベント登録無
                         </span>
                     {% endif %}
@@ -1962,17 +1962,23 @@ body.vertical-mode .event-bar-time {
         data-date="{{ '%04d-%02d-%02d'|format(year, month, date.day) }}">
         
             {{ month }}/{{ date.day }} {{ date.weekday }}
-
+            
             {% if date.holiday_name %}
-                （{{ date.holiday_name }}）
-            {% endif %}
+                <span style="display: inline-flex; flex-direction: column; margin-left: 8px;">
+                    <span>{{ date.holiday_name }}</span>
 
-            {% if day_events.count == 0 %}
-                <span style="margin-left: 10px; color: #777; font-weight: normal;">
+                    {% if day_events.count == 0 %}
+                        <span style="color: inherit; font-weight: normal;">
+                            イベント登録無
+                        </span>
+                    {% endif %}
+                </span>
+            {% elif day_events.count == 0 %}
+                <span style="margin-left: 10px; color: {% if search_date.holiday_name or search_date.date.weekday() >= 5 %}white{% else %}#777{% endif %}; font-weight: normal;">
                     イベント登録無
                 </span>
             {% endif %}
-
+            
             <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
 
                 {% if date_tag and date_tag != '付箋なし' %}
