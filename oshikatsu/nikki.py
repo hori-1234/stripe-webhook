@@ -737,11 +737,13 @@ def render_nikki_form(logged_in, csrf_token="", event_data=None, event_id=None):
                 photoLoading.classList.remove("is-loading");
                 enlarged.style.visibility = "hidden";
             });
-
+            
             function showDemoPhoto(index) {
-                if (index < 0 || index >= previewPhotoUrls.length) {
+                if (previewPhotoUrls.length === 0) {
                     return;
                 }
+
+                index = (index + previewPhotoUrls.length) % previewPhotoUrls.length;
 
                 currentPhotoIndex = index;
 
@@ -760,8 +762,8 @@ def render_nikki_form(logged_in, csrf_token="", event_data=None, event_id=None):
                 counter.textContent =
                     (index + 1) + " / " + previewPhotoUrls.length;
 
-                prevButton.disabled = index === 0;
-                nextButton.disabled = index === previewPhotoUrls.length - 1;
+                prevButton.disabled = previewPhotoUrls.length < 2;
+                nextButton.disabled = previewPhotoUrls.length < 2;
 
                 showPhotoArrows();
             }
@@ -820,7 +822,7 @@ def render_nikki_form(logged_in, csrf_token="", event_data=None, event_id=None):
                     closeDemoPhoto();
                 }
             });
-
+            
             document.addEventListener("keydown", function (event) {
                 if (!lightbox.classList.contains("is-open")) {
                     return;
@@ -833,6 +835,52 @@ def render_nikki_form(logged_in, csrf_token="", event_data=None, event_id=None):
                 } else if (event.key === "ArrowRight") {
                     showDemoPhoto(currentPhotoIndex + 1);
                 }
+            });
+
+            // スマホのスワイプで写真を切り替える
+            let touchStartX = null;
+            let touchStartY = null;
+
+            lightbox.addEventListener("touchstart", function (event) {
+                if (event.touches.length !== 1) {
+                    touchStartX = null;
+                    return;
+                }
+
+                touchStartX = event.touches[0].clientX;
+                touchStartY = event.touches[0].clientY;
+            }, { passive: true });
+
+            lightbox.addEventListener("touchend", function (event) {
+                if (touchStartX === null || event.changedTouches.length === 0) {
+                    return;
+                }
+
+                const differenceX =
+                    event.changedTouches[0].clientX - touchStartX;
+
+                const differenceY =
+                    event.changedTouches[0].clientY - touchStartY;
+
+                touchStartX = null;
+                touchStartY = null;
+
+                // 縦方向の操作や短い移動は無視する
+                if (Math.abs(differenceX) < 50 ||
+                    Math.abs(differenceX) <= Math.abs(differenceY)) {
+                    return;
+                }
+
+                if (differenceX < 0) {
+                    showDemoPhoto(currentPhotoIndex + 1);
+                } else {
+                    showDemoPhoto(currentPhotoIndex - 1);
+                }
+            }, { passive: true });
+
+            lightbox.addEventListener("touchcancel", function () {
+                touchStartX = null;
+                touchStartY = null;
             });
         });
     </script>
