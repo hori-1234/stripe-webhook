@@ -3,6 +3,9 @@ import psycopg2
 import calendar
 import jpholiday
 import secrets
+import subprocess
+import tempfile
+import shutil
 
 from .flyer_storage import (
     upload_flyer_to_r2,
@@ -1393,6 +1396,131 @@ def schedule_admin():
         events=admin_events
     )
 
+
+@event_schedule_bp.route("/schedule/admin/backup", methods=["POST"])
+@admin_required
+
+def schedule_admin_backup():
+    import threading
+    from flask import send_file, current_app
+
+    # CSRFトークンを検証
+    submitted_token = request.form.get("csrf_token", "")
+    expected_token = session.get("admin_backup_csrf_token", "")
+
+    if (
+        not submitted_token
+        or not expected_token
+        or not secrets.compare_digest(submitted_token, expected_token)
+    ):
+        return "不正なリクエストです。", 403
+
+    # pg_dump が実行できるか確認
+    pg_dump_path = shutil.which("pg_dump")
+
+    if not pg_dump_path:
+        return "サーバーにpg_dumpがインストールされていません。", 500
+
+    if not DATABASE_URL:
+        return "データベース接続情報がありません。", 500
+
+    # 一時ファイルを作成
+    temp_file = tempfile.NamedTemporaryFile(
+        suffix=".dump",
+        delete=False
+    )
+    temp_path = temp_file.name
+    temp_file.close()
+
+    try:
+        # バックアップを一時ファイルに直接保存
+        subprocess.run(
+            [
+                pg_dump_path,
+                "--format=custom",
+                "--no-owner",
+                "--no-acl",
+                "--file=" + temp_path,
+                "--dbname=" + DATABASE_URL
+            ],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.PIPE,
+            timeout=180,
+            check=True
+        )
+
+        if os.path.getsize(temp_path) == 0:
+            return "バックアップデータが空です。", 500
+
+        filename = (
+            "render_backup_"
+            + datetime.now(ZoneInfo("Asia/Tokyo")).strftime("%Y%m%d_%H%M%S")
+            + ".dump"
+        )
+
+        # ダウンロード用にファイルを開く
+        download_file = open(temp_path, "rb")
+
+        def generate():
+            try:
+                while True:
+                    chunk = download_file.read(1024 * 1024)
+
+                    if not chunk:
+                        break
+
+                    yield chunk
+            finally:
+                download_file.close()
+                try:
+                    os.remove(temp_path)
+                except OSError:
+                    current_app_logger.warning(
+                        "バックアップ一時ファイルの削除に失敗: %s",
+                        temp_path
+                    )
+
+        from flask import Response, stream_with_context
+
+        current_app_logger = current_app.logger
+
+        response = Response(
+            stream_with_context(generate()),
+            mimetype="application/octet-stream",
+            headers={
+                "Content-Disposition": (
+                    f'attachment; filename="{filename}"'
+                ),
+                "Cache-Control": "no-store",
+                "X-Content-Type-Options": "nosniff"
+            }
+        )
+
+        response.content_length = os.path.getsize(temp_path)
+        return response
+
+    except subprocess.TimeoutExpired:
+        return "バックアップ処理がタイムアウトしました。", 500
+
+    except subprocess.CalledProcessError:
+        current_app.logger.exception(
+            "PostgreSQLバックアップに失敗しました"
+        )
+        return "バックアップに失敗しました。", 500
+
+    except Exception:
+        current_app.logger.exception(
+            "バックアップ処理中にエラーが発生しました"
+        )
+        return "バックアップ処理中にエラーが発生しました。", 500
+
+    finally:
+        # エラーなどで送信が始まらなかった場合だけ削除
+        if "download_file" not in locals():
+            try:
+                os.remove(temp_path)
+            except OSError:
+                pass
 
 @event_schedule_bp.route(
     "/schedule/performer-favorite",
