@@ -755,7 +755,7 @@ def use_ticket(ticket_id):
                 purchaser_name,
                 amount,
                 used,
-                used_at
+                used_at,
                 reservation_name
             FROM tickets
             WHERE ticket_id = %s
