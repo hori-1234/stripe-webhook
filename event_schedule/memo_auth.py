@@ -1092,6 +1092,11 @@ def memo_account_delete():
         email = row[0]
 
         cur.execute("""
+            DELETE FROM oshi_diaries
+            WHERE user_id = %s
+        """, (str(user_id),))
+
+        cur.execute("""
             DELETE FROM schedule_memo_login_codes
             WHERE email = %s
         """, (email,))
@@ -1157,6 +1162,7 @@ def memo_account_delete_confirm():
             <li>アカウント情報</li>
             <li>マイメモ・付箋</li>
             <li>お気に入り演者</li>
+            <li>推し活日記・写真</li>
         </ul>
 
         <p style="color: red;">
