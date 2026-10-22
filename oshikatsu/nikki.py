@@ -482,6 +482,10 @@ def render_nikki_form(logged_in, csrf_token="", event_data=None, event_id=None):
         }
 
         .demo-photo-lightbox img {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             max-width: 90vw;
             max-height: 85vh;
             object-fit: contain;
@@ -529,7 +533,7 @@ def render_nikki_form(logged_in, csrf_token="", event_data=None, event_id=None):
             pointer-events: none;
         }
 
-        .demo-photo-arrow {
+        .demo-photo-arrow ,
         .demo-photo-close {
             transition: opacity 0.3s ease;
         }
