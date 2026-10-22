@@ -539,7 +539,7 @@ def delete_oshi_diary(diary_id):
     finally:
         conn.close()
 
-    return redirect(
+    response = redirect(
         url_for("oshikatsu.list_oshi_diaries"),
         code=303
     )
