@@ -38,7 +38,7 @@ app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024
 limiter.init_app(app)
 init_oshi_db()
 app.secret_key = os.environ.get("kuri_SECRET_KEY")
-app.config["PERMANENT_SESSION_LIFETIME"] = 60 * 60 * 24 * 365
+app.config["PERMANENT_SESSION_LIFETIME"] = 60 * 60 * 24 * 30
 app.config["SESSION_REFRESH_EACH_REQUEST"] = True
 app.config["SESSION_COOKIE_SECURE"] = True
 app.config["SESSION_COOKIE_HTTPONLY"] = True
@@ -464,31 +464,6 @@ def test_email():
         )
 
         return "テストメール送信失敗", 500
-
-
-@app.route("/test-r2")
-def test_r2():
-
-    try:
-
-        response = r2.get_object(
-            Bucket=R2_BUCKET,
-            Key="サンプルPDF.pdf"
-        )
-
-        return response["Body"].read(), 200, {
-            "Content-Type": "application/pdf",
-            "Content-Disposition": "attachment; filename=sample.pdf"
-        }
-
-    except Exception as e:
-
-        print(
-            "R2取得エラー:",
-            repr(e)
-        )
-
-        return "R2取得失敗", 500
 
 
 @app.route("/")
