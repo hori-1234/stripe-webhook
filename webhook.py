@@ -437,35 +437,6 @@ def ticket_cancel_confirm(ticket_id, token):
     )
 
 
-@app.route("/test-email")
-def test_email():
-
-    try:
-
-        response = resend.Emails.send({
-            "from": "onboarding@resend.dev",
-            "to": ["delivered@resend.dev"],
-            "subject": "マイマケ テストメール",
-            "text": "Resendからのテストメールです。"
-        })
-
-        print(
-            "テストメール送信成功:",
-            response
-        )
-
-        return "テストメール送信成功"
-
-    except Exception as e:
-
-        print(
-            "テストメール送信失敗:",
-            e
-        )
-
-        return "テストメール送信失敗", 500
-
-
 @app.route("/")
 def home():
 
