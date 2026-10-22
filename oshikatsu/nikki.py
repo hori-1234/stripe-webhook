@@ -884,7 +884,30 @@ def render_nikki_form(logged_in, csrf_token="", event_data=None, event_id=None):
                             return total + file.size;
                         }, 0);
 
+                        const oversizedFile = files.find(function (file) {
+                            return file.size > 20 * 1024 * 1024;
+                        });
+
+                        if (oversizedFile) {
+                            event.preventDefault();
+
+                            const errorMessage = document.getElementById("nikki-upload-error");
+
+                            if (errorMessage) {
+                                errorMessage.textContent = "画像は1枚20MiB以下にしてください。";
+                                errorMessage.hidden = false;
+                                errorMessage.scrollIntoView({
+                                    behavior: "smooth",
+                                    block: "center"
+                                });
+                            }
+
+                            return;
+                        }
+
                         if (totalBytes > 99 * 1024 * 1024) {
+
+                        
                             event.preventDefault();
 
                             const errorMessage = document.getElementById("nikki-upload-error");
