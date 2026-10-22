@@ -1390,12 +1390,16 @@ def schedule_admin():
             "registration_ip": event[9],
             "is_blocked": event[9] in blocked_ips
         })
+    
+    # バックアップ専用のCSRFトークンを生成
+    if "admin_backup_csrf_token" not in session:
+        session["admin_backup_csrf_token"] = secrets.token_urlsafe(32)
 
     return render_template(
         "schedule_admin.html",
-        events=admin_events
+        events=admin_events,
+        admin_backup_csrf_token=session["admin_backup_csrf_token"]
     )
-
 
 @event_schedule_bp.route("/schedule/admin/backup", methods=["POST"])
 @admin_required
