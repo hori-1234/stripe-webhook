@@ -63,8 +63,13 @@
         ">
             アクセス統計
         </a>
-
+        
         <form method="POST" action="/schedule/admin/backup" style="margin: 0;">
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ admin_backup_csrf_token }}"
+            >
             <button type="submit" style="
                 display: inline-block;
                 padding: 10px 20px;
