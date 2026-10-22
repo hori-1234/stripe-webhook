@@ -523,12 +523,14 @@ def render_nikki_form(logged_in, csrf_token="", event_data=None, event_id=None):
             display: none;
         }
 
-        .demo-photo-arrow.is-hidden {
+        .demo-photo-arrow.is-hidden,
+        .demo-photo-close.is-hidden {
             opacity: 0;
             pointer-events: none;
         }
 
         .demo-photo-arrow {
+        .demo-photo-close {
             transition: opacity 0.3s ease;
         }
 
@@ -718,12 +720,14 @@ def render_nikki_form(logged_in, csrf_token="", event_data=None, event_id=None):
             function showPhotoArrows() {
                 prevButton.classList.remove("is-hidden");
                 nextButton.classList.remove("is-hidden");
+                closeButton.classList.remove("is-hidden");
 
                 clearTimeout(arrowHideTimer);
 
                 arrowHideTimer = setTimeout(function () {
                     prevButton.classList.add("is-hidden");
                     nextButton.classList.add("is-hidden");
+                    closeButton.classList.add("is-hidden");
                 }, 3000);
             }
 
