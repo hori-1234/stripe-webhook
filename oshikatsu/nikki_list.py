@@ -672,7 +672,7 @@ def render_nikki_list(
                 const csrfInput = document.createElement("input");
                 csrfInput.type = "hidden";
                 csrfInput.name = "csrf_token";
-                csrfInput.value = "{{ csrf_token }}";
+                csrfInput.value = {{ csrf_token | tojson }};
 
                 form.appendChild(csrfInput);
                 document.body.appendChild(form);
