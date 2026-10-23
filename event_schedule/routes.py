@@ -408,11 +408,40 @@ def schedule_registration_request():
                 padding: 10px 20px;
                 cursor: pointer;
             }
-
+        
             textarea {
                 resize: vertical;
             }
+
+            .request-status {
+                display: inline-block;
+                padding: 4px 12px;
+                border-radius: 5px;
+                font-size: 14px;
+                font-weight: bold;
+            }
+
+            .status-pending {
+                background: #f1f3f5;
+                color: #495057;
+            }
+
+            .status-checking {
+                background: #fff3cd;
+                color: #856404;
+            }
+
+            .status-completed {
+                background: #d4edda;
+                color: #155724;
+            }
+
+            .status-rejected {
+                background: #f8d7da;
+                color: #721c24;
+            }
         </style>
+
     </head>
     <body>
         <h2>イベント登録依頼</h2>
@@ -426,7 +455,8 @@ def schedule_registration_request():
                    name="csrf_token"
                    value="{{ csrf_token }}">
 
-            <p>登録したいイベントのURLを入れてください</p>
+            <p>登録したいイベントの告知されたURLを入れてください</p><br>
+            <p>※確認が出来ない場合、登録不可となります。</p>
 
             <div class="url-row">
                 <input type="url"
@@ -455,7 +485,8 @@ def schedule_registration_request():
 
             <p>※主催者様からの依頼であればフライヤーの登録も可能です</p>
 
-            <p>コメント（任意）</p>
+            <p>コメント（任意）</p><br>
+            <p>※訂正の場合、依頼番号を入力ください</p>
 
             <textarea name="comment"
                       rows="2"
@@ -512,7 +543,15 @@ def schedule_registration_request():
                     {% endif %}
 
                     <div>
-                        対応状況：<strong class="request-status">{{ item[4] }}</strong>
+                        対応状況：
+                        <strong class="request-status
+                            {% if item[4] == '未対応' %}status-pending
+                            {% elif item[4] == '確認中' %}status-checking
+                            {% elif item[4] == '登録完了' %}status-completed
+                            {% elif item[4] == '登録不可' %}status-rejected
+                            {% endif %}">
+                            {{ item[4] }}
+                        </strong>
                     </div>
                     
                     {% if is_operator %}
@@ -603,8 +642,28 @@ def schedule_registration_request():
                     if (action === "delete") {
                         card.remove();
                     } else {
+
                         const statusDisplay = card.querySelector(".request-status");
+
                         statusDisplay.textContent = result.status;
+
+                        statusDisplay.classList.remove(
+                            "status-pending",
+                            "status-checking",
+                            "status-completed",
+                            "status-rejected"
+                        );
+
+                        const statusClasses = {
+                            "未対応": "status-pending",
+                            "確認中": "status-checking",
+                            "登録完了": "status-completed",
+                            "登録不可": "status-rejected"
+                        };
+
+                        statusDisplay.classList.add(
+                            statusClasses[result.status]
+                        );                    
                     }
 
                 } catch (error) {
@@ -631,7 +690,7 @@ def schedule_registration_request():
     "/schedule/request/<int:request_id>/manage",
     methods=["POST"]
 )
-def manage_schedule_registration_request():
+def manage_schedule_registration_request(request_id):
     if not is_schedule_operator():
         return "操作権限がありません", 403
 
