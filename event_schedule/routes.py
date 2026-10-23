@@ -1859,14 +1859,52 @@ def schedule_admin_stats():
     ]
 
     cur.execute("""
+        WITH visitor_history AS (
+            SELECT
+                visit_date,
+                visitor_id,
+                LAG(visit_date) OVER (
+                    PARTITION BY visitor_id
+                    ORDER BY visit_date
+                ) AS previous_visit
+            FROM schedule_unique_visitors
+        ),
+        daily_visitors AS (
+            SELECT
+                visit_date,
+                COUNT(*) AS unique_count,
+                COUNT(*) FILTER (
+                    WHERE previous_visit IS NOT NULL
+                      AND visit_date - previous_visit <= 7
+                ) AS repeat_count
+            FROM visitor_history
+            GROUP BY visit_date
+        ),
+        daily_page_views AS (
+            SELECT
+                view_date,
+                SUM(view_count) AS view_count
+            FROM schedule_page_views
+            GROUP BY view_date
+        )
         SELECT
-            view_date,
-            SUM(view_count) AS daily_views
-        FROM schedule_page_views
-        WHERE view_date >=
+            p.view_date,
+            p.view_count,
+            COALESCE(v.unique_count, 0),
+            COALESCE(
+                ROUND(
+                    v.repeat_count * 100.0
+                    / NULLIF(v.unique_count, 0),
+                    1
+                ),
+                0
+            )
+        FROM daily_page_views p
+        LEFT JOIN daily_visitors v
+            ON p.view_date = v.visit_date
+        WHERE p.view_date >=
             (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo')::date - 29
-        GROUP BY view_date
-        ORDER BY view_date DESC
+        ORDER BY p.view_date DESC
     """)
 
     daily_views = cur.fetchall()
@@ -1921,39 +1959,67 @@ def schedule_admin_stats():
 
     registered_users, today_registrations, month_registrations = cur.fetchone()
 
-    # リピート率（今月・累計）
+    # リピート率（前回訪問から7日以内）
     cur.execute("""
-        WITH visitor_counts AS (
+        WITH visits AS (
             SELECT
                 visitor_id,
-                COUNT(*) AS total_days,
+                visit_date,
+                LAG(visit_date) OVER (
+                    PARTITION BY visitor_id
+                    ORDER BY visit_date
+                ) AS previous_visit
+            FROM schedule_unique_visitors
+        ),
+        repeat_visits AS (
+            SELECT
+                visitor_id,
+                visit_date,
+                CASE
+                    WHEN previous_visit IS NOT NULL
+                     AND visit_date - previous_visit <= 7
+                    THEN 1
+                    ELSE 0
+                END AS is_repeat
+            FROM visits
+        ),
+        visitor_summary AS (
+            SELECT
+                visitor_id,
+                MAX(is_repeat) FILTER (
+                    WHERE visit_date >= DATE_TRUNC(
+                        'month',
+                        CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
+                    )::date
+                ) AS month_repeat,
+                MAX(is_repeat) AS total_repeat,
                 COUNT(*) FILTER (
                     WHERE visit_date >= DATE_TRUNC(
                         'month',
                         CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo'
                     )::date
                 ) AS month_days
-            FROM schedule_unique_visitors
+            FROM repeat_visits
             GROUP BY visitor_id
         )
         SELECT
             COALESCE(
                 ROUND(
-                    COUNT(*) FILTER (WHERE month_days >= 2) * 100.0
-                    / NULLIF(COUNT(*) FILTER (WHERE month_days >= 1), 0),
+                    COUNT(*) FILTER (WHERE month_repeat = 1) * 100.0
+                    / NULLIF(COUNT(*) FILTER (WHERE month_days > 0), 0),
                     1
                 ),
                 0
             ),
             COALESCE(
                 ROUND(
-                    COUNT(*) FILTER (WHERE total_days >= 2) * 100.0
+                    COUNT(*) FILTER (WHERE total_repeat = 1) * 100.0
                     / NULLIF(COUNT(*), 0),
                     1
                 ),
                 0
             )
-        FROM visitor_counts
+        FROM visitor_summary
     """)
 
     month_repeat_rate, total_repeat_rate = cur.fetchone()
