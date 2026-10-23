@@ -86,7 +86,19 @@
     <iframe id="youtubePlayer" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>
 </div>
 
+<button id="flipButton" onclick="
+    const player = document.getElementById('youtubePlayer');
+    const flipped = player.style.transform !== 'scaleX(-1)';
+    player.style.transform = flipped ? 'scaleX(-1)' : 'scaleX(1)';
+    this.textContent = flipped ? '反転中' : '通常';
+">通常</button>
+
+<p style="font-size: 12px; color: #aaa; margin: 4px 0;">
+    ※左右反転すると、動画内の文字や操作ボタンも反転して表示されます。
+</p>
+
 <button id="expandButton" onclick="
+    
     const box = document.getElementById('videoBox');
     box.classList.toggle('expanded');
     const expanded = box.classList.contains('expanded');
@@ -96,10 +108,17 @@
 
 <h3>インカメラ</h3>
 <button onclick="startCamera()">カメラ起動</button>
+<button id="cameraFlipButton" onclick="
+    const camera = document.getElementById('camera');
+    const flipped = camera.style.transform !== 'scaleX(-1)';
+    camera.style.transform = flipped ? 'scaleX(-1)' : 'scaleX(1)';
+    this.textContent = flipped ? '反転中' : '通常';
+">通常</button>
 <video id="camera" autoplay muted playsinline></video>
 
 <div>
     <button id="startButton" onclick="startRecording()" disabled>録画開始</button>
+    
     <button id="stopButton" onclick="stopRecording()" disabled>録画停止</button>
 </div>
 
