@@ -1206,16 +1206,15 @@ body.vertical-mode .event-bar-time {
             overflow-wrap: anywhere;
         }
 
-                 /* 終了分ボタン：PC・スマホ横は新規追加の下 */
+        /* 終了分開閉ボタン：登録者名の右隣 */
         #finished-events-button {
-            display: none;
-            position: absolute;
-            right: 0;
-            bottom: -48px;
-            width: 95px;
-            padding: 10px 0;
+            display: inline-block;
+            position: static;
+            width: auto;
+            padding: 10px 20px;
             margin: 0;
             border: 1px solid #333;
+            border-radius: 4px;
             background: #fff;
             color: #222;
             box-sizing: border-box;
@@ -1236,17 +1235,6 @@ body.vertical-mode .event-bar-time {
                 line-height: 20px;
                 margin: 12px 0 0 0;
                 order: 2;
-            }
-
-            body.vertical-mode #finished-events-button {
-                position: static;
-                display: inline-block !important;
-                vertical-align: middle;
-                width: 110px;
-                height: 42px;
-                line-height: 20px;
-                margin: 12px 20px 0 0;
-                order: 1;
             }
 
             body.vertical-mode .top-controls {
@@ -1428,6 +1416,10 @@ body.vertical-mode .event-bar-time {
             <button type="button" id="performer-panel-button" onclick="togglePerformerPanel()">
                 ▽ 登録者名
             </button>
+
+            <button type="button" id="finished-events-button" onclick="toggleFinishedEvents()">
+                ▽ 終了分開閉
+            </button>
         </div>
 
         <form id="schedule-search-form"
@@ -1573,10 +1565,6 @@ body.vertical-mode .event-bar-time {
     <a href="/schedule/add" class="add-button">
         新規追加
     </a>
-
-    <button type="button" id="finished-events-button" onclick="toggleFinishedEvents()">
-        終了分開閉
-    </button>
 
 </div>
 
