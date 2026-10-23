@@ -692,7 +692,6 @@ def logout_memo_user():
 def is_memo_logged_in():
     return session.get("memo_user_id") is not None
 
-
 def get_logged_in_memo_email():
     if not is_memo_logged_in():
         return None
@@ -700,7 +699,20 @@ def get_logged_in_memo_email():
     return session.get("memo_user_email")
 
 
+def is_schedule_operator():
+    if not is_memo_logged_in():
+        return False
+
+    email = get_logged_in_memo_email()
+
+    if not email:
+        return False
+
+    return email.strip().lower() == "minawoshi212@yahoo.co.jp"
+
+
 def should_show_google_link_prompt():
+
     user_id = session.get("memo_user_id")
 
     if user_id is None:
