@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ダンス撮影テスト</title>
+    <title>練習サイト(テスト)</title>
     <style>
         body {
             margin: 0;
@@ -128,7 +128,7 @@ function loadYoutube() {
 
     document.getElementById("youtubePlayer").src = embedUrl;
 }
-        
+    
 async function startCamera() {
     try {
         cameraStream = await navigator.mediaDevices.getUserMedia({
@@ -137,9 +137,6 @@ async function startCamera() {
                 noiseSuppression: false,
                 autoGainControl: false
             },
-            video: { facingMode: "user" }
-        });
-            audio: true,
             video: { facingMode: "user" }
         });
 
