@@ -621,13 +621,13 @@ def schedule_registration_request():
                 button.disabled = true;
 
                 try {
-                    ああああ
+                
                     const response = await fetch(form.getAttribute("action"), {
                         method: "POST",
                         body: new FormData(form),
                         credentials: "same-origin"
                     });
-                    ああああ
+                
 
                     if (!response.ok) {
                         throw new Error("HTTP " + response.status);
