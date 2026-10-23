@@ -57,9 +57,11 @@
 <button onclick="loadYoutube()">動画を表示</button>
 <button onclick="document.getElementById('youtubeUrl').value = ''">クリア</button>
 
-<div class="video-box">
+<div class="video-box" id="videoBox">
     <iframe id="youtubePlayer" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>
 </div>
+
+<button onclick="document.getElementById('videoBox').requestFullscreen()">拡大</button>
 
 <h3>インカメラ</h3>
 <button onclick="startCamera()">カメラ起動</button>
