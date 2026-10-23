@@ -177,6 +177,7 @@
         撮影動画の再生開始位置：
         <span id="compareStartValue">0.0秒 / 0.0秒</span>
     </p>
+    
     <input
         type="range"
         id="compareStartTime"
@@ -187,6 +188,10 @@
         oninput="setCompareStartTime()"
     >
 
+    <p>撮影動画の再生操作</p>
+    <button id="comparePlayButton" onclick="toggleComparePlayback()">
+        再生
+    </button>
 </div>
 
 <button id="flipButton" onclick="
@@ -287,8 +292,79 @@ function setCompareStartTime() {
         startTime.toFixed(1) + "秒 / " + duration.toFixed(1) + "秒";
 }
 
-async function toggleCompareMode() {
-    
+async function toggleComparePlayback() {
+    const compareVideo = document.getElementById("compareVideo");
+    const button = document.getElementById("comparePlayButton");
+    const status = document.getElementById("status");
+
+    if (!compareMode) {
+        return;
+    }
+
+    if (!youtubePlayerApi ||
+        typeof youtubePlayerApi.playVideo !== "function" ||
+        typeof youtubePlayerApi.pauseVideo !== "function") {
+        status.textContent =
+            "同時再生はYouTube動画で利用できます";
+        return;
+    }
+
+    if (compareVideo.paused) {
+        try {
+            if (compareVideo.ended) {
+                compareVideo.currentTime = 0;
+            }
+
+            await compareVideo.play();
+            youtubePlayerApi.playVideo();
+
+            button.textContent = "一時停止";
+            status.textContent = "同時再生中";
+
+        } catch (error) {
+            compareVideo.pause();
+            button.textContent = "再生";
+            status.textContent =
+                "再生できません: " + error.message;
+        }
+
+    } else {
+        compareVideo.pause();
+        youtubePlayerApi.pauseVideo();
+
+        button.textContent = "再生";
+        status.textContent = "一時停止中";
+    }
+}
+
+const compareVideoElement = document.getElementById("compareVideo");
+
+compareVideoElement.addEventListener("timeupdate", () => {
+    if (!compareMode) {
+        return;
+    }
+
+    const slider = document.getElementById("compareStartTime");
+    const startValue = document.getElementById("compareStartValue");
+
+    const currentTime = compareVideoElement.currentTime;
+    const duration = compareVideoElement.duration;
+
+    if (!Number.isFinite(duration) || duration <= 0) {
+        return;
+    }
+
+    slider.value = currentTime;
+
+    startValue.textContent =
+        currentTime.toFixed(1) + "秒 / " + duration.toFixed(1) + "秒";
+});
+
+compareVideoElement.addEventListener("ended", () => {
+    document.getElementById("comparePlayButton").textContent = "再生";
+});
+
+async function toggleCompareMode() { 
     const button = document.getElementById("compareButton");
     const startButton = document.getElementById("startButton");
     const recordingControls = document.getElementById("recordingControls");
@@ -342,10 +418,18 @@ async function toggleCompareMode() {
 
     } else {
         compareVideo.pause();
+
+        if (youtubePlayerApi &&
+            typeof youtubePlayerApi.pauseVideo === "function") {
+            youtubePlayerApi.pauseVideo();
+        }
+
+        document.getElementById("comparePlayButton").textContent = "再生";
+
         compareVideo.style.display = "none";
         compareVideo.removeAttribute("src");
         compareVideo.load();
-    }    
+    }
 
     startButton.disabled = compareMode || !cameraStream;
     
@@ -357,6 +441,50 @@ async function toggleCompareMode() {
     document.getElementById("status").textContent = compareMode
         ? "比較モード中"
         : "通常モード";
+}
+
+let youtubePlayerApi = null;
+let youtubeApiReady = false;
+
+function onYouTubeIframeAPIReady() {
+    youtubeApiReady = true;
+}
+
+function onYouTubePlayerStateChange(event) {
+    if (!compareMode) {
+        return;
+    }
+
+    if (event.data === YT.PlayerState.ENDED) {
+        const compareVideo = document.getElementById("compareVideo");
+
+        compareVideo.pause();
+
+        document.getElementById("comparePlayButton").textContent = "再生";
+
+    }
+
+    if (event.data === YT.PlayerState.PAUSED) {
+        const compareVideo = document.getElementById("compareVideo");
+
+        compareVideo.pause();
+
+        document.getElementById("comparePlayButton").textContent = "再生";
+    }
+
+    if (event.data === YT.PlayerState.PLAYING) {
+        const compareVideo = document.getElementById("compareVideo");
+
+        if (compareVideo.paused && !compareVideo.ended) {
+            compareVideo.play().then(() => {
+                document.getElementById("comparePlayButton").textContent =
+                    "一時停止";
+            }).catch(error => {
+                document.getElementById("status").textContent =
+                    "撮影動画を再生できません: " + error.message;
+            });
+        }
+    }
 }
 
 function loadYoutube() {
@@ -403,7 +531,62 @@ function loadYoutube() {
         return;
     }
 
-    document.getElementById("youtubePlayer").src = embedUrl;
+    // 動画切り替え時に比較動画を停止
+    const compareVideo = document.getElementById("compareVideo");
+    compareVideo.pause();
+
+    // 再生ボタンを初期状態に戻す
+    document.getElementById("comparePlayButton").textContent = "再生";
+
+    if (embedUrl.includes("youtube.com/embed/")) {
+
+        if (!youtubeApiReady) {
+            alert("YouTube APIの読み込みが完了していません");
+            return;
+        }
+
+        const videoId = embedUrl.split("/embed/")[1].split("?")[0];
+
+        if (youtubePlayerApi) {
+            youtubePlayerApi.destroy();
+            youtubePlayerApi = null;
+        }
+
+        const oldPlayer = document.getElementById("youtubePlayer");
+        const newPlayer = document.createElement("div");
+
+        newPlayer.id = "youtubePlayer";
+        oldPlayer.replaceWith(newPlayer);
+        
+        youtubePlayerApi = new YT.Player("youtubePlayer", {
+            width: "100%",
+            height: "100%",
+            videoId: videoId,
+            playerVars: {
+                playsinline: 1
+            },
+            events: {
+                onStateChange: onYouTubePlayerStateChange
+            }
+        });
+
+    } else {
+        if (youtubePlayerApi) {
+            youtubePlayerApi.destroy();
+            youtubePlayerApi = null;
+        }
+
+        const oldPlayer = document.getElementById("youtubePlayer");
+        const newPlayer = document.createElement("iframe");
+
+        newPlayer.id = "youtubePlayer";
+        newPlayer.allow =
+            "autoplay; encrypted-media; picture-in-picture; fullscreen";
+        newPlayer.allowFullscreen = true;
+        newPlayer.src = embedUrl;
+
+        oldPlayer.replaceWith(newPlayer);
+    }
 }
 
 async function toggleCamera() {
@@ -606,5 +789,7 @@ function stopRecording() {
 }
 </script>
 
+<script src="https://www.youtube.com/iframe_api"></script>
+    
 </body>
 </html>
