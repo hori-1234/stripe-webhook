@@ -3671,7 +3671,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const button = document.getElementById('finished-events-button');
 
-    if (isCurrentMonth && button) {
+    if (isCurrentMonth && !isMyMemoMode && button) {
         button.style.display = 'block';
         button.setAttribute('aria-expanded', 'false');
     }
