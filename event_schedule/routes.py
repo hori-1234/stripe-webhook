@@ -369,8 +369,7 @@ def schedule_registration_request():
         cur.close()
         conn.close()
 
-    return render_template_string("""
-
+    response = make_response(render_template_string("""
     
     <!DOCTYPE html>
     <html lang="ja">
@@ -867,9 +866,15 @@ def schedule_registration_request():
         csrf_token=csrf_token,
         completed=completed,
         request_history=request_history,
-        is_operator=is_schedule_operator()
-    )
+        
+        is_operator=is_operator
+    ))
 
+    response.headers["Cache-Control"] = "private, no-store, no-cache, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+
+    return response                                            
 
 @event_schedule_bp.route(
     "/schedule/request/<int:request_id>/manage",
