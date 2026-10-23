@@ -25,6 +25,11 @@
 
         button { margin: 5px 3px; }
 
+        #compareButton {
+            background: yellow;
+            color: black;
+        }
+
         #flipButton.is-flipped,
         #cameraFlipButton.is-flipped {
             background: red;
@@ -93,7 +98,10 @@
     <iframe id="youtubePlayer" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>
 </div>
 
+<button id="compareButton" onclick="toggleCompareMode()">比較モード OFF</button>
+
 <button id="flipButton" onclick="
+
     const player = document.getElementById('youtubePlayer');
     const flipped = player.style.transform !== 'scaleX(-1)';
     player.style.transform = flipped ? 'scaleX(-1)' : 'scaleX(1)';
@@ -125,9 +133,9 @@
 ">通常</button>
 <video id="camera" autoplay muted playsinline></video>
 
-<div>
+<div id="recordingControls">
     <button id="startButton" onclick="startRecording()" disabled>録画開始</button>
-    
+
     <button id="stopButton" onclick="stopRecording()" disabled>録画停止</button>
 </div>
 
@@ -138,6 +146,7 @@
 <a id="downloadLink" style="display:none;color:#8bc6ff;" download="dance-recording.mp4">録画動画をダウンロード</a>
 
 <script>
+    
 let cameraStream = null;
 let recorder = null;
 let chunks = [];
@@ -147,7 +156,38 @@ let recordingCanvas = null;
 let recordingContext = null;
 let recordingStream = null;
 let recordingAnimationId = null;
-    
+
+let compareMode = false;
+
+function toggleCompareMode() {
+    const button = document.getElementById("compareButton");
+    const startButton = document.getElementById("startButton");
+
+    if (recorder && recorder.state === "recording") {
+        document.getElementById("status").textContent =
+            "録画中は比較モードに切り替えできません";
+        return;
+    }
+
+    if (!recordingUrl) {
+        document.getElementById("status").textContent =
+            "先に動画を撮影してください";
+        return;
+    }
+
+    compareMode = !compareMode;
+
+    button.textContent = compareMode
+        ? "比較モード ON"
+        : "比較モード OFF";
+
+    startButton.disabled = compareMode || !cameraStream;
+
+    document.getElementById("status").textContent = compareMode
+        ? "比較モード中"
+        : "通常モード";
+}
+
 function loadYoutube() {
     const input = document.getElementById("youtubeUrl").value.trim();
     let embedUrl = "";
