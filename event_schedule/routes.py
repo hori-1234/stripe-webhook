@@ -17,6 +17,7 @@ from event_schedule.memo_auth import (
     get_logged_in_memo_email,
     should_show_google_link_prompt,
     get_google_link_csrf_token
+    is_schedule_operator
 )
 from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, url_for, session, make_response
@@ -513,7 +514,10 @@ def schedule():
     if not visitor_id:
         visitor_id = secrets.token_urlsafe(32)
 
-    if request.args.get("performer_refresh") != "1":
+    if (
+        request.args.get("performer_refresh") != "1"
+        and not is_schedule_operator()
+    ):
         user_agent = request.user_agent.string.lower()
 
         if "mobile" in user_agent or "iphone" in user_agent or "android" in user_agent:
@@ -1683,6 +1687,9 @@ def schedule_performer_favorites_save():
 
 @event_schedule_bp.route("/schedule/performer-click", methods=["POST"])
 def schedule_performer_click():
+    if is_schedule_operator():
+        return "", 204
+
     performer_name = request.form.get("performer", "").strip()
 
     if not performer_name or len(performer_name) > 200:
