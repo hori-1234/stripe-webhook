@@ -202,10 +202,51 @@ def create_schedule_stats_tables():
         cur.close()
         conn.close()
 
+
+def create_schedule_requests_table():
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+
+    try:
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS schedule_registration_requests (
+                id BIGSERIAL PRIMARY KEY,
+                event_url TEXT NOT NULL,
+                is_organizer BOOLEAN NOT NULL,
+                comment TEXT,
+                status TEXT NOT NULL DEFAULT '未対応',
+                requester_ip TEXT NOT NULL,
+                created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+                CONSTRAINT schedule_request_status_check
+                CHECK (
+                    status IN (
+                        '未対応',
+                        '確認中',
+                        '登録完了',
+                        '登録不可'
+                    )
+                )
+            )
+        """)
+
+        conn.commit()
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        cur.close()
+        conn.close()
+
+
 def create_event_schedule_table():
     conn = psycopg2.connect(DATABASE_URL)
     cur = conn.cursor()
 
+    
     cur.execute("""
         CREATE TABLE IF NOT EXISTS event_schedules (
             id SERIAL PRIMARY KEY,
