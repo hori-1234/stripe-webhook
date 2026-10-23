@@ -379,19 +379,67 @@ def schedule_registration_request():
         <meta name="viewport"
               content="width=device-width, initial-scale=1.0">
         <title>イベント登録依頼 | イベスケ</title>
+        
         <style>
-            body {
-                font-family: sans-serif;
-                max-width: 650px;
-                margin: 30px auto;
-                padding: 15px;
+            * {
+                box-sizing: border-box;
             }
 
-            input[type="url"], textarea {
-                width: 100%;
-                box-sizing: border-box;
-                padding: 10px;
+            body {
+                font-family: "Helvetica Neue", Arial, sans-serif;
+                background: #f3f8ff;
+                color: #17365d;
+                max-width: 1280px;
+                margin: 0 auto;
+                padding: 24px;
+                line-height: 1.7;
+            }
+
+            h2 {
+                color: #174a87;
+                font-size: 28px;
+                margin: 0 0 20px;
+                padding: 12px 0;
+                border-bottom: 3px solid #3489e5;
+            }
+
+            h3 {
+                color: #174a87;
+                font-size: 21px;
+                margin: 0 0 20px;
+            }
+
+            a {
+                color: #1674d8;
+                overflow-wrap: anywhere;
+            }
+
+            a:hover {
+                color: #0a4f9e;
+            }
+
+            input[type="url"],
+            textarea,
+            select {
+                border: 1px solid #bcd2ec;
+                border-radius: 8px;
+                background: #ffffff;
+                color: #17365d;
+                padding: 12px;
                 font-size: 16px;
+            }
+
+            input[type="url"],
+            textarea {
+                width: 100%;
+            }
+
+            input[type="url"]:focus,
+            textarea:focus,
+            select:focus {
+                outline: none;
+                border-color: #3489e5;
+                box-shadow: 0 0 0 3px rgba(52, 137, 229, 0.15);
             }
 
             .url-row {
@@ -404,122 +452,225 @@ def schedule_registration_request():
                 min-width: 0;
             }
 
-            button {
-                padding: 10px 20px;
-                cursor: pointer;
-            }
-        
             textarea {
                 resize: vertical;
+                min-height: 100px;
+            }
+
+            button {
+                background: #287fe0;
+                color: #ffffff;
+                border: none;
+                border-radius: 8px;
+                padding: 11px 24px;
+                font-size: 15px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: background 0.2s;
+            }
+
+            button:hover {
+                background: #155eb3;
+            }
+
+            button:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+            }
+
+            .request-card {
+                background: #ffffff;
+                border: 1px solid #cfe0f5 !important;
+                border-radius: 12px !important;
+                padding: 18px !important;
+                margin-bottom: 14px !important;
+                box-shadow: 0 3px 12px rgba(27, 88, 155, 0.06);
+                overflow-wrap: anywhere;
             }
 
             .request-status {
                 display: inline-block;
-                padding: 4px 12px;
-                border-radius: 5px;
+                padding: 5px 14px;
+                border-radius: 20px;
                 font-size: 14px;
                 font-weight: bold;
             }
 
             .status-pending {
-                background: #f1f3f5;
-                color: #495057;
+                background: #e8eef5;
+                color: #52677f;
             }
 
             .status-checking {
-                background: #fff3cd;
-                color: #856404;
+                background: #fff0c9;
+                color: #986000;
             }
 
             .status-completed {
-                background: #d4edda;
-                color: #155724;
+                background: #d8f5e4;
+                color: #137343;
             }
 
             .status-rejected {
-                background: #f8d7da;
-                color: #721c24;
+                background: #ffe0e7;
+                color: #aa2449;
+            }
+
+            @media (max-width: 768px) {
+                body {
+                    padding: 14px;
+                }
+
+                h2 {
+                    font-size: 23px;
+                }
+
+                h3 {
+                    font-size: 19px;
+                }
+
+                .request-card {
+                    padding: 14px !important;
+                }
             }
         </style>
 
     </head>
+    
     <body>
         <h2>イベント登録依頼</h2>
 
         {% if completed %}
-            <p>依頼を受け付けました。依頼番号：{{ completed }}</p>
+            <p style="
+                background: #e1f4e9;
+                color: #17683c;
+                border: 1px solid #b8e3c9;
+                border-radius: 8px;
+                padding: 12px 16px;
+            ">
+                依頼を受け付けました。依頼番号：{{ completed }}
+            </p>
         {% endif %}
 
-        <form method="POST" action="/schedule/request">
-            <input type="hidden"
-                   name="csrf_token"
-                   value="{{ csrf_token }}">
+        <section style="
+            background: #ffffff;
+            border: 1px solid #cfe0f5;
+            border-radius: 14px;
+            padding: 24px;
+            margin-bottom: 28px;
+            box-shadow: 0 4px 16px rgba(27, 88, 155, 0.07);
+        ">
+            <h3 style="
+                color: #174a87;
+                border-bottom: 2px solid #dceafa;
+                padding-bottom: 12px;
+            ">新規登録依頼</h3>
 
-            <p>登録したいイベントの告知されたURLを入れてください</p><br>
-            <p>※確認が出来ない場合、登録不可となります。</p>
+            <form method="POST" action="/schedule/request">
+                <input type="hidden"
+                       name="csrf_token"
+                       value="{{ csrf_token }}">
 
-            <div class="url-row">
-                <input type="url"
-                       name="event_url"
-                       maxlength="2000"
-                       placeholder="https://..."
-                       required>
-            </div>
+                <p style="font-weight: bold; margin-bottom: 6px;">
+                    登録したいイベントの告知されたURLを入れてください
+                </p>
 
-            <p>イベント主催者ですか？</p>
+                <p style="color: #287fe0; font-size: 13px; margin: 0 0 12px;">
+                    ※確認が出来ない場合、登録不可となります。
+                </p>
 
-            <label>
-                <input type="radio"
-                       name="is_organizer"
-                       value="yes"
-                       required>
-                はい
-            </label>
+                <div class="url-row">
+                    <input type="url"
+                           name="event_url"
+                           maxlength="2000"
+                           placeholder="https://..."
+                           required>
+                </div>
 
-            <label>
-                <input type="radio"
-                       name="is_organizer"
-                       value="no">
-                いいえ
-            </label>
+                <p style="font-weight: bold; margin: 24px 0 10px;">
+                    イベント主催者ですか？
+                </p>
 
-            <p>※主催者様からの依頼であればフライヤーの登録も可能です</p>
+                <div style="display: flex; gap: 24px;">
+                    <label>
+                        <input type="radio"
+                               name="is_organizer"
+                               value="yes"
+                               required>
+                        はい
+                    </label>
 
-            <p>コメント（任意）</p><br>
-            <p>※訂正の場合、依頼番号を入力ください</p>
+                    <label>
+                        <input type="radio"
+                               name="is_organizer"
+                               value="no">
+                        いいえ
+                    </label>
+                </div>
 
-            <textarea name="comment"
-                      rows="2"
-                      maxlength="100"
-                      placeholder="コメントがあれば入力してください"></textarea>
-                      
-            <div style="margin-top: 12px;">
-                <button type="submit">依頼</button>
-            </div>
-        </form>
+                <p style="color: #287fe0; font-size: 13px; margin: 12px 0 0;">
+                    ※主催者様からの依頼であればフライヤーの登録も可能です
+                </p>
+
+                <p style="font-weight: bold; margin: 24px 0 6px;">
+                    コメント（任意）
+                </p>
+
+                <p style="color: #287fe0; font-size: 13px; margin: 0 0 12px;">
+                    ※訂正の場合、依頼番号を入力ください
+                </p>
+
+                <textarea name="comment"
+                          rows="2"
+                          maxlength="100"
+                          placeholder="コメントがあれば入力してください"></textarea>
+
+                <div style="margin-top: 20px; text-align: center;">
+                    <button type="submit"
+                            style="min-width: 180px; font-size: 16px;">
+                        依頼する
+                    </button>
+                </div>
+            </form>
+        </section>
 
         <hr>
 
-        <h3>イベント登録依頼履歴</h3>
+        <h3 style="
+            color: #174a87;
+            border-bottom: 2px solid #dceafa;
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+        ">
+            イベント登録依頼履歴
+        </h3>
 
         {% if request_history %}
 
             {% for item in request_history %}
-                <div class="request-card" style="
-                    border: 1px solid #ccc;
-                    border-radius: 6px;
-                    padding: 12px;
-                    margin-bottom: 12px;
-                    overflow-wrap: anywhere;
-                ">
-                    <div>
-                        <strong>依頼番号：{{ item[0] }}</strong>
+                <div class="request-card">
+
+                    <div style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        flex-wrap: wrap;
+                        gap: 8px;
+                        border-bottom: 1px solid #e1ecf8;
+                        padding-bottom: 10px;
+                        margin-bottom: 12px;
+                    ">
+                        <strong style="color: #174a87; font-size: 17px;">
+                            依頼番号：{{ item[0] }}
+                        </strong>
+
+                        <span style="color: #71849b; font-size: 13px;">
+                            受付日時：{{ item[5] }}
+                        </span>
                     </div>
 
-                    <div>受付日時：{{ item[5] }}</div>
-
-                    <div>
-                        イベントURL：
+                    <div style="margin-bottom: 10px;">
+                        <strong style="color: #174a87;">イベントURL：</strong>
                         <a href="{{ item[1] }}"
                            target="_blank"
                            rel="noopener noreferrer">
@@ -527,23 +678,34 @@ def schedule_registration_request():
                         </a>
                     </div>
 
-                    <div>
-                        主催者：
+                    <div style="margin-bottom: 10px;">
+                        <strong style="color: #174a87;">主催者：</strong>
                         {{ "はい" if item[2] else "いいえ" }}
                     </div>
 
                     {% if item[3] %}
-                        <div>コメント：{{ item[3] }}</div>
-                    {% endif %}
-
-                    {% if is_operator %}
-                        <div>
-                            登録依頼IP：{{ item[6] }}
+                        <div style="margin-bottom: 10px;">
+                            <strong style="color: #174a87;">コメント：</strong>
+                            {{ item[3] }}
                         </div>
                     {% endif %}
 
-                    <div>
-                        対応状況：
+                    {% if is_operator %}
+                        <div style="margin-bottom: 10px;">
+                            <strong style="color: #174a87;">登録依頼IP：</strong>
+                            {{ item[6] }}
+                        </div>
+                    {% endif %}
+
+                    <div style="
+                        display: flex;
+                        align-items: center;
+                        flex-wrap: wrap;
+                        gap: 10px;
+                        margin-top: 14px;
+                    ">
+                        <strong style="color: #174a87;">対応状況：</strong>
+
                         <strong class="request-status
                             {% if item[4] == '未対応' %}status-pending
                             {% elif item[4] == '確認中' %}status-checking
@@ -577,8 +739,11 @@ def schedule_registration_request():
                                     </option>
                                 {% endfor %}
                             </select>
-
-                            <button type="submit">変更</button>
+                            
+                            <button type="submit"
+                                    style="background: #287fe0;">
+                                変更
+                            </button>
                         </form>
 
                         <form method="POST"
@@ -594,7 +759,11 @@ def schedule_registration_request():
                                    name="action"
                                    value="delete">
 
-                            <button type="submit">削除</button>
+                            <button type="submit"
+                                    style="background: #e05266;">
+                                削除
+                            </button>
+                            
                         </form>
                     {% endif %}
                     
@@ -605,7 +774,21 @@ def schedule_registration_request():
             <p>現在、登録依頼はありません。</p>
         {% endif %}
 
-        <p><a href="/schedule">イベスケに戻る</a></p>
+        <p style="text-align: center; margin: 30px 0;">
+            <a href="/schedule"
+               style="
+                   display: inline-block;
+                   background: #ffffff;
+                   color: #287fe0;
+                   border: 1px solid #287fe0;
+                   border-radius: 8px;
+                   padding: 10px 24px;
+                   font-weight: bold;
+                   text-decoration: none;
+               ">
+                ← イベスケに戻る
+            </a>
+        </p>
 
         <script>
             async function manageRequest(event, form, action) {
