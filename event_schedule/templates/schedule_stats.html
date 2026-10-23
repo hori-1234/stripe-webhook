@@ -294,34 +294,3 @@
         {% endif %}
     </div>
 
-    <div class="stats-section" style="--section-width: 500px;">
-        <h2>日別閲覧数（直近30日間）</h2>
-
-        {% if daily_views %}
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>日付</th>
-                            <th>閲覧数</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for day in daily_views %}
-                        <tr>
-                            <td>
-                                {{ day[0].strftime('%Y/%m/%d') }}
-                            </td>
-                            <td>{{ day[1] }} 回</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        {% else %}
-            <p>まだ閲覧データがありません。</p>
-        {% endif %}
-    </div>
-
-</body>
-</html>
