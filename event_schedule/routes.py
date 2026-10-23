@@ -434,7 +434,6 @@ def schedule_registration_request():
                        maxlength="2000"
                        placeholder="https://..."
                        required>
-                <button type="submit">依頼</button>
             </div>
 
             <p>イベント主催者ですか？</p>
@@ -462,6 +461,10 @@ def schedule_registration_request():
                       rows="2"
                       maxlength="100"
                       placeholder="コメントがあれば入力してください"></textarea>
+                      
+            <div style="margin-top: 12px;">
+                <button type="submit">依頼</button>
+            </div>
         </form>
 
         <hr>
@@ -471,7 +474,7 @@ def schedule_registration_request():
         {% if request_history %}
 
             {% for item in request_history %}
-                <div style="
+                <div class="request-card" style="
                     border: 1px solid #ccc;
                     border-radius: 6px;
                     padding: 12px;
@@ -509,12 +512,13 @@ def schedule_registration_request():
                     {% endif %}
 
                     <div>
-                        対応状況：<strong>{{ item[4] }}</strong>
+                        対応状況：<strong class="request-status">{{ item[4] }}</strong>
                     </div>
-
+                    
                     {% if is_operator %}
                         <form method="POST"
                               action="{{ url_for('event_schedule.manage_schedule_registration_request', request_id=item[0]) }}"
+                              onsubmit="return manageRequest(event, this, 'update');"
                               style="margin-top: 10px;">
 
                             <input type="hidden"
@@ -525,7 +529,8 @@ def schedule_registration_request():
                                    name="action"
                                    value="update">
 
-                            <select name="status">
+                            <select name="status"
+                                    style="min-width: 140px; padding: 10px; font-size: 16px;">
                                 {% for status in ['未対応', '確認中', '登録完了', '登録不可'] %}
                                     <option value="{{ status }}"
                                             {% if item[4] == status %}selected{% endif %}>
@@ -539,7 +544,7 @@ def schedule_registration_request():
 
                         <form method="POST"
                               action="{{ url_for('event_schedule.manage_schedule_registration_request', request_id=item[0]) }}"
-                              onsubmit="return confirm('この登録依頼を削除しますか？');"
+                              onsubmit="return manageRequest(event, this, 'delete');"
                               style="margin-top: 8px;">
 
                             <input type="hidden"
@@ -553,6 +558,7 @@ def schedule_registration_request():
                             <button type="submit">削除</button>
                         </form>
                     {% endif %}
+                    
                 </div>
             {% endfor %}
 
@@ -561,8 +567,57 @@ def schedule_registration_request():
         {% endif %}
 
         <p><a href="/schedule">イベスケに戻る</a></p>
+
+        <script>
+            async function manageRequest(event, form, action) {
+                event.preventDefault();
+
+                if (action === "delete") {
+                    if (!confirm("この登録依頼を削除しますか？")) {
+                        return false;
+                    }
+                }
+
+                const button = form.querySelector('button[type="submit"]');
+                button.disabled = true;
+
+                try {
+                    const response = await fetch(form.action, {
+                        method: "POST",
+                        body: new FormData(form),
+                        credentials: "same-origin"
+                    });
+
+                    if (!response.ok) {
+                        throw new Error("HTTP " + response.status);
+                    }
+
+                    const result = await response.json();
+
+                    if (!result.success) {
+                        throw new Error("処理に失敗しました");
+                    }
+
+                    const card = form.closest(".request-card");
+
+                    if (action === "delete") {
+                        card.remove();
+                    } else {
+                        const statusDisplay = card.querySelector(".request-status");
+                        statusDisplay.textContent = result.status;
+                    }
+
+                } catch (error) {
+                    alert("処理に失敗しました：" + error.message);
+                } finally {
+                    button.disabled = false;
+                }
+
+                return false;
+            }
+        </script>
     </body>
-    </html>
+    </html>        
 
     """,
         csrf_token=csrf_token,
@@ -633,9 +688,12 @@ def manage_schedule_registration_request():
     finally:
         cur.close()
         conn.close()
-
-    return redirect("/schedule/request")
-
+    return {
+        "success": True,
+        "action": action,
+        "request_id": request_id,
+        "status": status if action == "update" else None
+    }
 
 def create_event_schedule_table():
 
