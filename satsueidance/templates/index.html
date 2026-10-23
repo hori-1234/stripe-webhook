@@ -25,7 +25,14 @@
 
         button { margin: 5px 3px; }
 
+        #flipButton.is-flipped,
+        #cameraFlipButton.is-flipped {
+            background: red;
+            color: white;
+        }
+
         .video-box {
+
         width: 100%;
             aspect-ratio: 16 / 9;
             background: black;
@@ -91,6 +98,7 @@
     const flipped = player.style.transform !== 'scaleX(-1)';
     player.style.transform = flipped ? 'scaleX(-1)' : 'scaleX(1)';
     this.textContent = flipped ? '反転中' : '通常';
+    this.classList.toggle('is-flipped', flipped);
 ">通常</button>
 
 <p style="font-size: 12px; color: #aaa; margin: 4px 0;">
@@ -113,6 +121,7 @@
     const flipped = camera.style.transform !== 'scaleX(-1)';
     camera.style.transform = flipped ? 'scaleX(-1)' : 'scaleX(1)';
     this.textContent = flipped ? '反転中' : '通常';
+    this.classList.toggle('is-flipped', flipped);
 ">通常</button>
 <video id="camera" autoplay muted playsinline></video>
 
