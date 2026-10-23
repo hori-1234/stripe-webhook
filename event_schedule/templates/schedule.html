@@ -1410,15 +1410,15 @@ body.vertical-mode .event-bar-time {
 
         <div class="search-panel-toggle">
             <button type="button" id="search-panel-button" onclick="toggleSearchPanel()">
-                ▽検索
+                ▽ 検索
             </button>
 
             <button type="button" id="performer-panel-button" onclick="togglePerformerPanel()">
-                ▽演者名
+                ▽ 演者名
             </button>
 
             <button type="button" id="finished-events-button" onclick="toggleFinishedEvents()">
-                ▽終了分開閉
+                ▽ 終了分開閉
             </button>
         </div>
 
@@ -2659,7 +2659,7 @@ body.vertical-mode .event-bar-time {
         const isOpen = panel.style.display !== "none";
 
         panel.style.display = isOpen ? "none" : "block";
-        button.textContent = isOpen ? "▽ 登録者名" : "△ 登録者名";
+        button.textContent = isOpen ? "▽ 演者名" : "△ 演者名";
 
         localStorage.setItem("schedulePerformerOpen", String(!isOpen));
     }
@@ -2678,7 +2678,7 @@ body.vertical-mode .event-bar-time {
             searchOpen ? "△ 検索" : "▽ 検索";
 
         document.getElementById("performer-panel-button").textContent =
-            performerOpen ? "△ 登録者名" : "▽ 登録者名";
+            performerOpen ? "△ 演者名" : "▽ 演者名";
     });
 
     function clearSearch() {
@@ -3655,6 +3655,7 @@ function toggleFinishedEvents() {
 
     const button = document.getElementById('finished-events-button');
     button.setAttribute('aria-expanded', String(finishedEventsExpanded));
+    button.textContent = finishedEventsExpanded ? '△終了分開閉' : '▽終了分開閉';
 }
 
 document.addEventListener('DOMContentLoaded', function () {
