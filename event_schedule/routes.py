@@ -16,7 +16,7 @@ from zoneinfo import ZoneInfo
 from event_schedule.memo_auth import (
     get_logged_in_memo_email,
     should_show_google_link_prompt,
-    get_google_link_csrf_token
+    get_google_link_csrf_token,
     is_schedule_operator
 )
 from datetime import datetime
@@ -237,15 +237,410 @@ def create_schedule_requests_table():
         conn.rollback()
         raise
 
+
     finally:
         cur.close()
         conn.close()
 
 
-def create_event_schedule_table():
+@event_schedule_bp.route("/schedule/request", methods=["GET", "POST"])
+def schedule_registration_request():
+    from flask import render_template_string
+    from urllib.parse import urlsplit
+
+    if request.method == "POST":
+        submitted_token = request.form.get("csrf_token", "")
+        expected_token = session.get("schedule_request_csrf_token", "")
+
+        if (
+            not submitted_token
+            or not expected_token
+            or not secrets.compare_digest(submitted_token, expected_token)
+        ):
+            return "不正なリクエストです", 403
+
+        event_url = request.form.get("event_url", "").strip()
+        organizer = request.form.get("is_organizer", "")
+        comment = request.form.get("comment", "").strip()
+
+        try:
+            parsed_url = urlsplit(event_url)
+            valid_url = (
+                parsed_url.scheme in ("http", "https")
+                and bool(parsed_url.hostname)
+                and not parsed_url.username
+                and not parsed_url.password
+                and not any(char.isspace() for char in event_url)
+            )
+        except ValueError:
+            valid_url = False
+
+        if not valid_url or len(event_url) > 2000:
+            return "イベントURLが正しくありません", 400
+
+        if organizer not in ("yes", "no"):
+            return "主催者かどうかを選択してください", 400
+
+        if len(comment) > 100:
+            return "コメントは100文字以内で入力してください", 400
+
+        create_schedule_requests_table()
+
+        conn = psycopg2.connect(DATABASE_URL)
+        cur = conn.cursor()
+
+        try:
+            cur.execute("""
+
+                INSERT INTO schedule_registration_requests (
+                    event_url,
+                    is_organizer,
+                    comment,
+                    requester_ip
+                )
+                VALUES (%s, %s, %s, %s)
+                RETURNING id
+            """, (
+                event_url,
+                organizer == "yes",
+                comment,
+                request.remote_addr or ""
+            ))
+
+            request_id = cur.fetchone()[0]
+            conn.commit()
+
+        except Exception:
+            conn.rollback()
+            raise
+
+        finally:
+            cur.close()
+            conn.close()
+
+        session.pop("schedule_request_csrf_token", None)
+
+        return redirect(
+            url_for(
+                "event_schedule.schedule_registration_request",
+                completed=request_id
+            )
+        )
+
+    completed = request.args.get("completed", "")
+
+    csrf_token = session.get("schedule_request_csrf_token")
+
+    if not csrf_token:
+        csrf_token = secrets.token_urlsafe(32)
+        session["schedule_request_csrf_token"] = csrf_token
+
+    create_schedule_requests_table()
+
+    is_operator = is_schedule_operator()
+
     conn = psycopg2.connect(DATABASE_URL)
     cur = conn.cursor()
 
+    try:
+        cur.execute("""
+            SELECT
+                id,
+                event_url,
+                is_organizer,
+                comment,
+                status,
+                TO_CHAR(
+                    created_at AT TIME ZONE 'Asia/Tokyo',
+                    'YYYY/MM/DD HH24:MI'
+                ),
+                CASE WHEN %s THEN requester_ip ELSE NULL END
+                
+            FROM schedule_registration_requests
+            ORDER BY created_at DESC, id DESC
+            
+            LIMIT 100
+        """, (is_operator,))
+
+        request_history = cur.fetchall()
+
+
+    finally:
+        cur.close()
+        conn.close()
+
+    return render_template_string("""
+
+    
+    <!DOCTYPE html>
+    <html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport"
+              content="width=device-width, initial-scale=1.0">
+        <title>イベント登録依頼 | イベスケ</title>
+        <style>
+            body {
+                font-family: sans-serif;
+                max-width: 650px;
+                margin: 30px auto;
+                padding: 15px;
+            }
+
+            input[type="url"], textarea {
+                width: 100%;
+                box-sizing: border-box;
+                padding: 10px;
+                font-size: 16px;
+            }
+
+            .url-row {
+                display: flex;
+                gap: 8px;
+            }
+
+            .url-row input {
+                flex: 1;
+                min-width: 0;
+            }
+
+            button {
+                padding: 10px 20px;
+                cursor: pointer;
+            }
+
+            textarea {
+                resize: vertical;
+            }
+        </style>
+    </head>
+    <body>
+        <h2>イベント登録依頼</h2>
+
+        {% if completed %}
+            <p>依頼を受け付けました。依頼番号：{{ completed }}</p>
+        {% endif %}
+
+        <form method="POST" action="/schedule/request">
+            <input type="hidden"
+                   name="csrf_token"
+                   value="{{ csrf_token }}">
+
+            <p>登録したいイベントのURLを入れてください</p>
+
+            <div class="url-row">
+                <input type="url"
+                       name="event_url"
+                       maxlength="2000"
+                       placeholder="https://..."
+                       required>
+                <button type="submit">依頼</button>
+            </div>
+
+            <p>イベント主催者ですか？</p>
+
+            <label>
+                <input type="radio"
+                       name="is_organizer"
+                       value="yes"
+                       required>
+                はい
+            </label>
+
+            <label>
+                <input type="radio"
+                       name="is_organizer"
+                       value="no">
+                いいえ
+            </label>
+
+            <p>※主催者様からの依頼であればフライヤーの登録も可能です</p>
+
+            <p>コメント（任意）</p>
+
+            <textarea name="comment"
+                      rows="2"
+                      maxlength="100"
+                      placeholder="コメントがあれば入力してください"></textarea>
+        </form>
+
+        <hr>
+
+        <h3>イベント登録依頼履歴</h3>
+
+        {% if request_history %}
+
+            {% for item in request_history %}
+                <div style="
+                    border: 1px solid #ccc;
+                    border-radius: 6px;
+                    padding: 12px;
+                    margin-bottom: 12px;
+                    overflow-wrap: anywhere;
+                ">
+                    <div>
+                        <strong>依頼番号：{{ item[0] }}</strong>
+                    </div>
+
+                    <div>受付日時：{{ item[5] }}</div>
+
+                    <div>
+                        イベントURL：
+                        <a href="{{ item[1] }}"
+                           target="_blank"
+                           rel="noopener noreferrer">
+                            {{ item[1] }}
+                        </a>
+                    </div>
+
+                    <div>
+                        主催者：
+                        {{ "はい" if item[2] else "いいえ" }}
+                    </div>
+
+                    {% if item[3] %}
+                        <div>コメント：{{ item[3] }}</div>
+                    {% endif %}
+
+                    {% if is_operator %}
+                        <div>
+                            登録依頼IP：{{ item[6] }}
+                        </div>
+                    {% endif %}
+
+                    <div>
+                        対応状況：<strong>{{ item[4] }}</strong>
+                    </div>
+
+                    {% if is_operator %}
+                        <form method="POST"
+                              action="{{ url_for('event_schedule.manage_schedule_registration_request', request_id=item[0]) }}"
+                              style="margin-top: 10px;">
+
+                            <input type="hidden"
+                                   name="csrf_token"
+                                   value="{{ csrf_token }}">
+
+                            <input type="hidden"
+                                   name="action"
+                                   value="update">
+
+                            <select name="status">
+                                {% for status in ['未対応', '確認中', '登録完了', '登録不可'] %}
+                                    <option value="{{ status }}"
+                                            {% if item[4] == status %}selected{% endif %}>
+                                        {{ status }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+
+                            <button type="submit">変更</button>
+                        </form>
+
+                        <form method="POST"
+                              action="{{ url_for('event_schedule.manage_schedule_registration_request', request_id=item[0]) }}"
+                              onsubmit="return confirm('この登録依頼を削除しますか？');"
+                              style="margin-top: 8px;">
+
+                            <input type="hidden"
+                                   name="csrf_token"
+                                   value="{{ csrf_token }}">
+
+                            <input type="hidden"
+                                   name="action"
+                                   value="delete">
+
+                            <button type="submit">削除</button>
+                        </form>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+        {% else %}
+            <p>現在、登録依頼はありません。</p>
+        {% endif %}
+
+        <p><a href="/schedule">イベスケに戻る</a></p>
+    </body>
+    </html>
+
+    """,
+        csrf_token=csrf_token,
+        completed=completed,
+        request_history=request_history,
+        is_operator=is_schedule_operator()
+    )
+
+
+@event_schedule_bp.route(
+    "/schedule/request/<int:request_id>/manage",
+    methods=["POST"]
+)
+def manage_schedule_registration_request():
+    if not is_schedule_operator():
+        return "操作権限がありません", 403
+
+    submitted_token = request.form.get("csrf_token", "")
+    expected_token = session.get("schedule_request_csrf_token", "")
+
+    if (
+        not submitted_token
+        or not expected_token
+        or not secrets.compare_digest(submitted_token, expected_token)
+    ):
+        return "不正なリクエストです", 403
+
+    action = request.form.get("action", "")
+
+    if action not in ("update", "delete"):
+        return "不正な操作です", 400
+
+    if action == "update":
+        status = request.form.get("status", "")
+
+        if status not in (
+            "未対応",
+            "確認中",
+            "登録完了",
+            "登録不可"
+        ):
+            return "対応状況が正しくありません", 400
+
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+
+    try:
+        if action == "delete":
+            cur.execute("""
+                DELETE FROM schedule_registration_requests
+                WHERE id = %s
+            """, (request_id,))
+
+        else:
+            cur.execute("""
+                UPDATE schedule_registration_requests
+                SET status = %s,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = %s
+            """, (status, request_id))
+
+        conn.commit()
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        cur.close()
+        conn.close()
+
+    return redirect("/schedule/request")
+
+
+def create_event_schedule_table():
+
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
     
     cur.execute("""
         CREATE TABLE IF NOT EXISTS event_schedules (
