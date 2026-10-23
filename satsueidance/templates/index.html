@@ -133,6 +133,11 @@ let cameraStream = null;
 let recorder = null;
 let chunks = [];
 let recordingUrl = null;
+
+let recordingCanvas = null;
+let recordingContext = null;
+let recordingStream = null;
+let recordingAnimationId = null;
     
 function loadYoutube() {
     const input = document.getElementById("youtubeUrl").value.trim();
@@ -219,11 +224,66 @@ function startRecording() {
     );
 
     try {
+        const camera = document.getElementById("camera");
+
+        recordingCanvas = document.createElement("canvas");
+        recordingCanvas.width = camera.videoWidth || 1280;
+        recordingCanvas.height = camera.videoHeight || 720;
+
+        recordingContext = recordingCanvas.getContext("2d");
+
+        if (!recordingContext) {
+            throw new Error("Canvasを使用できません");
+        }
+
+        function drawRecordingFrame() {
+            const width = recordingCanvas.width;
+            const height = recordingCanvas.height;
+
+            recordingContext.clearRect(0, 0, width, height);
+            recordingContext.save();
+
+            const flipped = camera.style.transform === "scaleX(-1)";
+
+            if (flipped) {
+                recordingContext.translate(width, 0);
+                recordingContext.scale(-1, 1);
+            }
+
+            if (camera.readyState >= 2) {
+                recordingContext.drawImage(camera, 0, 0, width, height);
+            }
+
+            recordingContext.restore();
+
+            recordingAnimationId = requestAnimationFrame(drawRecordingFrame);
+        }
+
+        drawRecordingFrame();
+
+        const canvasStream = recordingCanvas.captureStream(30);
+
+        recordingStream = new MediaStream([
+            ...canvasStream.getVideoTracks(),
+            ...cameraStream.getAudioTracks()
+        ]);
+
         recorder = new MediaRecorder(
-            cameraStream,
+            recordingStream,
             mimeType ? { mimeType } : {}
         );
+
     } catch (error) {
+        if (recordingAnimationId !== null) {
+            cancelAnimationFrame(recordingAnimationId);
+            recordingAnimationId = null;
+        }
+
+        if (recordingStream) {
+            recordingStream.getVideoTracks().forEach(track => track.stop());
+            recordingStream = null;
+        }
+
         document.getElementById("status").textContent =
             "録画開始失敗: " + error.message;
         return;
@@ -236,6 +296,16 @@ function startRecording() {
     };
 
     recorder.onstop = () => {
+        if (recordingAnimationId !== null) {
+            cancelAnimationFrame(recordingAnimationId);
+            recordingAnimationId = null;
+        }
+
+        if (recordingStream) {
+            recordingStream.getVideoTracks().forEach(track => track.stop());
+            recordingStream = null;
+        }
+
         const type = recorder.mimeType || "video/mp4";
         const blob = new Blob(chunks, { type });
 
