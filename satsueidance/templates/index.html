@@ -26,12 +26,24 @@
         button { margin: 5px 3px; }
 
         .video-box {
-            width: 100%;
+        width: 100%;
             aspect-ratio: 16 / 9;
             background: black;
             margin-top: 12px;
         }
 
+        .video-box.expanded {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100dvh;
+            aspect-ratio: auto;
+            margin: 0;
+            z-index: 9999;
+            background: black;
+        }
+        
         iframe {
             width: 100%;
             height: 100%;
@@ -46,6 +58,19 @@
         }
 
         #status { color: #ffda75; }
+
+        #expandButton.expanded-button {
+            position: fixed;
+            top: 12px;
+            right: 12px;
+            z-index: 10000;
+            background: #333;
+            color: white;
+            border: 1px solid white;
+            border-radius: 6px;
+            padding: 10px 16px;
+        }
+
     </style>
 </head>
 <body>
@@ -61,7 +86,13 @@
     <iframe id="youtubePlayer" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>
 </div>
 
-<button onclick="document.getElementById('videoBox').requestFullscreen()">拡大</button>
+<button id="expandButton" onclick="
+    const box = document.getElementById('videoBox');
+    box.classList.toggle('expanded');
+    const expanded = box.classList.contains('expanded');
+    this.textContent = expanded ? '戻す' : '拡大';
+    this.classList.toggle('expanded-button', expanded);
+">拡大</button>
 
 <h3>インカメラ</h3>
 <button onclick="startCamera()">カメラ起動</button>
