@@ -119,12 +119,12 @@
         }
 
         .top-action-buttons {
-            position: absolute;
-            right: 0;
-            bottom: 0;
+            position: static;
             display: flex;
             align-items: center;
             gap: 10px;
+            margin-left: auto;
+            flex-shrink: 0;
         }
 
         .top-action-buttons > .add-button {
@@ -135,6 +135,7 @@
             box-sizing: border-box;
             text-align: center;
         }
+         
         
         .add-button {
             display: inline-block;
@@ -1075,14 +1076,22 @@ body.vertical-mode .event-bar-time {
             z-index: auto;
         }
             
+        /* 縦モード：新規追加・追加依頼を注意文言の上に配置 */
+        body.vertical-mode .schedule-notice-row {
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
 
-        /* 縦モード：新規追加・追加依頼を演者一覧の下に配置 */
         body.vertical-mode .top-action-buttons {
             position: static;
             display: flex;
             width: 100%;
             gap: 10px;
-            margin-top: 12px;
+            margin-top: 0;
+            margin-left: 0;
         }
 
         body.vertical-mode .top-action-buttons > .add-button {
@@ -1235,7 +1244,7 @@ body.vertical-mode .event-bar-time {
             cursor: pointer;
             white-space: nowrap;
         }
-
+         
         /* スマホ縦画面だけ横並び */
         @media (max-width: 700px) and (orientation: portrait) {
             body.vertical-mode .top-action-buttons {
@@ -1243,7 +1252,7 @@ body.vertical-mode .event-bar-time {
                 display: flex;
                 flex-wrap: nowrap;
                 gap: 10px;
-                margin-top: 12px;
+                margin-top: 0;
             }
 
             body.vertical-mode .top-action-buttons > .add-button {
@@ -1262,7 +1271,22 @@ body.vertical-mode .event-bar-time {
                 flex-basis: 100%;
             }
         }
+         
+        /* 横モード：注意文言を左、追加ボタンを右端に配置 */
+        body:not(.vertical-mode) .schedule-notice-row {
+            min-height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
 
+        body:not(.vertical-mode) .top-action-buttons {
+            position: static;
+            margin-left: auto;
+        }
 
     </style>
 </head>
@@ -1579,21 +1603,25 @@ body.vertical-mode .event-bar-time {
 
     </div>
 
-    <a href="/schedule/add" class="add-button">
-        新規追加
-    </a>
+    </div>
 
-    <a href="/schedule/request" class="add-button">
-        追加依頼
-    </a>
+<div class="schedule-notice-row">
+    <div style="color: #d60000; font-size: 14px;">
+        ※出演者の変更・辞退・開催中止・時間変更等が発生する場合があります。<br>
+        最新情報は、各イベントの公式案内をご確認ください。
+    </div>
 
+    <div class="top-action-buttons">
+        <a href="/schedule/add" class="add-button">
+            新規追加
+        </a>
+
+        <a href="/schedule/request" class="add-button">
+            追加依頼
+        </a>
+    </div>
 </div>
-
-<div style="color: #d60000; font-size: 14px; margin-bottom: 10px;">
-    ※出演者の変更・辞退・開催中止・時間変更等が発生する場合があります。<br>
-    最新情報は、各イベントの公式案内をご確認ください。
-</div>
-
+    
 <div class="schedule-area">
 
         <div class="time-header">
