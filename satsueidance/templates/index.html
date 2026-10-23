@@ -30,6 +30,11 @@
             color: black;
         }
 
+        #cameraButton.camera-active {
+            background: blue;
+            color: white;
+        }
+
         #flipButton.is-flipped,
         #cameraFlipButton.is-flipped {
             background: red;
@@ -55,14 +60,31 @@
             z-index: 9999;
             background: black;
         }
-        
+
         iframe {
             width: 100%;
             height: 100%;
             border: none;
         }
 
+        #videoBox {
+            position: relative;
+        }
+
+        #compareVideo {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            opacity: 0.5;
+            z-index: 2;
+            pointer-events: none;
+        }
+
         video {
+
             width: 100%;
             max-height: 300px;
             background: black;
@@ -96,9 +118,76 @@
 
 <div class="video-box" id="videoBox">
     <iframe id="youtubePlayer" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>
+
+    <video
+        id="compareVideo"
+        muted
+        playsinline
+        preload="metadata"
+        style="display:none;"
+    ></video>
 </div>
 
 <button id="compareButton" onclick="toggleCompareMode()">比較モード OFF</button>
+
+<div id="compareControls" style="display:none;">
+    <label for="opacitySlider">撮影動画の透明度：</label>
+    <input
+        type="range"
+        id="opacitySlider"
+        min="0"
+        max="100"
+        value="50"
+        oninput="changeCompareOpacity(this.value)"
+    >
+    
+    <span id="opacityValue">50%</span>
+
+    <p>横方向（X軸）</p>
+    <input
+        type="range"
+        id="compareX"
+        min="-100"
+        max="100"
+        value="0"
+        oninput="updateComparePosition()"
+    >
+    
+    <p>縦方向（Y軸）</p>
+    <input
+        type="range"
+        id="compareY"
+        min="-100"
+        max="100"
+        value="0"
+        oninput="updateComparePosition()"
+    >
+
+    <p>撮影動画のサイズ：<span id="compareSizeValue">100%</span></p>
+    <input
+        type="range"
+        id="compareSize"
+        min="20"
+        max="200"
+        value="100"
+        oninput="updateComparePosition()"
+    >
+
+    <p>
+        撮影動画の再生開始位置：
+        <span id="compareStartValue">0.0秒 / 0.0秒</span>
+    </p>
+    <input
+        type="range"
+        id="compareStartTime"
+        min="0"
+        max="0"
+        step="0.1"
+        value="0"
+        oninput="setCompareStartTime()"
+    >
+
+</div>
 
 <button id="flipButton" onclick="
 
@@ -123,7 +212,7 @@
 ">拡大</button>
 
 <h3>インカメラ</h3>
-<button onclick="startCamera()">カメラ起動</button>
+<button id="cameraButton" onclick="toggleCamera()">カメラ起動</button>
 <button id="cameraFlipButton" onclick="
     const camera = document.getElementById('camera');
     const flipped = camera.style.transform !== 'scaleX(-1)';
@@ -156,12 +245,53 @@ let recordingCanvas = null;
 let recordingContext = null;
 let recordingStream = null;
 let recordingAnimationId = null;
-
 let compareMode = false;
 
-function toggleCompareMode() {
+function changeCompareOpacity(value) {
+    const compareVideo = document.getElementById("compareVideo");
+    const opacityValue = document.getElementById("opacityValue");
+
+    compareVideo.style.opacity = value / 100;
+    opacityValue.textContent = value + "%";
+}
+
+function updateComparePosition() {
+    const compareVideo = document.getElementById("compareVideo");
+
+    const x = Number(document.getElementById("compareX").value);
+    const y = Number(document.getElementById("compareY").value);
+    const size = Number(document.getElementById("compareSize").value);
+
+    compareVideo.style.transform =
+        `translate(${x}%, ${y}%) scale(${size / 100})`;
+
+    document.getElementById("compareSizeValue").textContent =
+        size + "%";
+}
+    
+function setCompareStartTime() {
+    const compareVideo = document.getElementById("compareVideo");
+    const slider = document.getElementById("compareStartTime");
+    const startValue = document.getElementById("compareStartValue");
+
+    const startTime = Number(slider.value);
+    const duration = compareVideo.duration;
+
+    if (!Number.isFinite(duration) || duration <= 0) {
+        return;
+    }
+
+    compareVideo.currentTime = Math.min(startTime, duration);
+
+    startValue.textContent =
+        startTime.toFixed(1) + "秒 / " + duration.toFixed(1) + "秒";
+}
+
+async function toggleCompareMode() {
+    
     const button = document.getElementById("compareButton");
     const startButton = document.getElementById("startButton");
+    const recordingControls = document.getElementById("recordingControls");
 
     if (recorder && recorder.state === "recording") {
         document.getElementById("status").textContent =
@@ -177,11 +307,52 @@ function toggleCompareMode() {
 
     compareMode = !compareMode;
 
+    if (compareMode && cameraStream) {
+        await toggleCamera();
+    }
+
     button.textContent = compareMode
         ? "比較モード ON"
         : "比較モード OFF";
 
+    const compareVideo = document.getElementById("compareVideo");
+
+    if (compareMode) {
+        compareVideo.src = recordingUrl;
+        compareVideo.muted = true;
+        compareVideo.style.display = "block";
+
+        compareVideo.onloadedmetadata = () => {
+            const slider = document.getElementById("compareStartTime");
+            const startValue = document.getElementById("compareStartValue");
+            const duration = compareVideo.duration;
+
+            if (!Number.isFinite(duration) || duration <= 0) {
+                return;
+            }
+
+            slider.max = duration;
+            slider.value = 0;
+
+            compareVideo.currentTime = 0;
+
+            startValue.textContent =
+                "0.0秒 / " + duration.toFixed(1) + "秒";
+        };
+
+    } else {
+        compareVideo.pause();
+        compareVideo.style.display = "none";
+        compareVideo.removeAttribute("src");
+        compareVideo.load();
+    }    
+
     startButton.disabled = compareMode || !cameraStream;
+    
+    recordingControls.style.display = compareMode ? "none" : "block";
+
+    document.getElementById("compareControls").style.display =
+        compareMode ? "block" : "none";
 
     document.getElementById("status").textContent = compareMode
         ? "比較モード中"
@@ -234,7 +405,41 @@ function loadYoutube() {
 
     document.getElementById("youtubePlayer").src = embedUrl;
 }
-    
+
+async function toggleCamera() {
+    const button = document.getElementById("cameraButton");
+
+    if (compareMode && !cameraStream) {
+        document.getElementById("status").textContent =
+            "比較モード中はカメラを起動できません";
+        return;
+    }
+
+    if (recorder && recorder.state === "recording") {
+        document.getElementById("status").textContent =
+            "録画中はカメラを停止できません";
+        return;
+    }
+
+    if (cameraStream && cameraStream.active) {
+        cameraStream.getTracks().forEach(track => track.stop());
+        cameraStream = null;
+
+        const camera = document.getElementById("camera");
+        camera.pause();
+        camera.srcObject = null;
+
+        document.getElementById("startButton").disabled = true;
+
+        button.textContent = "カメラ起動";
+        button.classList.remove("camera-active");
+
+        document.getElementById("status").textContent = "カメラ停止";
+    } else {
+        await startCamera();
+    }
+}
+
 async function startCamera() {
     try {
         cameraStream = await navigator.mediaDevices.getUserMedia({
@@ -247,8 +452,14 @@ async function startCamera() {
         });
 
         document.getElementById("camera").srcObject = cameraStream;
-        document.getElementById("startButton").disabled = false;
+        document.getElementById("startButton").disabled = compareMode;
+
+        const button = document.getElementById("cameraButton");
+        button.textContent = "カメラ停止";
+        button.classList.add("camera-active");
+
         document.getElementById("status").textContent = "カメラ起動成功";
+        
     } catch (error) {
         document.getElementById("status").textContent =
             "カメラ起動失敗: " + error.message;
