@@ -94,13 +94,32 @@
             position: relative;
             margin-bottom: 25px;
         }
-
+        
         .search-performer-area {
             grid-column: 1;
             min-width: 0;
         }
 
+        /* 検索・登録者名トグル */
+        .search-panel-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .search-panel-toggle button {
+            padding: 10px 20px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            background: #fff;
+            color: #222;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
         .top-controls > .add-button {
+
             position: absolute;
             right: 0;
             bottom: 0;
@@ -1401,7 +1420,18 @@ body.vertical-mode .event-bar-time {
 
     <div class="search-performer-area">
 
+        <div class="search-panel-toggle">
+            <button type="button" id="search-panel-button" onclick="toggleSearchPanel()">
+                ▽ 検索
+            </button>
+
+            <button type="button" id="performer-panel-button" onclick="togglePerformerPanel()">
+                ▽ 登録者名
+            </button>
+        </div>
+
         <form id="schedule-search-form"
+
           class="search-form"
           method="GET"
           action="/schedule"
@@ -2621,6 +2651,47 @@ body.vertical-mode .event-bar-time {
     }
 
     document.addEventListener("DOMContentLoaded", updateMyMemoButton);
+
+    function toggleSearchPanel() {
+        const form = document.getElementById("schedule-search-form");
+        const button = document.getElementById("search-panel-button");
+
+        const isOpen = form.style.display !== "none";
+
+        form.style.display = isOpen ? "none" : "flex";
+        button.textContent = isOpen ? "▽ 検索" : "△ 検索";
+
+        localStorage.setItem("scheduleSearchOpen", String(!isOpen));
+    }
+
+    function togglePerformerPanel() {
+        const panel = document.querySelector(".registered-performers");
+        const button = document.getElementById("performer-panel-button");
+
+        const isOpen = panel.style.display !== "none";
+
+        panel.style.display = isOpen ? "none" : "block";
+        button.textContent = isOpen ? "▽ 登録者名" : "△ 登録者名";
+
+        localStorage.setItem("schedulePerformerOpen", String(!isOpen));
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("schedule-search-form");
+        const panel = document.querySelector(".registered-performers");
+
+        const searchOpen = localStorage.getItem("scheduleSearchOpen") === "true";
+        const performerOpen = localStorage.getItem("schedulePerformerOpen") === "true";
+
+        form.style.display = searchOpen ? "flex" : "none";
+        panel.style.display = performerOpen ? "block" : "none";
+
+        document.getElementById("search-panel-button").textContent =
+            searchOpen ? "△ 検索" : "▽ 検索";
+
+        document.getElementById("performer-panel-button").textContent =
+            performerOpen ? "△ 登録者名" : "▽ 登録者名";
+    });
 
     function clearSearch() {
         document.getElementById("schedule-loading").style.display = "flex";
