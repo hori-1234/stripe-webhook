@@ -144,31 +144,29 @@
 
     </div>
 
-    <div class="stats-section" style="--section-width: 500px;">
-        <h2>閲覧端末</h2>
+    <div class="stats-section" style="--section-width: 700px;">
+        <h2>日別アクセス統計（直近30日間）</h2>
 
-        {% if device_views %}
+        {% if daily_views %}
             <div class="table-wrap">
                 <table>
                     <thead>
                         <tr>
-                            <th>端末</th>
+                            <th>日付</th>
                             <th>閲覧数</th>
-                            <th>割合</th>
+                            <th>ユニーク人数</th>
+                            <th>リピート率</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for device in device_views %}
+                        {% for day in daily_views %}
                         <tr>
-                            <td>{{ device[0] }}</td>
-                            <td>{{ device[1] }} 回</td>
                             <td>
-                                {% if total_views %}
-                                    {{ (device[1] / total_views * 100) | round(1) }} %
-                                {% else %}
-                                    0 %
-                                {% endif %}
+                                {{ day[0].strftime('%Y/%m/%d') }}
                             </td>
+                            <td>{{ day[1] }} 回</td>
+                            <td>{{ day[2] }} 人</td>
+                            <td>{{ day[3] }} %</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -177,7 +175,7 @@
         {% else %}
             <p>まだ閲覧データがありません。</p>
         {% endif %}
-    </div>
+    </div>    
 
     <div class="stats-section" style="--section-width: 850px;">
         <h2>出演者ステータス</h2>
