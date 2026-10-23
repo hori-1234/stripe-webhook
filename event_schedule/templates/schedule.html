@@ -118,11 +118,17 @@
             cursor: pointer;
         }
 
-        .top-controls > .add-button {
-
+        .top-action-buttons {
             position: absolute;
             right: 0;
             bottom: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .top-action-buttons > .add-button {
+            position: static;
             width: 95px;
             padding: 10px 0;
             margin: 0;
@@ -1070,12 +1076,18 @@ body.vertical-mode .event-bar-time {
         }
             
 
-        /* 縦モード：新規追加を演者一覧の下に配置 */
-        body.vertical-mode .top-controls > .add-button {
+        /* 縦モード：新規追加・追加依頼を演者一覧の下に配置 */
+        body.vertical-mode .top-action-buttons {
             position: static;
-            display: block;
+            display: flex;
+            width: 100%;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        body.vertical-mode .top-action-buttons > .add-button {
             width: 110px;
-            margin: 12px 0 0 0;
+            margin: 0;
             padding: 10px 0;
             box-sizing: border-box;
             text-align: center;
@@ -1226,15 +1238,19 @@ body.vertical-mode .event-bar-time {
 
         /* スマホ縦画面だけ横並び */
         @media (max-width: 700px) and (orientation: portrait) {
-            body.vertical-mode .top-controls > .add-button {
+            body.vertical-mode .top-action-buttons {
                 position: static;
-                display: inline-block;
-                vertical-align: middle;
+                display: flex;
+                flex-wrap: nowrap;
+                gap: 10px;
+                margin-top: 12px;
+            }
+
+            body.vertical-mode .top-action-buttons > .add-button {
                 width: 110px;
                 height: 42px;
                 line-height: 20px;
-                margin: 12px 0 0 0;
-                order: 2;
+                margin: 0;
             }
 
             body.vertical-mode .top-controls {
@@ -1246,6 +1262,7 @@ body.vertical-mode .event-bar-time {
                 flex-basis: 100%;
             }
         }
+
 
     </style>
 </head>
@@ -1564,6 +1581,10 @@ body.vertical-mode .event-bar-time {
 
     <a href="/schedule/add" class="add-button">
         新規追加
+    </a>
+
+    <a href="/schedule/request" class="add-button">
+        追加依頼
     </a>
 
 </div>
