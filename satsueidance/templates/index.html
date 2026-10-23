@@ -132,6 +132,13 @@ function loadYoutube() {
 async function startCamera() {
     try {
         cameraStream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+                echoCancellation: false,
+                noiseSuppression: false,
+                autoGainControl: false
+            },
+            video: { facingMode: "user" }
+        });
             audio: true,
             video: { facingMode: "user" }
         });
