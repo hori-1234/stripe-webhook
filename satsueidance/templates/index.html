@@ -340,12 +340,41 @@ function loadUploadedVideo(input) {
 }
 
 let recordingCanvas = null;
-
 let recordingContext = null;
 let recordingStream = null;
 let recordingAnimationId = null;
 let compareMode = false;
 let screenAdjustMode = false;
+
+let compareLayout = "overlay";
+
+function toggleCompareLayout() {
+    if (!compareMode) {
+        return;
+    }
+
+    const button = document.getElementById("compareLayoutButton");
+    const videoBox = document.getElementById("videoBox");
+
+    if (compareLayout === "overlay") {
+        compareLayout = "vertical";
+        button.textContent = "縦";
+        button.style.background = "#168bff";
+        button.style.color = "white";
+        button.style.border = "1px solid #0875df";
+
+        videoBox.classList.add("vertical-compare");
+
+    } else {
+        compareLayout = "overlay";
+        button.textContent = "重";
+        button.style.background = "#25a58d";
+        button.style.color = "white";
+        button.style.border = "1px solid #1f907b";
+
+        videoBox.classList.remove("vertical-compare");
+    }
+}
 
 function toggleScreenAdjustMode() {
     screenAdjustMode = !screenAdjustMode;
