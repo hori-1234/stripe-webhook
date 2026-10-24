@@ -948,13 +948,22 @@ async function toggleCompareMode() {
             return;
         }
     }
-
+    
     compareMode = !compareMode;
+
+    if (compareMode) {
+        clearTimeout(normalPlayTimer);
+        normalPlayTimer = null;
+        normalPlayWaiting = false;
+        normalPlayPlaying = false;
+
+        document.getElementById("normalPlayButton").textContent = "▶";
+    }
 
     if (!compareMode && screenAdjustMode) {
         toggleScreenAdjustMode();
     }
-
+    
     if (compareMode && cameraStream) {
         await toggleCamera();
     }
@@ -971,9 +980,17 @@ async function toggleCompareMode() {
 
     const comparePlayButton = document.getElementById("comparePlayButton");
     comparePlayButton.style.display = compareMode ? "inline-block" : "none";
-    
+
     const compareReplayButton = document.getElementById("compareReplayButton");
     compareReplayButton.style.display = compareMode ? "inline-block" : "none";
+
+    const normalPlayButton = document.getElementById("normalPlayButton");
+    const normalPlayDelay = document.getElementById("normalPlayDelay");
+
+    normalPlayButton.style.display = compareMode ? "none" : "inline-block";
+    normalPlayDelay.style.display = compareMode ? "none" : "inline-block";
+    normalPlayDelay.nextElementSibling.style.display =
+        compareMode ? "none" : "inline";
 
     const compareSpeedControls = document.getElementById("compareSpeedControls");
     const currentPlayer = document.getElementById("youtubePlayer");
@@ -1103,7 +1120,83 @@ let youtubeApiReady = false;
 
 let nicoPlayerStatus = 3;
 
+let normalPlayTimer = null;
+let normalPlayWaiting = false;
+let normalPlayPlaying = false;
+
+function toggleNormalPlayback() {
+    if (compareMode) {
+        return;
+    }
+
+    const button = document.getElementById("normalPlayButton");
+    const delayInput = document.getElementById("normalPlayDelay");
+    const status = document.getElementById("status");
+    const player = document.getElementById("youtubePlayer");
+
+    if (normalPlayWaiting || normalPlayPlaying) {
+        clearTimeout(normalPlayTimer);
+        normalPlayTimer = null;
+
+        if (youtubePlayerApi &&
+            typeof youtubePlayerApi.pauseVideo === "function") {
+            youtubePlayerApi.pauseVideo();
+        }
+
+        sendNicoCommand("pause");
+
+        normalPlayWaiting = false;
+        normalPlayPlaying = false;
+        button.textContent = "▶";
+        status.textContent = "再生停止";
+        return;
+    }
+
+    const isNico =
+        player &&
+        player.tagName === "IFRAME" &&
+        player.src.startsWith("https://embed.nicovideo.jp/");
+
+    if (!isNico &&
+        (!youtubePlayerApi ||
+         typeof youtubePlayerApi.playVideo !== "function")) {
+        status.textContent = "先に動画を読み込んでください";
+        return;
+    }
+
+    const delay = Number(delayInput.value);
+
+    if (!Number.isFinite(delay) || delay < 0) {
+        status.textContent = "0以上の秒数を入力してください";
+        return;
+    }
+
+    normalPlayWaiting = true;
+    button.textContent = "Ⅱ";
+    status.textContent = delay + "秒後に再生します";
+
+    normalPlayTimer = setTimeout(() => {
+        normalPlayTimer = null;
+
+        if (!normalPlayWaiting || compareMode) {
+            return;
+        }
+
+        normalPlayWaiting = false;
+        normalPlayPlaying = true;
+
+        if (isNico) {
+            sendNicoCommand("play");
+        } else {
+            youtubePlayerApi.playVideo();
+        }
+
+        status.textContent = "再生中";
+    }, delay * 1000);
+}
+
 window.addEventListener("message", (event) => {
+
     if (event.origin !== "https://embed.nicovideo.jp") {
         return;
     }
@@ -1188,6 +1281,25 @@ function onYouTubeIframeAPIReady() {
 
 function onYouTubePlayerStateChange(event) {
     if (!compareMode) {
+        const button = document.getElementById("normalPlayButton");
+
+        if (event.data === YT.PlayerState.PLAYING) {
+            normalPlayPlaying = true;
+            normalPlayWaiting = false;
+            clearTimeout(normalPlayTimer);
+            normalPlayTimer = null;
+            button.textContent = "Ⅱ";
+        } else if (
+            event.data === YT.PlayerState.PAUSED ||
+            event.data === YT.PlayerState.ENDED
+        ) {
+            normalPlayPlaying = false;
+            normalPlayWaiting = false;
+            clearTimeout(normalPlayTimer);
+            normalPlayTimer = null;
+            button.textContent = "▶";
+        }
+
         return;
     }
 
@@ -1283,11 +1395,18 @@ function loadYoutube() {
     const compareVideo = document.getElementById("compareVideo");
     compareVideo.pause();
 
+    // OFF専用の遅延再生をキャンセル
+    clearTimeout(normalPlayTimer);
+    normalPlayTimer = null;
+    normalPlayWaiting = false;
+    normalPlayPlaying = false;
+    document.getElementById("normalPlayButton").textContent = "▶";
+
     // 再生ボタンを初期状態に戻す
     document.getElementById("comparePlayButton").textContent = "▶";
 
     // ニコニコ動画の再生状態も初期化
-    nicoPlayerStatus = 3;
+    nicoPlayerStatus = 3;    
 
     if (embedUrl.includes("youtube.com/embed/")) {
 
