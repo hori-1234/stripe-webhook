@@ -34,11 +34,11 @@
 <div id="compareStartControls" style="display:none;">
     
     <p>
-        撮影動画の再生開始位置（固定）：
-        <span id="compareStartValue">0.0秒 / 0.0秒</span>
+        撮影動画の再生開始位置（固定）
     </p>
-    <p style="font-size:12px; color:#aaa; margin:4px 0;">
-        ※リプレイ時は設定した位置から再生します。再生中も設定位置は変わりません。
+    <p>
+        開始位置：
+        <span id="compareStartValue">0.0秒 / 0.0秒</span>
     </p>
 
     <input
@@ -50,6 +50,26 @@
         value="0"
         oninput="setCompareStartTime()"
     >
+
+    <p>
+        動画の時間：
+        <span id="compareCurrentValue">0.0秒 / 0.0秒</span>
+    </p>
+
+    <input
+        type="range"
+        id="compareProgressTime"
+        min="0"
+        max="0"
+        step="0.1"
+        value="0"
+        disabled
+        style="accent-color: red;"
+    >
+
+    <p style="font-size:12px; color:#aaa; margin:4px 0;">
+        ※リプレイ時は設定した位置から再生します。再生中も設定位置は変わりません。
+    </p>
 </div>
 
 <div id="compareControls" style="display:none;">
