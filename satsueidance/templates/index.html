@@ -261,13 +261,71 @@
 {% include 'satsueidance_layout.html' %}
 
 <script>
-    
+
 let cameraStream = null;
 let recorder = null;
 let chunks = [];
 let recordingUrl = null;
 
+let uploadedVideoUrl = null;
+let compareVideoSource = "recording";
+
+function changeCompareSource(value) {
+    const status = document.getElementById("status");
+    const sourceSwitch = document.getElementById("compareSourceSwitch");
+
+    if (compareMode) {
+        status.textContent =
+            "比較モードをOFFにしてから切り替えてください";
+
+        sourceSwitch.value =
+            compareVideoSource === "recording" ? "0" : "1";
+        return;
+    }
+
+    if (value === "0") {
+        compareVideoSource = "recording";
+        status.textContent = "比較対象：インカメ撮影動画";
+    } else {
+        compareVideoSource = "upload";
+        status.textContent = "比較対象：アップロード動画";
+    }
+}
+
+function loadUploadedVideo(input) {
+
+    const file = input.files && input.files[0];
+
+    if (!file) {
+        return;
+    }
+
+    if (!file.type.startsWith("video/")) {
+        document.getElementById("status").textContent =
+            "動画ファイルを選択してください";
+        input.value = "";
+        return;
+    }
+
+    if (compareMode) {
+        document.getElementById("status").textContent =
+            "比較モードをOFFにしてから動画を選択してください";
+        input.value = "";
+        return;
+    }
+
+    if (uploadedVideoUrl) {
+        URL.revokeObjectURL(uploadedVideoUrl);
+    }
+
+    uploadedVideoUrl = URL.createObjectURL(file);
+
+    document.getElementById("status").textContent =
+        "アップロード動画を読み込みました：" + file.name;
+}
+
 let recordingCanvas = null;
+
 let recordingContext = null;
 let recordingStream = null;
 let recordingAnimationId = null;
@@ -764,10 +822,18 @@ async function toggleCompareMode() {
         return;
     }
 
-    if (!recordingUrl) {
-        document.getElementById("status").textContent =
-            "先に動画を撮影してください";
-        return;
+    if (!compareMode) {
+        if (compareVideoSource === "recording" && !recordingUrl) {
+            document.getElementById("status").textContent =
+                "先にインカメで動画を撮影してください";
+            return;
+        }
+
+        if (compareVideoSource === "upload" && !uploadedVideoUrl) {
+            document.getElementById("status").textContent =
+                "先に動画をアップロードしてください";
+            return;
+        }
     }
 
     compareMode = !compareMode;
@@ -781,8 +847,8 @@ async function toggleCompareMode() {
     }
 
     button.textContent = compareMode
-        ? "比較モード ON"
-        : "比較モード OFF";
+        ? "ON"
+        : "OFF";
     
     button.classList.toggle("compare-active", compareMode);
 
@@ -814,9 +880,12 @@ async function toggleCompareMode() {
     youtubeUrlControls.style.display = compareMode ? "none" : "block";
 
     const compareVideo = document.getElementById("compareVideo");
-    
+
     if (compareMode) {
-        compareVideo.src = recordingUrl;
+        compareVideo.src = compareVideoSource === "recording"
+            ? recordingUrl
+            : uploadedVideoUrl;
+
         compareVideo.muted = true;
         compareVideo.style.display = "block";
 
