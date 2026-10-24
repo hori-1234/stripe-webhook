@@ -178,13 +178,59 @@ function setCompareStartTime() {
     currentValue.textContent =
         compareVideo.currentTime.toFixed(1) + "秒 / " + duration.toFixed(1) + "秒";
 }
-    
+
 async function toggleComparePlayback() {
     const compareVideo = document.getElementById("compareVideo");
     const button = document.getElementById("comparePlayButton");
     const status = document.getElementById("status");
+    const player = document.getElementById("youtubePlayer");
 
     if (!compareMode) {
+        return;
+    }
+
+    const isNico =
+        player &&
+        player.tagName === "IFRAME" &&
+        player.src.startsWith("https://embed.nicovideo.jp/");
+
+    if (isNico) {
+        if (nicoPlayerStatus === 2) {
+            compareVideo.pause();
+            sendNicoCommand("pause");
+
+            nicoPlayerStatus = 3;
+
+            button.textContent = "▶";
+            status.textContent = "一時停止中";
+            return;
+        }
+
+        try {
+            if (compareVideo.ended) {
+                compareVideo.currentTime =
+                    Number(document.getElementById("compareStartTime").value);
+            }
+
+            await compareVideo.play();
+            sendNicoCommand("play");
+
+            nicoPlayerStatus = 2;
+
+            button.textContent = "Ⅱ";
+            status.textContent = "同時再生中";
+
+        } catch (error) {
+            compareVideo.pause();
+            sendNicoCommand("pause");
+
+            nicoPlayerStatus = 3;
+
+            button.textContent = "▶";
+            status.textContent =
+                "再生できません: " + error.message;
+        }
+
         return;
     }
 
@@ -193,7 +239,7 @@ async function toggleComparePlayback() {
         typeof youtubePlayerApi.pauseVideo !== "function" ||
         typeof youtubePlayerApi.getPlayerState !== "function") {
         status.textContent =
-            "同時再生はYouTube動画で利用できます";
+            "同時再生はYouTube・ニコニコ動画で利用できます";
         return;
     }
 
@@ -242,16 +288,52 @@ async function replayCompareVideos() {
     const compareVideo = document.getElementById("compareVideo");
     const button = document.getElementById("comparePlayButton");
     const status = document.getElementById("status");
+    const player = document.getElementById("youtubePlayer");
+
+    const isNico =
+        player &&
+        player.tagName === "IFRAME" &&
+        player.src.startsWith("https://embed.nicovideo.jp/");
+
+    const startTime =
+        Number(document.getElementById("compareStartTime").value);
+
+    if (isNico) {
+        try {
+            compareVideo.pause();
+            sendNicoCommand("pause");
+            sendNicoCommand("seek", { time: 0 });
+
+            compareVideo.currentTime = startTime;
+
+            await compareVideo.play();
+            sendNicoCommand("play");
+
+            nicoPlayerStatus = 2;
+
+            button.textContent = "Ⅱ";
+            status.textContent = "リプレイ中";
+
+        } catch (error) {
+            compareVideo.pause();
+            sendNicoCommand("pause");
+
+            nicoPlayerStatus = 3;
+
+            button.textContent = "▶";
+            status.textContent =
+                "リプレイできません: " + error.message;
+        }
+
+        return;
+    }
 
     if (!youtubePlayerApi ||
         typeof youtubePlayerApi.seekTo !== "function" ||
         typeof youtubePlayerApi.playVideo !== "function") {
-        status.textContent = "リプレイはYouTube動画で利用できます";
+        status.textContent = "リプレイはYouTube・ニコニコ動画で利用できます";
         return;
     }
-
-    const startTime =
-        Number(document.getElementById("compareStartTime").value);
 
     try {
         compareVideo.pause();
@@ -312,6 +394,17 @@ compareVideoElement.addEventListener("ended", () => {
     }
 
     const button = document.getElementById("comparePlayButton");
+    const player = document.getElementById("youtubePlayer");
+
+    const isNico =
+        player &&
+        player.tagName === "IFRAME" &&
+        player.src.startsWith("https://embed.nicovideo.jp/");
+
+    if (isNico) {
+        button.textContent = nicoPlayerStatus === 2 ? "Ⅱ" : "▶";
+        return;
+    }
 
     if (youtubePlayerApi &&
         typeof youtubePlayerApi.getPlayerState === "function" &&
@@ -417,6 +510,8 @@ async function toggleCompareMode() {
             typeof youtubePlayerApi.pauseVideo === "function") {
             youtubePlayerApi.pauseVideo();
         }
+        
+        sendNicoCommand("pause");
 
         document.getElementById("comparePlayButton").textContent = "▶";
 
@@ -439,6 +534,87 @@ async function toggleCompareMode() {
 
 let youtubePlayerApi = null;
 let youtubeApiReady = false;
+
+let nicoPlayerStatus = 3;
+
+window.addEventListener("message", (event) => {
+    if (event.origin !== "https://embed.nicovideo.jp") {
+        return;
+    }
+
+    const player = document.getElementById("youtubePlayer");
+
+    if (!player ||
+        player.tagName !== "IFRAME" ||
+        event.source !== player.contentWindow ||
+        !event.data ||
+        event.data.playerId !== "furii") {
+        return;
+    }
+
+    if (event.data.eventName === "playerStatusChange" ||
+        event.data.eventName === "statusChange") {
+
+        const status = event.data.data?.playerStatus;
+
+        if (typeof status !== "number") {
+            return;
+        }
+
+        nicoPlayerStatus = status;
+
+        if (!compareMode) {
+            return;
+        }
+
+        const compareVideo = document.getElementById("compareVideo");
+        const button = document.getElementById("comparePlayButton");
+
+        if (status === 2) {
+            button.textContent = "Ⅱ";
+
+            if (compareVideo.paused && !compareVideo.ended) {
+                compareVideo.play().catch(error => {
+                    document.getElementById("status").textContent =
+                        "撮影動画を再生できません: " + error.message;
+                });
+            }
+
+        } else if (status === 3 || status === 4) {
+            compareVideo.pause();
+            nicoPlayerStatus = 3;
+            button.textContent = "▶";
+
+        }
+    }
+});
+
+function sendNicoCommand(eventName, data = null) {
+    const player = document.getElementById("youtubePlayer");
+
+    if (!player || player.tagName !== "IFRAME" ||
+        !player.src.startsWith("https://embed.nicovideo.jp/") ||
+        !player.contentWindow) {
+        return false;
+    }
+
+    const message = {
+        sourceConnectorType: 1,
+        playerId: "furii",
+        eventName: eventName
+    };
+
+    if (data !== null) {
+        message.data = data;
+    }
+
+    player.contentWindow.postMessage(
+        message,
+        "https://embed.nicovideo.jp"
+    );
+
+    return true;
+}
 
 function onYouTubeIframeAPIReady() {
     youtubeApiReady = true;
@@ -522,8 +698,9 @@ function loadYoutube() {
             const match = url.pathname.match(/^\/watch\/(sm\d+|nm\d+|so\d+|\d+)\/?$/);
 
             if (match) {
-                embedUrl = "https://embed.nicovideo.jp/watch/" + match[1];
+                embedUrl = "https://embed.nicovideo.jp/watch/" + match[1] + "?jsapi=1&playerId=furii";
             }
+
         }
 
     } catch (error) {
@@ -542,6 +719,9 @@ function loadYoutube() {
 
     // 再生ボタンを初期状態に戻す
     document.getElementById("comparePlayButton").textContent = "▶";
+
+    // ニコニコ動画の再生状態も初期化
+    nicoPlayerStatus = 3;
 
     if (embedUrl.includes("youtube.com/embed/")) {
 
