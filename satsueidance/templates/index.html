@@ -639,7 +639,28 @@ function stopAdjustDrag(event) {
 adjustVideo.addEventListener("pointerup", stopAdjustDrag);
 adjustVideo.addEventListener("pointercancel", stopAdjustDrag);
 adjustVideo.addEventListener("lostpointercapture", stopAdjustDrag);
-    
+
+function changeCompareSpeed(speed) {
+    if (!compareMode || !youtubePlayerApi ||
+        typeof youtubePlayerApi.setPlaybackRate !== "function") {
+        return;
+    }
+
+    const compareVideo = document.getElementById("compareVideo");
+
+    youtubePlayerApi.setPlaybackRate(speed);
+
+    const actualSpeed =
+        typeof youtubePlayerApi.getPlaybackRate === "function"
+            ? youtubePlayerApi.getPlaybackRate()
+            : speed;
+
+    compareVideo.playbackRate = actualSpeed;
+
+    document.getElementById("status").textContent =
+        "再生速度：" + actualSpeed + "倍";
+}
+        
 function setCompareStartTime() {
     const compareVideo = document.getElementById("compareVideo");
     const slider = document.getElementById("compareStartTime");
@@ -950,13 +971,24 @@ async function toggleCompareMode() {
 
     const comparePlayButton = document.getElementById("comparePlayButton");
     comparePlayButton.style.display = compareMode ? "inline-block" : "none";
-
+    
     const compareReplayButton = document.getElementById("compareReplayButton");
     compareReplayButton.style.display = compareMode ? "inline-block" : "none";
 
+    const compareSpeedControls = document.getElementById("compareSpeedControls");
+    const currentPlayer = document.getElementById("youtubePlayer");
+
+    const isYouTube =
+        currentPlayer &&
+        currentPlayer.tagName === "IFRAME" &&
+        currentPlayer.src.includes("youtube.com/embed/");
+
+    compareSpeedControls.style.display =
+        compareMode && isYouTube ? "block" : "none";
+
     const expandButton = document.getElementById("expandButton");
     expandButton.style.display = compareMode ? "none" : "inline-block";
-
+    
     const compareStartControls = document.getElementById("compareStartControls");
     compareStartControls.style.display = compareMode ? "block" : "none";
 
@@ -979,7 +1011,7 @@ async function toggleCompareMode() {
     uploadControls.style.display = compareMode ? "none" : "block";
 
     const compareVideo = document.getElementById("compareVideo");
-
+    
     if (compareMode) {
         compareVideo.src = compareVideoSource === "recording"
             ? recordingUrl
@@ -987,6 +1019,27 @@ async function toggleCompareMode() {
 
         compareVideo.muted = true;
         compareVideo.style.display = "block";
+
+        compareVideo.playbackRate = 1;
+
+        if (youtubePlayerApi &&
+            typeof youtubePlayerApi.setPlaybackRate === "function") {
+            youtubePlayerApi.setPlaybackRate(1);
+        }
+
+        document.querySelectorAll(
+            "#compareSpeedControls button"
+        ).forEach(button => {
+            const selected = button.textContent.trim() === "1.0×";
+
+            button.style.background =
+                selected ? "#168bff" : "#25a58d";
+
+            button.style.borderColor =
+                selected ? "#0875df" : "#1f907b";
+
+            button.style.color = "white";
+        });
 
         compareVideo.onloadedmetadata = () => {
             const slider = document.getElementById("compareStartTime");
@@ -1265,13 +1318,62 @@ function loadYoutube() {
             playerVars: {
                 playsinline: 1
             },
+            
             events: {
+                
                 onReady: function(event) {
                     document.getElementById("status").textContent =
                         "YouTube再生可能";
+
+                    const availableRates =
+                        event.target.getAvailablePlaybackRates();
+
+                    document.querySelectorAll(
+                        "#compareSpeedControls button"
+                    ).forEach(button => {
+                        const speed = Number(
+                            button.textContent.replace("×", "")
+                        );
+
+                        button.disabled = !availableRates.includes(speed);
+                    });
                 },
-                onStateChange: onYouTubePlayerStateChange
+
+                onStateChange: onYouTubePlayerStateChange,
+                onPlaybackRateChange: function(event) {
+                    if (!compareMode) {
+                        return;
+                    }
+
+                    const compareVideo = document.getElementById("compareVideo");
+                    const actualSpeed = event.data;
+
+                    compareVideo.playbackRate = actualSpeed;
+
+                    document.querySelectorAll(
+                        "#compareSpeedControls button"
+                    ).forEach(button => {
+                        const buttonSpeed = Number(
+                            button.textContent.replace("×", "")
+                        );
+
+                        const selected =
+                            Math.abs(buttonSpeed - actualSpeed) < 0.001;
+
+                        button.style.background =
+                            selected ? "#168bff" : "#25a58d";
+
+                        button.style.borderColor =
+                            selected ? "#0875df" : "#1f907b";
+
+                        button.style.color = "white";
+                    });
+
+                    document.getElementById("status").textContent =
+                        "再生速度：" + actualSpeed + "倍";
+                }
             }
+
         });
 
     } else {
