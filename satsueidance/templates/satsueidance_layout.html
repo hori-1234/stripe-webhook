@@ -31,8 +31,27 @@
             onclick="toggleCompareLayout()"
             style="background:#25a58d; color:white; border:1px solid #1f907b;"
         >重</button>
+
     </div>
-  
+
+    <div id="compareSpeedControls" style="display:none; margin:12px 0;">
+        <div style="font-weight:bold; margin-bottom:8px;">
+            再生速度
+        </div>
+
+        <div style="display:flex; flex-wrap:wrap; gap:4px;">
+            <button type="button" onclick="changeCompareSpeed(0.25)">0.25×</button>
+            <button type="button" onclick="changeCompareSpeed(0.5)">0.5×</button>
+            <button type="button" onclick="changeCompareSpeed(0.75)">0.75×</button>
+            <button type="button" onclick="changeCompareSpeed(1)">1.0×</button>
+            <button type="button" onclick="changeCompareSpeed(1.25)">1.25×</button>
+        </div>
+
+        <p style="font-size:12px; color:#777; margin:4px 0;">
+            ※YouTube専用（元動画と比較動画の両方に適用）
+        </p>
+    </div>
+
     <details id="adjustControls">
         <summary>調整</summary>
 
@@ -123,7 +142,6 @@
     <span id="uploadSourceLabel" style="color:#91aaa1; font-weight:normal;">アップロード</span>
 </div>
 
-<button id="compareReplayButton" onclick="replayCompareVideos()" style="display:none;" title="リプレイ" aria-label="リプレイ">↻</button>
 <button id="expandButton" onclick="
 
     const box = document.getElementById('videoBox');
