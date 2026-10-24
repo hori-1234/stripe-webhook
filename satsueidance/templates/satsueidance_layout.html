@@ -9,7 +9,7 @@
 </div>
 
 <div id="compareControls" style="display:none;">
-
+    
     <div style="display:flex; align-items:center; justify-content:flex-start; gap:8px; margin:10px 0;">
         <span>画面調整モード</span>
         <button
@@ -17,8 +17,14 @@
             onclick="toggleScreenAdjustMode()"
             style="background:#25a58d; color:white; border:1px solid #1f907b;"
         >OFF</button>
-    </div>
 
+        <button
+            id="compareLayoutButton"
+            onclick="toggleCompareLayout()"
+            style="background:#25a58d; color:white; border:1px solid #1f907b;"
+        >重</button>
+    </div>
+  
     <details id="adjustControls">
         <summary>調整</summary>
 
