@@ -283,12 +283,27 @@ function changeCompareSource(value) {
         return;
     }
 
+    const recordingLabel = document.getElementById("recordingSourceLabel");
+    const uploadLabel = document.getElementById("uploadSourceLabel");
+
     if (value === "0") {
         compareVideoSource = "recording";
         status.textContent = "比較対象：インカメ撮影動画";
+
+        recordingLabel.style.color = "#168978";
+        recordingLabel.style.fontWeight = "bold";
+
+        uploadLabel.style.color = "#91aaa1";
+        uploadLabel.style.fontWeight = "normal";
     } else {
         compareVideoSource = "upload";
         status.textContent = "比較対象：アップロード動画";
+
+        recordingLabel.style.color = "#91aaa1";
+        recordingLabel.style.fontWeight = "normal";
+
+        uploadLabel.style.color = "#168978";
+        uploadLabel.style.fontWeight = "bold";
     }
 }
 
@@ -852,6 +867,10 @@ async function toggleCompareMode() {
     
     button.classList.toggle("compare-active", compareMode);
 
+    const compareSourceSwitch = document.getElementById("compareSourceSwitch");
+    compareSourceSwitch.parentElement.style.display =
+        compareMode ? "none" : "flex";
+
     const comparePlayButton = document.getElementById("comparePlayButton");
     comparePlayButton.style.display = compareMode ? "inline-block" : "none";
 
@@ -878,6 +897,9 @@ async function toggleCompareMode() {
 
     const youtubeUrlControls = document.getElementById("youtubeUrlControls");
     youtubeUrlControls.style.display = compareMode ? "none" : "block";
+
+    const uploadControls = document.getElementById("uploadControls");
+    uploadControls.style.display = compareMode ? "none" : "block";
 
     const compareVideo = document.getElementById("compareVideo");
 
