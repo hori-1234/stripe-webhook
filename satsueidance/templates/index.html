@@ -264,8 +264,17 @@ async function toggleCompareMode() {
         ? "比較モード ON"
         : "比較モード OFF";
 
-    const compareVideo = document.getElementById("compareVideo");
+    const comparePlayButton = document.getElementById("comparePlayButton");
+    comparePlayButton.style.display = compareMode ? "inline-block" : "none";
 
+    const compareStartControls = document.getElementById("compareStartControls");
+    compareStartControls.style.display = compareMode ? "block" : "none";
+
+    const flipButton = document.getElementById("flipButton");
+    flipButton.style.display = compareMode ? "none" : "inline-block";
+
+    const compareVideo = document.getElementById("compareVideo");
+    
     if (compareMode) {
         compareVideo.src = recordingUrl;
         compareVideo.muted = true;
