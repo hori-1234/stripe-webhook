@@ -2540,8 +2540,31 @@ def schedule_admin_stats():
             COUNT(DISTINCT visitor_id)
         FROM satsueidance_unique_visitors
     """)
-
+    
     freeire_today_unique, freeire_month_unique, freeire_total_unique = cur.fetchone()
+
+    # フリイレの日別アクセス統計（直近30日間）
+    cur.execute("""
+        SELECT
+            pv.view_date,
+            pv.view_count,
+            COALESCE(uu.unique_count, 0)
+        FROM satsueidance_page_views pv
+        LEFT JOIN (
+            SELECT
+                visit_date,
+                COUNT(DISTINCT visitor_id) AS unique_count
+            FROM satsueidance_unique_visitors
+            GROUP BY visit_date
+        ) uu
+            ON pv.view_date = uu.visit_date
+        WHERE pv.view_date >=
+            (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo')::date
+            - INTERVAL '29 days'
+        ORDER BY pv.view_date DESC
+    """)
+
+    freeire_daily_views = cur.fetchall()
 
 
     # 出演者ステータスの検索条件
