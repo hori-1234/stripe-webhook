@@ -2495,8 +2495,57 @@ def schedule_admin_stats():
 
     today_views, month_views, total_views = cur.fetchone()
 
-    
+    # フリイレのアクセス統計
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS satsueidance_page_views (
+            view_date DATE NOT NULL PRIMARY KEY,
+            view_count INTEGER NOT NULL DEFAULT 0
+        )
+    """)
+
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS satsueidance_unique_visitors (
+            visit_date DATE NOT NULL,
+            visitor_id TEXT NOT NULL,
+            PRIMARY KEY (visit_date, visitor_id)
+        )
+    """)
+
+    cur.execute("""
+        SELECT
+            COALESCE(SUM(view_count) FILTER (
+                WHERE view_date =
+                    (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo')::date
+            ), 0),
+            COALESCE(SUM(view_count) FILTER (
+                WHERE DATE_TRUNC('month', view_date::timestamp) =
+                    DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo')
+            ), 0),
+            COALESCE(SUM(view_count), 0)
+        FROM satsueidance_page_views
+    """)
+
+    freeire_today_views, freeire_month_views, freeire_total_views = cur.fetchone()
+
+    cur.execute("""
+        SELECT
+            COUNT(DISTINCT visitor_id) FILTER (
+                WHERE visit_date =
+                    (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo')::date
+            ),
+            COUNT(DISTINCT visitor_id) FILTER (
+                WHERE DATE_TRUNC('month', visit_date::timestamp) =
+                    DATE_TRUNC('month', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo')
+            ),
+            COUNT(DISTINCT visitor_id)
+        FROM satsueidance_unique_visitors
+    """)
+
+    freeire_today_unique, freeire_month_unique, freeire_total_unique = cur.fetchone()
+
+
     # 出演者ステータスの検索条件
+
     selected_genre = request.args.get("genre", "").strip()
     sort_by = request.args.get("sort", "clicks")
     sort_order = request.args.get("order", "desc")
@@ -2782,6 +2831,12 @@ def schedule_admin_stats():
         today_views=today_views,
         month_views=month_views,
         total_views=total_views,
+        freeire_today_views=freeire_today_views,
+        freeire_month_views=freeire_month_views,
+        freeire_total_views=freeire_total_views,
+        freeire_today_unique=freeire_today_unique,
+        freeire_month_unique=freeire_month_unique,
+        freeire_total_unique=freeire_total_unique,
         performer_status=performer_status,
         selected_genre=selected_genre,
         sort_by=sort_by,
