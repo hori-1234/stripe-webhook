@@ -308,6 +308,20 @@ function changeCompareOpacity(value) {
     opacityValue.textContent = value + "%";
 }
 
+function updateComparePosition() {
+    const compareVideo = document.getElementById("compareVideo");
+
+    const x = Number(document.getElementById("compareX").value);
+    const y = Number(document.getElementById("compareY").value);
+    const size = Number(document.getElementById("compareSize").value);
+
+    compareVideo.style.transform =
+        `translate(${x}%, ${y}%) scale(${size / 100})`;
+
+    document.getElementById("compareSizeValue").textContent =
+        size + "%";
+}
+
 let adjustDragStart = null;
 
 const adjustVideo = document.getElementById("compareVideo");
