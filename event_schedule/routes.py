@@ -2860,6 +2860,7 @@ def schedule_admin_stats():
         freeire_today_unique=freeire_today_unique,
         freeire_month_unique=freeire_month_unique,
         freeire_total_unique=freeire_total_unique,
+        freeire_daily_views=freeire_daily_views,
         performer_status=performer_status,
         selected_genre=selected_genre,
         sort_by=sort_by,
