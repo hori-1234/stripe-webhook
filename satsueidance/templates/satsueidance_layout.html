@@ -18,51 +18,10 @@
 </div>
 
 <button id="compareButton" onclick="toggleCompareMode()">比較モード OFF</button>
+<button id="comparePlayButton" onclick="toggleComparePlayback()" style="display:none;">再生</button>
 
-<div id="compareControls" style="display:none;">
-    <label for="opacitySlider">撮影動画の透明度：</label>
-    <input
-        type="range"
-        id="opacitySlider"
-        min="0"
-        max="100"
-        value="50"
-        oninput="changeCompareOpacity(this.value)"
-    >
-
-    <span id="opacityValue">50%</span>
-
-    <p>横方向（X軸）</p>
-    <input
-        type="range"
-        id="compareX"
-        min="-100"
-        max="100"
-        value="0"
-        oninput="updateComparePosition()"
-    >
-
-    <p>縦方向（Y軸）</p>
-    <input
-        type="range"
-        id="compareY"
-        min="-100"
-        max="100"
-        value="0"
-        oninput="updateComparePosition()"
-    >
-
-    <p>撮影動画のサイズ：<span id="compareSizeValue">100%</span></p>
-    <input
-        type="range"
-        id="compareSize"
-        min="20"
-        max="100"
-        value="100"
-        oninput="updateComparePosition()"
-    >
-
-      <p>
+<div id="compareStartControls" style="display:none;">
+    <p>
         撮影動画の再生開始位置：
         <span id="compareStartValue">0.0秒 / 0.0秒</span>
     </p>
@@ -76,11 +35,62 @@
         value="0"
         oninput="setCompareStartTime()"
     >
+</div>
 
-    <p>撮影動画の再生操作</p>
-    <button id="comparePlayButton" onclick="toggleComparePlayback()">
-        再生
-    </button>
+<div id="compareControls" style="display:none;">
+
+    <details id="adjustControls">
+        <summary>調整</summary>
+
+        <details>
+            <summary>撮影動画の透明度：<span id="opacityValue">50%</span></summary>
+            <input
+                type="range"
+                id="opacitySlider"
+                min="0"
+                max="100"
+                value="50"
+                oninput="changeCompareOpacity(this.value)"
+            >
+        </details>
+
+        <details>
+            <summary>横方向（X軸）</summary>
+            <input
+                type="range"
+                id="compareX"
+                min="-100"
+                max="100"
+                value="0"
+                oninput="updateComparePosition()"
+            >
+        </details>
+
+        <details>
+            <summary>縦方向（Y軸）</summary>
+            <input
+                type="range"
+                id="compareY"
+                min="-100"
+                max="100"
+                value="0"
+                oninput="updateComparePosition()"
+            >
+        </details>
+
+        <details>
+            <summary>撮影動画のサイズ：<span id="compareSizeValue">100%</span></summary>
+            <input
+                type="range"
+                id="compareSize"
+                min="0"
+                max="200"
+                value="100"
+                oninput="updateComparePosition()"
+            >
+        </details>
+    </details>
+
 </div>
 
 <button id="flipButton" onclick="
