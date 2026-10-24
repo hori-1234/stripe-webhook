@@ -471,6 +471,27 @@ function onYouTubePlayerStateChange(event) {
     }
 }
     
+async function copyYoutubeUrl() {
+    const url = document.getElementById("youtubeUrl").value.trim();
+
+    if (!url) {
+        document.getElementById("status").textContent =
+            "コピーするURLがありません";
+        return;
+    }
+
+    try {
+        await navigator.clipboard.writeText(url);
+
+        document.getElementById("status").textContent =
+            "URLをコピーしました";
+
+    } catch (error) {
+        document.getElementById("status").textContent =
+            "URLをコピーできませんでした";
+    }
+}
+
 function loadYoutube() {
     const input = document.getElementById("youtubeUrl").value.trim();
     let embedUrl = "";
