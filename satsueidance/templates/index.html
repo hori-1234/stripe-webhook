@@ -168,7 +168,17 @@ function setCompareStartTime() {
 
     startValue.textContent =
         startTime.toFixed(1) + "秒 / " + duration.toFixed(1) + "秒";
+
+    const progressSlider = document.getElementById("compareProgressTime");
+    const currentValue = document.getElementById("compareCurrentValue");
+
+    progressSlider.max = duration;
+    progressSlider.value = compareVideo.currentTime;
+
+    currentValue.textContent =
+        compareVideo.currentTime.toFixed(1) + "秒 / " + duration.toFixed(1) + "秒";
 }
+    
 async function toggleComparePlayback() {
     const compareVideo = document.getElementById("compareVideo");
     const button = document.getElementById("comparePlayButton");
@@ -275,7 +285,11 @@ compareVideoElement.addEventListener("timeupdate", () => {
     const slider = document.getElementById("compareStartTime");
     const startValue = document.getElementById("compareStartValue");
 
+    const progressSlider = document.getElementById("compareProgressTime");
+    const currentValue = document.getElementById("compareCurrentValue");
+
     const startTime = Number(slider.value);
+    const currentTime = compareVideoElement.currentTime;
     const duration = compareVideoElement.duration;
 
     if (!Number.isFinite(duration) || duration <= 0) {
@@ -284,6 +298,12 @@ compareVideoElement.addEventListener("timeupdate", () => {
 
     startValue.textContent =
         startTime.toFixed(1) + "秒 / " + duration.toFixed(1) + "秒";
+
+    progressSlider.max = duration;
+    progressSlider.value = currentTime;
+
+    currentValue.textContent =
+        currentTime.toFixed(1) + "秒 / " + duration.toFixed(1) + "秒";
 });
 
 compareVideoElement.addEventListener("ended", () => {
@@ -371,13 +391,22 @@ async function toggleCompareMode() {
             if (!Number.isFinite(duration) || duration <= 0) {
                 return;
             }
-
+            
             slider.max = duration;
             slider.value = 0;
 
             compareVideo.currentTime = 0;
 
             startValue.textContent =
+                "0.0秒 / " + duration.toFixed(1) + "秒";
+
+            const progressSlider = document.getElementById("compareProgressTime");
+            const currentValue = document.getElementById("compareCurrentValue");
+
+            progressSlider.max = duration;
+            progressSlider.value = 0;
+
+            currentValue.textContent =
                 "0.0秒 / " + duration.toFixed(1) + "秒";
         };
 
