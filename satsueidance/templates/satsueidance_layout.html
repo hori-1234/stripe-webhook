@@ -122,6 +122,21 @@
 
 <span style="margin-right:8px;">比較モード</span>
 <button id="compareButton" onclick="toggleCompareMode()">OFF</button>
+<button
+    id="normalPlayButton"
+    onclick="toggleNormalPlayback()"
+    style="background:#25a58d; color:white; border:1px solid #1f907b;"
+>▶</button>
+<input
+    type="number"
+    id="normalPlayDelay"
+    min="0"
+    max="999"
+    step="1"
+    value="5"
+    style="width:65px; padding:8px; text-align:center;"
+>
+<span>秒</span>
 <button id="comparePlayButton" onclick="toggleComparePlayback()" style="display:none;">▶</button>
 <button id="compareReplayButton" onclick="replayCompareVideos()" style="display:none;" title="リプレイ" aria-label="リプレイ">↻</button>
 
