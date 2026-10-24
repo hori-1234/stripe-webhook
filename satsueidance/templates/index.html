@@ -174,7 +174,7 @@
             border-radius: 12px;
             box-shadow: 0 4px 16px rgba(36, 72, 63, 0.08);
         }
-
+        
         #compareVideo {
             position: absolute;
             top: 0;
@@ -187,11 +187,43 @@
             pointer-events: none;
         }
 
+        #videoBox.vertical-compare {
+            display: flex;
+            flex-direction: column;
+            aspect-ratio: auto;
+            overflow: visible;
+        }
+
+        #videoBox.vertical-compare #youtubePlayer {
+            position: relative;
+            display: block;
+            width: 100%;
+            height: auto;
+            aspect-ratio: 16 / 9;
+            flex-shrink: 0;
+        }
+
+        #videoBox.vertical-compare #compareVideo {
+            position: relative;
+            top: auto;
+            left: auto;
+            width: 100%;
+            height: auto;
+            aspect-ratio: 16 / 9;
+            max-height: none;
+            margin-top: 0;
+            opacity: 1;
+            transform: none !important;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+
         #videoBox.screen-adjust-active #compareVideo {
             pointer-events: auto;
             touch-action: none;
             cursor: grab;
         }
+
 
         #videoBox.screen-adjust-active #compareVideo:active {
             cursor: grabbing;
