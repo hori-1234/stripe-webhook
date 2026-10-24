@@ -187,6 +187,20 @@
             pointer-events: none;
         }
 
+        #videoBox.screen-adjust-active #compareVideo {
+            pointer-events: auto;
+            touch-action: none;
+            cursor: grab;
+        }
+
+        #videoBox.screen-adjust-active #compareVideo:active {
+            cursor: grabbing;
+        }
+
+        #videoBox.screen-adjust-active #youtubePlayer {
+            pointer-events: none;
+        }
+
         video {
 
             width: 100%;
@@ -258,6 +272,33 @@ let recordingContext = null;
 let recordingStream = null;
 let recordingAnimationId = null;
 let compareMode = false;
+let screenAdjustMode = false;
+
+function toggleScreenAdjustMode() {
+    screenAdjustMode = !screenAdjustMode;
+
+    const button = document.getElementById("screenAdjustButton");
+    const videoBox = document.getElementById("videoBox");
+
+    if (!screenAdjustMode) {
+        adjustDragStart = null;
+        adjustPinchStart = null;
+        adjustPointers.clear();
+    }
+
+    videoBox.classList.toggle("screen-adjust-active", screenAdjustMode);
+
+    if (screenAdjustMode) {
+
+        button.textContent = "ON";
+        button.style.background = "#e53935";
+        button.style.borderColor = "#c62828";
+    } else {
+        button.textContent = "OFF";
+        button.style.background = "#25a58d";
+        button.style.borderColor = "#1f907b";
+    }
+}
 
 function changeCompareOpacity(value) {
     const compareVideo = document.getElementById("compareVideo");
@@ -267,19 +308,173 @@ function changeCompareOpacity(value) {
     opacityValue.textContent = value + "%";
 }
 
-function updateComparePosition() {
-    const compareVideo = document.getElementById("compareVideo");
+let adjustDragStart = null;
 
-    const x = Number(document.getElementById("compareX").value);
-    const y = Number(document.getElementById("compareY").value);
-    const size = Number(document.getElementById("compareSize").value);
+const adjustVideo = document.getElementById("compareVideo");
 
-    compareVideo.style.transform =
-        `translate(${x}%, ${y}%) scale(${size / 100})`;
+let adjustPinchStart = null;
+const adjustPointers = new Map();
 
-    document.getElementById("compareSizeValue").textContent =
-        size + "%";
+function getAdjustPointerDistance() {
+    const points = [...adjustPointers.values()];
+
+    if (points.length < 2) {
+        return 0;
+    }
+
+    return Math.hypot(
+        points[0].x - points[1].x,
+        points[0].y - points[1].y
+    );
 }
+
+adjustVideo.addEventListener("pointerdown", (event) => {
+    if (!screenAdjustMode || !compareMode) {
+        return;
+    }
+
+    adjustPointers.set(event.pointerId, {
+        x: event.clientX,
+        y: event.clientY
+    });
+
+    if (adjustPointers.size === 2) {
+        adjustDragStart = null;
+
+        adjustPinchStart = {
+            distance: getAdjustPointerDistance(),
+            size: Number(document.getElementById("compareSize").value)
+        };
+    }
+}, true);
+
+adjustVideo.addEventListener("pointermove", (event) => {
+    if (!screenAdjustMode || !compareMode ||
+        !adjustPointers.has(event.pointerId)) {
+        return;
+    }
+
+    adjustPointers.set(event.pointerId, {
+        x: event.clientX,
+        y: event.clientY
+    });
+
+    if (adjustPointers.size !== 2 ||
+        !adjustPinchStart ||
+        adjustPinchStart.distance <= 0) {
+        return;
+    }
+
+    event.preventDefault();
+
+    const distance = getAdjustPointerDistance();
+
+    const size = adjustPinchStart.size *
+        distance / adjustPinchStart.distance;
+
+    document.getElementById("compareSize").value =
+        Math.max(0, Math.min(200, Math.round(size)));
+
+    updateComparePosition();
+}, true);
+
+function stopAdjustPinch(event) {
+    adjustPointers.delete(event.pointerId);
+
+    if (adjustPointers.size < 2) {
+        adjustPinchStart = null;
+    }
+
+    if (adjustPointers.size === 1 && screenAdjustMode && compareMode) {
+        const [pointerId, point] = [...adjustPointers.entries()][0];
+
+        adjustDragStart = {
+            pointerId: pointerId,
+            startX: point.x,
+            startY: point.y,
+            x: Number(document.getElementById("compareX").value),
+            y: Number(document.getElementById("compareY").value)
+        };
+    }
+}
+
+adjustVideo.addEventListener("pointerup", stopAdjustPinch);
+adjustVideo.addEventListener("pointercancel", stopAdjustPinch);
+adjustVideo.addEventListener("lostpointercapture", stopAdjustPinch);
+
+adjustVideo.addEventListener("pointerdown", (event) => {
+    if (!screenAdjustMode || !compareMode) {
+        return;
+    }
+
+    if (event.pointerType === "mouse" && event.button !== 0) {
+        return;
+    }
+
+    event.preventDefault();
+
+    adjustVideo.setPointerCapture(event.pointerId);
+
+    if (adjustPointers.size !== 1) {
+        return;
+    }
+
+    adjustDragStart = {
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        startY: event.clientY,
+        x: Number(document.getElementById("compareX").value),
+        y: Number(document.getElementById("compareY").value)
+    };
+});
+
+adjustVideo.addEventListener("pointermove", (event) => {
+    if (!screenAdjustMode || !compareMode || !adjustDragStart) {
+        return;
+    }
+
+    if (adjustPointers.size >= 2 || adjustPinchStart) {
+        return;
+    }
+
+    if (event.pointerId !== adjustDragStart.pointerId) {
+        return;
+    }
+
+    event.preventDefault();
+
+    const baseWidth = adjustVideo.offsetWidth;
+    const baseHeight = adjustVideo.offsetHeight;
+
+    if (!baseWidth || !baseHeight) {
+        return;
+    }
+
+    const x = adjustDragStart.x +
+        (event.clientX - adjustDragStart.startX) / baseWidth * 100;
+
+    const y = adjustDragStart.y +
+        (event.clientY - adjustDragStart.startY) / baseHeight * 100;
+
+    document.getElementById("compareX").value =
+        Math.max(-100, Math.min(100, x));
+
+    document.getElementById("compareY").value =
+        Math.max(-100, Math.min(100, y));
+
+    updateComparePosition();
+});
+
+function stopAdjustDrag(event) {
+    if (adjustDragStart &&
+        event.pointerId === adjustDragStart.pointerId) {
+        adjustDragStart = null;
+    }
+}
+
+adjustVideo.addEventListener("pointerup", stopAdjustDrag);
+adjustVideo.addEventListener("pointercancel", stopAdjustDrag);
+adjustVideo.addEventListener("lostpointercapture", stopAdjustDrag);
     
 function setCompareStartTime() {
     const compareVideo = document.getElementById("compareVideo");
@@ -562,6 +757,10 @@ async function toggleCompareMode() {
     }
 
     compareMode = !compareMode;
+
+    if (!compareMode && screenAdjustMode) {
+        toggleScreenAdjustMode();
+    }
 
     if (compareMode && cameraStream) {
         await toggleCamera();
