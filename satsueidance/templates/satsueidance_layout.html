@@ -89,9 +89,11 @@
 
 <span style="margin-right:8px;">比較モード</span>
 <button id="compareButton" onclick="toggleCompareMode()">OFF</button>
+<button id="comparePlayButton" onclick="toggleComparePlayback()" style="display:none;">▶</button>
+<button id="compareReplayButton" onclick="replayCompareVideos()" style="display:none;" title="リプレイ" aria-label="リプレイ">↻</button>
 
-<div style="display:flex; align-items:center; gap:12px; margin:12px 0;">
-    <span>インカメ</span>
+<div style="display:flex; align-items:center; justify-content:center; gap:12px; margin:12px 0;">
+    <span id="recordingSourceLabel" style="color:#168978; font-weight:bold;">インカメ</span>
 
     <input
         type="range"
@@ -104,10 +106,9 @@
         style="width:70px; padding:0; cursor:pointer; accent-color:#25a58d;"
     >
 
-    <span>アップロード</span>
+    <span id="uploadSourceLabel" style="color:#91aaa1; font-weight:normal;">アップロード</span>
 </div>
 
-<button id="comparePlayButton" onclick="toggleComparePlayback()" style="display:none;">▶</button>
 <button id="compareReplayButton" onclick="replayCompareVideos()" style="display:none;" title="リプレイ" aria-label="リプレイ">↻</button>
 <button id="expandButton" onclick="
 
