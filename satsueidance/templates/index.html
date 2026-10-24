@@ -981,7 +981,8 @@ async function toggleCompareMode() {
     const isYouTube =
         currentPlayer &&
         currentPlayer.tagName === "IFRAME" &&
-        currentPlayer.src.includes("youtube.com/embed/");
+        youtubePlayerApi !== null &&
+        typeof youtubePlayerApi.setPlaybackRate === "function";
 
     compareSpeedControls.style.display =
         compareMode && isYouTube ? "block" : "none";
