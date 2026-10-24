@@ -143,6 +143,75 @@
         </div>
 
     </div>
+        </div>
+
+    <h2>フリイレ アクセス統計</h2>
+
+    <div style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;">
+
+        <div class="stats-section" style="--section-width: 350px;">
+            <h2>閲覧数（PV）</h2>
+            <p>今日：{{ freeire_today_views }} 回</p>
+            <p>今月：{{ freeire_month_views }} 回</p>
+            <p>累計：{{ freeire_total_views }} 回</p>
+        </div>
+
+        <div class="stats-section" style="--section-width: 350px;">
+            <h2>ユニークユーザー数（UU）</h2>
+            <p>今日：{{ freeire_today_unique }} 人</p>
+            <p>今月：{{ freeire_month_unique }} 人</p>
+            <p>累計：{{ freeire_total_unique }} 人</p>
+        </div>
+
+    </div>
+        </div>
+
+    <details style="
+        max-width: 700px;
+        margin-bottom: 20px;
+    ">
+        <summary style="
+            cursor: pointer;
+            padding: 12px;
+            background: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: bold;
+        ">
+            フリイレ 日別アクセス統計（直近30日間）
+        </summary>
+
+        <div class="stats-section" style="
+            --section-width: 700px;
+            margin-top: 10px;
+        ">
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>日付</th>
+                            <th>PV</th>
+                            <th>UU</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for day in freeire_daily_views | default([]) %}
+                        <tr>
+                            <td>{{ day[0].strftime('%Y/%m/%d') }}</td>
+                            <td>{{ day[1] }} 回</td>
+                            <td>{{ day[2] }} 人</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="3">まだ閲覧データがありません。</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </details>
 
     <div class="stats-section" style="--section-width: 700px;">
         <h2>日別アクセス統計（直近30日間）</h2>
