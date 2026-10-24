@@ -8,12 +8,21 @@
         body {
             margin: 0;
             padding: 16px;
-            background: #111;
-            color: white;
+            background: #f2faf6;
+            color: #24483f;
             font-family: sans-serif;
         }
-
-        h2 { text-align: center; }
+        
+        h2 {
+            text-align: center;
+            color: #168978;
+            font-size: 24px;
+            font-weight: 700;
+            margin: 16px 0 24px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #b8dcd0;
+            letter-spacing: 1px;
+        }
 
         input, button {
             box-sizing: border-box;
@@ -21,26 +30,117 @@
             font-size: 16px;
         }
 
-        input { width: 100%; }
+        input {
+            width: 100%;
+            background: #ffffff;
+            color: #24483f;
+            border: 1px solid #b8dcd0;
+            border-radius: 8px;
+            outline: none;
+        }
 
-        button { margin: 5px 3px; }
+        input:focus {
+            border-color: #25a58d;
+            box-shadow: 0 0 0 3px rgba(37, 165, 141, 0.15);
+        }
 
+        input::placeholder {
+            color: #91aaa1;
+        }
+
+        button {
+            margin: 5px 3px;
+            background: #25a58d;
+            color: white;
+            border: 1px solid #1f907b;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s ease;
+        }
+
+        button:hover {
+            background: #1d8c77;
+        }
+
+        button:disabled {
+            background: #cbd8d3;
+            color: #71847c;
+            border-color: #cbd8d3;
+            cursor: not-allowed;
+        }
+
+        #startButton {
+            background: #e53935;
+            color: white;
+            border: 2px solid #c62828;
+        }
+
+        #startButton:hover:not(:disabled) {
+            background: #c62828;
+        }
+
+        #stopButton {
+            background: #2563eb;
+            color: white;
+            border: 2px solid #1d4ed8;
+        }
+
+        #stopButton:hover:not(:disabled) {
+            background: #1d4ed8;
+        }
+
+        #startButton:disabled,
+        #stopButton:disabled {
+            background: #cbd8d3;
+            color: #71847c;
+            border-color: #cbd8d3;
+        }
+        
         #compareButton {
-            background: yellow;
-            color: black;
+            background: #d7f3e8;
+            color: #167763;
+            border: 2px solid #25a58d;
+            font-weight: 700;
+        }
+
+        #compareButton:hover {
+            background: #bcebd9;
+        }
+
+        #compareButton.compare-active {
+            background: #e53935;
+            color: white;
+            border-color: #c62828;
+        }
+
+        #compareButton.compare-active:hover {
+            background: #c62828;
         }
 
         #cameraButton.camera-active {
-            background: blue;
+            background: #2563eb;
             color: white;
+            border: 2px solid #1d4ed8;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
         }
 
+        #cameraButton.camera-active:hover {
+            background: #1d4ed8;
+        }
+        
         #flipButton.is-flipped,
         #cameraFlipButton.is-flipped {
-            background: red;
+            background: #f97316;
             color: white;
+            border: 2px solid #ea580c;
         }
 
+        #flipButton.is-flipped:hover,
+        #cameraFlipButton.is-flipped:hover {
+            background: #ea580c;
+        }
+        
         .video-box {
 
         width: 100%;
@@ -70,6 +170,9 @@
         #videoBox {
             position: relative;
             overflow: hidden;
+            border: 2px solid #b8dcd0;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(36, 72, 63, 0.08);
         }
 
         #compareVideo {
@@ -92,23 +195,49 @@
             margin-top: 12px;
         }
 
-        #status { color: #ffda75; }
+        #status {
+            color: #1d4ed8;
+            font-weight: 600;
+        }
 
         #expandButton.expanded-button {
             position: fixed;
             top: 12px;
             right: 12px;
             z-index: 10000;
-            background: #333;
+            background: #2563eb;
             color: white;
-            border: 1px solid white;
-            border-radius: 6px;
+            border: 2px solid white;
+            border-radius: 10px;
             padding: 10px 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
 
+        #expandButton.expanded-button:hover {
+            background: #1d4ed8;
+        }
+        
         #adjustControls summary {
-            padding: 8px 6px;
+            padding: 12px 14px;
             cursor: pointer;
+            background: #d7f3e8;
+            color: #167763;
+            border: 1px solid #25a58d;
+            border-radius: 8px;
+            font-weight: 700;
+        }
+
+        #adjustControls[open] summary {
+            background: #2563eb;
+            color: white;
+            border-color: #1d4ed8;
+        }
+
+        #adjustControls[open] {
+            border: 2px solid #2563eb;
+            border-radius: 10px;
+            padding: 8px;
+            background: #ffffff;
         }
 
     </style>
@@ -441,6 +570,8 @@ async function toggleCompareMode() {
     button.textContent = compareMode
         ? "比較モード ON"
         : "比較モード OFF";
+    
+    button.classList.toggle("compare-active", compareMode);
 
     const comparePlayButton = document.getElementById("comparePlayButton");
     comparePlayButton.style.display = compareMode ? "inline-block" : "none";
