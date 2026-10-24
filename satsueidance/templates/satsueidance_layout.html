@@ -10,12 +10,22 @@
 
 
 <div id="compareControls" style="display:none;">
-
+    
     <details id="adjustControls">
         <summary>調整</summary>
 
+        <div style="display:flex; align-items:center; justify-content:flex-start; gap:8px; margin:10px 0;">
+            <span>画面調整モード</span>
+            <button
+                id="screenAdjustButton"
+                onclick="toggleScreenAdjustMode()"
+                style="background:#25a58d; color:white; border:1px solid #1f907b;"
+            >OFF</button>
+        </div>
+
         <details>
             <summary>撮影動画の透明度：<span id="opacityValue">50%</span></summary>
+
             <input
                 type="range"
                 id="opacitySlider"
