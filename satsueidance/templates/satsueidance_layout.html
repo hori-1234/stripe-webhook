@@ -19,6 +19,14 @@
 
 <button id="compareButton" onclick="toggleCompareMode()">比較モード OFF</button>
 <button id="comparePlayButton" onclick="toggleComparePlayback()" style="display:none;">再生</button>
+<button id="expandButton" onclick="
+
+    const box = document.getElementById('videoBox');
+    box.classList.toggle('expanded');
+    const expanded = box.classList.contains('expanded');
+    this.textContent = expanded ? '戻す' : '拡大';
+    this.classList.toggle('expanded-button', expanded);
+">拡大</button>
 
 <div id="compareStartControls" style="display:none;">
     <p>
@@ -106,25 +114,18 @@
     ※左右反転すると、動画内の文字や操作ボタンも反転して表示されます。
 </p>
 
-<button id="expandButton" onclick="
-
-    const box = document.getElementById('videoBox');
-    box.classList.toggle('expanded');
-    const expanded = box.classList.contains('expanded');
-    this.textContent = expanded ? '戻す' : '拡大';
-    this.classList.toggle('expanded-button', expanded);
-">拡大</button>
-
-<h3>インカメラ</h3>
-<button id="cameraButton" onclick="toggleCamera()">カメラ起動</button>
-<button id="cameraFlipButton" onclick="
-    const camera = document.getElementById('camera');
-    const flipped = camera.style.transform !== 'scaleX(-1)';
-    camera.style.transform = flipped ? 'scaleX(-1)' : 'scaleX(1)';
-    this.textContent = flipped ? '反転中' : '通常';
-    this.classList.toggle('is-flipped', flipped);
-">通常</button>
-<video id="camera" autoplay muted playsinline></video>
+<div id="cameraControls">
+    <h3>インカメラ</h3>
+    <button id="cameraButton" onclick="toggleCamera()">カメラ起動</button>
+    <button id="cameraFlipButton" onclick="
+        const camera = document.getElementById('camera');
+        const flipped = camera.style.transform !== 'scaleX(-1)';
+        camera.style.transform = flipped ? 'scaleX(-1)' : 'scaleX(1)';
+        this.textContent = flipped ? '反転中' : '通常';
+        this.classList.toggle('is-flipped', flipped);
+    ">通常</button>
+    <video id="camera" autoplay muted playsinline></video>
+</div>
 
 <div id="recordingControls">
     <button id="startButton" onclick="startRecording()" disabled>録画開始</button>
@@ -134,9 +135,10 @@
 
 <p id="status">待機中</p>
 
-<h3>録画結果</h3>
-<video id="recordedVideo" controls playsinline></video>
-<a id="downloadLink" style="display:none;color:#8bc6ff;" download="dance-recording.mp4">録画動画をダウンロード</a>
-
+<div id="recordingResultControls">
+    <h3>録画結果</h3>
+    <video id="recordedVideo" controls playsinline></video>
+    <a id="downloadLink" style="display:none;color:#8bc6ff;" download="dance-recording.mp4">録画動画をダウンロード</a>
+</div>
 
 
