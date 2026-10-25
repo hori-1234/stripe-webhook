@@ -700,7 +700,7 @@ adjustVideo.addEventListener("pointercancel", stopAdjustDrag);
 adjustVideo.addEventListener("lostpointercapture", stopAdjustDrag);
 
 function changeCompareSpeed(speed) {
-    if (!compareMode || !youtubePlayerApi ||
+    if (!youtubePlayerApi ||
         typeof youtubePlayerApi.setPlaybackRate !== "function") {
         return;
     }
@@ -714,7 +714,9 @@ function changeCompareSpeed(speed) {
             ? youtubePlayerApi.getPlaybackRate()
             : speed;
 
-    compareVideo.playbackRate = actualSpeed;
+    if (compareMode) {
+        compareVideo.playbackRate = actualSpeed;
+    }
 
     document.getElementById("status").textContent =
         "再生速度：" + actualSpeed + "倍";
@@ -1061,7 +1063,7 @@ async function toggleCompareMode() {
         typeof youtubePlayerApi.setPlaybackRate === "function";
 
     compareSpeedControls.style.display =
-        compareMode && isYouTube ? "block" : "none";
+        isYouTube ? "block" : "none";
 
     const expandButton = document.getElementById("expandButton");
     expandButton.style.display = compareMode ? "none" : "inline-block";
