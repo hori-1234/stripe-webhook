@@ -44,6 +44,11 @@ def init_syuwa_db():
                 )
             """)
 
+            cur.execute("""
+                ALTER TABLE syuwa_applications
+                ADD COLUMN IF NOT EXISTS password_hash TEXT
+            """)
+            
         conn.commit()
 
     except Exception:
@@ -191,6 +196,77 @@ def get_syuwa_applications():
             """)
 
             return cur.fetchall()
+
+    finally:
+        conn.close()
+
+
+def update_syuwa_application_status(application_id, status):
+    if status not in ("approved", "rejected"):
+        return False
+
+    conn = get_syuwa_db_connection()
+
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                UPDATE syuwa_applications
+                SET status = %s,
+                    approved_at = CASE
+                        WHEN %s = 'approved'
+                        THEN CURRENT_TIMESTAMP
+                        ELSE NULL
+                    END
+                WHERE id = %s
+                  AND status = 'pending'
+                RETURNING id
+            """, (
+                status,
+                status,
+                application_id
+            ))
+
+            updated = cur.fetchone() is not None
+
+        conn.commit()
+        return updated
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        conn.close()
+
+def set_syuwa_password(application_id, password):
+    from werkzeug.security import generate_password_hash
+
+    password_hash = generate_password_hash(password)
+
+    conn = get_syuwa_db_connection()
+
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                UPDATE syuwa_applications
+                SET password_hash = %s
+                WHERE id = %s
+                  AND status = 'approved'
+                  AND password_hash IS NULL
+                RETURNING id
+            """, (
+                password_hash,
+                application_id
+            ))
+
+            updated = cur.fetchone() is not None
+
+        conn.commit()
+        return updated
+
+    except Exception:
+        conn.rollback()
+        raise
 
     finally:
         conn.close()
