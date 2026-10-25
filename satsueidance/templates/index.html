@@ -1765,13 +1765,23 @@ function stopRecording() {
 }
 
 
-function closeVideoFullscreen() {
+async function closeVideoFullscreen() {
     const box = document.getElementById('videoBox');
 
     if (document.fullscreenElement) {
-        document.exitFullscreen().catch(error => {
+        try {
+            await document.exitFullscreen();
+        } catch (error) {
             console.error('全画面解除に失敗:', error);
-        });
+        }
+    }
+
+    if (screen.orientation && screen.orientation.unlock) {
+        try {
+            screen.orientation.unlock();
+        } catch (error) {
+            console.warn('画面の横向き固定解除に失敗:', error);
+        }
     }
 
     box.classList.remove('mobile-fullscreen');
@@ -1786,6 +1796,15 @@ document.addEventListener('fullscreenchange', () => {
     const box = document.getElementById('videoBox');
 
     if (!document.fullscreenElement) {
+
+        if (screen.orientation && screen.orientation.unlock) {
+            try {
+                screen.orientation.unlock();
+            } catch (error) {
+                console.warn('画面の横向き固定解除に失敗:', error);
+            }
+        }
+
         box.classList.remove('mobile-fullscreen');
 
         const expandButton = document.getElementById('expandButton');
@@ -1793,6 +1812,7 @@ document.addEventListener('fullscreenchange', () => {
         expandButton.classList.remove('expanded-button');
     }
 });
+
 </script>
 
 <script src="https://www.youtube.com/iframe_api"></script>
