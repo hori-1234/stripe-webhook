@@ -303,13 +303,46 @@ def syuwa_update_application():
     if not updated:
         abort(409)
 
+    if status == "approved":
+        from syuwa.syuwa_db import (
+            get_syuwa_approved_applicant,
+            create_syuwa_password_token
+        )
+        from syuwa.syuwa_mail import send_syuwa_approval_email
+
+        applicant = get_syuwa_approved_applicant(int(application_id))
+
+        if applicant is None:
+            abort(409)
+
+        applicant_name, email = applicant
+
+        token = create_syuwa_password_token(int(application_id))
+
+        if token is None:
+            abort(409)
+
+        password_url = (
+            request.url_root.rstrip("/")
+            + "/syuwa/password/setup?token="
+            + token
+        )
+
+        try:
+            send_syuwa_approval_email(
+                email,
+                applicant_name,
+                password_url
+            )
+        except Exception:
+            abort(502, description="承認済みですが、メール送信に失敗しました。再送信が必要です。")
+
     from flask import redirect, url_for
 
     return redirect(
         url_for("syuwa.syuwa_admin_applications"),
         code=303
     )
-
 
 @syuwa_bp.route("/admin/password-token/create", methods=["POST"])
 @admin_required
@@ -332,6 +365,17 @@ def syuwa_create_password_token():
     if not application_id.isdigit():
         abort(400)
 
+    from syuwa.syuwa_db import get_syuwa_approved_applicant
+    from syuwa.syuwa_mail import send_syuwa_approval_email
+    from flask import redirect
+
+    applicant = get_syuwa_approved_applicant(int(application_id))
+
+    if applicant is None:
+        abort(409)
+
+    applicant_name, email = applicant
+
     token = create_syuwa_password_token(int(application_id))
 
     if token is None:
@@ -344,24 +388,23 @@ def syuwa_create_password_token():
         + token
     )
 
-    return f"""
-    <!DOCTYPE html>
-    <html lang="ja">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>パスワード設定URL発行</title>
-    </head>
-    <body>
-        <h2>パスワード設定URLを発行しました</h2>
-        <p>対象の登録者本人にだけ送ってください。</p>
+    try:
+        send_syuwa_approval_email(
+            email,
+            applicant_name,
+            password_url
+        )
+    except Exception:
+        abort(
+            502,
+            description="メール送信に失敗しました。再度お試しください。"
+        )
 
-        <textarea rows="5" style="width:100%;" readonly>{escape(password_url)}</textarea>
+    return redirect(
+        url_for("syuwa.syuwa_admin_applications"),
+        code=303
+    )
 
-        <p><a href="/syuwa/admin/applications">申請一覧へ戻る</a></p>
-    </body>
-    </html>
-    """
 
 @syuwa_bp.route("/password/setup", methods=["GET", "POST"])
 def syuwa_password_setup():
