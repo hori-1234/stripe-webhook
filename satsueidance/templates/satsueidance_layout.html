@@ -167,16 +167,16 @@
 <button id="expandButton" onclick="
 
     const box = document.getElementById('videoBox');
-    const compareButton = document.getElementById('compareButton');
 
-    if (compareButton.textContent.trim() === 'OFF') {
+    if (!compareMode) {
 
-        if (!document.fullscreenElement) {
+        if (box.requestFullscreen && document.fullscreenEnabled) {
             box.requestFullscreen().catch(error => {
-                console.error('全画面表示に失敗しました:', error);
+                console.error('全画面表示に失敗:', error);
+                box.classList.add('mobile-fullscreen');
             });
         } else {
-            document.exitFullscreen();
+            box.classList.add('mobile-fullscreen');
         }
 
     } else {
@@ -188,7 +188,7 @@
 
     }
 ">拡大</button>
-
+    
 <div id="compareStartControls" style="display:none;">
     
     <p>
