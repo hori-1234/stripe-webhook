@@ -408,3 +408,23 @@ def complete_syuwa_password_setup(token, password):
     finally:
         conn.close()
 
+
+def get_syuwa_approved_applicant(application_id):
+    conn = get_syuwa_db_connection()
+
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT
+                    applicant_name,
+                    email
+                FROM syuwa_applications
+                WHERE id = %s
+                  AND status = 'approved'
+                  AND password_hash IS NULL
+            """, (application_id,))
+
+            return cur.fetchone()
+
+    finally:
+        conn.close()
