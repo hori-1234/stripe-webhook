@@ -175,15 +175,17 @@ def syuwa_admin_applications():
     rows = ""
 
     for application in applications:
-        application_id, name, email, comment, status, created_at = application
+        application_id, name, email, comment, status, created_at, password_set = application
 
         status_labels = {
             "pending": "未対応",
-            "approved": "承認済み",
-            "rejected": "却下"
+            "approved": "登録完了" if password_set else "承認済み",
+            "rejected": "却下",
+            "disabled": "無効化"
         }
 
         status_text = status_labels.get(status, status)
+
 
         if status == "pending":
             status_html = f"""
