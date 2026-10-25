@@ -1097,45 +1097,8 @@ compareVideoElement.addEventListener("timeupdate", () => {
 });
 
 compareVideoElement.addEventListener("ended", () => {
-    if (!compareMode) {
-        return;
-    }
-
-    const button = document.getElementById("comparePlayButton");
-    const player = document.getElementById("youtubePlayer");
-    const sourceVideo = document.getElementById("sourceVideo");
-    
-    if (sourceVideo &&
-        sourceVideo.style.display !== "none" &&
-        sourceVideo.src) {
-
-        sourceVideo.pause();
-
-        button.textContent = "▶";
-
-        document.getElementById("status").textContent =
-            "比較動画の再生が終了しました";
-
-        return;
-    }
-
-    const isNico =
-        player &&
-        player.tagName === "IFRAME" &&
-        player.src.startsWith("https://embed.nicovideo.jp/");
-
-    if (isNico) {
-        button.textContent = nicoPlayerStatus === 2 ? "Ⅱ" : "▶";
-        return;
-    }
-
-    if (youtubePlayerApi &&
-        typeof youtubePlayerApi.getPlayerState === "function" &&
-        youtubePlayerApi.getPlayerState() === YT.PlayerState.PLAYING) {
-        button.textContent = "Ⅱ";
-    } else {
-        button.textContent = "▶";
-    }
+    // 録画動画の終了では元動画を停止しない。
+    // 停止の基準はYouTube・ニコニコ・端末動画の終了。
 });
 
 async function toggleCompareMode() { 
@@ -1531,9 +1494,8 @@ window.addEventListener("message", (event) => {
             compareVideo.pause();
             nicoPlayerStatus = 3;
             button.textContent = "▶";
-
+            }
         }
-    }
 });
 
 function loadSourceVideo(input) {
