@@ -171,3 +171,26 @@ def save_syuwa_application(token, applicant_name, email, comment):
 
     finally:
         conn.close()
+
+
+def get_syuwa_applications():
+    conn = get_syuwa_db_connection()
+
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT
+                    id,
+                    applicant_name,
+                    email,
+                    comment,
+                    status,
+                    created_at
+                FROM syuwa_applications
+                ORDER BY created_at DESC, id DESC
+            """)
+
+            return cur.fetchall()
+
+    finally:
+        conn.close()
