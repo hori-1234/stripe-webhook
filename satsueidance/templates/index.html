@@ -229,12 +229,14 @@
             overflow: visible;
         }
 
-        #videoBox.vertical-compare #youtubePlayer {
+        #videoBox.vertical-compare #youtubePlayer,
+        #videoBox.vertical-compare #sourceVideo {
             position: relative;
-            display: block;
             width: 100%;
             height: auto;
             aspect-ratio: 16 / 9;
+            max-height: none;
+            margin-top: 0;
             flex-shrink: 0;
         }
 
@@ -1093,14 +1095,17 @@ compareVideoElement.addEventListener("ended", () => {
     const button = document.getElementById("comparePlayButton");
     const player = document.getElementById("youtubePlayer");
     const sourceVideo = document.getElementById("sourceVideo");
-
+    
     if (sourceVideo &&
         sourceVideo.style.display !== "none" &&
         sourceVideo.src) {
 
-        button.textContent = sourceVideo.paused || sourceVideo.ended
-            ? "▶"
-            : "Ⅱ";
+        sourceVideo.pause();
+
+        button.textContent = "▶";
+
+        document.getElementById("status").textContent =
+            "比較動画の再生が終了しました";
 
         return;
     }
