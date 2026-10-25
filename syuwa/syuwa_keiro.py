@@ -298,3 +298,100 @@ def syuwa_update_application():
     )
 
 
+@syuwa_bp.route("/admin/password-token/create", methods=["POST"])
+@admin_required
+def syuwa_create_password_token():
+    from syuwa.syuwa_db import create_syuwa_password_token
+    from flask import url_for
+    from markupsafe import escape
+
+    submitted_csrf = request.form.get("csrf_token", "")
+    expected_csrf = session.get("syuwa_admin_application_csrf", "")
+
+    if not expected_csrf:
+        abort(403)
+
+    if not hmac.compare_digest(submitted_csrf, expected_csrf):
+        abort(403)
+
+    application_id = request.form.get("application_id", "")
+
+    if not application_id.isdigit():
+        abort(400)
+
+    token = create_syuwa_password_token(int(application_id))
+
+    if token is None:
+        abort(409)
+
+    password_url = (
+        request.url_root.rstrip("/")
+        + url_for("syuwa.syuwa_password_setup")
+        + "?token="
+        + token
+    )
+
+    return f"""
+    <!DOCTYPE html>
+    <html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>パスワード設定URL発行</title>
+    </head>
+    <body>
+        <h2>パスワード設定URLを発行しました</h2>
+        <p>対象の登録者本人にだけ送ってください。</p>
+
+        <textarea rows="5" style="width:100%;" readonly>{escape(password_url)}</textarea>
+
+        <p><a href="/syuwa/admin/applications">申請一覧へ戻る</a></p>
+    </body>
+    </html>
+    """
+
+@syuwa_bp.route("/password/setup", methods=["GET"])
+def syuwa_password_setup():
+    from syuwa.syuwa_db import verify_syuwa_password_token
+
+    token = request.args.get("token", "")
+
+    if not verify_syuwa_password_token(token):
+        abort(403)
+
+    return render_template(
+        "syuwa_password_setup.html",
+        token=token
+    )
+
+
+def verify_syuwa_password_token(token):
+    if not token:
+        return False
+
+    token_hash = hashlib.sha256(
+        token.encode("utf-8")
+    ).hexdigest()
+
+    conn = get_syuwa_db_connection()
+
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM syuwa_password_tokens AS t
+                    JOIN syuwa_applications AS a
+                      ON a.id = t.application_id
+                    WHERE t.token_hash = %s
+                      AND t.used_at IS NULL
+                      AND t.expires_at > CURRENT_TIMESTAMP
+                      AND a.status = 'approved'
+                      AND a.password_hash IS NULL
+                )
+            """, (token_hash,))
+
+            return cur.fetchone()[0]
+
+    finally:
+        conn.close()
