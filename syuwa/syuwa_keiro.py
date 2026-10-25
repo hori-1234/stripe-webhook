@@ -457,3 +457,13 @@ def syuwa_password_setup():
         token=token,
         csrf_token=csrf_token
     )
+
+@syuwa_bp.route("/login", methods=["GET"])
+def syuwa_login():
+    csrf_token = secrets.token_urlsafe(32)
+    session["syuwa_login_csrf"] = csrf_token
+
+    return render_template(
+        "syuwa_login.html",
+        csrf_token=csrf_token
+    )
