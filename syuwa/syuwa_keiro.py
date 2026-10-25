@@ -36,7 +36,7 @@ def syuwa_admin_invites():
 
         <form method="POST" action="/syuwa/admin/invites/create">
             <input type="hidden" name="csrf_token" value="{csrf_token}">
-            <button type="submit" disabled>
+            <button type="submit">
                 個別招待URLを発行
             </button>
         </form>
@@ -71,3 +71,13 @@ def syuwa_create_invite():
         f'<textarea rows="5" style="width:100%;" readonly>{invite_url}</textarea>'
         '<p><a href="/syuwa/admin/invites">招待管理へ戻る</a></p>'
     )
+
+
+@syuwa_bp.route("/apply", methods=["GET"])
+def syuwa_apply():
+    token = request.args.get("token", "")
+
+    if not verify_syuwa_invite(token):
+        abort(403)
+
+    return render_template("syuwa_apply.html")
