@@ -182,10 +182,23 @@ def syuwa_admin_applications():
                     </button>
                 </form>
             """
+        
+        elif status == "approved":
+            status_html = f"""
+                <form method="POST" action="/syuwa/admin/password-token/create">
+                    <input type="hidden" name="csrf_token" value="{csrf_token}">
+                    <input type="hidden" name="application_id" value="{application_id}">
+
+                    <button type="submit">
+                        パスワード設定URL発行
+                    </button>
+                </form>
+            """
         else:
             status_html = ""
 
         rows += f"""
+
         <tr>
             <td>{application_id}</td>
             <td>{escape(name)}</td>
