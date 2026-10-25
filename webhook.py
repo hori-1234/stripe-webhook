@@ -40,8 +40,12 @@ limiter.init_app(app)
 init_oshi_db()
 app.secret_key = os.environ.get("kuri_SECRET_KEY")
 
+from syuwa.syuwa_db import init_syuwa_db
+init_syuwa_db()
+
 from syuwa.syuwa_keiro import syuwa_bp
 app.register_blueprint(syuwa_bp)
+
 app.config["PERMANENT_SESSION_LIFETIME"] = 60 * 60 * 24 * 30
 app.config["SESSION_REFRESH_EACH_REQUEST"] = True
 app.config["SESSION_COOKIE_SECURE"] = True
