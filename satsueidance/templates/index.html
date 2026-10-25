@@ -148,7 +148,7 @@
             background: black;
             margin-top: 12px;
         }
-
+        
         .video-box.expanded {
             position: fixed;
             top: 0;
@@ -158,6 +158,18 @@
             aspect-ratio: auto;
             margin: 0;
             z-index: 9999;
+            background: black;
+        }
+
+        #videoBox:fullscreen {
+            width: 100vw;
+            height: 100dvh;
+            aspect-ratio: auto;
+            margin: 0;
+            padding: 0;
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
             background: black;
         }
 
@@ -173,6 +185,20 @@
             border: 2px solid #b8dcd0;
             border-radius: 12px;
             box-shadow: 0 4px 16px rgba(36, 72, 63, 0.08);
+        }
+
+        #videoBox.mobile-fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100dvh;
+            aspect-ratio: auto;
+            margin: 0;
+            z-index: 9999;
+            border: none;
+            border-radius: 0;
+            background: black;
         }
         
         #compareVideo {
@@ -1755,6 +1781,18 @@ function closeVideoFullscreen() {
     expandButton.textContent = '拡大';
     expandButton.classList.remove('expanded-button');
 }
+
+document.addEventListener('fullscreenchange', () => {
+    const box = document.getElementById('videoBox');
+
+    if (!document.fullscreenElement) {
+        box.classList.remove('mobile-fullscreen');
+
+        const expandButton = document.getElementById('expandButton');
+        expandButton.textContent = '拡大';
+        expandButton.classList.remove('expanded-button');
+    }
+});
 </script>
 
 <script src="https://www.youtube.com/iframe_api"></script>
