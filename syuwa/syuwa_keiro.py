@@ -636,6 +636,7 @@ def syuwa_login():
 
         session.pop("syuwa_user_id", None)
         session.pop("syuwa_login_csrf", None)
+        session.permanent = True
         session["syuwa_user_id"] = user_id
 
         return redirect(url_for("syuwa.syuwa_login_complete"), code=303)
