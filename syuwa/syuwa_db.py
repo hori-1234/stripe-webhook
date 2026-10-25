@@ -339,3 +339,72 @@ def create_syuwa_password_token(application_id):
 
     finally:
         conn.close()
+
+
+def complete_syuwa_password_setup(token, password):
+    from werkzeug.security import generate_password_hash
+
+    if not token or len(password) < 12:
+        return False
+
+    token_hash = hashlib.sha256(
+        token.encode("utf-8")
+    ).hexdigest()
+
+    password_hash = generate_password_hash(password)
+
+    conn = get_syuwa_db_connection()
+
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT
+                    t.id,
+                    t.application_id
+                FROM syuwa_password_tokens AS t
+                JOIN syuwa_applications AS a
+                  ON a.id = t.application_id
+                WHERE t.token_hash = %s
+                  AND t.used_at IS NULL
+                  AND t.expires_at > CURRENT_TIMESTAMP
+                  AND a.status = 'approved'
+                  AND a.password_hash IS NULL
+                FOR UPDATE OF t, a
+            """, (token_hash,))
+
+            result = cur.fetchone()
+
+            if result is None:
+                conn.rollback()
+                return False
+
+            token_id, application_id = result
+
+            cur.execute("""
+                UPDATE syuwa_applications
+                SET password_hash = %s
+                WHERE id = %s
+                  AND status = 'approved'
+                  AND password_hash IS NULL
+            """, (
+                password_hash,
+                application_id
+            ))
+
+            cur.execute("""
+                UPDATE syuwa_password_tokens
+                SET used_at = CURRENT_TIMESTAMP
+                WHERE application_id = %s
+                  AND used_at IS NULL
+            """, (application_id,))
+
+        conn.commit()
+        return True
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        conn.close()
+
