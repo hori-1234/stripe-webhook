@@ -69,15 +69,23 @@
 
             <label>登録者ID名</label>
             <input type="text" name="applicant_name"
-                   placeholder="登録者ID名" maxlength="100" required>
+                   placeholder="登録者ID名" maxlength="100"
+                   value="{{ applicant_name | default('', true) }}" required>
+
+            {% if error %}
+            <p style="color: red; font-size: 14px; font-weight: bold;">
+                {{ error }}
+            </p>
+            {% endif %}
 
             <label>メールアドレス</label>
             <input type="email" name="email"
-                   placeholder="メールアドレス" maxlength="255" required>
+                   placeholder="メールアドレス" maxlength="255"
+                   value="{{ email | default('', true) }}" required>
 
             <label>コメント</label>
             <textarea name="comment"
-                      placeholder="〇〇です。登録お願いします。"></textarea>
+                      placeholder="〇〇です。登録お願いします。">{{ comment | default('', true) }}</textarea>
 
             <button type="submit">申請する</button>
 
