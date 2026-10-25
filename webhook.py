@@ -40,19 +40,6 @@ limiter.init_app(app)
 init_oshi_db()
 app.secret_key = os.environ.get("kuri_SECRET_KEY")
 
-
-@app.before_request
-def check_syuwa_client_ip():
-    if request.path != "/syuwa/login":
-        return
-    
-    print(
-        "手話ログイン IP確認:",
-        "remote_addr =", request.remote_addr,
-        "X-Forwarded-For =", request.headers.get("X-Forwarded-For"),
-        "CF-Connecting-IP =", request.headers.get("CF-Connecting-IP")
-    )    
-
 from syuwa.syuwa_db import init_syuwa_db
 init_syuwa_db()
 
