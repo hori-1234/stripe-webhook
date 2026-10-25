@@ -697,21 +697,6 @@ def syuwa_login():
         if not applicant_name or not password:
             abort(400)
         
-        from syuwa.syuwa_db import is_syuwa_ip_login_limited
-
-        if is_syuwa_ip_login_limited(request.remote_addr):
-            csrf_token = secrets.token_urlsafe(32)
-            session["syuwa_login_csrf"] = csrf_token
-
-            return render_template(
-                "syuwa_login.html",
-                csrf_token=csrf_token,
-                error=(
-                    "※ログイン試行回数の上限を超えました。"
-                    "5分ほど時間を空けてから再度お試しください。"
-                )
-            ), 429
-
         user_id = authenticate_syuwa_user(applicant_name, password)
 
         if user_id is None:
