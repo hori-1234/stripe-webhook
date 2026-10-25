@@ -707,12 +707,31 @@ function changeCompareSpeed(speed) {
     if (sourceVideo &&
         sourceVideo.style.display !== "none" &&
         sourceVideo.src) {
-
+        
         sourceVideo.playbackRate = speed;
 
         if (compareMode) {
             compareVideo.playbackRate = speed;
         }
+
+        document.querySelectorAll(
+            "#compareSpeedControls button"
+        ).forEach(button => {
+            const buttonSpeed = Number(
+                button.textContent.replace("×", "")
+            );
+
+            const selected =
+                Math.abs(buttonSpeed - speed) < 0.001;
+
+            button.style.background =
+                selected ? "#168bff" : "#25a58d";
+
+            button.style.borderColor =
+                selected ? "#0875df" : "#1f907b";
+
+            button.style.color = "white";
+        });
 
         status.textContent = "再生速度：" + speed + "倍";
         return;
@@ -733,6 +752,25 @@ function changeCompareSpeed(speed) {
     if (compareMode) {
         compareVideo.playbackRate = actualSpeed;
     }
+
+    document.querySelectorAll(
+        "#compareSpeedControls button"
+    ).forEach(button => {
+        const buttonSpeed = Number(
+            button.textContent.replace("×", "")
+        );
+
+        const selected =
+            Math.abs(buttonSpeed - actualSpeed) < 0.001;
+
+        button.style.background =
+            selected ? "#168bff" : "#25a58d";
+
+        button.style.borderColor =
+            selected ? "#0875df" : "#1f907b";
+
+        button.style.color = "white";
+    });
 
     status.textContent = "再生速度：" + actualSpeed + "倍";
 }
@@ -769,8 +807,50 @@ async function toggleComparePlayback() {
     const button = document.getElementById("comparePlayButton");
     const status = document.getElementById("status");
     const player = document.getElementById("youtubePlayer");
+    const sourceVideo = document.getElementById("sourceVideo");
 
     if (!compareMode) {
+        return;
+    }
+
+    if (sourceVideo &&
+        sourceVideo.style.display !== "none" &&
+        sourceVideo.src) {
+
+        if (!sourceVideo.paused) {
+            sourceVideo.pause();
+            compareVideo.pause();
+
+            button.textContent = "▶";
+            status.textContent = "一時停止中";
+            return;
+        }
+
+        try {
+            if (sourceVideo.ended) {
+                sourceVideo.currentTime = 0;
+            }
+
+            if (compareVideo.ended) {
+                compareVideo.currentTime =
+                    Number(document.getElementById("compareStartTime").value);
+            }
+
+            await compareVideo.play();
+            await sourceVideo.play();
+
+            button.textContent = "Ⅱ";
+            status.textContent = "同時再生中";
+
+        } catch (error) {
+            sourceVideo.pause();
+            compareVideo.pause();
+
+            button.textContent = "▶";
+            status.textContent =
+                "再生できません: " + error.message;
+        }
+
         return;
     }
 
@@ -869,11 +949,12 @@ async function replayCompareVideos() {
     if (!compareMode) {
         return;
     }
-
+    
     const compareVideo = document.getElementById("compareVideo");
     const button = document.getElementById("comparePlayButton");
     const status = document.getElementById("status");
     const player = document.getElementById("youtubePlayer");
+    const sourceVideo = document.getElementById("sourceVideo");
 
     const isNico =
         player &&
@@ -883,6 +964,37 @@ async function replayCompareVideos() {
     const startTime =
         Number(document.getElementById("compareStartTime").value);
 
+    if (sourceVideo &&
+        sourceVideo.style.display !== "none" &&
+        sourceVideo.src) {
+
+        try {
+            sourceVideo.pause();
+            compareVideo.pause();
+
+            sourceVideo.currentTime = 0;
+            compareVideo.currentTime = startTime;
+
+            await Promise.all([
+                sourceVideo.play(),
+                compareVideo.play()
+            ]);
+
+            button.textContent = "Ⅱ";
+            status.textContent = "リプレイ中";
+
+        } catch (error) {
+            sourceVideo.pause();
+            compareVideo.pause();
+
+            button.textContent = "▶";
+            status.textContent =
+                "リプレイできません: " + error.message;
+        }
+
+        return;
+    }
+    
     if (isNico) {
         try {
             compareVideo.pause();
@@ -980,6 +1092,18 @@ compareVideoElement.addEventListener("ended", () => {
 
     const button = document.getElementById("comparePlayButton");
     const player = document.getElementById("youtubePlayer");
+    const sourceVideo = document.getElementById("sourceVideo");
+
+    if (sourceVideo &&
+        sourceVideo.style.display !== "none" &&
+        sourceVideo.src) {
+
+        button.textContent = sourceVideo.paused || sourceVideo.ended
+            ? "▶"
+            : "Ⅱ";
+
+        return;
+    }
 
     const isNico =
         player &&
@@ -1070,6 +1194,12 @@ async function toggleCompareMode() {
 
     const compareSpeedControls = document.getElementById("compareSpeedControls");
     const currentPlayer = document.getElementById("youtubePlayer");
+    const sourceVideo = document.getElementById("sourceVideo");
+
+    const isSourceVideo =
+        sourceVideo &&
+        sourceVideo.style.display !== "none" &&
+        !!sourceVideo.src;
 
     const isYouTube =
         currentPlayer &&
@@ -1078,7 +1208,7 @@ async function toggleCompareMode() {
         typeof youtubePlayerApi.setPlaybackRate === "function";
 
     compareSpeedControls.style.display =
-        isYouTube ? "block" : "none";
+        (isSourceVideo || isYouTube) ? "block" : "none";
 
     const expandButton = document.getElementById("expandButton");
     expandButton.style.display = compareMode ? "none" : "inline-block";
@@ -1354,13 +1484,28 @@ function loadSourceVideo(input) {
         input.value = "";
         return;
     }
-
+    
     const sourceVideo = document.getElementById("sourceVideo");
     const youtubePlayer = document.getElementById("youtubePlayer");
 
     if (!sourceVideo || !youtubePlayer) {
         return;
     }
+
+    sourceVideo.onended = function() {
+        if (!compareMode) {
+            document.getElementById("normalPlayButton").textContent = "▶";
+            return;
+        }
+
+        const compareVideo = document.getElementById("compareVideo");
+
+        compareVideo.pause();
+
+        document.getElementById("comparePlayButton").textContent = "▶";
+        document.getElementById("status").textContent =
+            "元動画の再生が終了しました";
+    };
 
     if (sourceVideo.dataset.objectUrl) {
         URL.revokeObjectURL(sourceVideo.dataset.objectUrl);
@@ -1374,6 +1519,17 @@ function loadSourceVideo(input) {
 
     youtubePlayer.style.display = "none";
     sourceVideo.style.display = "block";
+
+    const compareSpeedControls =
+        document.getElementById("compareSpeedControls");
+
+    compareSpeedControls.style.display = "block";
+
+    document.querySelectorAll(
+        "#compareSpeedControls button"
+    ).forEach(button => {
+        button.disabled = false;
+    });
 
     document.getElementById("status").textContent =
         "元動画を読み込みました：" + file.name;
@@ -1526,12 +1682,27 @@ function loadYoutube() {
     const compareVideo = document.getElementById("compareVideo");
     compareVideo.pause();
 
+    // 端末から読み込んだ元動画を停止・非表示
+    const sourceVideo = document.getElementById("sourceVideo");
+    sourceVideo.pause();
+    sourceVideo.style.display = "none";
+
+    // YouTube・ニコニコ動画の表示に戻す
+    const youtubePlayer = document.getElementById("youtubePlayer");
+    youtubePlayer.style.display = "block";
+
+    // 再生速度ボタンを一旦非表示
+    const compareSpeedControls =
+        document.getElementById("compareSpeedControls");
+    compareSpeedControls.style.display = "none";
+
     // OFF専用の遅延再生をキャンセル
     clearTimeout(normalPlayTimer);
     normalPlayTimer = null;
     normalPlayWaiting = false;
     normalPlayPlaying = false;
     document.getElementById("normalPlayButton").textContent = "▶";
+
 
     // 再生ボタンを初期状態に戻す
     document.getElementById("comparePlayButton").textContent = "▶";
@@ -1557,8 +1728,12 @@ function loadYoutube() {
         const newPlayer = document.createElement("div");
 
         newPlayer.id = "youtubePlayer";
+        newPlayer.style.display = "block";
+        newPlayer.style.width = "100%";
+        newPlayer.style.height = "100%";
+
         oldPlayer.replaceWith(newPlayer);
-        
+
         document.getElementById("status").textContent =
             "YouTube読み込み中...";
 
@@ -1575,6 +1750,11 @@ function loadYoutube() {
                 onReady: function(event) {
                     document.getElementById("status").textContent =
                         "YouTube再生可能";
+
+                    const compareSpeedControls =
+                        document.getElementById("compareSpeedControls");
+
+                    compareSpeedControls.style.display = "block";
 
                     const availableRates =
                         event.target.getAvailablePlaybackRates();
@@ -1632,17 +1812,22 @@ function loadYoutube() {
             youtubePlayerApi.destroy();
             youtubePlayerApi = null;
         }
-
+        
         const oldPlayer = document.getElementById("youtubePlayer");
         const newPlayer = document.createElement("iframe");
 
         newPlayer.id = "youtubePlayer";
+        newPlayer.style.display = "block";
+        newPlayer.style.width = "100%";
+        newPlayer.style.height = "100%";
+
         newPlayer.allow =
             "autoplay; encrypted-media; picture-in-picture; fullscreen";
         newPlayer.allowFullscreen = true;
         newPlayer.src = embedUrl;
 
         oldPlayer.replaceWith(newPlayer);
+
     }
 }
 
