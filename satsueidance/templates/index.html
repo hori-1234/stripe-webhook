@@ -1243,8 +1243,17 @@ async function toggleCompareMode() {
 
         compareVideo.muted = true;
         compareVideo.style.display = "block";
-
+        
         compareVideo.playbackRate = 1;
+
+        const sourceVideoForSpeed =
+            document.getElementById("sourceVideo");
+
+        if (sourceVideoForSpeed &&
+            sourceVideoForSpeed.style.display !== "none" &&
+            sourceVideoForSpeed.src) {
+            sourceVideoForSpeed.playbackRate = 1;
+        }
 
         if (youtubePlayerApi &&
             typeof youtubePlayerApi.setPlaybackRate === "function") {
@@ -1295,11 +1304,18 @@ async function toggleCompareMode() {
     } else {
         compareVideo.pause();
 
+        const sourceVideoForPause =
+            document.getElementById("sourceVideo");
+
+        if (sourceVideoForPause) {
+            sourceVideoForPause.pause();
+        }
+
         if (youtubePlayerApi &&
             typeof youtubePlayerApi.pauseVideo === "function") {
             youtubePlayerApi.pauseVideo();
         }
-        
+
         sendNicoCommand("pause");
 
         document.getElementById("comparePlayButton").textContent = "▶";
@@ -1342,20 +1358,54 @@ function toggleNormalPlayback() {
     const sourceVideo = document.getElementById("sourceVideo");
 
     if (sourceVideo && sourceVideo.style.display !== "none" && sourceVideo.src) {
-        if (sourceVideo.paused) {
+
+        if (normalPlayWaiting || !sourceVideo.paused) {
+            clearTimeout(normalPlayTimer);
+            normalPlayTimer = null;
+            normalPlayWaiting = false;
+            normalPlayPlaying = false;
+
+            sourceVideo.pause();
+            button.textContent = "▶";
+            status.textContent = "再生停止";
+            return;
+        }
+
+        const delay = Number(delayInput.value);
+
+        if (!Number.isFinite(delay) || delay < 0) {
+            status.textContent = "0以上の秒数を入力してください";
+            return;
+        }
+
+        normalPlayWaiting = true;
+        button.textContent = "Ⅱ";
+        status.textContent = delay + "秒後に再生します";
+
+        normalPlayTimer = setTimeout(() => {
+            normalPlayTimer = null;
+
+            if (!normalPlayWaiting || compareMode) {
+                return;
+            }
+
+            normalPlayWaiting = false;
+
             sourceVideo.play().then(() => {
+                normalPlayPlaying = true;
                 button.textContent = "Ⅱ";
                 status.textContent = "再生中";
             }).catch(error => {
+                normalPlayPlaying = false;
+                button.textContent = "▶";
                 status.textContent = "再生できません: " + error.message;
             });
-        } else {
-            sourceVideo.pause();
-            button.textContent = "▶";
-            status.textContent = "一時停止中";
-        }
+
+        }, delay * 1000);
+
         return;
     }
+
 
     if (normalPlayWaiting || normalPlayPlaying) {
 
@@ -1484,13 +1534,25 @@ function loadSourceVideo(input) {
         input.value = "";
         return;
     }
-    
+
     const sourceVideo = document.getElementById("sourceVideo");
     const youtubePlayer = document.getElementById("youtubePlayer");
 
     if (!sourceVideo || !youtubePlayer) {
         return;
     }
+
+    clearTimeout(normalPlayTimer);
+    normalPlayTimer = null;
+    normalPlayWaiting = false;
+    normalPlayPlaying = false;
+
+    if (youtubePlayerApi &&
+        typeof youtubePlayerApi.pauseVideo === "function") {
+        youtubePlayerApi.pauseVideo();
+    }
+
+    sendNicoCommand("pause");
 
     sourceVideo.onended = function() {
         if (!compareMode) {
@@ -1506,6 +1568,8 @@ function loadSourceVideo(input) {
         document.getElementById("status").textContent =
             "元動画の再生が終了しました";
     };
+　
+    sourceVideo.pause();
 
     if (sourceVideo.dataset.objectUrl) {
         URL.revokeObjectURL(sourceVideo.dataset.objectUrl);
@@ -1516,6 +1580,10 @@ function loadSourceVideo(input) {
     sourceVideo.dataset.objectUrl = videoUrl;
     sourceVideo.src = videoUrl;
     sourceVideo.load();
+
+    sourceVideo.playbackRate = 1;
+
+    document.getElementById("normalPlayButton").textContent = "▶";
 
     youtubePlayer.style.display = "none";
     sourceVideo.style.display = "block";
@@ -1529,6 +1597,17 @@ function loadSourceVideo(input) {
         "#compareSpeedControls button"
     ).forEach(button => {
         button.disabled = false;
+
+        const selected =
+            button.textContent.trim() === "1.0×";
+
+        button.style.background =
+            selected ? "#168bff" : "#25a58d";
+
+        button.style.borderColor =
+            selected ? "#0875df" : "#1f907b";
+
+        button.style.color = "white";
     });
 
     document.getElementById("status").textContent =
