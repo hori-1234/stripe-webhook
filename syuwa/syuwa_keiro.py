@@ -696,16 +696,34 @@ def syuwa_login():
 
         if not applicant_name or not password:
             abort(400)
-        
+   
         user_id = authenticate_syuwa_user(applicant_name, password)
 
         if user_id is None:
-            from syuwa.syuwa_db import is_syuwa_account_disabled
+            from syuwa.syuwa_db import (
+                is_syuwa_account_disabled,
+                record_syuwa_login_failure
+            )
+
+            contact_email = "minawoshi212@yahoo.co.jp"
 
             if is_syuwa_account_disabled(applicant_name, password):
                 error_message = "※ログイン権限がありません"
             else:
-                error_message = "※登録者ID名またはパスワードが違います"
+                locked = record_syuwa_login_failure(
+                    applicant_name,
+                    request.remote_addr
+                )
+
+                if locked:
+                    error_message = (
+                        "※ログイン試行回数の上限を超えたため、"
+                        "アカウントを無効化しました。"
+                        "解除については運営にお問い合わせください。"
+                        f"連絡先：{contact_email}"
+                    )
+                else:
+                    error_message = "※登録者ID名またはパスワードが違います"
 
             csrf_token = secrets.token_urlsafe(32)
             session["syuwa_login_csrf"] = csrf_token
