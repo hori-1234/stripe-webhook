@@ -48,6 +48,18 @@ def init_syuwa_db():
                 ALTER TABLE syuwa_applications
                 ADD COLUMN IF NOT EXISTS password_hash TEXT
             """)
+
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS syuwa_password_tokens (
+                    id BIGSERIAL PRIMARY KEY,
+                    application_id BIGINT NOT NULL
+                        REFERENCES syuwa_applications(id),
+                    token_hash VARCHAR(64) NOT NULL UNIQUE,
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    expires_at TIMESTAMPTZ NOT NULL,
+                    used_at TIMESTAMPTZ
+                )
+            """)
             
         conn.commit()
 
@@ -263,6 +275,63 @@ def set_syuwa_password(application_id, password):
 
         conn.commit()
         return updated
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        conn.close()
+
+
+def create_syuwa_password_token(application_id):
+    token = secrets.token_urlsafe(32)
+
+    token_hash = hashlib.sha256(
+        token.encode("utf-8")
+    ).hexdigest()
+
+    expires_at = datetime.now(timezone.utc) + timedelta(days=7)
+
+    conn = get_syuwa_db_connection()
+
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT id
+                FROM syuwa_applications
+                WHERE id = %s
+                  AND status = 'approved'
+                  AND password_hash IS NULL
+                FOR UPDATE
+            """, (application_id,))
+
+            if cur.fetchone() is None:
+                conn.rollback()
+                return None
+
+            cur.execute("""
+                UPDATE syuwa_password_tokens
+                SET used_at = CURRENT_TIMESTAMP
+                WHERE application_id = %s
+                  AND used_at IS NULL
+            """, (application_id,))
+
+            cur.execute("""
+                INSERT INTO syuwa_password_tokens (
+                    application_id,
+                    token_hash,
+                    expires_at
+                )
+                VALUES (%s, %s, %s)
+            """, (
+                application_id,
+                token_hash,
+                expires_at
+            ))
+
+        conn.commit()
+        return token
 
     except Exception:
         conn.rollback()
