@@ -373,7 +373,6 @@ def complete_syuwa_password_setup(token, password):
                   AND a.status = 'approved'
                   AND a.password_hash IS NULL
                 FOR UPDATE OF t, a
-                FOR UPDATE OF t, a
             """, (token_hash,))
 
             result = cur.fetchone()
@@ -642,6 +641,7 @@ def complete_syuwa_password_reset(token, password):
                   AND a.status = 'approved'
                   AND a.password_hash IS NOT NULL
                 FOR UPDATE OF t, a
+            """, (token_hash,))
 
             result = cur.fetchone()
 
