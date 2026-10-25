@@ -1737,6 +1737,24 @@ function stopRecording() {
     document.getElementById("startButton").disabled = false;
     document.getElementById("stopButton").disabled = true;
 }
+
+
+function closeVideoFullscreen() {
+    const box = document.getElementById('videoBox');
+
+    if (document.fullscreenElement) {
+        document.exitFullscreen().catch(error => {
+            console.error('全画面解除に失敗:', error);
+        });
+    }
+
+    box.classList.remove('mobile-fullscreen');
+    box.classList.remove('expanded');
+
+    const expandButton = document.getElementById('expandButton');
+    expandButton.textContent = '拡大';
+    expandButton.classList.remove('expanded-button');
+}
 </script>
 
 <script src="https://www.youtube.com/iframe_api"></script>
