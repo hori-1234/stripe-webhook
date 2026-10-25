@@ -49,7 +49,7 @@ def init_syuwa_db():
                 ALTER TABLE syuwa_applications
                 ADD COLUMN IF NOT EXISTS password_hash TEXT
             """)
-
+            
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS syuwa_password_tokens (
                     id BIGSERIAL PRIMARY KEY,
@@ -58,7 +58,9 @@ def init_syuwa_db():
                     token_hash VARCHAR(64) NOT NULL UNIQUE,
                     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     expires_at TIMESTAMPTZ NOT NULL,
-                    used_at TIMESTAMPTZ
+                    used_at TIMESTAMPTZ,
+                    token_type VARCHAR(20) NOT NULL DEFAULT 'setup'
+                        CHECK (token_type IN ('setup', 'reset'))
                 )
             """)
             
