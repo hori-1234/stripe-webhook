@@ -526,9 +526,34 @@ def is_syuwa_user_active(user_id):
         conn.close()
 
 
-def authenticate_syuwa_user(applicant_name, password):
+def is_syuwa_account_disabled(applicant_name, password):
     from werkzeug.security import check_password_hash
 
+    conn = get_syuwa_db_connection()
+
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT password_hash
+                FROM syuwa_applications
+                WHERE applicant_name = %s
+                  AND status = 'disabled'
+                  AND password_hash IS NOT NULL
+            """, (applicant_name,))
+
+            user = cur.fetchone()
+
+            if user is None:
+                return False
+
+            return check_password_hash(user[0], password)
+
+    finally:
+        conn.close()
+
+
+def authenticate_syuwa_user(applicant_name, password):
+    from werkzeug.security import check_password_hash
     conn = get_syuwa_db_connection()
 
     try:
