@@ -458,8 +458,39 @@ def syuwa_password_setup():
         csrf_token=csrf_token
     )
 
-@syuwa_bp.route("/login", methods=["GET"])
+@syuwa_bp.route("/login", methods=["GET", "POST"])
 def syuwa_login():
+    from flask import redirect, url_for
+
+    if request.method == "POST":
+        from syuwa.syuwa_db import authenticate_syuwa_user
+
+        submitted_csrf = request.form.get("csrf_token", "")
+        expected_csrf = session.get("syuwa_login_csrf", "")
+
+        if not expected_csrf:
+            abort(403)
+
+        if not hmac.compare_digest(submitted_csrf, expected_csrf):
+            abort(403)
+
+        applicant_name = request.form.get("applicant_name", "").strip()
+        password = request.form.get("password", "")
+
+        if not applicant_name or not password:
+            abort(400)
+
+        user_id = authenticate_syuwa_user(applicant_name, password)
+
+        if user_id is None:
+            abort(401, description="登録者ID名またはパスワードが違います")
+
+        session.pop("syuwa_user_id", None)
+        session.pop("syuwa_login_csrf", None)
+        session["syuwa_user_id"] = user_id
+
+        return redirect(url_for("syuwa.syuwa_login_complete"), code=303)
+
     csrf_token = secrets.token_urlsafe(32)
     session["syuwa_login_csrf"] = csrf_token
 
