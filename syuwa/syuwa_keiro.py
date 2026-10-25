@@ -427,8 +427,75 @@ def syuwa_create_password_token():
     )
 
 
+@syuwa_bp.route("/admin/password-reset/create", methods=["POST"])
+@admin_required
+def syuwa_create_password_reset():
+    from syuwa.syuwa_db import (
+        get_syuwa_password_reset_applicant,
+        create_syuwa_password_reset_token
+    )
+    from flask import redirect, url_for
+
+    submitted_csrf = request.form.get("csrf_token", "")
+    expected_csrf = session.get("syuwa_admin_application_csrf", "")
+
+    if not expected_csrf:
+        abort(403)
+
+    if not hmac.compare_digest(submitted_csrf, expected_csrf):
+        abort(403)
+
+    application_id = request.form.get("application_id", "")
+
+    if not application_id.isdigit():
+        abort(400)
+
+    applicant = get_syuwa_password_reset_applicant(
+        int(application_id)
+    )
+
+    if applicant is None:
+        abort(409)
+
+    applicant_name, email = applicant
+
+    token = create_syuwa_password_reset_token(
+        int(application_id)
+    )
+
+    if token is None:
+        abort(409)
+
+    password_url = (
+        request.url_root.rstrip("/")
+        + url_for("syuwa.syuwa_password_reset")
+        + "?token="
+        + token
+    )
+
+    from syuwa.syuwa_mail import send_syuwa_password_reset_email
+
+    try:
+        send_syuwa_password_reset_email(
+            email,
+            applicant_name,
+            password_url
+        )
+    except Exception:
+        abort(
+            502,
+            description="再設定メールの送信に失敗しました。再度お試しください。"
+        )
+
+    return redirect(
+        url_for("syuwa.syuwa_admin_applications"),
+        code=303
+    )
+
+
 @syuwa_bp.route("/password/setup", methods=["GET", "POST"])
 def syuwa_password_setup():
+
     from syuwa.syuwa_db import (
         verify_syuwa_password_token,
         complete_syuwa_password_setup
