@@ -223,6 +223,31 @@ def syuwa_admin_applications():
                 </form>
             """
 
+            if password_set:
+                status_html += f"""
+                    <form method="POST" action="/syuwa/admin/account/update">
+                        <input type="hidden" name="csrf_token" value="{csrf_token}">
+                        <input type="hidden" name="application_id" value="{application_id}">
+                        <input type="hidden" name="action" value="disable">
+
+                        <button type="submit"
+                                onclick="return confirm('このアカウントを無効化しますか？');">
+                            無効化
+                        </button>
+                    </form>
+                """
+
+        elif status == "disabled":
+            status_html = f"""
+                <form method="POST" action="/syuwa/admin/account/update">
+                    <input type="hidden" name="csrf_token" value="{csrf_token}">
+                    <input type="hidden" name="application_id" value="{application_id}">
+                    <input type="hidden" name="action" value="enable">
+
+                    <button type="submit">有効化</button>
+                </form>
+            """
+
         else:
             status_html = ""
 
