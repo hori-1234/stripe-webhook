@@ -169,12 +169,22 @@
     const box = document.getElementById('videoBox');
 
     if (!compareMode) {
-
+        
         if (box.requestFullscreen && document.fullscreenEnabled) {
-            box.requestFullscreen().catch(error => {
-                console.error('全画面表示に失敗:', error);
-                box.classList.add('mobile-fullscreen');
-            });
+            box.requestFullscreen()
+                .then(async () => {
+                    if (screen.orientation && screen.orientation.lock) {
+                        try {
+                            await screen.orientation.lock('landscape');
+                        } catch (error) {
+                            console.warn('画面の横向き固定に失敗:', error);
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('全画面表示に失敗:', error);
+                    box.classList.add('mobile-fullscreen');
+                });
         } else {
             box.classList.add('mobile-fullscreen');
         }
