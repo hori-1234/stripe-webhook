@@ -700,12 +700,28 @@ adjustVideo.addEventListener("pointercancel", stopAdjustDrag);
 adjustVideo.addEventListener("lostpointercapture", stopAdjustDrag);
 
 function changeCompareSpeed(speed) {
+    const sourceVideo = document.getElementById("sourceVideo");
+    const compareVideo = document.getElementById("compareVideo");
+    const status = document.getElementById("status");
+
+    if (sourceVideo &&
+        sourceVideo.style.display !== "none" &&
+        sourceVideo.src) {
+
+        sourceVideo.playbackRate = speed;
+
+        if (compareMode) {
+            compareVideo.playbackRate = speed;
+        }
+
+        status.textContent = "再生速度：" + speed + "倍";
+        return;
+    }
+
     if (!youtubePlayerApi ||
         typeof youtubePlayerApi.setPlaybackRate !== "function") {
         return;
     }
-
-    const compareVideo = document.getElementById("compareVideo");
 
     youtubePlayerApi.setPlaybackRate(speed);
 
@@ -718,8 +734,7 @@ function changeCompareSpeed(speed) {
         compareVideo.playbackRate = actualSpeed;
     }
 
-    document.getElementById("status").textContent =
-        "再生速度：" + actualSpeed + "倍";
+    status.textContent = "再生速度：" + actualSpeed + "倍";
 }
         
 function setCompareStartTime() {
@@ -1194,8 +1209,26 @@ function toggleNormalPlayback() {
     const delayInput = document.getElementById("normalPlayDelay");
     const status = document.getElementById("status");
     const player = document.getElementById("youtubePlayer");
+    const sourceVideo = document.getElementById("sourceVideo");
+
+    if (sourceVideo && sourceVideo.style.display !== "none" && sourceVideo.src) {
+        if (sourceVideo.paused) {
+            sourceVideo.play().then(() => {
+                button.textContent = "Ⅱ";
+                status.textContent = "再生中";
+            }).catch(error => {
+                status.textContent = "再生できません: " + error.message;
+            });
+        } else {
+            sourceVideo.pause();
+            button.textContent = "▶";
+            status.textContent = "一時停止中";
+        }
+        return;
+    }
 
     if (normalPlayWaiting || normalPlayPlaying) {
+
         clearTimeout(normalPlayTimer);
         normalPlayTimer = null;
 
@@ -1309,6 +1342,43 @@ window.addEventListener("message", (event) => {
     }
 });
 
+function loadSourceVideo(input) {
+    const file = input.files && input.files[0];
+
+    if (!file) {
+        return;
+    }
+
+    if (!file.type.startsWith("video/")) {
+        alert("動画ファイルを選択してください。");
+        input.value = "";
+        return;
+    }
+
+    const sourceVideo = document.getElementById("sourceVideo");
+    const youtubePlayer = document.getElementById("youtubePlayer");
+
+    if (!sourceVideo || !youtubePlayer) {
+        return;
+    }
+
+    if (sourceVideo.dataset.objectUrl) {
+        URL.revokeObjectURL(sourceVideo.dataset.objectUrl);
+    }
+
+    const videoUrl = URL.createObjectURL(file);
+
+    sourceVideo.dataset.objectUrl = videoUrl;
+    sourceVideo.src = videoUrl;
+    sourceVideo.load();
+
+    youtubePlayer.style.display = "none";
+    sourceVideo.style.display = "block";
+
+    document.getElementById("status").textContent =
+        "元動画を読み込みました：" + file.name;
+}
+
 function sendNicoCommand(eventName, data = null) {
     const player = document.getElementById("youtubePlayer");
 
@@ -1335,7 +1405,7 @@ function sendNicoCommand(eventName, data = null) {
 
     return true;
 }
-
+    
 function onYouTubeIframeAPIReady() {
     youtubeApiReady = true;
 }
