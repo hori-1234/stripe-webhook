@@ -146,6 +146,11 @@ def syuwa_admin_applications():
     from flask import render_template_string
     from markupsafe import Markup, escape
 
+    if "syuwa_admin_application_csrf" not in session:
+        session["syuwa_admin_application_csrf"] = secrets.token_urlsafe(32)
+
+    csrf_token = session["syuwa_admin_application_csrf"]
+
     applications = get_syuwa_applications()
 
     rows = ""
@@ -153,13 +158,40 @@ def syuwa_admin_applications():
     for application in applications:
         application_id, name, email, comment, status, created_at = application
 
+        status_labels = {
+            "pending": "未対応",
+            "approved": "承認済み",
+            "rejected": "却下"
+        }
+
+        status_text = status_labels.get(status, status)
+
+        if status == "pending":
+            status_html = f"""
+                <form method="POST" action="/syuwa/admin/applications/update">
+                    <input type="hidden" name="csrf_token" value="{csrf_token}">
+                    <input type="hidden" name="application_id" value="{application_id}">
+
+                    <button type="submit" name="status" value="approved">
+                        承認
+                    </button>
+
+                    <button type="submit" name="status" value="rejected"
+                            onclick="return confirm('この申請を却下しますか？');">
+                        却下
+                    </button>
+                </form>
+            """
+        else:
+            status_html = ""
+
         rows += f"""
         <tr>
             <td>{application_id}</td>
             <td>{escape(name)}</td>
             <td>{escape(email)}</td>
             <td>{escape(comment or "")}</td>
-            <td>{escape(status)}</td>
+            <td>{escape(status_text)}{status_html}</td>
             <td>{created_at.strftime('%Y/%m/%d %H:%M')}</td>
         </tr>
         """
@@ -225,3 +257,44 @@ def syuwa_admin_applications():
     </body>
     </html>
     """, rows=Markup(rows))
+
+
+@syuwa_bp.route("/admin/applications/update", methods=["POST"])
+@admin_required
+def syuwa_update_application():
+    from syuwa.syuwa_db import update_syuwa_application_status
+
+    submitted_csrf = request.form.get("csrf_token", "")
+    expected_csrf = session.get("syuwa_admin_application_csrf", "")
+
+    if not expected_csrf:
+        abort(403)
+
+    if not hmac.compare_digest(submitted_csrf, expected_csrf):
+        abort(403)
+
+    application_id = request.form.get("application_id", "")
+    status = request.form.get("status", "")
+
+    if not application_id.isdigit():
+        abort(400)
+
+    if status not in ("approved", "rejected"):
+        abort(400)
+
+    updated = update_syuwa_application_status(
+        int(application_id),
+        status
+    )
+
+    if not updated:
+        abort(409)
+
+    from flask import redirect, url_for
+
+    return redirect(
+        url_for("syuwa.syuwa_admin_applications"),
+        code=303
+    )
+
+
