@@ -118,3 +118,56 @@ def verify_syuwa_invite(token):
 
     finally:
         conn.close()
+
+
+def save_syuwa_application(token, applicant_name, email, comment):
+    token_hash = hashlib.sha256(
+        token.encode("utf-8")
+    ).hexdigest()
+
+    conn = get_syuwa_db_connection()
+
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                UPDATE syuwa_invites
+                SET status = 'applied',
+                    used_at = CURRENT_TIMESTAMP
+                WHERE token_hash = %s
+                  AND status = 'unused'
+                  AND expires_at > CURRENT_TIMESTAMP
+                RETURNING id
+            """, (token_hash,))
+
+            result = cur.fetchone()
+
+            if result is None:
+                conn.rollback()
+                return False
+
+            invite_id = result[0]
+
+            cur.execute("""
+                INSERT INTO syuwa_applications (
+                    invite_id,
+                    applicant_name,
+                    email,
+                    comment
+                )
+                VALUES (%s, %s, %s, %s)
+            """, (
+                invite_id,
+                applicant_name,
+                email,
+                comment
+            ))
+
+        conn.commit()
+        return True
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        conn.close()
