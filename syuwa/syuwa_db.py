@@ -463,6 +463,27 @@ def verify_syuwa_password_token(token):
             """, (token_hash,))
 
             return cur.fetchone()[0]
+    
+    finally:
+        conn.close()
+
+
+def is_syuwa_user_active(user_id):
+    conn = get_syuwa_db_connection()
+
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM syuwa_applications
+                    WHERE id = %s
+                      AND status = 'approved'
+                      AND password_hash IS NOT NULL
+                )
+            """, (user_id,))
+
+            return cur.fetchone()[0]
 
     finally:
         conn.close()
