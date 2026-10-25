@@ -179,6 +179,14 @@
             border: none;
         }
 
+        #videoBox.mobile-fullscreen #youtubePlayer,
+        #videoBox:fullscreen #youtubePlayer {
+            display: block;
+            width: 100% !important;
+            height: 100% !important;
+            border: none;
+        }
+
         #videoBox {
             position: relative;
             overflow: hidden;
@@ -186,18 +194,19 @@
             border-radius: 12px;
             box-shadow: 0 4px 16px rgba(36, 72, 63, 0.08);
         }
-
+        
         #videoBox.mobile-fullscreen {
             position: fixed;
-            top: 0;
-            left: 0;
+            inset: 0;
             width: 100vw;
             height: 100dvh;
             aspect-ratio: auto;
             margin: 0;
+            padding: 0;
             z-index: 9999;
             border: none;
             border-radius: 0;
+            box-shadow: none;
             background: black;
         }
         
