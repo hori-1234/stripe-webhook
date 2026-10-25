@@ -63,15 +63,20 @@ def init_syuwa_db():
                         CHECK (token_type IN ('setup', 'reset'))
                 )
             """)
-
+            
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS syuwa_login_failures (
                     id BIGSERIAL PRIMARY KEY,
-                    application_id BIGINT NOT NULL
+                    application_id BIGINT
                         REFERENCES syuwa_applications(id),
                     ip_address VARCHAR(45),
                     failed_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
                 )
+            """)
+
+            cur.execute("""
+                ALTER TABLE syuwa_login_failures
+                ALTER COLUMN application_id DROP NOT NULL
             """)
 
             cur.execute("""
@@ -586,6 +591,29 @@ def is_syuwa_account_disabled(applicant_name, password):
         conn.close()
 
 
+def is_syuwa_ip_login_limited(ip_address):
+    if not ip_address:
+        return True
+
+    conn = get_syuwa_db_connection()
+
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT COUNT(*)
+                FROM syuwa_login_failures
+                WHERE ip_address = %s
+                  AND failed_at > CURRENT_TIMESTAMP - INTERVAL '5 minutes'
+            """, (ip_address,))
+
+            failure_count = cur.fetchone()[0]
+
+            return failure_count >= 5
+
+    finally:
+        conn.close()
+
+
 def record_syuwa_login_failure(applicant_name, ip_address):
     conn = get_syuwa_db_connection()
 
@@ -601,9 +629,17 @@ def record_syuwa_login_failure(applicant_name, ip_address):
             """, (applicant_name,))
 
             users = cur.fetchall()
-
+            
             if len(users) != 1:
-                conn.rollback()
+                cur.execute("""
+                    INSERT INTO syuwa_login_failures (
+                        application_id,
+                        ip_address
+                    )
+                    VALUES (NULL, %s)
+                """, (ip_address,))
+
+                conn.commit()
                 return False
 
             application_id = users[0][0]
@@ -645,7 +681,7 @@ def record_syuwa_login_failure(applicant_name, ip_address):
         conn.close()
 
 
-def is_syuwa_account_disabled(applicant_name, password):
+def authenticate_syuwa_user(applicant_name, password):
     from werkzeug.security import check_password_hash
     conn = get_syuwa_db_connection()
 
