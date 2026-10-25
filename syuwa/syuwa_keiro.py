@@ -696,11 +696,25 @@ def syuwa_login():
 
         if not applicant_name or not password:
             abort(400)
-
+        
         user_id = authenticate_syuwa_user(applicant_name, password)
 
         if user_id is None:
-            abort(401, description="登録者ID名またはパスワードが違います")
+            from syuwa.syuwa_db import is_syuwa_account_disabled
+
+            if is_syuwa_account_disabled(applicant_name, password):
+                error_message = "※ログイン権限がありません"
+            else:
+                error_message = "※登録者ID名またはパスワードが違います"
+
+            csrf_token = secrets.token_urlsafe(32)
+            session["syuwa_login_csrf"] = csrf_token
+
+            return render_template(
+                "syuwa_login.html",
+                csrf_token=csrf_token,
+                error=error_message
+            ), 401
 
         session.pop("syuwa_user_id", None)
         session.pop("syuwa_login_csrf", None)
