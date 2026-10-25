@@ -398,6 +398,49 @@ def syuwa_update_application():
         code=303
     )
 
+
+@syuwa_bp.route("/admin/account/update", methods=["POST"])
+@admin_required
+def syuwa_admin_account_update():
+    from flask import redirect, url_for
+    from syuwa.syuwa_db import update_syuwa_account_enabled
+
+    submitted_csrf = request.form.get("csrf_token", "")
+    expected_csrf = session.get("syuwa_admin_application_csrf", "")
+
+    if not expected_csrf:
+        abort(403)
+
+    if not hmac.compare_digest(submitted_csrf, expected_csrf):
+        abort(403)
+
+    application_id = request.form.get("application_id", "")
+    action = request.form.get("action", "")
+
+    if not application_id.isdigit():
+        abort(400)
+
+    if action == "enable":
+        enabled = True
+    elif action == "disable":
+        enabled = False
+    else:
+        abort(400)
+
+    updated = update_syuwa_account_enabled(
+        int(application_id),
+        enabled
+    )
+
+    if not updated:
+        abort(409)
+
+    return redirect(
+        url_for("syuwa.syuwa_admin_applications"),
+        code=303
+    )
+
+
 @syuwa_bp.route("/admin/password-token/create", methods=["POST"])
 @admin_required
 def syuwa_create_password_token():
