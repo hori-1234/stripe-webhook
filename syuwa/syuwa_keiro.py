@@ -660,6 +660,17 @@ def syuwa_login_complete():
     if user_id is None:
         return redirect(url_for("syuwa.syuwa_login"), code=303)
 
+    from syuwa.syuwa_db import is_syuwa_user_active
+
+    if not is_syuwa_user_active(user_id):
+        session.pop("syuwa_user_id", None)
+        session.pop("syuwa_logout_csrf", None)
+
+        return redirect(
+            url_for("syuwa.syuwa_login"),
+            code=303
+        )
+
     csrf_token = secrets.token_urlsafe(32)
     session["syuwa_logout_csrf"] = csrf_token
 
