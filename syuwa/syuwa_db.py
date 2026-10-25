@@ -291,7 +291,7 @@ def update_syuwa_account_enabled(application_id, enabled):
         conn.close()
 
 
-def set_syuwa_password(
+def set_syuwa_password(application_id, password):
     from werkzeug.security import generate_password_hash
 
     password_hash = generate_password_hash(password)
