@@ -41,7 +41,7 @@ def init_syuwa_db():
                     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     approved_at TIMESTAMPTZ,
                     CONSTRAINT syuwa_applications_status_check
-                        CHECK (status IN ('pending', 'approved', 'rejected'))
+                        CHECK (status IN ('pending', 'approved', 'rejected', 'disabled'))
                 )
             """)
 
@@ -203,7 +203,8 @@ def get_syuwa_applications():
                     email,
                     comment,
                     status,
-                    created_at
+                    created_at,
+                    (password_hash IS NOT NULL) AS password_set
                 FROM syuwa_applications
                 ORDER BY created_at DESC, id DESC
             """)
