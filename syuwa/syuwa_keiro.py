@@ -498,3 +498,59 @@ def syuwa_login():
         "syuwa_login.html",
         csrf_token=csrf_token
     )
+
+
+@syuwa_bp.route("/login/complete", methods=["GET"])
+def syuwa_login_complete():
+    from flask import redirect, url_for
+    from markupsafe import escape
+
+    user_id = session.get("syuwa_user_id")
+
+    if user_id is None:
+        return redirect(url_for("syuwa.syuwa_login"), code=303)
+
+    csrf_token = secrets.token_urlsafe(32)
+    session["syuwa_logout_csrf"] = csrf_token
+
+    return """
+    <!DOCTYPE html>
+    <html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>手話アプリ ログイン完了</title>
+    </head>
+    <body>
+        <h2>ログインしました</h2>
+        <p>動画登録機能は現在準備中です。</p>
+
+        <form method="POST" action="/syuwa/logout">
+            <input type="hidden" name="csrf_token" value="{csrf_token}">
+            <button type="submit">ログアウト</button>
+        </form>
+    </body>
+    </html>
+    """.replace("{csrf_token}", csrf_token)
+
+
+@syuwa_bp.route("/logout", methods=["POST"])
+def syuwa_logout():
+    from flask import redirect, url_for
+
+    submitted_csrf = request.form.get("csrf_token", "")
+    expected_csrf = session.get("syuwa_logout_csrf", "")
+
+    if not expected_csrf:
+        abort(403)
+
+    if not hmac.compare_digest(submitted_csrf, expected_csrf):
+        abort(403)
+
+    session.pop("syuwa_user_id", None)
+    session.pop("syuwa_logout_csrf", None)
+
+    return redirect(
+        url_for("syuwa.syuwa_login"),
+        code=303
+    )
