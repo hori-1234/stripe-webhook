@@ -28,6 +28,22 @@ def init_syuwa_db():
                 )
             """)
 
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS syuwa_applications (
+                    id BIGSERIAL PRIMARY KEY,
+                    invite_id BIGINT NOT NULL UNIQUE
+                        REFERENCES syuwa_invites(id),
+                    applicant_name VARCHAR(100) NOT NULL,
+                    email VARCHAR(255) NOT NULL,
+                    comment TEXT,
+                    status VARCHAR(20) NOT NULL DEFAULT 'pending',
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    approved_at TIMESTAMPTZ,
+                    CONSTRAINT syuwa_applications_status_check
+                        CHECK (status IN ('pending', 'approved', 'rejected'))
+                )
+            """)
+
         conn.commit()
 
     except Exception:
