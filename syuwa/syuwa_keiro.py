@@ -137,3 +137,91 @@ def syuwa_apply():
         invite_token=token,
         csrf_token=csrf_token
     )
+
+
+@syuwa_bp.route("/admin/applications", methods=["GET"])
+@admin_required
+def syuwa_admin_applications():
+    from syuwa.syuwa_db import get_syuwa_applications
+    from flask import render_template_string
+    from markupsafe import Markup, escape
+
+    applications = get_syuwa_applications()
+
+    rows = ""
+
+    for application in applications:
+        application_id, name, email, comment, status, created_at = application
+
+        rows += f"""
+        <tr>
+            <td>{application_id}</td>
+            <td>{escape(name)}</td>
+            <td>{escape(email)}</td>
+            <td>{escape(comment or "")}</td>
+            <td>{escape(status)}</td>
+            <td>{created_at.strftime('%Y/%m/%d %H:%M')}</td>
+        </tr>
+        """
+
+    if not rows:
+        rows = '<tr><td colspan="6">申請はありません</td></tr>'
+
+    return render_template_string("""
+    <!DOCTYPE html>
+    <html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>手話アプリ 登録者申請一覧</title>
+        <style>
+            body {
+                font-family: sans-serif;
+                padding: 20px;
+                background: #f5f7fa;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                background: white;
+            }
+
+            th, td {
+                border: 1px solid #ccc;
+                padding: 10px;
+                text-align: left;
+                overflow-wrap: anywhere;
+            }
+
+            th {
+                background: #1769aa;
+                color: white;
+            }
+
+            .table-wrap {
+                overflow-x: auto;
+            }
+        </style>
+    </head>
+    <body>
+        <h2>登録者申請一覧</h2>
+
+        <p><a href="/syuwa/admin/invites">招待管理へ戻る</a></p>
+
+        <div class="table-wrap">
+            <table>
+                <tr>
+                    <th>ID</th>
+                    <th>登録者ID名</th>
+                    <th>メールアドレス</th>
+                    <th>コメント</th>
+                    <th>状態</th>
+                    <th>申請日時</th>
+                </tr>
+                {{ rows }}
+            </table>
+        </div>
+    </body>
+    </html>
+    """, rows=Markup(rows))
