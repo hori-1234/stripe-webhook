@@ -2,6 +2,7 @@ import os
 import psycopg2
 import secrets
 import hashlib
+import re
 from datetime import datetime, timedelta, timezone
 
 def get_syuwa_db_connection():
@@ -344,7 +345,7 @@ def create_syuwa_password_token(application_id):
 def complete_syuwa_password_setup(token, password):
     from werkzeug.security import generate_password_hash
 
-    if not token or len(password) < 12:
+    if not token or not re.fullmatch(r"[A-Za-z0-9]{6}", password):
         return False
 
     token_hash = hashlib.sha256(
