@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>手話アプリ 登録者申請</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #f5f7fa;
+            font-family: sans-serif;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 30px auto;
+            padding: 24px;
+            background: white;
+            border-radius: 10px;
+            box-sizing: border-box;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            margin-top: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        textarea {
+            min-height: 100px;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 25px;
+            padding: 14px;
+            background: #1769aa;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h2>手話アプリ 登録者申請</h2>
+
+        <label>登録者ID名</label>
+        <input type="text" placeholder="登録者ID名" required>
+
+        <label>メールアドレス</label>
+        <input type="email" placeholder="メールアドレス" required>
+
+        <label>コメント</label>
+        <textarea placeholder="〇〇です。登録お願いします。"></textarea>
+
+        <button type="button" disabled>申請する（準備中）</button>
+    </div>
+
+</body>
+</html>
