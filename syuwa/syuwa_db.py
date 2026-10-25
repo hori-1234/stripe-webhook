@@ -669,6 +669,13 @@ def is_syuwa_account_disabled(applicant_name, password):
             if not check_password_hash(password_hash, password):
                 return None
 
+            cur.execute("""
+                DELETE FROM syuwa_login_failures
+                WHERE application_id = %s
+            """, (user_id,))
+
+            conn.commit()
+
             return user_id
 
     finally:
