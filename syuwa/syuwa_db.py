@@ -278,6 +278,7 @@ def update_syuwa_account_enabled(application_id, enabled):
 
     try:
         with conn.cursor() as cur:
+            
             if enabled:
                 cur.execute("""
                     UPDATE syuwa_applications
@@ -287,7 +288,21 @@ def update_syuwa_account_enabled(application_id, enabled):
                       AND password_hash IS NOT NULL
                     RETURNING id
                 """, (application_id,))
+
+                if cur.fetchone() is None:
+                    conn.rollback()
+                    return False
+
+                cur.execute("""
+                    DELETE FROM syuwa_login_failures
+                    WHERE application_id = %s
+                """, (application_id,))
+
+                conn.commit()
+                return True
+
             else:
+
                 cur.execute("""
                     UPDATE syuwa_applications
                     SET status = 'disabled'
