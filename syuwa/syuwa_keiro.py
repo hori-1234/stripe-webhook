@@ -1,5 +1,6 @@
 import os
 import hmac
+import re
 import secrets
 from flask import Blueprint, render_template, request, abort, session
 from admin_auth import admin_required
@@ -430,8 +431,8 @@ def syuwa_password_setup():
         if password != password_confirm:
             abort(400, description="パスワードが一致しません")
 
-        if len(password) < 12:
-            abort(400, description="パスワードは12文字以上にしてください")
+        if not re.fullmatch(r"[A-Za-z0-9]{6}", password):
+            abort(400, description="パスワードは6桁の半角英数字にしてください")
 
         if not complete_syuwa_password_setup(token, password):
             abort(403)
