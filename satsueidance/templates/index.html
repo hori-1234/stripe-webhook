@@ -496,33 +496,26 @@ function loadUploadedVideo(input) {
     uploadedVideoUrl = URL.createObjectURL(file);
     
     const status = document.getElementById("status");
-    const loadingVideo = document.createElement("video");
+    const compareVideo = document.getElementById("compareVideo");
 
     status.textContent = "アップロード動画を読み込み中…";
     showVideoLoading();
 
-    loadingVideo.preload = "auto";
+    compareVideo.preload = "auto";
 
-    loadingVideo.onloadeddata = function() {
+    compareVideo.onloadeddata = function() {
         status.textContent = "アップロード動画の読み込みが完了しました";
         hideVideoLoading();
-        loadingVideo.removeAttribute("src");
-        loadingVideo.load();
     };
 
-    loadingVideo.onerror = function() {
+    compareVideo.onerror = function() {
         status.textContent = "アップロード動画の読み込みに失敗しました";
         hideVideoLoading();
-        loadingVideo.removeAttribute("src");
-        loadingVideo.load();
     };
-
-
-    loadingVideo.onerror = function() {
-        status.textContent = "アップロード動画の読み込みに失敗しました";
-        loadingVideo.removeAttribute("src");
-        loadingVideo.load();
-    };
+    
+    compareVideo.src = uploadedVideoUrl;
+    compareVideo.load();
+}
 
     loadingVideo.src = uploadedVideoUrl;
     loadingVideo.load();
@@ -1286,13 +1279,17 @@ async function toggleCompareMode() {
     const compareVideo = document.getElementById("compareVideo");
     
     if (compareMode) {
-        compareVideo.src = compareVideoSource === "recording"
+        const selectedVideoUrl = compareVideoSource === "recording"
             ? recordingUrl
             : uploadedVideoUrl;
 
+        if (compareVideo.src !== selectedVideoUrl) {
+            compareVideo.src = selectedVideoUrl;
+        }
+
         compareVideo.muted = true;
         compareVideo.style.display = "block";
-        
+
         compareVideo.playbackRate = 1;
 
         const sourceVideoForSpeed =
@@ -1821,16 +1818,23 @@ function loadYoutube() {
     // 動画切り替え時に比較動画を停止
     const compareVideo = document.getElementById("compareVideo");
     compareVideo.pause();
-
+    
     // 端末から読み込んだ元動画を停止・非表示
     const sourceVideo = document.getElementById("sourceVideo");
     sourceVideo.pause();
     sourceVideo.style.display = "none";
 
+    // 端末動画の選択欄を初期化
+    document.querySelectorAll('input[type="file"]').forEach(input => {
+        if (input.onchange && input.onchange.toString().includes("loadSourceVideo")) {
+            input.value = "";
+        }
+    });
+
     // YouTube・ニコニコ動画の表示に戻す
     const youtubePlayer = document.getElementById("youtubePlayer");
     youtubePlayer.style.display = "block";
-
+    
     // 再生速度ボタンを一旦非表示
     const compareSpeedControls =
         document.getElementById("compareSpeedControls");
