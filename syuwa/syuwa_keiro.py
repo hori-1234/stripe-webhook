@@ -109,14 +109,32 @@ def syuwa_apply():
             abort(400)
 
         from syuwa.syuwa_db import save_syuwa_application
+        from psycopg2.errors import UniqueViolation
 
-        if not save_syuwa_application(
-            token,
-            applicant_name,
-            email,
-            comment
-        ):
+        try:
+            saved = save_syuwa_application(
+                token,
+                applicant_name,
+                email,
+                comment
+            )
+        except UniqueViolation as e:
+            if e.diag.constraint_name != "syuwa_applications_applicant_name_unique":
+                raise
+
+            return render_template(
+                "syuwa_apply.html",
+                invite_token=token,
+                csrf_token=expected_csrf,
+                error="このIDは既に使用されています。別のIDを入力してください。",
+                applicant_name=applicant_name,
+                email=email,
+                comment=comment
+            ), 409
+
+        if not saved:
             abort(403)
+
 
         session.pop("syuwa_apply_csrf_token", None)
 
