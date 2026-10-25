@@ -492,3 +492,22 @@ def authenticate_syuwa_user(applicant_name, password):
 
     finally:
         conn.close()
+
+
+def get_syuwa_duplicate_applicant_names():
+    conn = get_syuwa_db_connection()
+
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT applicant_name, COUNT(*)
+                FROM syuwa_applications
+                GROUP BY applicant_name
+                HAVING COUNT(*) > 1
+                ORDER BY applicant_name
+            """)
+
+            return cur.fetchall()
+
+    finally:
+        conn.close()
