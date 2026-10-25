@@ -160,10 +160,26 @@
 <button id="expandButton" onclick="
 
     const box = document.getElementById('videoBox');
-    box.classList.toggle('expanded');
-    const expanded = box.classList.contains('expanded');
-    this.textContent = expanded ? '戻す' : '拡大';
-    this.classList.toggle('expanded-button', expanded);
+    const compareButton = document.getElementById('compareButton');
+
+    if (compareButton.textContent.trim() === 'OFF') {
+
+        if (!document.fullscreenElement) {
+            box.requestFullscreen().catch(error => {
+                console.error('全画面表示に失敗しました:', error);
+            });
+        } else {
+            document.exitFullscreen();
+        }
+
+    } else {
+
+        box.classList.toggle('expanded');
+        const expanded = box.classList.contains('expanded');
+        this.textContent = expanded ? '戻す' : '拡大';
+        this.classList.toggle('expanded-button', expanded);
+
+    }
 ">拡大</button>
 
 <div id="compareStartControls" style="display:none;">
