@@ -350,18 +350,55 @@ def syuwa_create_password_token():
     </html>
     """
 
-@syuwa_bp.route("/password/setup", methods=["GET"])
+@syuwa_bp.route("/password/setup", methods=["GET", "POST"])
 def syuwa_password_setup():
-    from syuwa.syuwa_db import verify_syuwa_password_token
+    from syuwa.syuwa_db import (
+        verify_syuwa_password_token,
+        complete_syuwa_password_setup
+    )
+
+    if request.method == "POST":
+        token = request.form.get("token", "")
+        password = request.form.get("password", "")
+        password_confirm = request.form.get("password_confirm", "")
+
+        submitted_csrf = request.form.get("csrf_token", "")
+        expected_csrf = session.get("syuwa_password_setup_csrf", "")
+
+        if not expected_csrf:
+            abort(403)
+
+        if not hmac.compare_digest(submitted_csrf, expected_csrf):
+            abort(403)
+
+        if password != password_confirm:
+            abort(400, description="パスワードが一致しません")
+
+        if len(password) < 12:
+            abort(400, description="パスワードは12文字以上にしてください")
+
+        if not complete_syuwa_password_setup(token, password):
+            abort(403)
+
+        session.pop("syuwa_password_setup_csrf", None)
+
+        return """
+        <h2>パスワード設定が完了しました</h2>
+        <p>ログイン機能の準備ができるまでお待ちください。</p>
+        """
 
     token = request.args.get("token", "")
 
     if not verify_syuwa_password_token(token):
         abort(403)
 
+    csrf_token = secrets.token_urlsafe(32)
+    session["syuwa_password_setup_csrf"] = csrf_token
+
     return render_template(
         "syuwa_password_setup.html",
-        token=token
+        token=token,
+        csrf_token=csrf_token
     )
 
 
