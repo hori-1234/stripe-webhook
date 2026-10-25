@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>手話アプリ ログイン</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #f5f7fa;
+            font-family: sans-serif;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 30px auto;
+            padding: 24px;
+            background: white;
+            border-radius: 10px;
+            box-sizing: border-box;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-top: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 25px;
+            padding: 14px;
+            background: #1769aa;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>手話アプリ ログイン</h2>
+
+        <form method="POST" action="/syuwa/login">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+            <label for="applicant_name">登録者ID名</label>
+            <input
+                type="text"
+                id="applicant_name"
+                name="applicant_name"
+                maxlength="100"
+                autocomplete="username"
+                required
+            >
+
+            <label for="password">パスワード</label>
+            <input
+                type="password"
+                id="password"
+                name="password"
+                minlength="6"
+                maxlength="6"
+                autocomplete="current-password"
+                required
+            >
+
+            <button type="submit">
+                ログイン
+            </button>
+        </form>
+    </div>
+</body>
+</html>
