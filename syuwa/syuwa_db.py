@@ -461,3 +461,34 @@ def verify_syuwa_password_token(token):
 
     finally:
         conn.close()
+
+
+def authenticate_syuwa_user(applicant_name, password):
+    from werkzeug.security import check_password_hash
+
+    conn = get_syuwa_db_connection()
+
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT id, password_hash
+                FROM syuwa_applications
+                WHERE applicant_name = %s
+                  AND status = 'approved'
+                  AND password_hash IS NOT NULL
+            """, (applicant_name,))
+
+            users = cur.fetchall()
+
+            if len(users) != 1:
+                return None
+
+            user_id, password_hash = users[0]
+
+            if not check_password_hash(password_hash, password):
+                return None
+
+            return user_id
+
+    finally:
+        conn.close()
