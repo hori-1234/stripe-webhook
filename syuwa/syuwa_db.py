@@ -250,11 +250,48 @@ def update_syuwa_application_status(application_id, status):
     except Exception:
         conn.rollback()
         raise
+    finally:
+        conn.close()
+
+
+def update_syuwa_account_enabled(application_id, enabled):
+    conn = get_syuwa_db_connection()
+
+    try:
+        with conn.cursor() as cur:
+            if enabled:
+                cur.execute("""
+                    UPDATE syuwa_applications
+                    SET status = 'approved'
+                    WHERE id = %s
+                      AND status = 'disabled'
+                      AND password_hash IS NOT NULL
+                    RETURNING id
+                """, (application_id,))
+            else:
+                cur.execute("""
+                    UPDATE syuwa_applications
+                    SET status = 'disabled'
+                    WHERE id = %s
+                      AND status = 'approved'
+                      AND password_hash IS NOT NULL
+                    RETURNING id
+                """, (application_id,))
+
+            updated = cur.fetchone() is not None
+
+        conn.commit()
+        return updated
+
+    except Exception:
+        conn.rollback()
+        raise
 
     finally:
         conn.close()
 
-def set_syuwa_password(application_id, password):
+
+def set_syuwa_password(
     from werkzeug.security import generate_password_hash
 
     password_hash = generate_password_hash(password)
