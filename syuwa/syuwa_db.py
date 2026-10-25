@@ -63,7 +63,26 @@ def init_syuwa_db():
                         CHECK (token_type IN ('setup', 'reset'))
                 )
             """)
-            
+
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS syuwa_login_failures (
+                    id BIGSERIAL PRIMARY KEY,
+                    application_id BIGINT NOT NULL
+                        REFERENCES syuwa_applications(id),
+                    ip_address VARCHAR(45),
+                    failed_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+
+            cur.execute("""
+                CREATE INDEX IF NOT EXISTS
+                    idx_syuwa_login_failures_account_time
+                ON syuwa_login_failures (
+                    application_id,
+                    failed_at
+                )
+            """)
+
         conn.commit()
 
     except Exception:
@@ -552,7 +571,66 @@ def is_syuwa_account_disabled(applicant_name, password):
         conn.close()
 
 
-def authenticate_syuwa_user(applicant_name, password):
+def record_syuwa_login_failure(applicant_name, ip_address):
+    conn = get_syuwa_db_connection()
+
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT id
+                FROM syuwa_applications
+                WHERE applicant_name = %s
+                  AND status = 'approved'
+                  AND password_hash IS NOT NULL
+                FOR UPDATE
+            """, (applicant_name,))
+
+            users = cur.fetchall()
+
+            if len(users) != 1:
+                conn.rollback()
+                return False
+
+            application_id = users[0][0]
+
+            cur.execute("""
+                INSERT INTO syuwa_login_failures (
+                    application_id,
+                    ip_address
+                )
+                VALUES (%s, %s)
+            """, (application_id, ip_address))
+
+            cur.execute("""
+                SELECT COUNT(*)
+                FROM syuwa_login_failures
+                WHERE application_id = %s
+                  AND failed_at > CURRENT_TIMESTAMP - INTERVAL '5 minutes'
+            """, (application_id,))
+
+            failure_count = cur.fetchone()[0]
+
+            if failure_count >= 5:
+                cur.execute("""
+                    UPDATE syuwa_applications
+                    SET status = 'disabled'
+                    WHERE id = %s
+                      AND status = 'approved'
+                """, (application_id,))
+
+        conn.commit()
+
+        return failure_count >= 5
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        conn.close()
+
+
+def is_syuwa_account_disabled(applicant_name, password):
     from werkzeug.security import check_password_hash
     conn = get_syuwa_db_connection()
 
