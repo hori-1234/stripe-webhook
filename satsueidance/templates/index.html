@@ -371,14 +371,56 @@
             height: 24px;
             cursor: grab;
         }
+    
+        #videoLoadingOverlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 20000;
+            background: rgba(0, 0, 0, 0.75);
+            color: white;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
 
+        #videoLoadingSpinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.25);
+            border-top-color: #25a58d;
+            border-radius: 50%;
+            animation: videoLoadingSpin 0.8s linear infinite;
+        }
+
+        @keyframes videoLoadingSpin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 </head>
 <body>
 
+<div id="videoLoadingOverlay">
+    <div id="videoLoadingSpinner"></div>
+    <div>動画を読み込み中…</div>
+</div>
+
 {% include 'satsueidance_layout.html' %}
 
 <script>
+
+function showVideoLoading() {
+    document.getElementById("videoLoadingOverlay").style.display = "flex";
+}
+
+function hideVideoLoading() {
+    document.getElementById("videoLoadingOverlay").style.display = "none";
+}
 
 let cameraStream = null;
 let recorder = null;
@@ -450,12 +492,42 @@ function loadUploadedVideo(input) {
     if (uploadedVideoUrl) {
         URL.revokeObjectURL(uploadedVideoUrl);
     }
-
+    
     uploadedVideoUrl = URL.createObjectURL(file);
+    
+    const status = document.getElementById("status");
+    const loadingVideo = document.createElement("video");
 
-    document.getElementById("status").textContent =
-        "アップロード動画を読み込みました：" + file.name;
+    status.textContent = "アップロード動画を読み込み中…";
+    showVideoLoading();
+
+    loadingVideo.preload = "auto";
+
+    loadingVideo.onloadeddata = function() {
+        status.textContent = "アップロード動画の読み込みが完了しました";
+        hideVideoLoading();
+        loadingVideo.removeAttribute("src");
+        loadingVideo.load();
+    };
+
+    loadingVideo.onerror = function() {
+        status.textContent = "アップロード動画の読み込みに失敗しました";
+        hideVideoLoading();
+        loadingVideo.removeAttribute("src");
+        loadingVideo.load();
+    };
+
+
+    loadingVideo.onerror = function() {
+        status.textContent = "アップロード動画の読み込みに失敗しました";
+        loadingVideo.removeAttribute("src");
+        loadingVideo.load();
+    };
+
+    loadingVideo.src = uploadedVideoUrl;
+    loadingVideo.load();
 }
+
 
 let recordingCanvas = null;
 let recordingContext = null;
@@ -1550,6 +1622,21 @@ function loadSourceVideo(input) {
     if (sourceVideo.dataset.objectUrl) {
         URL.revokeObjectURL(sourceVideo.dataset.objectUrl);
     }
+    
+    const status = document.getElementById("status");
+    
+    status.textContent = "動画を読み込み中…";
+    showVideoLoading();
+
+    sourceVideo.onloadeddata = function() {
+        status.textContent = "動画の読み込みが完了しました";
+        hideVideoLoading();
+    };
+
+    sourceVideo.onerror = function() {
+        status.textContent = "動画の読み込みに失敗しました";
+        hideVideoLoading();
+    };
 
     const videoUrl = URL.createObjectURL(file);
 
@@ -1586,8 +1673,6 @@ function loadSourceVideo(input) {
         button.style.color = "white";
     });
 
-    document.getElementById("status").textContent =
-        "元動画を読み込みました：" + file.name;
 }
 
 function sendNicoCommand(eventName, data = null) {
