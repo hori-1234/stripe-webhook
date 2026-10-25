@@ -512,3 +512,60 @@ def get_syuwa_duplicate_applicant_names():
 
     finally:
         conn.close()
+
+
+def create_syuwa_password_reset_token(application_id):
+    token = secrets.token_urlsafe(32)
+
+    token_hash = hashlib.sha256(
+        token.encode("utf-8")
+    ).hexdigest()
+
+    expires_at = datetime.now(timezone.utc) + timedelta(hours=1)
+
+    conn = get_syuwa_db_connection()
+
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT id
+                FROM syuwa_applications
+                WHERE id = %s
+                  AND status = 'approved'
+                  AND password_hash IS NOT NULL
+                FOR UPDATE
+            """, (application_id,))
+
+            if cur.fetchone() is None:
+                conn.rollback()
+                return None
+
+            cur.execute("""
+                UPDATE syuwa_password_tokens
+                SET used_at = CURRENT_TIMESTAMP
+                WHERE application_id = %s
+                  AND used_at IS NULL
+            """, (application_id,))
+
+            cur.execute("""
+                INSERT INTO syuwa_password_tokens (
+                    application_id,
+                    token_hash,
+                    expires_at
+                )
+                VALUES (%s, %s, %s)
+            """, (
+                application_id,
+                token_hash,
+                expires_at
+            ))
+
+        conn.commit()
+        return token
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        conn.close()
