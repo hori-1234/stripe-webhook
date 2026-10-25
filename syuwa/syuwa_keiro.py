@@ -73,11 +73,67 @@ def syuwa_create_invite():
     )
 
 
-@syuwa_bp.route("/apply", methods=["GET"])
+@syuwa_bp.route("/apply", methods=["GET", "POST"])
 def syuwa_apply():
+
+    if request.method == "POST":
+        token = request.form.get("token", "")
+        submitted_csrf = request.form.get("csrf_token", "")
+        expected_csrf = session.get("syuwa_apply_csrf_token", "")
+
+        if not expected_csrf:
+            abort(403)
+
+        if not hmac.compare_digest(submitted_csrf, expected_csrf):
+            abort(403)
+
+        if not verify_syuwa_invite(token):
+            abort(403)
+
+        applicant_name = request.form.get("applicant_name", "").strip()
+        email = request.form.get("email", "").strip()
+        comment = request.form.get("comment", "").strip()
+
+        if not applicant_name or len(applicant_name) > 100:
+            abort(400)
+
+        if (
+            not email
+            or len(email) > 255
+            or "@" not in email
+        ):
+            abort(400)
+
+        if len(comment) > 2000:
+            abort(400)
+
+        from syuwa.syuwa_db import save_syuwa_application
+
+        if not save_syuwa_application(
+            token,
+            applicant_name,
+            email,
+            comment
+        ):
+            abort(403)
+
+        session.pop("syuwa_apply_csrf_token", None)
+
+        return """
+        <h2>登録者申請を受け付けました</h2>
+        <p>管理者による承認をお待ちください。</p>
+        """
+
     token = request.args.get("token", "")
 
     if not verify_syuwa_invite(token):
         abort(403)
 
-    return render_template("syuwa_apply.html")
+    csrf_token = secrets.token_urlsafe(32)
+    session["syuwa_apply_csrf_token"] = csrf_token
+
+    return render_template(
+        "syuwa_apply.html",
+        invite_token=token,
+        csrf_token=csrf_token
+    )
