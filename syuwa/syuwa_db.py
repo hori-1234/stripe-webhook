@@ -74,3 +74,31 @@ def create_syuwa_invite():
         conn.close()
 
     return token
+
+
+def verify_syuwa_invite(token):
+    if not token:
+        return False
+
+    token_hash = hashlib.sha256(
+        token.encode("utf-8")
+    ).hexdigest()
+
+    conn = get_syuwa_db_connection()
+
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM syuwa_invites
+                    WHERE token_hash = %s
+                      AND status = 'unused'
+                      AND expires_at > CURRENT_TIMESTAMP
+                )
+            """, (token_hash,))
+
+            return cur.fetchone()[0]
+
+    finally:
+        conn.close()
