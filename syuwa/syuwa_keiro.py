@@ -2,6 +2,7 @@ import os
 import hmac
 import re
 import secrets
+import ipaddress
 from flask import Blueprint, render_template, request, abort, session
 from admin_auth import admin_required
 from syuwa.syuwa_db import create_syuwa_invite, verify_syuwa_invite
@@ -12,6 +13,15 @@ syuwa_bp = Blueprint(
     url_prefix="/syuwa",
     template_folder="templates"
 )
+
+
+def get_syuwa_client_ip():
+    ip_text = request.headers.get("CF-Connecting-IP", "").strip()
+
+    try:
+        return str(ipaddress.ip_address(ip_text))
+    except ValueError:
+        return None
 
 @syuwa_bp.route("/admin/invites", methods=["GET"])
 @admin_required
@@ -690,14 +700,33 @@ def syuwa_login():
 
         if not hmac.compare_digest(submitted_csrf, expected_csrf):
             abort(403)
-
+        
         applicant_name = request.form.get("applicant_name", "").strip()
         password = request.form.get("password", "")
 
         if not applicant_name or not password:
             abort(400)
-        
-        user_id = authenticate_syuwa_user(applicant_name, password)
+
+        from syuwa.syuwa_db import is_syuwa_ip_login_limited
+
+        client_ip = get_syuwa_client_ip()
+
+        if is_syuwa_ip_login_limited(client_ip):
+            error_message = (
+                "※ログイン試行回数の上限を超えました。"
+                "5分ほど経過してから再度お試しください。"
+            )
+
+            csrf_token = secrets.token_urlsafe(32)
+            session["syuwa_login_csrf"] = csrf_token
+
+            return render_template(
+                "syuwa_login.html",
+                csrf_token=csrf_token,
+                error=error_message
+            ), 429
+
+        user_id = authenticate_syuwa_user(applicant_name, password)        
 
         if user_id is None:
             from syuwa.syuwa_db import (
@@ -712,7 +741,7 @@ def syuwa_login():
             else:
                 locked = record_syuwa_login_failure(
                     applicant_name,
-                    request.remote_addr
+                    get_syuwa_client_ip()
                 )
 
                 if locked:
