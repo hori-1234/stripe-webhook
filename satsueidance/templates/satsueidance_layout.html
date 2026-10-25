@@ -24,13 +24,32 @@
         accept="video/*"
         onchange="loadSourceVideo(this)"
     >
+    
     <p style="font-size:12px; color:#777; margin:4px 0;">
         ※動画は端末内で読み込みます。サーバーには保存しません。
     </p>
 </div>
 
+<div id="compareSpeedControls" style="display:none; margin:12px 0;">
+    <div style="font-weight:bold; margin-bottom:8px;">
+        再生速度
+    </div>
+
+    <div style="display:flex; flex-wrap:nowrap; gap:3px;">
+        <button type="button" style="flex:1; min-width:0; padding:8px 2px; margin:0; font-size:13px;" onclick="changeCompareSpeed(0.25)">0.25×</button>
+        <button type="button" style="flex:1; min-width:0; padding:8px 2px; margin:0; font-size:13px;" onclick="changeCompareSpeed(0.5)">0.5×</button>
+        <button type="button" style="flex:1; min-width:0; padding:8px 2px; margin:0; font-size:13px;" onclick="changeCompareSpeed(0.75)">0.75×</button>
+        <button type="button" style="flex:1; min-width:0; padding:8px 2px; margin:0; font-size:13px;" onclick="changeCompareSpeed(1)">1.0×</button>
+        <button type="button" style="flex:1; min-width:0; padding:8px 2px; margin:0; font-size:13px;" onclick="changeCompareSpeed(1.25)">1.25×</button>
+    </div>
+
+    <p style="font-size:12px; color:#777; margin:4px 0;">
+        ※ニコニコ動画の再生速度変更は非対応<br>
+    </p>
+</div>
+
 <div id="compareControls" style="display:none;">
-    
+
     <div style="display:flex; align-items:center; justify-content:flex-start; gap:8px; margin:10px 0;">
         <span>画面調整モード</span>
         <button
@@ -47,25 +66,8 @@
 
     </div>
 
-    <div id="compareSpeedControls" style="display:none; margin:12px 0;">
-        <div style="font-weight:bold; margin-bottom:8px;">
-            再生速度
-        </div>
-        
-        <div style="display:flex; flex-wrap:nowrap; gap:3px;">
-            <button type="button" style="flex:1; min-width:0; padding:8px 2px; margin:0; font-size:13px;" onclick="changeCompareSpeed(0.25)">0.25×</button>
-            <button type="button" style="flex:1; min-width:0; padding:8px 2px; margin:0; font-size:13px;" onclick="changeCompareSpeed(0.5)">0.5×</button>
-            <button type="button" style="flex:1; min-width:0; padding:8px 2px; margin:0; font-size:13px;" onclick="changeCompareSpeed(0.75)">0.75×</button>
-            <button type="button" style="flex:1; min-width:0; padding:8px 2px; margin:0; font-size:13px;" onclick="changeCompareSpeed(1)">1.0×</button>
-            <button type="button" style="flex:1; min-width:0; padding:8px 2px; margin:0; font-size:13px;" onclick="changeCompareSpeed(1.25)">1.25×</button>
-        </div>
-
-        <p style="font-size:12px; color:#777; margin:4px 0;">
-            ※ニコニコ動画の再生速度変更は非対応<br>
-        </p>
-    </div>
-
     <details id="adjustControls">
+        
         <summary>調整</summary>
 
         <details>
