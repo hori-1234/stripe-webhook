@@ -367,10 +367,12 @@ def complete_syuwa_password_setup(token, password):
                 JOIN syuwa_applications AS a
                   ON a.id = t.application_id
                 WHERE t.token_hash = %s
+                  AND t.token_type = 'setup'
                   AND t.used_at IS NULL
                   AND t.expires_at > CURRENT_TIMESTAMP
                   AND a.status = 'approved'
                   AND a.password_hash IS NULL
+                FOR UPDATE OF t, a
                 FOR UPDATE OF t, a
             """, (token_hash,))
 
@@ -451,6 +453,7 @@ def verify_syuwa_password_token(token):
                     JOIN syuwa_applications AS a
                       ON a.id = t.application_id
                     WHERE t.token_hash = %s
+                      AND t.token_type = 'setup'
                       AND t.used_at IS NULL
                       AND t.expires_at > CURRENT_TIMESTAMP
                       AND a.status = 'approved'
@@ -551,17 +554,123 @@ def create_syuwa_password_reset_token(application_id):
                 INSERT INTO syuwa_password_tokens (
                     application_id,
                     token_hash,
-                    expires_at
+                    expires_at,
+                    token_type
                 )
-                VALUES (%s, %s, %s)
+                VALUES (%s, %s, %s, %s)
             """, (
                 application_id,
                 token_hash,
-                expires_at
+                expires_at,
+                "reset"
             ))
 
         conn.commit()
         return token
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        conn.close()
+
+
+def verify_syuwa_password_reset_token(token):
+    if not token:
+        return False
+
+    token_hash = hashlib.sha256(
+        token.encode("utf-8")
+    ).hexdigest()
+
+    conn = get_syuwa_db_connection()
+
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM syuwa_password_tokens AS t
+                    JOIN syuwa_applications AS a
+                      ON a.id = t.application_id
+                    
+                    WHERE t.token_hash = %s
+                      AND t.token_type = 'reset'
+                      AND t.used_at IS NULL
+                      AND t.expires_at > CURRENT_TIMESTAMP
+                      AND a.status = 'approved'
+                      AND a.password_hash IS NOT NULL
+
+                )
+            """, (token_hash,))
+
+            return cur.fetchone()[0]
+
+    finally:
+        conn.close()
+
+
+def complete_syuwa_password_reset(token, password):
+    from werkzeug.security import generate_password_hash
+
+    if not token or not re.fullmatch(r"[A-Za-z0-9]{6}", password):
+        return False
+
+    token_hash = hashlib.sha256(
+        token.encode("utf-8")
+    ).hexdigest()
+
+    password_hash = generate_password_hash(password)
+
+    conn = get_syuwa_db_connection()
+
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT
+                    t.id,
+                    t.application_id
+                FROM syuwa_password_tokens AS t
+                JOIN syuwa_applications AS a
+                  ON a.id = t.application_id
+                
+                WHERE t.token_hash = %s
+                  AND t.token_type = 'reset'
+                  AND t.used_at IS NULL
+                  AND t.expires_at > CURRENT_TIMESTAMP
+                  AND a.status = 'approved'
+                  AND a.password_hash IS NOT NULL
+                FOR UPDATE OF t, a
+
+            result = cur.fetchone()
+
+            if result is None:
+                conn.rollback()
+                return False
+
+            token_id, application_id = result
+
+            cur.execute("""
+                UPDATE syuwa_applications
+                SET password_hash = %s
+                WHERE id = %s
+                  AND status = 'approved'
+                  AND password_hash IS NOT NULL
+            """, (
+                password_hash,
+                application_id
+            ))
+
+            cur.execute("""
+                UPDATE syuwa_password_tokens
+                SET used_at = CURRENT_TIMESTAMP
+                WHERE application_id = %s
+                  AND used_at IS NULL
+            """, (application_id,))
+
+        conn.commit()
+        return True
 
     except Exception:
         conn.rollback()
