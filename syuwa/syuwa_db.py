@@ -518,6 +518,27 @@ def get_syuwa_duplicate_applicant_names():
         conn.close()
 
 
+def get_syuwa_password_reset_applicant(application_id):
+    conn = get_syuwa_db_connection()
+
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT
+                    applicant_name,
+                    email
+                FROM syuwa_applications
+                WHERE id = %s
+                  AND status = 'approved'
+                  AND password_hash IS NOT NULL
+            """, (application_id,))
+
+            return cur.fetchone()
+
+    finally:
+        conn.close()
+
+
 def create_syuwa_password_reset_token(application_id):
     token = secrets.token_urlsafe(32)
 
