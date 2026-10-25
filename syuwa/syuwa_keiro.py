@@ -413,35 +413,3 @@ def syuwa_password_setup():
         token=token,
         csrf_token=csrf_token
     )
-
-
-def verify_syuwa_password_token(token):
-    if not token:
-        return False
-
-    token_hash = hashlib.sha256(
-        token.encode("utf-8")
-    ).hexdigest()
-
-    conn = get_syuwa_db_connection()
-
-    try:
-        with conn.cursor() as cur:
-            cur.execute("""
-                SELECT EXISTS (
-                    SELECT 1
-                    FROM syuwa_password_tokens AS t
-                    JOIN syuwa_applications AS a
-                      ON a.id = t.application_id
-                    WHERE t.token_hash = %s
-                      AND t.used_at IS NULL
-                      AND t.expires_at > CURRENT_TIMESTAMP
-                      AND a.status = 'approved'
-                      AND a.password_hash IS NULL
-                )
-            """, (token_hash,))
-
-            return cur.fetchone()[0]
-
-    finally:
-        conn.close()
