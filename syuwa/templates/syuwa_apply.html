@@ -62,16 +62,26 @@
     <div class="container">
         <h2>手話アプリ 登録者申請</h2>
 
-        <label>登録者ID名</label>
-        <input type="text" placeholder="登録者ID名" required>
+        <form method="POST">
 
-        <label>メールアドレス</label>
-        <input type="email" placeholder="メールアドレス" required>
+            <input type="hidden" name="token" value="{{ invite_token }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
 
-        <label>コメント</label>
-        <textarea placeholder="〇〇です。登録お願いします。"></textarea>
+            <label>登録者ID名</label>
+            <input type="text" name="applicant_name"
+                   placeholder="登録者ID名" maxlength="100" required>
 
-        <button type="button" disabled>申請する（準備中）</button>
+            <label>メールアドレス</label>
+            <input type="email" name="email"
+                   placeholder="メールアドレス" maxlength="255" required>
+
+            <label>コメント</label>
+            <textarea name="comment"
+                      placeholder="〇〇です。登録お願いします。"></textarea>
+
+            <button type="submit" disabled>申請する（準備中）</button>
+
+        </form>
     </div>
 
 </body>
