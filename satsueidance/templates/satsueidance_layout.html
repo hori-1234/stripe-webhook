@@ -169,8 +169,15 @@
     const box = document.getElementById('videoBox');
 
     if (!compareMode) {
-        
-        if (box.requestFullscreen && document.fullscreenEnabled) {
+
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+        if (isIOS) {
+
+            box.classList.add('mobile-fullscreen');
+
+        } else if (box.requestFullscreen && document.fullscreenEnabled) {
+
             box.requestFullscreen()
                 .then(async () => {
                     if (screen.orientation && screen.orientation.lock) {
@@ -185,10 +192,11 @@
                     console.error('全画面表示に失敗:', error);
                     box.classList.add('mobile-fullscreen');
                 });
+
         } else {
+
             box.classList.add('mobile-fullscreen');
 
-            alert('全画面表示に切り替えました');
         }
 
     } else {
