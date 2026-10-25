@@ -203,18 +203,26 @@ def syuwa_admin_applications():
                     </button>
                 </form>
             """
-        
+       
         elif status == "approved":
+            if password_set:
+                action_url = "/syuwa/admin/password-reset/create"
+                button_text = "パスワード再設定URL発行"
+            else:
+                action_url = "/syuwa/admin/password-token/create"
+                button_text = "パスワード設定URL発行"
+
             status_html = f"""
-                <form method="POST" action="/syuwa/admin/password-token/create">
+                <form method="POST" action="{action_url}">
                     <input type="hidden" name="csrf_token" value="{csrf_token}">
                     <input type="hidden" name="application_id" value="{application_id}">
 
                     <button type="submit">
-                        パスワード設定URL発行
+                        {button_text}
                     </button>
                 </form>
             """
+
         else:
             status_html = ""
 
