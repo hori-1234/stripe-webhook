@@ -39,6 +39,9 @@ app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024
 limiter.init_app(app)
 init_oshi_db()
 app.secret_key = os.environ.get("kuri_SECRET_KEY")
+
+from syuwa.syuwa_keiro import syuwa_bp
+app.register_blueprint(syuwa_bp)
 app.config["PERMANENT_SESSION_LIFETIME"] = 60 * 60 * 24 * 30
 app.config["SESSION_REFRESH_EACH_REQUEST"] = True
 app.config["SESSION_COOKIE_SECURE"] = True
