@@ -2078,7 +2078,12 @@ async function startCamera() {
                 noiseSuppression: false,
                 autoGainControl: false
             },
-            video: { facingMode: "user" }
+            video: {
+                facingMode: "user",
+                width: { ideal: 1280 },
+                height: { ideal: 720 },
+                aspectRatio: { ideal: 16 / 9 }
+            }
         });
 
         const camera = document.getElementById("camera");
