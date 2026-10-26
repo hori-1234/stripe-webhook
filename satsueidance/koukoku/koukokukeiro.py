@@ -1,7 +1,6 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from event_schedule.memo_auth import is_schedule_operator
 from satsueidance.koukoku.chiiki import check_region_headers
-
 
 koukoku_bp = Blueprint(
     "koukoku",
@@ -15,4 +14,20 @@ def region_test():
     if not is_schedule_operator():
         return jsonify({"error": "Forbidden"}), 403
 
-    return jsonify(check_region_headers())
+    result = check_region_headers()
+
+    result["location_headers"] = {
+        key: value
+        for key, value in request.headers.items()
+        if key.lower().startswith("cf-")
+        and (
+            "country" in key.lower()
+            or "region" in key.lower()
+            or "city" in key.lower()
+            or "postal" in key.lower()
+            or "latitude" in key.lower()
+            or "longitude" in key.lower()
+        )
+    }
+
+    return jsonify(result)
