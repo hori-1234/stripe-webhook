@@ -290,7 +290,7 @@
             display: block;
             width: 100%;
             height: auto;
-            max-height: none;
+            max-height: 300px;
             object-fit: contain;
         }
 
@@ -534,10 +534,7 @@ function loadUploadedVideo(input) {
     compareVideo.load();
 }
 
-let recordingCanvas = null;
-let recordingContext = null;
 let recordingStream = null;
-let recordingAnimationId = null;
 let compareMode = false;
 let screenAdjustMode = false;
 
@@ -2134,105 +2131,10 @@ function startRecording() {
     );
 
     try {
-        const camera = document.getElementById("camera");
+        // カメラの映像を直接録画する。
+        // Canvasで縦横を強制しない。
+        recordingStream = cameraStream;
 
-        const videoTrack = cameraStream.getVideoTracks()[0];
-        const settings = videoTrack.getSettings();
-
-        const cameraWidth = camera.videoWidth || settings.width;
-        const cameraHeight = camera.videoHeight || settings.height;
-
-        if (!cameraWidth || !cameraHeight) {
-            throw new Error("カメラの解像度を取得できません");
-        }
-
-        const maxLongSide = 1280;
-        const maxShortSide = 720;
-
-        const longSide = Math.max(cameraWidth, cameraHeight);
-        const shortSide = Math.min(cameraWidth, cameraHeight);
-
-        const scale = Math.min(
-            1,
-            maxLongSide / longSide,
-            maxShortSide / shortSide
-        );
-
-        const portraitRecording = window.screen.orientation
-            ? window.screen.orientation.type.startsWith("portrait")
-            : window.matchMedia("(orientation: portrait)").matches;
-        
-        recordingCanvas = document.createElement("canvas");
-
-        if (portraitRecording) {
-            recordingCanvas.width = Math.round(shortSide * scale);
-            recordingCanvas.height = Math.round(longSide * scale);
-        } else {
-            recordingCanvas.width = Math.round(longSide * scale);
-            recordingCanvas.height = Math.round(shortSide * scale);
-        }
-
-        recordingContext = recordingCanvas.getContext("2d");
-
-        if (!recordingContext) {
-            throw new Error("Canvasを使用できません");
-        }
-
-        function drawRecordingFrame() {
-            const width = recordingCanvas.width;
-            const height = recordingCanvas.height;
-
-            recordingContext.fillStyle = "black";
-            recordingContext.fillRect(0, 0, width, height);
-            recordingContext.save();
-
-            const flipped = camera.style.transform === "scaleX(-1)";
-
-            if (flipped) {
-                recordingContext.translate(width, 0);
-                recordingContext.scale(-1, 1);
-            }
-
-            if (camera.readyState >= 2) {
-                const sourceWidth = camera.videoWidth;
-                const sourceHeight = camera.videoHeight;
-
-                if (sourceWidth && sourceHeight) {
-                    const fitScale = Math.min(
-                        width / sourceWidth,
-                        height / sourceHeight
-                    );
-
-                    const drawWidth = sourceWidth * fitScale;
-                    const drawHeight = sourceHeight * fitScale;
-
-                    const drawX = (width - drawWidth) / 2;
-                    const drawY = (height - drawHeight) / 2;
-
-                    recordingContext.drawImage(
-                        camera,
-                        drawX,
-                        drawY,
-                        drawWidth,
-                        drawHeight
-                    );
-                }
-            }
-
-            recordingContext.restore();
-
-            recordingAnimationId = requestAnimationFrame(drawRecordingFrame);
-        }
-
-        drawRecordingFrame();
-
-        const canvasStream = recordingCanvas.captureStream(30);
-
-        recordingStream = new MediaStream([
-            ...canvasStream.getVideoTracks(),
-            ...cameraStream.getAudioTracks()
-        ]);
-        
         recorder = new MediaRecorder(
             recordingStream,
             {
@@ -2243,15 +2145,7 @@ function startRecording() {
         );
 
     } catch (error) {
-        if (recordingAnimationId !== null) {
-            cancelAnimationFrame(recordingAnimationId);
-            recordingAnimationId = null;
-        }
-
-        if (recordingStream) {
-            recordingStream.getVideoTracks().forEach(track => track.stop());
-            recordingStream = null;
-        }
+        recordingStream = null;
 
         document.getElementById("status").textContent =
             "録画開始失敗: " + error.message;
@@ -2265,15 +2159,9 @@ function startRecording() {
     };
 
     recorder.onstop = () => {
-        if (recordingAnimationId !== null) {
-            cancelAnimationFrame(recordingAnimationId);
-            recordingAnimationId = null;
-        }
-
-        if (recordingStream) {
-            recordingStream.getVideoTracks().forEach(track => track.stop());
-            recordingStream = null;
-        }
+        // カメラは停止しない。
+        // 録画停止後もプレビューを維持する。
+        recordingStream = null;
 
         const type = recorder.mimeType || "video/mp4";
         const blob = new Blob(chunks, { type });
@@ -2281,14 +2169,20 @@ function startRecording() {
         if (recordingUrl) URL.revokeObjectURL(recordingUrl);
         recordingUrl = URL.createObjectURL(blob);
 
-        document.getElementById("recordedVideo").src = recordingUrl;
+        const recordedVideo =
+            document.getElementById("recordedVideo");
+
+        recordedVideo.pause();
+        recordedVideo.src = recordingUrl;
+        recordedVideo.load();
 
         const link = document.getElementById("downloadLink");
         const extension = type.includes("mp4") ? "mp4" : "webm";
+
         link.href = recordingUrl;
         link.download = "dance-recording." + extension;
         link.style.display = "inline-block";
-        
+
         document.getElementById("status").textContent =
             "録画完了：" + Math.round(blob.size / 1024) + " KB";
 
@@ -2296,12 +2190,19 @@ function startRecording() {
     };
 
     recorder.onerror = event => {
-
         document.getElementById("status").textContent =
             "録画エラーが発生しました";
     };
 
-    recorder.start(1000);
+    try {
+        recorder.start(1000);
+    } catch (error) {
+        recordingStream = null;
+
+        document.getElementById("status").textContent =
+            "録画開始失敗: " + error.message;
+        return;
+    }
 
     document.getElementById("startButton").disabled = true;
     document.getElementById("stopButton").disabled = false;
