@@ -92,7 +92,7 @@ def koukoku_stats():
                 else 0.0
             )
         
-        ur.execute("""
+        cur.execute("""
             SELECT COALESCE(SUM(view_count), 0)
             FROM satsueidance_page_views
             WHERE view_date >=
