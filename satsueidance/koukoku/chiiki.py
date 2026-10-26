@@ -27,10 +27,13 @@ def get_visitor_prefecture():
     if country != "JP":
         return "不明"
 
-    region_code = request.headers.get("CF-Region-Code", "").strip()
+    region_code = request.headers.get("CF-Region-Code", "").strip().upper()
+
+    if region_code.startswith("JP-"):
+        region_code = region_code[3:]
 
     return PREFECTURE_CODES.get(region_code, "不明")
-
+    
 
 def check_region_headers():
     return {
