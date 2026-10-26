@@ -278,6 +278,22 @@
             margin-top: 12px;
         }
 
+        #camera {
+            display: block;
+            width: 100%;
+            height: auto;
+            max-height: none;
+            object-fit: contain;
+        }
+
+        #recordedVideo {
+            display: block;
+            width: 100%;
+            height: auto;
+            max-height: none;
+            object-fit: contain;
+        }
+
         #sourceVideo {
             display: block;
             width: 100%;
@@ -2065,8 +2081,19 @@ async function startCamera() {
             video: { facingMode: "user" }
         });
 
-        document.getElementById("camera").srcObject = cameraStream;
-        document.getElementById("startButton").disabled = compareMode;
+        const camera = document.getElementById("camera");
+        const startButton = document.getElementById("startButton");
+
+        startButton.disabled = true;
+        camera.srcObject = cameraStream;
+
+        if (camera.readyState < 1) {
+            await new Promise(resolve => {
+                camera.addEventListener("loadedmetadata", resolve, { once: true });
+            });
+        }
+
+        startButton.disabled = compareMode;
 
         const button = document.getElementById("cameraButton");
         button.textContent = "カメラ停止";
@@ -2100,9 +2127,20 @@ function startRecording() {
     try {
         const camera = document.getElementById("camera");
 
+        const videoTrack = cameraStream.getVideoTracks()[0];
+        const settings = videoTrack.getSettings();
+
+        const cameraWidth = camera.videoWidth || settings.width;
+        const cameraHeight = camera.videoHeight || settings.height;
+
+        if (!cameraWidth || !cameraHeight) {
+            throw new Error("カメラの解像度を取得できません");
+        }
+
         recordingCanvas = document.createElement("canvas");
-        recordingCanvas.width = camera.videoWidth || 1280;
-        recordingCanvas.height = camera.videoHeight || 720;
+        recordingCanvas.width = cameraWidth;
+        recordingCanvas.height = cameraHeight;
+        
 
         recordingContext = recordingCanvas.getContext("2d");
 
