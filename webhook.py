@@ -25,6 +25,7 @@ from oshikatsu.oshi_photo_view import oshi_photo_bp
 from oshikatsu.oshi_mokuteki import oshi_mokuteki_bp
 from oshikatsu.oshi_db import init_oshi_db
 from satsueidance.satsueidance_keiro import satsueidance_bp
+from satsueidance.koukoku.koukokukeiro import koukoku_bp
 from product import process_products
 from ticket_check import (
     check_ticket,
@@ -77,6 +78,7 @@ app.register_blueprint(shipping_bp)
 app.register_blueprint(privacy_bp)
 app.register_blueprint(kuri_move_sarch_bp)
 app.register_blueprint(satsueidance_bp)
+app.register_blueprint(koukoku_bp)
 
 
 @app.before_request
