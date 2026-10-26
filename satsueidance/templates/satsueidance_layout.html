@@ -155,9 +155,11 @@
     >×</button>
 </div>
 
+<div id="compareModeVisibility" style="display:none;">
+    <span style="margin-right:8px;">比較モード</span>
+    <button id="compareButton" onclick="toggleCompareMode()">OFF</button>
+</div>
 
-<span style="margin-right:8px;">比較モード</span>
-<button id="compareButton" onclick="toggleCompareMode()">OFF</button>
 <button
     id="normalPlayButton"
     onclick="toggleNormalPlayback()"
@@ -176,8 +178,9 @@
 <button id="comparePlayButton" onclick="toggleComparePlayback()" style="display:none;">▶</button>
 <button id="compareReplayButton" onclick="replayCompareVideos()" style="display:none;" title="リプレイ" aria-label="リプレイ">↻</button>
 
-<div style="display:flex; align-items:center; justify-content:center; gap:12px; margin:12px 0;">
-    <span id="recordingSourceLabel" style="color:#168978; font-weight:bold;">インカメ</span>
+<div id="compareSourceVisibility" style="display:none;">
+    <div style="display:flex; align-items:center; justify-content:center; gap:12px; margin:12px 0;">
+        <span id="recordingSourceLabel" style="color:#168978; font-weight:bold;">インカメ</span>
 
     <input
         type="range"
@@ -189,8 +192,9 @@
         oninput="changeCompareSource(this.value)"
         style="width:70px; padding:0; cursor:pointer; accent-color:#25a58d;"
     >
-
-    <span id="uploadSourceLabel" style="color:#91aaa1; font-weight:normal;">アップロード</span>
+    
+        <span id="uploadSourceLabel" style="color:#91aaa1; font-weight:normal;">アップロード</span>
+    </div>
 </div>
 
 <button id="expandButton" onclick="
@@ -316,9 +320,12 @@
 <p id="status">待機中</p>
 
 <div id="recordingResultControls">
-    <h3>録画結果</h3>
-    <video id="recordedVideo" controls playsinline></video>
-    <a id="downloadLink" style="display:none;color:#8bc6ff;" download="dance-recording.mp4">録画動画をダウンロード</a>
+    <details>
+        <summary>録画結果</summary>
+
+        <video id="recordedVideo" controls playsinline></video>
+        <a id="downloadLink" style="display:none;color:#8bc6ff;" download="dance-recording.mp4">録画動画をダウンロード</a>
+    </details>
 </div>
 
 <div id="uploadControls">
