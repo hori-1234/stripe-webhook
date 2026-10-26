@@ -502,10 +502,11 @@ function loadUploadedVideo(input) {
     showVideoLoading();
 
     compareVideo.preload = "auto";
-
+    
     compareVideo.onloadeddata = function() {
         status.textContent = "アップロード動画の読み込みが完了しました";
         hideVideoLoading();
+        updateCompareVisibility();
     };
 
     compareVideo.onerror = function() {
@@ -523,6 +524,45 @@ let recordingStream = null;
 let recordingAnimationId = null;
 let compareMode = false;
 let screenAdjustMode = false;
+
+function updateCompareVisibility() {
+    const sourceVideo = document.getElementById("sourceVideo");
+    const youtubePlayer = document.getElementById("youtubePlayer");
+
+    const hasSourceVideo =
+        !!(
+            (sourceVideo &&
+             sourceVideo.src &&
+             sourceVideo.style.display !== "none") ||
+
+            (youtubePlayer &&
+             youtubePlayer.tagName === "IFRAME" &&
+             youtubePlayer.src.startsWith("https://embed.nicovideo.jp/")) ||
+
+            (youtubePlayerApi &&
+             typeof youtubePlayerApi.getVideoData === "function" &&
+             youtubePlayerApi.getVideoData().video_id)
+        );
+
+    const hasCompareVideo =
+        !!recordingUrl || !!uploadedVideoUrl;
+
+    const compareModeVisibility =
+        document.getElementById("compareModeVisibility");
+
+    const compareSourceVisibility =
+        document.getElementById("compareSourceVisibility");
+
+    if (compareModeVisibility) {
+        compareModeVisibility.style.display =
+            (hasSourceVideo && hasCompareVideo) ? "block" : "none";
+    }
+
+    if (compareSourceVisibility) {
+        compareSourceVisibility.style.display =
+            (hasSourceVideo && !compareMode) ? "block" : "none";
+    }
+}
 
 let compareLayout = "overlay";
 
@@ -1376,6 +1416,8 @@ async function toggleCompareMode() {
     document.getElementById("status").textContent = compareMode
         ? "比較モード中"
         : "通常モード";
+
+    updateCompareVisibility();
 }
 
 let youtubePlayerApi = null;
@@ -1665,9 +1707,12 @@ function loadSourceVideo(input) {
         button.style.color = "white";
     });
 
+    updateCompareVisibility();
+
 }
 
 function sendNicoCommand(eventName, data = null) {
+
     const player = document.getElementById("youtubePlayer");
 
     if (!player || player.tagName !== "IFRAME" ||
@@ -1890,6 +1935,8 @@ function loadYoutube() {
                     document.getElementById("status").textContent =
                         "YouTube再生可能";
 
+                    updateCompareVisibility();
+
                     const compareSpeedControls =
                         document.getElementById("compareSpeedControls");
 
@@ -1963,9 +2010,12 @@ function loadYoutube() {
         newPlayer.allow =
             "autoplay; encrypted-media; picture-in-picture; fullscreen";
         newPlayer.allowFullscreen = true;
+
         newPlayer.src = embedUrl;
 
         oldPlayer.replaceWith(newPlayer);
+
+        updateCompareVisibility();
 
     }
 }
@@ -2143,12 +2193,15 @@ function startRecording() {
         link.href = recordingUrl;
         link.download = "dance-recording." + extension;
         link.style.display = "inline-block";
-
+        
         document.getElementById("status").textContent =
             "録画完了：" + Math.round(blob.size / 1024) + " KB";
+
+        updateCompareVisibility();
     };
 
     recorder.onerror = event => {
+
         document.getElementById("status").textContent =
             "録画エラーが発生しました";
     };
