@@ -2271,6 +2271,109 @@ document.addEventListener('fullscreenchange', () => {
     }
 });
 
+    // フリイレ利用時間計測
+(function () {
+    const sessionId = crypto.randomUUID();
+    let activeSeconds = 0;
+    let lastTick = performance.now();
+
+    function updateActiveTime() {
+        const now = performance.now();
+
+        if (document.visibilityState === "visible") {
+            activeSeconds += Math.max(0, (now - lastTick) / 1000);
+        }
+
+        lastTick = now;
+    }
+
+    function sendUsage() {
+        updateActiveTime();
+
+        const data = JSON.stringify({
+            session_id: sessionId,
+            active_seconds: Math.floor(activeSeconds)
+        });
+
+        const blob = new Blob([data], {
+            type: "application/json"
+        });
+
+        navigator.sendBeacon(
+            "/satsueidance/usage",
+            blob
+        );
+    }
+
+    document.addEventListener("visibilitychange", function () {
+        updateActiveTime();
+
+        if (document.visibilityState === "hidden") {
+            sendUsage();
+        }
+    });
+
+    window.addEventListener("pagehide", sendUsage);
+
+    setInterval(function () {
+        if (document.visibilityState === "visible") {
+            sendUsage();
+        }
+    }, 30000);
+})();
+
+    // フリイレ利用時間計測
+(function () {
+    const sessionId = crypto.randomUUID();
+    let activeSeconds = 0;
+    let lastTick = performance.now();
+    let wasVisible = document.visibilityState === "visible";
+
+    function updateActiveTime() {
+        const now = performance.now();
+
+        if (wasVisible) {
+            activeSeconds += Math.max(0, (now - lastTick) / 1000);
+        }
+
+        lastTick = now;
+    }
+
+    function sendUsage() {
+        updateActiveTime();
+
+        const blob = new Blob([
+            JSON.stringify({
+                session_id: sessionId,
+                active_seconds: Math.floor(activeSeconds)
+            })
+        ], {
+            type: "application/json"
+        });
+
+        navigator.sendBeacon("/satsueidance/usage", blob);
+    }
+
+    document.addEventListener("visibilitychange", function () {
+        updateActiveTime();
+        wasVisible = document.visibilityState === "visible";
+
+        if (!wasVisible) {
+            sendUsage();
+        }
+    });
+
+    window.addEventListener("pagehide", function () {
+        sendUsage();
+        wasVisible = false;
+    });
+
+    setInterval(function () {
+        if (wasVisible) {
+            sendUsage();
+        }
+    }, 30000);
+})();
 </script>
 
 <script src="https://www.youtube.com/iframe_api"></script>
