@@ -213,7 +213,6 @@ def satsueidance_usage():
             active_seconds,
             get_visitor_device()
         ))
-        cur.execute("""
 
         conn.commit()
 
