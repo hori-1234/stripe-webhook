@@ -123,15 +123,34 @@ def koukoku_stats():
 
         usage_count, average_seconds = cur.fetchone()
 
+        cur.execute("""
+            SELECT
+                prefecture,
+                COUNT(DISTINCT visitor_id) AS unique_visitors
+            FROM satsueidance_visitor_regions
+            WHERE visit_date >=
+                (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo')::date - 29
+            GROUP BY prefecture
+            ORDER BY unique_visitors DESC, prefecture
+        """)
+
+        prefectures = [
+            {
+                "prefecture": row[0],
+                "unique_visitors": row[1]
+            }
+            for row in cur.fetchall()
+        ]
+
         return jsonify({
             "period": "過去30日間",
             "pv": total_pv,
             "uu": total_uu,
             "usage_sessions": usage_count,
             "average_usage_seconds": float(average_seconds),
-            "devices": results
+            "devices": results,
+            "prefectures": prefectures
         })
-
 
     finally:
         cur.close()
