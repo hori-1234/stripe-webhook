@@ -552,10 +552,10 @@ function updateCompareVisibility() {
 
     const compareSourceVisibility =
         document.getElementById("compareSourceVisibility");
-
+    
     if (compareModeVisibility) {
         compareModeVisibility.style.display =
-            (hasSourceVideo && hasCompareVideo) ? "block" : "none";
+            (hasSourceVideo && hasCompareVideo) ? "inline" : "none";
     }
 
     if (compareSourceVisibility) {
