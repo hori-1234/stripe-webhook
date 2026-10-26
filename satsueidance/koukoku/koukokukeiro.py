@@ -38,3 +38,46 @@ def region_test():
     }
 
     return jsonify(result)
+
+
+@koukoku_bp.route("/stats")
+def koukoku_stats():
+    import os
+    import psycopg2
+
+    if not is_schedule_operator():
+        return jsonify({"error": "Forbidden"}), 403
+
+    conn = psycopg2.connect(os.environ["DATABASE_URL"])
+    cur = conn.cursor()
+
+    try:
+        cur.execute("""
+            SELECT
+                device_type,
+                COUNT(DISTINCT visitor_id) AS unique_visitors,
+                COUNT(*) AS visitor_days
+            FROM satsueidance_visitor_regions
+            WHERE visit_date >=
+                (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo')::date - 29
+            GROUP BY device_type
+            ORDER BY unique_visitors DESC
+        """)
+
+        results = [
+            {
+                "device_type": row[0],
+                "unique_visitors": row[1],
+                "visitor_days": row[2]
+            }
+            for row in cur.fetchall()
+        ]
+
+        return jsonify({
+            "period": "過去30日間",
+            "devices": results
+        })
+
+    finally:
+        cur.close()
+        conn.close()
