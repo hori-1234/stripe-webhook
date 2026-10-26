@@ -108,7 +108,7 @@
 
         <div class="panel">
             <h2>都道府県別アクセス</h2>
-            <p>現在、地域別の集計は未対応です。</p>
+            <div id="prefectures">読み込み中...</div>
         </div>
 
         <p id="error" class="error"></p>
@@ -184,12 +184,41 @@
                     const fill = document.createElement("div");
                     fill.className = "bar-fill";
                     fill.style.width = percentage + "%";
-
+    
                     bar.appendChild(fill);
                     wrapper.append(header, bar);
                     devices.appendChild(wrapper);
                 }
+
+                const prefectures = document.getElementById("prefectures");
+
+                if (prefectures) {
+                    prefectures.replaceChildren();
+
+                    if (!data.prefectures || data.prefectures.length === 0) {
+                        prefectures.textContent = "データがありません";
+                    } else {
+                        for (const item of data.prefectures) {
+                            const row = document.createElement("div");
+                            row.style.display = "flex";
+                            row.style.justifyContent = "space-between";
+                            row.style.padding = "10px 0";
+                            row.style.borderBottom = "1px solid #eee";
+
+                            const name = document.createElement("span");
+                            name.textContent = item.prefecture;
+
+                            const count = document.createElement("span");
+                            count.textContent =
+                                Number(item.unique_visitors).toLocaleString() + "人";
+
+                            row.append(name, count);
+                            prefectures.appendChild(row);
+                        }
+                    }
+                }
             } catch (error) {
+
                 document.getElementById("period").textContent =
                     "データ取得失敗";
                 document.getElementById("error").textContent =
