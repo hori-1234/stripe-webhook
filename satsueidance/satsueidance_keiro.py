@@ -3,6 +3,7 @@ import psycopg2
 
 from flask import Blueprint, render_template
 from satsueidance.koukoku.database import create_koukoku_tables
+from satsueidance.koukoku.chiiki import get_visitor_device
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
@@ -101,7 +102,30 @@ def satsueidance_index():
                 )
                 ON CONFLICT (visit_date, visitor_id)
                 DO NOTHING
+        
             """, (visitor_id,))
+
+            cur.execute("""
+                INSERT INTO satsueidance_visitor_regions (
+                    visitor_id,
+                    visit_date,
+                    prefecture,
+                    device_type
+                )
+                VALUES (
+                    %s,
+                    (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo')::date,
+                    %s,
+                    %s
+                )
+                ON CONFLICT (visit_date, visitor_id)
+                DO UPDATE SET
+                    device_type = EXCLUDED.device_type
+            """, (
+                visitor_id,
+                "不明",
+                get_visitor_device()
+            ))
 
             conn.commit()
 
@@ -163,19 +187,22 @@ def satsueidance_usage():
     cur = conn.cursor()
 
     try:
+        
         cur.execute("""
             INSERT INTO satsueidance_usage_sessions (
                 session_id,
                 visitor_id,
-                active_seconds
+                active_seconds,
+                device_type
             )
-            VALUES (%s, %s, %s)
+            VALUES (%s, %s, %s, %s)
             ON CONFLICT (session_id)
             DO UPDATE SET
                 active_seconds = GREATEST(
                     satsueidance_usage_sessions.active_seconds,
                     EXCLUDED.active_seconds
                 ),
+                device_type = EXCLUDED.device_type,
                 last_reported_at = CURRENT_TIMESTAMP
             WHERE
                 satsueidance_usage_sessions.visitor_id =
@@ -183,8 +210,10 @@ def satsueidance_usage():
         """, (
             session_id,
             visitor_id,
-            active_seconds
+            active_seconds,
+            get_visitor_device()
         ))
+        cur.execute("""
 
         conn.commit()
 
