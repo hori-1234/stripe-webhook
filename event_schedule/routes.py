@@ -2567,12 +2567,21 @@ def schedule_admin_stats():
     freeire_daily_views = cur.fetchall()
     
     # フリイレの利用時間統計
-    from satsueidance.routes import create_satsueidance_stats_tables
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS satsueidance_usage_sessions (
+            session_id TEXT PRIMARY KEY,
+            visitor_id TEXT NOT NULL,
+            started_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            active_seconds INTEGER NOT NULL DEFAULT 0,
+            last_reported_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
 
-    create_satsueidance_stats_tables()
+    conn.commit()
 
     cur.execute("""
         SELECT
+
             COALESCE(AVG(active_seconds), 0),
 
             COALESCE(
