@@ -2072,6 +2072,8 @@ async function toggleCamera() {
 
 async function startCamera() {
     try {
+        const isPortrait = window.innerHeight > window.innerWidth;
+
         cameraStream = await navigator.mediaDevices.getUserMedia({
             audio: {
                 echoCancellation: false,
@@ -2080,9 +2082,9 @@ async function startCamera() {
             },
             video: {
                 facingMode: "user",
-                width: { ideal: 1280 },
-                height: { ideal: 720 },
-                aspectRatio: { ideal: 16 / 9 }
+                width: { ideal: isPortrait ? 720 : 1280 },
+                height: { ideal: isPortrait ? 1280 : 720 },
+                aspectRatio: { ideal: isPortrait ? 9 / 16 : 16 / 9 }
             }
         });
 
@@ -2154,6 +2156,12 @@ function startRecording() {
             maxShortSide / shortSide
         );
 
+        const scale = Math.min(
+            1,
+            1280 / Math.max(cameraWidth, cameraHeight),
+            720 / Math.min(cameraWidth, cameraHeight)
+        );
+
         recordingCanvas = document.createElement("canvas");
         recordingCanvas.width = Math.round(cameraWidth * scale);
         recordingCanvas.height = Math.round(cameraHeight * scale);
@@ -2196,10 +2204,14 @@ function startRecording() {
             ...canvasStream.getVideoTracks(),
             ...cameraStream.getAudioTracks()
         ]);
-
+        
         recorder = new MediaRecorder(
             recordingStream,
-            mimeType ? { mimeType } : {}
+            {
+                ...(mimeType ? { mimeType } : {}),
+                videoBitsPerSecond: 1500000,
+                audioBitsPerSecond: 96000
+            }
         );
 
     } catch (error) {
