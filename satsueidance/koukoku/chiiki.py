@@ -2,6 +2,18 @@ from flask import request
 import ipaddress
 
 
+def get_visitor_device():
+    user_agent = request.headers.get("User-Agent", "").lower()
+
+    if "ipad" in user_agent or "tablet" in user_agent:
+        return "タブレット"
+
+    if "iphone" in user_agent or "android" in user_agent or "mobile" in user_agent:
+        return "スマホ"
+
+    return "PC"
+    
+
 def get_visitor_ip():
     ip = request.headers.get("CF-Connecting-IP", "").strip()
 
