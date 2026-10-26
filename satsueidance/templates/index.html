@@ -2081,9 +2081,9 @@ async function startCamera() {
             },
             video: {
                 facingMode: "user",
-                width: { ideal: isPortrait ? 720 : 1280 },
-                height: { ideal: isPortrait ? 1280 : 720 },
-                aspectRatio: { ideal: isPortrait ? 9 / 16 : 16 / 9 }
+                width: { ideal: isPortrait ? 1280 : 720 },
+                height: { ideal: isPortrait ? 720 : 1280 },
+                aspectRatio: { ideal: isPortrait ? 16 / 9 : 9 / 16 }
             }
         });
 
