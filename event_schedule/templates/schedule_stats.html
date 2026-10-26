@@ -164,10 +164,22 @@
 
     </div>
 
+    </div>
+
+    <div class="stats-section" style="--section-width: 700px;">
+        <h2>利用時間統計</h2>
+
+        <p>平均利用時間：{{ freeire_avg_usage | default('未集計') }}</p>
+        <p>中央値：{{ freeire_median_usage | default('未集計') }}</p>
+        <p>最長利用時間：{{ freeire_max_usage | default('未集計') }}</p>
+        <p>計測セッション数：{{ freeire_usage_sessions | default('未集計') }} 回</p>
+    </div>
+
     <details style="
         max-width: 700px;
         margin-bottom: 20px;
     ">
+
         <summary style="
             cursor: pointer;
             padding: 12px;
