@@ -30,4 +30,11 @@ def region_test():
         )
     }
 
+    result["ip_test"] = {
+        "remote_addr": request.remote_addr,
+        "x_forwarded_for": request.headers.get("X-Forwarded-For", ""),
+        "x_real_ip": request.headers.get("X-Real-IP", ""),
+        "cf_connecting_ip": request.headers.get("CF-Connecting-IP", "")
+    }
+
     return jsonify(result)
