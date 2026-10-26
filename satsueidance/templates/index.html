@@ -2142,9 +2142,21 @@ function startRecording() {
             throw new Error("カメラの解像度を取得できません");
         }
 
+        const maxLongSide = 1280;
+        const maxShortSide = 720;
+
+        const longSide = Math.max(cameraWidth, cameraHeight);
+        const shortSide = Math.min(cameraWidth, cameraHeight);
+
+        const scale = Math.min(
+            1,
+            maxLongSide / longSide,
+            maxShortSide / shortSide
+        );
+
         recordingCanvas = document.createElement("canvas");
-        recordingCanvas.width = cameraWidth;
-        recordingCanvas.height = cameraHeight;
+        recordingCanvas.width = Math.round(cameraWidth * scale);
+        recordingCanvas.height = Math.round(cameraHeight * scale);
         
 
         recordingContext = recordingCanvas.getContext("2d");
