@@ -2566,10 +2566,45 @@ def schedule_admin_stats():
 
     freeire_daily_views = cur.fetchall()
 
+    # フリイレの利用時間統計
+    cur.execute("""
+        SELECT
+            COALESCE(AVG(active_seconds), 0),
+            COALESCE(
+                PERCENTILE_CONT(0.5)
+                WITHIN GROUP (ORDER BY active_seconds),
+                0
+            ),
+            COALESCE(MAX(active_seconds), 0),
+            COUNT(*)
+        FROM satsueidance_usage_sessions
+    """)
+
+    (
+        freeire_avg_seconds,
+        freeire_median_seconds,
+        freeire_max_seconds,
+        freeire_usage_sessions
+    ) = cur.fetchone()
+
+    def format_usage_time(seconds):
+        seconds = round(float(seconds))
+        hours, remainder = divmod(seconds, 3600)
+        minutes, seconds = divmod(remainder, 60)
+
+        if hours:
+            return f"{hours}時間{minutes}分{seconds}秒"
+
+        return f"{minutes}分{seconds}秒"
+
+    freeire_avg_usage = format_usage_time(freeire_avg_seconds)
+    freeire_median_usage = format_usage_time(freeire_median_seconds)
+    freeire_max_usage = format_usage_time(freeire_max_seconds)
 
     # 出演者ステータスの検索条件
 
     selected_genre = request.args.get("genre", "").strip()
+
     sort_by = request.args.get("sort", "clicks")
     sort_order = request.args.get("order", "desc")
     page = max(1, request.args.get("page", 1, type=int))
@@ -2861,6 +2896,10 @@ def schedule_admin_stats():
         freeire_month_unique=freeire_month_unique,
         freeire_total_unique=freeire_total_unique,
         freeire_daily_views=freeire_daily_views,
+        freeire_avg_usage=freeire_avg_usage,
+        freeire_median_usage=freeire_median_usage,
+        freeire_max_usage=freeire_max_usage,
+        freeire_usage_sessions=freeire_usage_sessions,
         performer_status=performer_status,
         selected_genre=selected_genre,
         sort_by=sort_by,
