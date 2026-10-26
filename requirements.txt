@@ -12,3 +12,4 @@ cryptography
 Authlib
 Pillow
 Flask-Limiter
+geoip2
