@@ -1,4 +1,23 @@
 from flask import request
+import ipaddress
+
+
+def get_visitor_ip():
+    ip = request.headers.get("CF-Connecting-IP", "").strip()
+
+    if not ip:
+        return None
+
+    try:
+        address = ipaddress.ip_address(ip)
+
+        if not address.is_global:
+            return None
+
+        return str(address)
+
+    except ValueError:
+        return None
 
 
 PREFECTURE_CODES = {
@@ -41,3 +60,13 @@ def check_region_headers():
         "region_code": request.headers.get("CF-Region-Code", ""),
         "region": request.headers.get("CF-Region", "")
     }
+
+
+def get_visitor_prefecture_from_ip():
+    ip = get_visitor_ip()
+
+    if not ip:
+        return "不明"
+
+    # GeoIPによる都道府県判定は次の工程で実装
+    return "不明"
