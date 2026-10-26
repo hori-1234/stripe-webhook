@@ -30,3 +30,11 @@ def get_visitor_prefecture():
     region_code = request.headers.get("CF-Region-Code", "").strip()
 
     return PREFECTURE_CODES.get(region_code, "不明")
+
+
+def check_region_headers():
+    return {
+        "country": request.headers.get("CF-IPCountry", ""),
+        "region_code": request.headers.get("CF-Region-Code", ""),
+        "region": request.headers.get("CF-Region", "")
+    }
