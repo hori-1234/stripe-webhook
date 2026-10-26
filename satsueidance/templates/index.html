@@ -293,9 +293,18 @@
             }
 
             #camera {
-                aspect-ratio: 16 / 9;
+                aspect-ratio: auto;
+                max-height: 720px;
+                object-fit: contain;
+            }
+
+            #recordedVideo {
+                width: 100%;
+                max-width: 1280px;
+                max-height: 720px;
             }
         }
+
 
         #recordedVideo {
             display: block;
