@@ -48,10 +48,15 @@ def koukoku_stats():
     if not is_schedule_operator():
         return jsonify({"error": "Forbidden"}), 403
 
+    from satsueidance.satsueidance_keiro import create_satsueidance_stats_tables
+
+    create_satsueidance_stats_tables()
+
     conn = psycopg2.connect(os.environ["DATABASE_URL"])
     cur = conn.cursor()
 
     try:
+
         cur.execute("""
             SELECT
                 device_type,
