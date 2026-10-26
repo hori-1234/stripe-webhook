@@ -136,3 +136,13 @@ def koukoku_stats():
     finally:
         cur.close()
         conn.close()
+
+
+@koukoku_bp.route("/dashboard")
+def koukoku_dashboard():
+    from flask import render_template
+
+    if not is_schedule_operator():
+        return jsonify({"error": "Forbidden"}), 403
+
+    return render_template("koukoku_dashboard.html")
