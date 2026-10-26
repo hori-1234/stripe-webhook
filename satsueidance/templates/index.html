@@ -2072,7 +2072,9 @@ async function toggleCamera() {
 
 async function startCamera() {
     try {
-        const isPortrait = window.innerHeight > window.innerWidth;
+        const isPortrait = window.screen.orientation
+            ? window.screen.orientation.type.startsWith("portrait")
+            : window.matchMedia("(orientation: portrait)").matches;
 
         cameraStream = await navigator.mediaDevices.getUserMedia({
             audio: {
@@ -2156,7 +2158,9 @@ function startRecording() {
             maxShortSide / shortSide
         );
 
-        const portraitRecording = window.innerHeight > window.innerWidth;
+        const portraitRecording = window.screen.orientation
+            ? window.screen.orientation.type.startsWith("portrait")
+            : window.matchMedia("(orientation: portrait)").matches;
         
         recordingCanvas = document.createElement("canvas");
 
