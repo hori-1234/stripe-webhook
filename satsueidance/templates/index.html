@@ -2156,12 +2156,6 @@ function startRecording() {
             maxShortSide / shortSide
         );
 
-        const scale = Math.min(
-            1,
-            1280 / Math.max(cameraWidth, cameraHeight),
-            720 / Math.min(cameraWidth, cameraHeight)
-        );
-
         recordingCanvas = document.createElement("canvas");
         recordingCanvas.width = Math.round(cameraWidth * scale);
         recordingCanvas.height = Math.round(cameraHeight * scale);
