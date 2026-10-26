@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
 from event_schedule.memo_auth import is_schedule_operator
 from satsueidance.koukoku.chiiki import check_region_headers
-ああああ
+
 koukoku_bp = Blueprint(
     "koukoku",
     __name__,
