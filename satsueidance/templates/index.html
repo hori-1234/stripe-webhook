@@ -244,13 +244,13 @@
             position: relative;
             top: auto;
             left: auto;
-            width: 56.25%;
+            width: 100%;
             height: auto;
-            aspect-ratio: 9 / 16;
+            aspect-ratio: 16 / 9;
             max-height: none;
-            margin: 0 auto;
+            margin-top: 0;
             opacity: 1;
-            transform: rotate(90deg) scale(1.7778) !important;
+            transform: none !important;
             object-fit: contain;
             flex-shrink: 0;
         }
@@ -276,22 +276,6 @@
             max-height: 300px;
             background: black;
             margin-top: 12px;
-        }
-
-        #camera {
-            display: block;
-            width: 100%;
-            height: auto;
-            max-height: 300px;
-            object-fit: contain;
-        }
-
-        #recordedVideo {
-            display: block;
-            width: 100%;
-            height: auto;
-            max-height: 300px;
-            object-fit: contain;
         }
 
         #sourceVideo {
@@ -534,7 +518,10 @@ function loadUploadedVideo(input) {
     compareVideo.load();
 }
 
+let recordingCanvas = null;
+let recordingContext = null;
 let recordingStream = null;
+let recordingAnimationId = null;
 let compareMode = false;
 let screenAdjustMode = false;
 
@@ -2069,37 +2056,17 @@ async function toggleCamera() {
 
 async function startCamera() {
     try {
-        const isPortrait = window.screen.orientation
-            ? window.screen.orientation.type.startsWith("portrait")
-            : window.matchMedia("(orientation: portrait)").matches;
-
         cameraStream = await navigator.mediaDevices.getUserMedia({
             audio: {
                 echoCancellation: false,
                 noiseSuppression: false,
                 autoGainControl: false
             },
-            video: {
-                facingMode: "user",
-                width: { ideal: isPortrait ? 1280 : 720 },
-                height: { ideal: isPortrait ? 720 : 1280 },
-                aspectRatio: { ideal: isPortrait ? 16 / 9 : 9 / 16 }
-            }
+            video: { facingMode: "user" }
         });
 
-        const camera = document.getElementById("camera");
-        const startButton = document.getElementById("startButton");
-
-        startButton.disabled = true;
-        camera.srcObject = cameraStream;
-
-        if (camera.readyState < 1) {
-            await new Promise(resolve => {
-                camera.addEventListener("loadedmetadata", resolve, { once: true });
-            });
-        }
-
-        startButton.disabled = compareMode;
+        document.getElementById("camera").srcObject = cameraStream;
+        document.getElementById("startButton").disabled = compareMode;
 
         const button = document.getElementById("cameraButton");
         button.textContent = "カメラ停止";
@@ -2131,21 +2098,65 @@ function startRecording() {
     );
 
     try {
-        // カメラの映像を直接録画する。
-        // Canvasで縦横を強制しない。
-        recordingStream = cameraStream;
+        const camera = document.getElementById("camera");
+
+        recordingCanvas = document.createElement("canvas");
+        recordingCanvas.width = camera.videoWidth || 1280;
+        recordingCanvas.height = camera.videoHeight || 720;
+
+        recordingContext = recordingCanvas.getContext("2d");
+
+        if (!recordingContext) {
+            throw new Error("Canvasを使用できません");
+        }
+
+        function drawRecordingFrame() {
+            const width = recordingCanvas.width;
+            const height = recordingCanvas.height;
+
+            recordingContext.clearRect(0, 0, width, height);
+            recordingContext.save();
+
+            const flipped = camera.style.transform === "scaleX(-1)";
+
+            if (flipped) {
+                recordingContext.translate(width, 0);
+                recordingContext.scale(-1, 1);
+            }
+
+            if (camera.readyState >= 2) {
+                recordingContext.drawImage(camera, 0, 0, width, height);
+            }
+
+            recordingContext.restore();
+
+            recordingAnimationId = requestAnimationFrame(drawRecordingFrame);
+        }
+
+        drawRecordingFrame();
+
+        const canvasStream = recordingCanvas.captureStream(30);
+
+        recordingStream = new MediaStream([
+            ...canvasStream.getVideoTracks(),
+            ...cameraStream.getAudioTracks()
+        ]);
 
         recorder = new MediaRecorder(
             recordingStream,
-            {
-                ...(mimeType ? { mimeType } : {}),
-                videoBitsPerSecond: 1500000,
-                audioBitsPerSecond: 96000
-            }
+            mimeType ? { mimeType } : {}
         );
 
     } catch (error) {
-        recordingStream = null;
+        if (recordingAnimationId !== null) {
+            cancelAnimationFrame(recordingAnimationId);
+            recordingAnimationId = null;
+        }
+
+        if (recordingStream) {
+            recordingStream.getVideoTracks().forEach(track => track.stop());
+            recordingStream = null;
+        }
 
         document.getElementById("status").textContent =
             "録画開始失敗: " + error.message;
@@ -2159,9 +2170,15 @@ function startRecording() {
     };
 
     recorder.onstop = () => {
-        // カメラは停止しない。
-        // 録画停止後もプレビューを維持する。
-        recordingStream = null;
+        if (recordingAnimationId !== null) {
+            cancelAnimationFrame(recordingAnimationId);
+            recordingAnimationId = null;
+        }
+
+        if (recordingStream) {
+            recordingStream.getVideoTracks().forEach(track => track.stop());
+            recordingStream = null;
+        }
 
         const type = recorder.mimeType || "video/mp4";
         const blob = new Blob(chunks, { type });
@@ -2169,20 +2186,14 @@ function startRecording() {
         if (recordingUrl) URL.revokeObjectURL(recordingUrl);
         recordingUrl = URL.createObjectURL(blob);
 
-        const recordedVideo =
-            document.getElementById("recordedVideo");
-
-        recordedVideo.pause();
-        recordedVideo.src = recordingUrl;
-        recordedVideo.load();
+        document.getElementById("recordedVideo").src = recordingUrl;
 
         const link = document.getElementById("downloadLink");
         const extension = type.includes("mp4") ? "mp4" : "webm";
-
         link.href = recordingUrl;
         link.download = "dance-recording." + extension;
         link.style.display = "inline-block";
-
+        
         document.getElementById("status").textContent =
             "録画完了：" + Math.round(blob.size / 1024) + " KB";
 
@@ -2190,19 +2201,12 @@ function startRecording() {
     };
 
     recorder.onerror = event => {
+
         document.getElementById("status").textContent =
             "録画エラーが発生しました";
     };
 
-    try {
-        recorder.start(1000);
-    } catch (error) {
-        recordingStream = null;
-
-        document.getElementById("status").textContent =
-            "録画開始失敗: " + error.message;
-        return;
-    }
+    recorder.start(1000);
 
     document.getElementById("startButton").disabled = true;
     document.getElementById("stopButton").disabled = false;
