@@ -3,7 +3,10 @@ import psycopg2
 
 from flask import Blueprint, render_template
 from satsueidance.koukoku.database import create_koukoku_tables
-from satsueidance.koukoku.chiiki import get_visitor_device
+from satsueidance.koukoku.chiiki import (
+    get_visitor_device,
+    get_visitor_prefecture_from_ip
+)
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
@@ -106,6 +109,22 @@ def satsueidance_index():
             """, (visitor_id,))
 
             cur.execute("""
+                SELECT 1
+                FROM satsueidance_visitor_regions
+                WHERE visitor_id = %s
+                  AND visit_date =
+                      (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo')::date
+            """, (visitor_id,))
+
+            already_recorded = cur.fetchone() is not None
+
+            prefecture = (
+                "不明"
+                if already_recorded
+                else get_visitor_prefecture_from_ip()
+            )
+
+            cur.execute("""
                 INSERT INTO satsueidance_visitor_regions (
                     visitor_id,
                     visit_date,
@@ -123,9 +142,10 @@ def satsueidance_index():
                     device_type = EXCLUDED.device_type
             """, (
                 visitor_id,
-                "不明",
+                prefecture,
                 get_visitor_device()
             ))
+
 
             conn.commit()
 
