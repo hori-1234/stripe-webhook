@@ -73,12 +73,37 @@ def check_region_headers():
         "region": request.headers.get("CF-Region", "")
     }
 
-
 def get_visitor_prefecture_from_ip():
+    import json
+    import urllib.request
+    import urllib.error
+
     ip = get_visitor_ip()
 
     if not ip:
         return "不明"
 
-    # GeoIPによる都道府県判定は次の工程で実装
-    return "不明"
+    try:
+        url = f"https://api.db-ip.com/v2/free/{ip}"
+
+        with urllib.request.urlopen(url, timeout=3) as response:
+            data = json.load(response)
+
+        if data.get("countryCode") != "JP":
+            return "不明"
+
+        region = data.get("stateProv", "").strip()
+
+        if region in PREFECTURE_CODES.values():
+            return region
+
+        return "不明"
+
+    except (
+        urllib.error.URLError,
+        TimeoutError,
+        ValueError,
+        KeyError,
+        TypeError
+    ):
+        return "不明"
