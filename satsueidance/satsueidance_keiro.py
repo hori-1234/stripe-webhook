@@ -54,6 +54,8 @@ def create_satsueidance_stats_tables():
         cur.close()
         conn.close()
 
+    create_koukoku_tables()
+
 
 @satsueidance_bp.route("/")
 def satsueidance_index():
