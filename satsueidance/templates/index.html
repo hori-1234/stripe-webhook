@@ -282,7 +282,7 @@
             display: block;
             width: 100%;
             height: auto;
-            max-height: none;
+            max-height: 300px;
             object-fit: contain;
         }
 
@@ -2156,10 +2156,17 @@ function startRecording() {
             maxShortSide / shortSide
         );
 
-        recordingCanvas = document.createElement("canvas");
-        recordingCanvas.width = Math.round(cameraWidth * scale);
-        recordingCanvas.height = Math.round(cameraHeight * scale);
+        const portraitRecording = window.innerHeight > window.innerWidth;
         
+        recordingCanvas = document.createElement("canvas");
+
+        if (portraitRecording) {
+            recordingCanvas.width = Math.round(shortSide * scale);
+            recordingCanvas.height = Math.round(longSide * scale);
+        } else {
+            recordingCanvas.width = Math.round(longSide * scale);
+            recordingCanvas.height = Math.round(shortSide * scale);
+        }
 
         recordingContext = recordingCanvas.getContext("2d");
 
@@ -2171,7 +2178,8 @@ function startRecording() {
             const width = recordingCanvas.width;
             const height = recordingCanvas.height;
 
-            recordingContext.clearRect(0, 0, width, height);
+            recordingContext.fillStyle = "black";
+            recordingContext.fillRect(0, 0, width, height);
             recordingContext.save();
 
             const flipped = camera.style.transform === "scaleX(-1)";
@@ -2182,7 +2190,29 @@ function startRecording() {
             }
 
             if (camera.readyState >= 2) {
-                recordingContext.drawImage(camera, 0, 0, width, height);
+                const sourceWidth = camera.videoWidth;
+                const sourceHeight = camera.videoHeight;
+
+                if (sourceWidth && sourceHeight) {
+                    const fitScale = Math.min(
+                        width / sourceWidth,
+                        height / sourceHeight
+                    );
+
+                    const drawWidth = sourceWidth * fitScale;
+                    const drawHeight = sourceHeight * fitScale;
+
+                    const drawX = (width - drawWidth) / 2;
+                    const drawY = (height - drawHeight) / 2;
+
+                    recordingContext.drawImage(
+                        camera,
+                        drawX,
+                        drawY,
+                        drawWidth,
+                        drawHeight
+                    );
+                }
             }
 
             recordingContext.restore();
