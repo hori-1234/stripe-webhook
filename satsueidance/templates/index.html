@@ -2116,7 +2116,12 @@ async function startCamera() {
                 noiseSuppression: false,
                 autoGainControl: false
             },
-            video: { facingMode: "user" }
+            video: {
+                facingMode: "user",
+                aspectRatio: { ideal: 16 / 9 },
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            }
         });
 
         document.getElementById("camera").srcObject = cameraStream;
