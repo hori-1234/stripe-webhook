@@ -8,7 +8,6 @@ koukoku_bp = Blueprint(
     url_prefix="/satsueidance/koukoku",
     template_folder="../templates"
 )
-ああああ
 
 @koukoku_bp.route("/region-test")
 def region_test():
