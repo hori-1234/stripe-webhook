@@ -68,7 +68,7 @@ def koukoku_stats():
             GROUP BY device_type
             ORDER BY unique_visitors DESC
         """)
-
+        
         results = [
             {
                 "device_type": row[0],
@@ -78,10 +78,60 @@ def koukoku_stats():
             for row in cur.fetchall()
         ]
 
+        total_device_visitors = sum(
+            item["unique_visitors"] for item in results
+        )
+
+        for item in results:
+            item["percentage"] = (
+                round(
+                    item["unique_visitors"] / total_device_visitors * 100,
+                    1
+                )
+                if total_device_visitors > 0
+                else 0.0
+            )
+        
+        ur.execute("""
+            SELECT COALESCE(SUM(view_count), 0)
+            FROM satsueidance_page_views
+            WHERE view_date >=
+                (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo')::date - 29
+        """)
+
+
+        total_pv = cur.fetchone()[0]
+
+        cur.execute("""
+            SELECT COUNT(DISTINCT visitor_id)
+            FROM satsueidance_unique_visitors
+            WHERE visit_date >=
+                (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo')::date - 29
+        """)
+
+        total_uu = cur.fetchone()[0]
+
+        cur.execute("""
+            SELECT
+                COUNT(*),
+                COALESCE(ROUND(AVG(active_seconds), 1), 0)
+            FROM satsueidance_usage_sessions
+            WHERE started_at >=
+                ((CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo')::date - 29)
+                AT TIME ZONE 'Asia/Tokyo'
+        """)
+
+        usage_count, average_seconds = cur.fetchone()
+
         return jsonify({
             "period": "過去30日間",
+            "pv": total_pv,
+            "uu": total_uu,
+            "usage_sessions": usage_count,
+            "average_usage_seconds": float(average_seconds),
             "devices": results
         })
+
 
     finally:
         cur.close()
