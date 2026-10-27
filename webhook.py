@@ -38,7 +38,7 @@ from ticket_check import (
 app = Flask(__name__)
 
 from werkzeug.middleware.proxy_fix import ProxyFix
-app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=2)
 
 app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024
 limiter.init_app(app)
