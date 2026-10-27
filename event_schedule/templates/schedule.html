@@ -2013,11 +2013,28 @@ body.vertical-mode .event-bar-time {
                                     | map(attribute='performer_name')
                                     | list %}
 
+                                あああ
                                 {% if added_performers %}
                                     <div class="schedule-addition-saved-result" style="margin-top: 8px;">
-                                        出演追加：{{ added_performers | join('、') }}
+                                        出演追加：
+                                        {% for performer in added_performers %}
+                                            <span style="display: inline-block; margin-right: 10px;">
+                                                {{ performer }}
+                                                <button
+                                                    type="button"
+                                                    class="schedule-addition-cancel-button"
+                                                    data-event-id="{{ event.id }}"
+                                                    data-performer="{{ performer }}"
+                                                    style="margin-left: 4px; padding: 2px 6px; cursor: pointer;"
+                                                >
+                                                    取消
+                                                </button>
+                                            </span>
+                                        {% endfor %}
                                     </div>
                                 {% endif %}
+
+                                あああ
 
                                 <div id="schedule-change-panel-{{ event.id }}" class="schedule-change-panel" style="display: none; margin-top: 8px;">
 
@@ -2486,9 +2503,24 @@ body.vertical-mode .event-bar-time {
                                 | map(attribute='performer_name')
                                 | list %}
 
+
                             {% if added_performers %}
                                 <div class="schedule-addition-saved-result" style="margin-top: 8px;">
-                                    出演追加：{{ added_performers | join('、') }}
+                                    出演追加：
+                                    {% for performer in added_performers %}
+                                        <span style="display: inline-block; margin-right: 10px;">
+                                            {{ performer }}
+                                            <button
+                                                type="button"
+                                                class="schedule-addition-cancel-button"
+                                                data-event-id="{{ event.id }}"
+                                                data-performer="{{ performer }}"
+                                                style="margin-left: 4px; padding: 2px 6px; cursor: pointer;"
+                                            >
+                                                ×
+                                            </button>
+                                        </span>
+                                    {% endfor %}
                                 </div>
                             {% endif %}
 
