@@ -2070,8 +2070,17 @@ body.vertical-mode .event-bar-time {
                                         <button type="button" class="schedule-addition-button">
                                             追加
                                         </button>
+                                    
                                     </div>
-                                    <div>イベント中止</div>
+                                    <div class="schedule-cancellation-area" style="margin-top: 8px;">
+                                        <label>
+                                            <input
+                                                type="checkbox"
+                                                class="schedule-cancellation-checkbox"
+                                            >
+                                            イベント中止
+                                        </label>
+                                    </div>
 
                                 </div>
 
@@ -2555,14 +2564,23 @@ body.vertical-mode .event-bar-time {
                                         maxlength="100"
                                         style="padding: 6px; margin-top: 5px;"
                                     >
+                                    
                                     <button type="button" class="schedule-addition-button">
                                         追加
                                     </button>
                                 </div>
-                                <div>イベント中止</div>
+                                <div class="schedule-cancellation-area" style="margin-top: 8px;">
+                                    <label>
+                                        <input
+                                            type="checkbox"
+                                            class="schedule-cancellation-checkbox"
+                                        >
+                                        イベント中止
+                                    </label>
+                                </div>
 
                             </div>
-
+                            
                             {% if event.organizer_sns_url %}
 
                                 <div style="margin-top: 10px;">
