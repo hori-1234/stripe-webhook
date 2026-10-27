@@ -1990,6 +1990,18 @@ body.vertical-mode .event-bar-time {
                                 {% if event.performers %}
                                     <div>出演者：{{ event.performers }}</div>
                                 {% endif %}
+                                
+                                <div style="margin-top: 8px;">
+                                    <button type="button" class="schedule-change-button" data-event-id="{{ event.id }}">
+                                        変更連絡
+                                    </button>
+                                </div>
+
+                                <div id="schedule-change-panel-{{ event.id }}" class="schedule-change-panel" style="display: none; margin-top: 8px;">
+                                    <div>出演辞退</div>
+                                    <div>出演追加</div>
+                                    <div>イベント中止</div>
+                                </div>
 
                                 {% if event.organizer_sns_url %}
                                     <div style="margin-top: 10px;">
@@ -2397,7 +2409,20 @@ body.vertical-mode .event-bar-time {
                                 <div>出演者：{{ event.performers }}</div>
                             {% endif %}
 
+                            <div style="margin-top: 8px;">
+                                <button type="button" class="schedule-change-button" data-event-id="{{ event.id }}">
+                                    変更連絡
+                                </button>
+                            </div>
+
+                            <div id="schedule-change-panel-{{ event.id }}" class="schedule-change-panel" style="display: none; margin-top: 8px;">
+                                <div>出演辞退</div>
+                                <div>出演追加</div>
+                                <div>イベント中止</div>
+                            </div>
+
                             {% if event.organizer_sns_url %}
+
                                 <div style="margin-top: 10px;">
                                     <a
                                         href="{{ event.organizer_sns_url }}"
