@@ -1941,22 +1941,29 @@ def schedule_change_addition():
         """, (event_id, performer_name))
 
         existing = cur.fetchone()
+        active = request.form.get("is_active", "1") == "1"
 
-        if existing and existing[1]:
-            return {"success": True, "performer_name": performer_name}
+        if request.form.get("is_active", "1") not in ("0", "1"):
+            return {"success": False, "error": "不正な操作です"}, 400
+
+        if existing and existing[1] == active:
+            return {"success": True, "performer_name": performer_name, "is_active": active}
 
         if existing:
             change_id = existing[0]
 
             cur.execute("""
                 UPDATE event_schedule_changes
-                SET is_active = TRUE,
+                SET is_active = %s,
                     last_updated_ip = %s,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE id = %s
-            """, (ip_address, change_id))
+            """, (active, ip_address, change_id))
 
         else:
+            if not active:
+                return {"success": False, "error": "追加されていない出演者です"}, 400
+
             cur.execute("""
                 INSERT INTO event_schedule_changes (
                     event_id,
@@ -1980,12 +1987,22 @@ def schedule_change_addition():
                 action,
                 ip_address
             )
-            VALUES (%s, %s, 'addition', %s, 'activate', %s)
-        """, (event_id, change_id, performer_name, ip_address))
+            VALUES (%s, %s, 'addition', %s, %s, %s)
+        """, (
+            event_id,
+            change_id,
+            performer_name,
+            "activate" if active else "deactivate",
+            ip_address
+        ))
 
         conn.commit()
 
-        return {"success": True, "performer_name": performer_name}
+        return {
+            "success": True,
+            "performer_name": performer_name,
+            "is_active": active
+        }
 
     except Exception:
         conn.rollback()
