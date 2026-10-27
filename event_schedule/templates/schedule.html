@@ -1996,22 +1996,37 @@ body.vertical-mode .event-bar-time {
                                         変更連絡
                                     </button>
                                 </div>
-                                
+
+                                {% set withdrawn_performers = event_changes.get(event.id, [])
+                                    | selectattr('change_type', 'equalto', 'withdrawal')
+                                    | map(attribute='performer_name')
+                                    | list %}
+
+                                {% if withdrawn_performers %}
+                                    <div class="schedule-withdrawal-saved-result" style="margin-top: 8px;">
+                                        出演辞退：{{ withdrawn_performers | join('、') }}
+                                    </div>
+                                {% endif %}
+
                                 <div id="schedule-change-panel-{{ event.id }}" class="schedule-change-panel" style="display: none; margin-top: 8px;">
                                     <div>
                                         <button type="button" class="schedule-withdrawal-button">
                                             出演辞退
                                         </button>
-
+                                        
                                         <div class="schedule-withdrawal-list" style="display: none; margin-top: 8px;">
+                                            {% set withdrawn_performers = event_changes.get(event.id, [])
+                                                | selectattr('change_type', 'equalto', 'withdrawal')
+                                                | map(attribute='performer_name')
+                                                | list %}
+
                                             {% for performer in event.performers.split() %}
                                                 <label style="display: block; margin-bottom: 5px;">
-                                                    <input type="checkbox" class="schedule-withdrawal-checkbox" value="{{ performer }}">
+                                                    <input type="checkbox" class="schedule-withdrawal-checkbox" value="{{ performer }}" {% if performer in withdrawn_performers %}checked{% endif %}>
                                                     {{ performer }}
                                                 </label>
                                             {% endfor %}
                                         </div>
-                                    </div>
 
                                     <div>出演追加</div>
                                     <div>イベント中止</div>
@@ -2428,22 +2443,38 @@ body.vertical-mode .event-bar-time {
                                     変更連絡
                                 </button>
                             </div>
-                            
+
+                            {% set withdrawn_performers = event_changes.get(event.id, [])
+                                | selectattr('change_type', 'equalto', 'withdrawal')
+                                | map(attribute='performer_name')
+                                | list %}
+
+                            {% if withdrawn_performers %}
+                                <div class="schedule-withdrawal-saved-result" style="margin-top: 8px;">
+                                    出演辞退：{{ withdrawn_performers | join('、') }}
+                                </div>
+                            {% endif %}
+
                             <div id="schedule-change-panel-{{ event.id }}" class="schedule-change-panel" style="display: none; margin-top: 8px;">
+
                                 <div>
                                     <button type="button" class="schedule-withdrawal-button">
                                         出演辞退
                                     </button>
-
+                                    
                                     <div class="schedule-withdrawal-list" style="display: none; margin-top: 8px;">
+                                        {% set withdrawn_performers = event_changes.get(event.id, [])
+                                            | selectattr('change_type', 'equalto', 'withdrawal')
+                                            | map(attribute='performer_name')
+                                            | list %}
+
                                         {% for performer in event.performers.split() %}
                                             <label style="display: block; margin-bottom: 5px;">
-                                                <input type="checkbox" class="schedule-withdrawal-checkbox" value="{{ performer }}">
+                                                <input type="checkbox" class="schedule-withdrawal-checkbox" value="{{ performer }}" {% if performer in withdrawn_performers %}checked{% endif %}>
                                                 {{ performer }}
                                             </label>
                                         {% endfor %}
                                     </div>
-                                </div>
 
                                 <div>出演追加</div>
                                 <div>イベント中止</div>
@@ -3946,28 +3977,62 @@ document.querySelectorAll(".schedule-withdrawal-button").forEach(button => {
 });
 
 document.querySelectorAll(".schedule-withdrawal-checkbox").forEach(checkbox => {
-    checkbox.addEventListener("change", () => {
+    checkbox.addEventListener("change", async () => {
         const panel = checkbox.closest(".schedule-change-panel");
         if (!panel) return;
 
-        const selected = Array.from(
-            panel.querySelectorAll(".schedule-withdrawal-checkbox:checked")
-        ).map(item => item.value);
+        const eventId = panel.id.replace("schedule-change-panel-", "");
+        const isActive = checkbox.checked;
 
-        let result = panel.querySelector(".schedule-withdrawal-result");
+        checkbox.disabled = true;
 
-        if (!result) {
-            result = document.createElement("div");
-            result.className = "schedule-withdrawal-result";
-            result.style.marginTop = "8px";
-            panel.appendChild(result);
+        try {
+            const formData = new FormData();
+            formData.append("csrf_token", {{ schedule_csrf_token | tojson }});
+            formData.append("event_id", eventId);
+            formData.append("performer_name", checkbox.value);
+            formData.append("is_active", isActive ? "1" : "0");
+
+            const response = await fetch("/schedule/change/withdrawal", {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.error || "保存に失敗しました");
+            }
+    
+            const selected = Array.from(
+                panel.querySelectorAll(".schedule-withdrawal-checkbox:checked")
+            ).map(item => item.value);
+
+            const performerList = panel.closest(".performer-list");
+            let result = performerList.querySelector(".schedule-withdrawal-saved-result");
+
+            if (!result) {
+                result = document.createElement("div");
+                result.className = "schedule-withdrawal-saved-result";
+                result.style.marginTop = "8px";
+                panel.before(result);
+            }
+
+            result.textContent = selected.length
+                ? "出演辞退：" + selected.join("、")
+                : "";
+
+            result.style.display = selected.length ? "block" : "none";
+
+        } catch (error) {
+            checkbox.checked = !isActive;
+            alert(error.message);
+        } finally {
+            checkbox.disabled = false;
         }
-
-        result.textContent = selected.length
-            ? "出演辞退：" + selected.join("、")
-            : "";
     });
 });
+
 </script>
 
 </body>
