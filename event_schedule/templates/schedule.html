@@ -2001,14 +2001,26 @@ body.vertical-mode .event-bar-time {
                                     | selectattr('change_type', 'equalto', 'withdrawal')
                                     | map(attribute='performer_name')
                                     | list %}
-
+                                
                                 {% if withdrawn_performers %}
                                     <div class="schedule-withdrawal-saved-result" style="margin-top: 8px;">
                                         出演辞退：{{ withdrawn_performers | join('、') }}
                                     </div>
                                 {% endif %}
 
+                                {% set added_performers = event_changes.get(event.id, [])
+                                    | selectattr('change_type', 'equalto', 'addition')
+                                    | map(attribute='performer_name')
+                                    | list %}
+
+                                {% if added_performers %}
+                                    <div class="schedule-addition-saved-result" style="margin-top: 8px;">
+                                        出演追加：{{ added_performers | join('、') }}
+                                    </div>
+                                {% endif %}
+
                                 <div id="schedule-change-panel-{{ event.id }}" class="schedule-change-panel" style="display: none; margin-top: 8px;">
+
                                     <div>
                                         <button type="button" class="schedule-withdrawal-button">
                                             出演辞退
@@ -2462,10 +2474,21 @@ body.vertical-mode .event-bar-time {
                                 | selectattr('change_type', 'equalto', 'withdrawal')
                                 | map(attribute='performer_name')
                                 | list %}
-
+                            
                             {% if withdrawn_performers %}
                                 <div class="schedule-withdrawal-saved-result" style="margin-top: 8px;">
                                     出演辞退：{{ withdrawn_performers | join('、') }}
+                                </div>
+                            {% endif %}
+
+                            {% set added_performers = event_changes.get(event.id, [])
+                                | selectattr('change_type', 'equalto', 'addition')
+                                | map(attribute='performer_name')
+                                | list %}
+
+                            {% if added_performers %}
+                                <div class="schedule-addition-saved-result" style="margin-top: 8px;">
+                                    出演追加：{{ added_performers | join('、') }}
                                 </div>
                             {% endif %}
 
@@ -4060,10 +4083,9 @@ document.querySelectorAll(".schedule-withdrawal-checkbox").forEach(checkbox => {
         }
     });
 });
-
-    
+ 
 document.querySelectorAll(".schedule-addition-button").forEach(button => {
-    button.addEventListener("click", () => {
+    button.addEventListener("click", async () => {
         const panel = button.closest(".schedule-change-panel");
         if (!panel) return;
 
@@ -4078,13 +4100,36 @@ document.querySelectorAll(".schedule-addition-button").forEach(button => {
 
         const eventId = panel.id.replace("schedule-change-panel-", "");
 
-        console.log("出演追加", {
-            event_id: eventId,
-            performer_name: performerName
-        });
+        button.disabled = true;
+
+        try {
+            const formData = new FormData();
+            formData.append("csrf_token", "{{ schedule_csrf_token }}");
+            formData.append("event_id", eventId);
+            formData.append("performer_name", performerName);
+
+            const response = await fetch("/schedule/change/addition", {
+                method: "POST",
+                body: formData,
+                credentials: "same-origin"
+            });
+
+            const result = await response.json();
+
+            if (!response.ok || !result.success) {
+                throw new Error(result.error || "出演追加に失敗しました");
+            }
+
+            input.value = "";
+            location.reload();
+
+        } catch (error) {
+            alert(error.message);
+        } finally {
+            button.disabled = false;
+        }
     });
 });
-
     
 </script>
 
