@@ -1681,9 +1681,8 @@ def schedule():
             for search_date in unique_dates
         ]
 
-    if "schedule_csrf_token" not in session:
         
-        # 変更連絡の有効な情報を取得
+    # 変更連絡の有効な情報を取得
     conn = psycopg2.connect(DATABASE_URL)
     cur = conn.cursor()
 
@@ -1742,13 +1741,145 @@ def schedule():
         httponly=True,
         samesite="Lax"
     )
-
+    
     return response
+
+
+@event_schedule_bp.route("/schedule/change/withdrawal", methods=["POST"])
+@limiter.limit("20 per minute")
+def schedule_change_withdrawal():
+    submitted_token = request.form.get("csrf_token", "")
+    expected_token = session.get("schedule_csrf_token", "")
+
+    if (
+        not submitted_token
+        or not expected_token
+        or not secrets.compare_digest(submitted_token, expected_token)
+    ):
+        return {"success": False, "error": "不正なリクエストです"}, 403
+
+    event_id = request.form.get("event_id", type=int)
+    performer_name = request.form.get("performer_name", "").strip()
+    is_active = request.form.get("is_active")
+
+    if not event_id or not performer_name or is_active not in ("0", "1"):
+        return {"success": False, "error": "入力内容が正しくありません"}, 400
+
+    if len(performer_name) > 200:
+        return {"success": False, "error": "出演者名が長すぎます"}, 400
+
+    ip_address = request.remote_addr or ""
+
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+
+    try:
+        cur.execute("""
+            SELECT 1
+            FROM event_schedule_blocked_ips
+            WHERE ip_address = %s
+        """, (ip_address,))
+
+        if cur.fetchone():
+            return {"success": False, "error": "変更連絡を利用できません"}, 403
+
+        cur.execute("""
+            SELECT performers
+            FROM event_schedules
+            WHERE id = %s
+            FOR UPDATE
+        """, (event_id,))
+
+        event = cur.fetchone()
+
+        if event is None:
+            return {"success": False, "error": "イベントが見つかりません"}, 404
+
+        if performer_name not in (event[0] or "").split():
+            return {"success": False, "error": "登録されていない出演者です"}, 400
+
+        cur.execute("""
+            SELECT id, is_active
+            FROM event_schedule_changes
+            WHERE event_id = %s
+              AND change_type = 'withdrawal'
+              AND performer_name = %s
+            ORDER BY id DESC
+            LIMIT 1
+            FOR UPDATE
+        """, (event_id, performer_name))
+
+        existing = cur.fetchone()
+        active = is_active == "1"
+
+        if existing and existing[1] == active:
+            return {"success": True, "is_active": active}
+
+        if existing:
+            change_id = existing[0]
+
+            cur.execute("""
+                UPDATE event_schedule_changes
+                SET is_active = %s,
+                    last_updated_ip = %s,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = %s
+            """, (active, ip_address, change_id))
+
+        else:
+            if not active:
+                return {"success": True, "is_active": False}
+
+            cur.execute("""
+                INSERT INTO event_schedule_changes (
+                    event_id,
+                    change_type,
+                    performer_name,
+                    is_active,
+                    last_updated_ip
+                )
+                VALUES (%s, 'withdrawal', %s, TRUE, %s)
+                RETURNING id
+            """, (event_id, performer_name, ip_address))
+
+            change_id = cur.fetchone()[0]
+
+        cur.execute("""
+            INSERT INTO event_schedule_change_logs (
+                event_id,
+                change_id,
+                change_type,
+                performer_name,
+                action,
+                ip_address
+            )
+            VALUES (%s, %s, 'withdrawal', %s, %s, %s)
+        """, (
+            event_id,
+            change_id,
+            performer_name,
+            "activate" if active else "deactivate",
+            ip_address
+        ))
+
+        conn.commit()
+
+        return {"success": True, "is_active": active}
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        cur.close()
+        conn.close()
+
 
 @event_schedule_bp.route("/schedule/edit/<int:event_id>", methods=["GET", "POST"])
 @limiter.limit("5 per 5 minutes", methods=["POST"])
 def schedule_edit(event_id):
     create_event_schedule_table()
+
 
     conn = psycopg2.connect(DATABASE_URL)
     cur = conn.cursor()
