@@ -2072,11 +2072,18 @@ body.vertical-mode .event-bar-time {
                                         </button>
                                     
                                     </div>
+                                    
+                                    {% set is_cancelled = event_changes.get(event.id, [])
+                                        | selectattr('change_type', 'equalto', 'cancellation')
+                                        | list
+                                        | length > 0 %}
+
                                     <div class="schedule-cancellation-area" style="margin-top: 8px;">
                                         <label>
                                             <input
                                                 type="checkbox"
                                                 class="schedule-cancellation-checkbox"
+                                                {% if is_cancelled %}checked{% endif %}
                                             >
                                             イベント中止
                                         </label>
@@ -2569,11 +2576,18 @@ body.vertical-mode .event-bar-time {
                                         追加
                                     </button>
                                 </div>
+                                
+                                {% set is_cancelled = event_changes.get(event.id, [])
+                                    | selectattr('change_type', 'equalto', 'cancellation')
+                                    | list
+                                    | length > 0 %}
+
                                 <div class="schedule-cancellation-area" style="margin-top: 8px;">
                                     <label>
                                         <input
                                             type="checkbox"
                                             class="schedule-cancellation-checkbox"
+                                            {% if is_cancelled %}checked{% endif %}
                                         >
                                         イベント中止
                                     </label>
@@ -4214,6 +4228,45 @@ document.querySelectorAll(".schedule-addition-cancel-button").forEach(button => 
             alert(error.message);
         } finally {
             button.disabled = false;
+        }
+    });
+});
+
+document.querySelectorAll(".schedule-cancellation-checkbox").forEach(checkbox => {
+    checkbox.addEventListener("change", async () => {
+        const panel = checkbox.closest(".schedule-change-panel");
+        if (!panel) return;
+
+        const eventId = panel.id.replace("schedule-change-panel-", "");
+        const isActive = checkbox.checked;
+
+        checkbox.disabled = true;
+
+        try {
+            const formData = new FormData();
+            formData.append("csrf_token", {{ schedule_csrf_token | tojson }});
+            formData.append("event_id", eventId);
+            formData.append("is_active", isActive ? "1" : "0");
+
+            const response = await fetch("/schedule/change/cancellation", {
+                method: "POST",
+                body: formData,
+                credentials: "same-origin"
+            });
+
+            const result = await response.json();
+
+            if (!response.ok || !result.success) {
+                throw new Error(result.error || "イベント中止の変更に失敗しました");
+            }
+
+            location.reload();
+
+        } catch (error) {
+            checkbox.checked = !isActive;
+            alert(error.message);
+        } finally {
+            checkbox.disabled = false;
         }
     });
 });
