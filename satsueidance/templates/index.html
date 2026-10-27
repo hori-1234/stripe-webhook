@@ -1420,7 +1420,7 @@ async function toggleCompareMode() {
     flipNotice.style.display = compareMode ? "none" : "block";
 
     const cameraControls = document.getElementById("cameraControls");
-    cameraControls.style.display = compareMode ? "none" : "block";
+    cameraControls.style.display = compareMode ? "none" : "";    
 
     const recordingResultControls = document.getElementById("recordingResultControls");
     recordingResultControls.style.display = compareMode ? "none" : "block";
