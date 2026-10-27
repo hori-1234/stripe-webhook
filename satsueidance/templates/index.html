@@ -2276,7 +2276,11 @@ function startRecording() {
 
         recorder = new MediaRecorder(
             recordingStream,
-            mimeType ? { mimeType } : {}
+            {
+                ...(mimeType ? { mimeType } : {}),
+                videoBitsPerSecond: 2500000,
+                audioBitsPerSecond: 128000
+            }
         );
 
     } catch (error) {
