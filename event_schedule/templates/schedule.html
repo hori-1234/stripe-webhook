@@ -3944,7 +3944,31 @@ document.querySelectorAll(".schedule-withdrawal-button").forEach(button => {
             list.style.display === "none" ? "block" : "none";
     });
 });
+
+document.querySelectorAll(".schedule-withdrawal-checkbox").forEach(checkbox => {
+    checkbox.addEventListener("change", () => {
+        const panel = checkbox.closest(".schedule-change-panel");
+        if (!panel) return;
+
+        const selected = Array.from(
+            panel.querySelectorAll(".schedule-withdrawal-checkbox:checked")
+        ).map(item => item.value);
+
+        let result = panel.querySelector(".schedule-withdrawal-result");
+
+        if (!result) {
+            result = document.createElement("div");
+            result.className = "schedule-withdrawal-result";
+            result.style.marginTop = "8px";
+            panel.appendChild(result);
+        }
+
+        result.textContent = selected.length
+            ? "出演辞退：" + selected.join("、")
+            : "";
+    });
+});
 </script>
-    
+
 </body>
 </html>
