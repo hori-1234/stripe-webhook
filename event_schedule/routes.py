@@ -2013,6 +2013,125 @@ def schedule_change_addition():
         conn.close()
 
 
+@event_schedule_bp.route("/schedule/change/cancellation", methods=["POST"])
+@limiter.limit("20 per minute")
+def schedule_change_cancellation():
+    submitted_token = request.form.get("csrf_token", "")
+    expected_token = session.get("schedule_csrf_token", "")
+
+    if (
+        not submitted_token
+        or not expected_token
+        or not secrets.compare_digest(submitted_token, expected_token)
+    ):
+        return {"success": False, "error": "不正なリクエストです"}, 403
+
+    event_id = request.form.get("event_id", type=int)
+    is_active = request.form.get("is_active")
+
+    if not event_id or is_active not in ("0", "1"):
+        return {"success": False, "error": "入力内容が正しくありません"}, 400
+
+    active = is_active == "1"
+    ip_address = request.remote_addr or ""
+
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+
+    try:
+        cur.execute("""
+            SELECT 1
+            FROM event_schedule_blocked_ips
+            WHERE ip_address = %s
+        """, (ip_address,))
+
+        if cur.fetchone():
+            return {"success": False, "error": "変更連絡を利用できません"}, 403
+
+        cur.execute("""
+            SELECT id
+            FROM event_schedules
+            WHERE id = %s
+            FOR UPDATE
+        """, (event_id,))
+
+        if cur.fetchone() is None:
+            return {"success": False, "error": "イベントが見つかりません"}, 404
+
+        cur.execute("""
+            SELECT id, is_active
+            FROM event_schedule_changes
+            WHERE event_id = %s
+              AND change_type = 'cancellation'
+            ORDER BY id DESC
+            LIMIT 1
+            FOR UPDATE
+        """, (event_id,))
+
+        existing = cur.fetchone()
+
+        if existing and existing[1] == active:
+            return {"success": True, "is_active": active}
+
+        if existing:
+            change_id = existing[0]
+
+            cur.execute("""
+                UPDATE event_schedule_changes
+                SET is_active = %s,
+                    last_updated_ip = %s,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = %s
+            """, (active, ip_address, change_id))
+
+        else:
+            if not active:
+                return {"success": True, "is_active": False}
+
+            cur.execute("""
+                INSERT INTO event_schedule_changes (
+                    event_id,
+                    change_type,
+                    performer_name,
+                    is_active,
+                    last_updated_ip
+                )
+                VALUES (%s, 'cancellation', '', TRUE, %s)
+                RETURNING id
+            """, (event_id, ip_address))
+
+            change_id = cur.fetchone()[0]
+
+        cur.execute("""
+            INSERT INTO event_schedule_change_logs (
+                event_id,
+                change_id,
+                change_type,
+                performer_name,
+                action,
+                ip_address
+            )
+            VALUES (%s, %s, 'cancellation', '', %s, %s)
+        """, (
+            event_id,
+            change_id,
+            "activate" if active else "deactivate",
+            ip_address
+        ))
+
+        conn.commit()
+
+        return {"success": True, "is_active": active}
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        cur.close()
+        conn.close()
+
+
 @event_schedule_bp.route("/schedule/edit/<int:event_id>", methods=["GET", "POST"])
 @limiter.limit("5 per 5 minutes", methods=["POST"])
 def schedule_edit(event_id):
