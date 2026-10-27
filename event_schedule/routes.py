@@ -1093,12 +1093,14 @@ def schedule_add():
                 form_data=request.form,
                 copy_event=copy_event
             )
+    
+        registration_ip = request.remote_addr or ""
 
-        registration_ip = request.headers.get(
-            "X-Forwarded-For",
-            request.remote_addr
+        print(
+            "IP取得診断:",
+            "remote_addr =", request.remote_addr,
+            "forwarded_for =", request.headers.get("X-Forwarded-For")
         )
-        registration_ip = registration_ip.split(",")[0].strip()
 
         conn = psycopg2.connect(DATABASE_URL)
         cur = conn.cursor()
