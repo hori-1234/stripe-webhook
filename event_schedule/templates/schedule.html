@@ -4157,12 +4157,49 @@ document.querySelectorAll(".schedule-addition-button").forEach(button => {
 
         } catch (error) {
             alert(error.message);
+        
         } finally {
             button.disabled = false;
         }
     });
 });
-    
+
+document.querySelectorAll(".schedule-addition-cancel-button").forEach(button => {
+    button.addEventListener("click", async () => {
+        const eventId = button.dataset.eventId;
+        const performerName = button.dataset.performer;
+
+        button.disabled = true;
+
+        try {
+            const formData = new FormData();
+            formData.append("csrf_token", "{{ schedule_csrf_token }}");
+            formData.append("event_id", eventId);
+            formData.append("performer_name", performerName);
+            formData.append("is_active", "0");
+
+            const response = await fetch("/schedule/change/addition", {
+                method: "POST",
+                body: formData,
+                credentials: "same-origin"
+            });
+
+            const result = await response.json();
+
+            if (!response.ok || !result.success) {
+                throw new Error(result.error || "出演追加の取り消しに失敗しました");
+            }
+
+            location.reload();
+
+        } catch (error) {
+            alert(error.message);
+        } finally {
+            button.disabled = false;
+        }
+    });
+});
+
 </script>
 
 </body>
