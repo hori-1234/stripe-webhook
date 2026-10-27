@@ -1682,10 +1682,35 @@ def schedule():
         ]
 
     if "schedule_csrf_token" not in session:
+        
+        # 変更連絡の有効な情報を取得
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT event_id, change_type, performer_name
+        FROM event_schedule_changes
+        WHERE is_active = TRUE
+        ORDER BY id
+    """)
+
+    event_changes = {}
+
+    for event_id, change_type, performer_name in cur.fetchall():
+        event_changes.setdefault(event_id, []).append({
+            "change_type": change_type,
+            "performer_name": performer_name
+        })
+
+    cur.close()
+    conn.close()
+
+    if "schedule_csrf_token" not in session:
         session["schedule_csrf_token"] = secrets.token_urlsafe(32)
 
     response = make_response(render_template(
         "schedule.html",
+
         year=year,
         month=month,
         days=days,
@@ -1705,7 +1730,8 @@ def schedule():
         memo_login_email=get_logged_in_memo_email(),
         show_google_link_prompt=should_show_google_link_prompt(),
         google_link_csrf_token=get_google_link_csrf_token(),
-        schedule_csrf_token=session["schedule_csrf_token"]
+        schedule_csrf_token=session["schedule_csrf_token"],
+        event_changes=event_changes
     ))
 
     response.set_cookie(
