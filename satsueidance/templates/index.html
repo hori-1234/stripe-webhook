@@ -306,15 +306,62 @@
             object-fit: cover;
         }
 
+        
         @media screen and (max-width: 768px) and (orientation: landscape) {
             body {
                 box-sizing: border-box;
                 width: 100%;
-                max-width: 100svh;
+                max-width: none;
                 margin-left: 0;
                 margin-right: auto;
             }
+
+            #sourceLandscapeLayout {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+                gap: 12px;
+                align-items: start;
+            }
+
+            #sourceLandscapeControls,
+            #sourceLandscapeVideo {
+                min-width: 0;
+            }
+            
+            #sourceLandscapeVideo .video-box {
+                margin-top: 0;
+            }
+
+            #cameraControls {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+                gap: 12px;
+                align-items: start;
+            }
+
+            #cameraLandscapeControls {
+                grid-column: 1;
+                grid-row: 1;
+                min-width: 0;
+            }
+
+            #cameraRecordingControls {
+                grid-column: 1;
+                grid-row: 2;
+                min-width: 0;
+            }
+
+            #cameraLandscapeVideo {
+                grid-column: 2;
+                grid-row: 1 / 3;
+                min-width: 0;
+            }
+
+            #cameraLandscapeVideo #camera {
+                margin-top: 0;
+            }
         }
+
 
         @media screen and (min-width: 769px) {
             #camera,
