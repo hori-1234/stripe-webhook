@@ -2262,19 +2262,6 @@ function startRecording() {
 
             recordingContext.restore();
 
-            if (!window.recordingDebugLastTime ||
-                performance.now() - window.recordingDebugLastTime >= 10000) {
-
-                console.log(
-                    "録画診断",
-                    "Canvas描画中",
-                    "Recorder:", recorder ? recorder.state : "未開始",
-                    "映像Track:", recordingStream?.getVideoTracks()[0]?.readyState
-                );
-
-                window.recordingDebugLastTime = performance.now();
-            }
-
             recordingAnimationId = requestAnimationFrame(drawRecordingFrame);
         }
 
