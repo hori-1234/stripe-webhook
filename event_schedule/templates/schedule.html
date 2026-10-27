@@ -1996,9 +1996,23 @@ body.vertical-mode .event-bar-time {
                                         変更連絡
                                     </button>
                                 </div>
-
+                                
                                 <div id="schedule-change-panel-{{ event.id }}" class="schedule-change-panel" style="display: none; margin-top: 8px;">
-                                    <div>出演辞退</div>
+                                    <div>
+                                        <button type="button" class="schedule-withdrawal-button">
+                                            出演辞退
+                                        </button>
+
+                                        <div class="schedule-withdrawal-list" style="display: none; margin-top: 8px;">
+                                            {% for performer in event.performers.split() %}
+                                                <label style="display: block; margin-bottom: 5px;">
+                                                    <input type="checkbox" class="schedule-withdrawal-checkbox" value="{{ performer }}">
+                                                    {{ performer }}
+                                                </label>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+
                                     <div>出演追加</div>
                                     <div>イベント中止</div>
                                 </div>
@@ -2414,9 +2428,23 @@ body.vertical-mode .event-bar-time {
                                     変更連絡
                                 </button>
                             </div>
-
+                            
                             <div id="schedule-change-panel-{{ event.id }}" class="schedule-change-panel" style="display: none; margin-top: 8px;">
-                                <div>出演辞退</div>
+                                <div>
+                                    <button type="button" class="schedule-withdrawal-button">
+                                        出演辞退
+                                    </button>
+
+                                    <div class="schedule-withdrawal-list" style="display: none; margin-top: 8px;">
+                                        {% for performer in event.performers.split() %}
+                                            <label style="display: block; margin-bottom: 5px;">
+                                                <input type="checkbox" class="schedule-withdrawal-checkbox" value="{{ performer }}">
+                                                {{ performer }}
+                                            </label>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+
                                 <div>出演追加</div>
                                 <div>イベント中止</div>
                             </div>
@@ -3887,6 +3915,35 @@ window.addEventListener("scroll", () => {
 
     mobileScrollLastY = currentY;
 }, { passive: true });
+</script>
+    
+<script>
+document.querySelectorAll(".schedule-change-button").forEach(button => {
+    button.addEventListener("click", () => {
+        const eventId = button.dataset.eventId;
+        const panel = document.getElementById(
+            "schedule-change-panel-" + eventId
+        );
+
+        if (!panel) return;
+
+        panel.style.display =
+            panel.style.display === "none" ? "block" : "none";
+    });
+});
+
+document.querySelectorAll(".schedule-withdrawal-button").forEach(button => {
+    button.addEventListener("click", () => {
+        const list = button.parentElement.querySelector(
+            ".schedule-withdrawal-list"
+        );
+
+        if (!list) return;
+
+        list.style.display =
+            list.style.display === "none" ? "block" : "none";
+    });
+});
 </script>
     
 </body>
