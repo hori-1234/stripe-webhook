@@ -2363,9 +2363,42 @@ function startRecording() {
         if (recordingUrl) URL.revokeObjectURL(recordingUrl);
         recordingUrl = URL.createObjectURL(blob);
 
-        document.getElementById("recordedVideo").src = recordingUrl;
+        const recordedVideo = document.getElementById("recordedVideo");
+        recordedVideo.src = recordingUrl;
+
+        // 録画動画の直下に時間と容量を表示
+        let recordingInfo = document.getElementById("recordingInfo");
+
+        if (!recordingInfo) {
+            recordingInfo = document.createElement("div");
+            recordingInfo.id = "recordingInfo";
+            recordingInfo.style.textAlign = "center";
+            recordingInfo.style.margin = "8px 0 12px";
+            recordingInfo.style.fontWeight = "bold";
+            recordingInfo.style.color = "#24483f";
+
+            recordedVideo.insertAdjacentElement("afterend", recordingInfo);
+        }
+
+        const sizeMB = (blob.size / 1024 / 1024).toFixed(1);
+
+        recordingInfo.textContent = "容量：" + sizeMB + " MB";
+
+        recordedVideo.onloadedmetadata = () => {
+            const duration = recordedVideo.duration;
+
+            if (Number.isFinite(duration)) {
+                const minutes = Math.floor(duration / 60);
+                const seconds = (duration % 60).toFixed(1);
+
+                recordingInfo.textContent =
+                    "録画時間：" + minutes + "分" + seconds + "秒" +
+                    "　｜　容量：" + sizeMB + " MB";
+            }
+        };
 
         const link = document.getElementById("downloadLink");
+
         const extension = type.includes("mp4") ? "mp4" : "webm";
         link.href = recordingUrl;
         link.download = "dance-recording." + extension;
