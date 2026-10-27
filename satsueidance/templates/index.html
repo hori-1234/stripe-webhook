@@ -2274,13 +2274,17 @@ function startRecording() {
             ...cameraStream.getAudioTracks()
         ]);
 
+        const isIPhone = /iPhone|iPod/.test(navigator.userAgent);
+
         recorder = new MediaRecorder(
             recordingStream,
-            {
-                ...(mimeType ? { mimeType } : {}),
-                videoBitsPerSecond: 2500000,
-                audioBitsPerSecond: 128000
-            }
+            isIPhone
+                ? {
+                    ...(mimeType ? { mimeType } : {}),
+                    videoBitsPerSecond: 2500000,
+                    audioBitsPerSecond: 128000
+                }
+                : (mimeType ? { mimeType } : {})
         );
 
     } catch (error) {
