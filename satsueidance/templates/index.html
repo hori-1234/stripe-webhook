@@ -2219,7 +2219,31 @@ function startRecording() {
         return;
     }
 
+    // 次の録画開始時に前回の録画データを解放
+    if (recordingUrl) {
+        const recordedVideo = document.getElementById("recordedVideo");
+        const compareVideo = document.getElementById("compareVideo");
+        const downloadLink = document.getElementById("downloadLink");
+
+        recordedVideo.pause();
+        recordedVideo.removeAttribute("src");
+        recordedVideo.load();
+
+        compareVideo.pause();
+        compareVideo.removeAttribute("src");
+        compareVideo.load();
+
+        downloadLink.removeAttribute("href");
+        downloadLink.style.display = "none";
+
+        URL.revokeObjectURL(recordingUrl);
+        recordingUrl = null;
+    }
+
+    chunks = [];
+
     const candidates = [
+    
         "video/mp4",
         "video/webm;codecs=vp8",
         "video/webm"
