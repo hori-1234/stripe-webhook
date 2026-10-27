@@ -2387,13 +2387,18 @@ function startRecording() {
         recordedVideo.onloadedmetadata = () => {
             const duration = recordedVideo.duration;
 
-            if (Number.isFinite(duration)) {
+            if (Number.isFinite(duration) && duration > 0) {
                 const minutes = Math.floor(duration / 60);
                 const seconds = (duration % 60).toFixed(1);
 
+                const actualMbps = (
+                    blob.size * 8 / duration / 1000000
+                ).toFixed(2);
+
                 recordingInfo.textContent =
                     "録画時間：" + minutes + "分" + seconds + "秒" +
-                    "　｜　容量：" + sizeMB + " MB";
+                    "　｜　容量：" + sizeMB + " MB" +
+                    "　｜　実測：" + actualMbps + " Mbps";
             }
         };
 
