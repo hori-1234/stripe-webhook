@@ -360,8 +360,17 @@
             #cameraLandscapeVideo #camera {
                 margin-top: 0;
             }
-        }
+            @media screen and (orientation: landscape) and (pointer: coarse) {
+                #compareModeVisibility,
+                #compareModeVisibility span,
+                #compareButton,
+                #normalPlayDelay,
+                #normalPlayDelay + span {
+                    font-size: 13px !important;
+                }
+            }
 
+        }
 
         @media screen and (min-width: 769px) {
             #camera,
