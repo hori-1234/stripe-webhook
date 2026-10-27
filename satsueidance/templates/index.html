@@ -13,7 +13,7 @@
             font-family: sans-serif;
         }
 
-        @media screen and (min-width: 769px) {
+        @media screen and (min-width: 769px) and not ((orientation: landscape) and (pointer: coarse) and (max-height: 500px)) {
             body {
                 box-sizing: border-box;
                 max-width: 992px;
@@ -307,7 +307,7 @@
         }
 
         
-        @media screen and (max-width: 768px) and (orientation: landscape) {
+         @media screen and (orientation: landscape) and (pointer: coarse) and (max-height: 500px) {
             body {
                 box-sizing: border-box;
                 width: 100%;
@@ -372,7 +372,7 @@
 
         }
 
-        @media screen and (min-width: 769px) {
+        @media screen and (min-width: 769px) and not ((orientation: landscape) and (pointer: coarse) and (max-height: 500px)) {
             #camera,
             #recordedVideo {
                 width: 100%;
@@ -511,7 +511,7 @@
             }
         }
 
-        @media screen and (min-width: 769px) {
+        @media screen and (min-width: 769px) and not ((orientation: landscape) and (pointer: coarse) and (max-height: 500px)) {
             #videoBox {
                 box-sizing: border-box;
                 width: 100%;
