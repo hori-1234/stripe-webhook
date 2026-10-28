@@ -2647,6 +2647,7 @@ def schedule_admin():
     return render_template(
         "schedule_admin.html",
         events=admin_events,
+        change_ip_logs=change_ip_logs,
         admin_backup_csrf_token=session["admin_backup_csrf_token"]
     )
 
