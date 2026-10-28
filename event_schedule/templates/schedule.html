@@ -4421,12 +4421,9 @@ window.addEventListener("load", function () {
     const monthStart = document.querySelector(".schedule-area");
     if (!monthStart) return;
 
-    const monthTop = window.scrollY
-        + monthStart.getBoundingClientRect().top;
-
-    // 月の先頭を表示
+    // ページ最上部からスクロールを開始
     window.scrollTo({
-        top: monthTop,
+        top: 0,
         behavior: "instant"
     });
 
