@@ -2013,7 +2013,7 @@ body.vertical-mode .event-bar-time {
                                     | map(attribute='performer_name')
                                     | list %}
 
-                                あああ
+        
                                 {% if added_performers %}
                                     <div class="schedule-addition-saved-result" style="margin-top: 8px;">
                                         出演追加：
@@ -2032,9 +2032,19 @@ body.vertical-mode .event-bar-time {
                                             </span>
                                         {% endfor %}
                                     </div>
+                                
                                 {% endif %}
+                                
+                                {% set is_cancelled = event_changes.get(event.id, [])
+                                    | selectattr('change_type', 'equalto', 'cancellation')
+                                    | list
+                                    | length > 0 %}
 
-                                あああ
+                                {% if is_cancelled %}
+                                    <div class="schedule-cancellation-saved-result" style="margin-top: 8px; color: red; font-weight: bold;">
+                                        イベント中止
+                                    </div>
+                                {% endif %}
 
                                 <div id="schedule-change-panel-{{ event.id }}" class="schedule-change-panel" style="display: none; margin-top: 8px;">
 
@@ -2537,6 +2547,17 @@ body.vertical-mode .event-bar-time {
                                             </button>
                                         </span>
                                     {% endfor %}
+                                </div>
+                            {% endif %}
+
+                            {% set is_cancelled = event_changes.get(event.id, [])
+                                | selectattr('change_type', 'equalto', 'cancellation')
+                                | list
+                                | length > 0 %}
+
+                            {% if is_cancelled %}
+                                <div class="schedule-cancellation-saved-result" style="margin-top: 8px; color: red; font-weight: bold;">
+                                    イベント中止
                                 </div>
                             {% endif %}
 
