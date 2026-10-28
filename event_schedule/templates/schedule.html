@@ -166,12 +166,51 @@
             font-size: 16px;
             box-sizing: border-box;
         }
-
+         
         .search-form button {
             padding: 10px 25px;
             font-size: 16px;
             cursor: pointer;
         }
+
+        /* 検索・クリア：アイコン付きボタン */
+        .search-form .search-icon-button,
+        .search-form .clear-icon-button {
+            width: 54px;
+            height: 62px;
+            padding: 5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            border: 1px solid #b7c5d5;
+            border-radius: 8px;
+            background: #fff;
+            color: #1767bd;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            box-sizing: border-box;
+        }
+
+        .search-form .search-icon-button svg,
+        .search-form .clear-icon-button svg {
+            width: 22px;
+            height: 22px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .search-form .clear-icon-button {
+            color: #667085;
+            border-color: #d0d5dd;
+        }
+
+        .search-row {
 
         .search-row {
             display: flex;
@@ -877,11 +916,6 @@
                 padding: 15px;
             }
 
-            .search-form button[onclick="clearSearch()"] {
-                background: #000;
-                color: #fff;
-            }
-
             .top-controls {
                 display: block;
             }
@@ -1583,10 +1617,22 @@ body.vertical-mode .event-bar-time {
                         <option value="撮影会" {% if request.args.get('genre') == '撮影会' %}selected{% endif %}>撮影会</option>
                         <option value="その他" {% if request.args.get('genre') == 'その他' %}selected{% endif %}>その他</option>
                     </select>
-                    
-                    <button type="submit">検索</button>
-                    <button type="button" onclick="clearSearch()">クリア</button>
-                    
+
+                    <button type="submit" class="search-icon-button" aria-label="検索">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <circle cx="10.5" cy="10.5" r="6.5"></circle>
+                            <path d="M15.5 15.5L21 21"></path>
+                        </svg>
+                        <span>検索</span>
+                    </button>
+
+                    <button type="button" class="clear-icon-button" onclick="clearSearch()" aria-label="クリア">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M5 5L19 19M19 5L5 19"></path>
+                        </svg>
+                        <span>クリア</span>
+                    </button>
+
                 </div>
 
                 <!-- 場所 -->
