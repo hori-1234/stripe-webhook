@@ -4403,26 +4403,84 @@ window.addEventListener("load", function () {
         return;
     }
 
-    targetEvent.scrollIntoView({
-        behavior: "instant",
-        block: "center",
-        inline: "nearest"
-    });
+    // 対象月の先頭を表示
+    const monthStart = document.querySelector(".schedule-area");
 
-    // 画面全体を半透明グレーで覆う
-    const overlay = document.createElement("div");
-    overlay.className = "shared-event-overlay";
-    document.body.appendChild(overlay);
+    if (monthStart) {
+        window.scrollTo({
+            top: window.scrollY + monthStart.getBoundingClientRect().top,
+            behavior: "instant"
+        });
+    }
 
-    // 対象イベントだけ前面に表示
-    targetEvent.classList.add("shared-event-highlight");
-    
-    // 3秒後に強調表示を解除
+    // 0.8秒待ってから対象イベントへスクロール
     setTimeout(function () {
-        overlay.remove();
-        targetEvent.classList.remove("shared-event-highlight");
-    }, 3000);
+        const startY = window.scrollY;
+
+        const targetY = Math.max(
+            0,
+            window.scrollY
+                + targetEvent.getBoundingClientRect().top
+                - (window.innerHeight - targetEvent.offsetHeight) / 2
+        );
+
+        const distance = targetY - startY;
+        const duration = Math.abs(distance) / 900 * 1000;
+
+        let startTime = null;
+
+        function animateScroll(timestamp) {
+            if (startTime === null) {
+                startTime = timestamp;
+            }
+
+            const elapsed = timestamp - startTime;
+            const progress = duration === 0
+                ? 1
+                : Math.min(elapsed / duration, 1);
+
+            // 最初と最後の15%で滑らかに加減速
+            const ramp = 0.15;
+            const speed = 1 / (1 - ramp);
+
+            let eased;
+
+            if (progress < ramp) {
+                eased = speed * progress * progress / (2 * ramp);
+            } else if (progress > 1 - ramp) {
+                const remaining = 1 - progress;
+                eased = 1 - speed * remaining * remaining / (2 * ramp);
+            } else {
+                eased = speed * (progress - ramp / 2);
+            }
+
+            window.scrollTo(0, startY + distance * eased);
+            
+            if (progress < 1) {
+                requestAnimationFrame(animateScroll);
+            } else {
+                window.scrollTo(0, targetY);
+
+                // スクロール停止後に強調表示
+                const overlay = document.createElement("div");
+                overlay.className = "shared-event-overlay";
+                document.body.appendChild(overlay);
+
+                targetEvent.classList.add("shared-event-highlight");
+
+                // 3秒後に強調表示を解除
+                setTimeout(function () {
+                    overlay.remove();
+                    targetEvent.classList.remove("shared-event-highlight");
+                }, 3000);
+            }
+        }
+
+        requestAnimationFrame(animateScroll);
+
+    }, 800);
 });
+
 
 // イベント情報を右スワイプして共有ボタンを表示
 document.querySelectorAll(".event-info").forEach(function (eventInfo) {
