@@ -133,6 +133,12 @@
                                 action="{{ url_for('event_schedule.schedule_admin_unblock_ip') }}"
                                 style="margin-top: 6px;"
                             >
+                                
+                                <input
+                                    type="hidden"
+                                    name="csrf_token"
+                                    value="{{ admin_ip_csrf_token }}"
+                                >
                                 <input
                                     type="hidden"
                                     name="ip_address"
@@ -141,6 +147,7 @@
                                 <button type="submit">
                                     ブロック解除
                                 </button>
+                                
                             </form>
                         {% else %}
                             <form
@@ -148,11 +155,18 @@
                                 action="{{ url_for('event_schedule.schedule_admin_block_ip') }}"
                                 style="margin-top: 6px;"
                             >
+                                
+                                <input
+                                    type="hidden"
+                                    name="csrf_token"
+                                    value="{{ admin_ip_csrf_token }}"
+                                >
                                 <input
                                     type="hidden"
                                     name="ip_address"
                                     value="{{ event.registration_ip }}"
                                 >
+                            
                                 <button type="submit">
                                     ブロック
                                 </button>
@@ -230,14 +244,21 @@
                               action="{{ url_for('event_schedule.schedule_admin_unblock_ip') }}"
                               style="margin-top: 6px;">
                             <input type="hidden"
+                                   name="csrf_token"
+                                   value="{{ admin_ip_csrf_token }}">
+                            <input type="hidden"
                                    name="ip_address"
                                    value="{{ log.ip_address }}">
                             <button type="submit">ブロック解除</button>
+                            
                         </form>
                     {% else %}
                         <form method="POST"
                               action="{{ url_for('event_schedule.schedule_admin_block_ip') }}"
                               style="margin-top: 6px;">
+                            <input type="hidden"
+                                   name="csrf_token"
+                                   value="{{ admin_ip_csrf_token }}">
                             <input type="hidden"
                                    name="ip_address"
                                    value="{{ log.ip_address }}">
