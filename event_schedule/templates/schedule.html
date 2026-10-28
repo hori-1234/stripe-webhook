@@ -4541,50 +4541,25 @@ document.querySelectorAll(".event-info").forEach(function (eventInfo) {
     }, { passive: true });
 });
 
-// PC：イベント情報を左右にドラッグして共有ボタンを開閉
+// PC：イベント情報をダブルクリックして共有ボタンを開閉
 document.querySelectorAll(".event-info").forEach(function (eventInfo) {
-    let mouseStartX = null;
-    let mouseStartY = null;
 
-    eventInfo.addEventListener("mousedown", function (e) {
-        if (e.button !== 0 || e.target.closest(".event-share-button")) {
+    eventInfo.addEventListener("dblclick", function (e) {
+        if (e.target.closest(".event-share-button")) {
             return;
         }
 
-        mouseStartX = e.clientX;
-        mouseStartY = e.clientY;
-    });
+        const isOpen = eventInfo.classList.contains("share-open");
 
-    eventInfo.addEventListener("mouseup", function (e) {
-        if (mouseStartX === null) {
-            return;
-        }
+        // 他のイベントの共有ボタンを閉じる
+        document.querySelectorAll(".event-info.share-open").forEach(function (opened) {
+            opened.classList.remove("share-open");
+        });
 
-        const diffX = e.clientX - mouseStartX;
-        const diffY = e.clientY - mouseStartY;
-
-        mouseStartX = null;
-        mouseStartY = null;
-
-        if (Math.abs(diffY) >= Math.abs(diffX)) {
-            return;
-        }
-
-        if (diffX > 50) {
-            document.querySelectorAll(".event-info.share-open").forEach(function (opened) {
-                opened.classList.remove("share-open");
-            });
-
+        // 閉じていた場合だけ表示
+        if (!isOpen) {
             eventInfo.classList.add("share-open");
-
-        } else if (diffX < -50) {
-            eventInfo.classList.remove("share-open");
         }
-    });
-
-    eventInfo.addEventListener("mouseleave", function () {
-        mouseStartX = null;
-        mouseStartY = null;
     });
 });
 
