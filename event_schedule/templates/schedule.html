@@ -4386,34 +4386,51 @@ document.querySelectorAll(".schedule-cancellation-checkbox").forEach(checkbox =>
     });
 });
 
+    
 // 共有URLから対象イベントへ自動スクロール
-window.addEventListener("load", function () {
-    const params = new URLSearchParams(window.location.search);
-    const eventId = params.get("event_id");
+const sharedParams = new URLSearchParams(window.location.search);
+const sharedEventId = sharedParams.get("event_id");
+const isSharedEvent = sharedEventId && /^\d+$/.test(sharedEventId);
 
-    if (!eventId || !/^\d+$/.test(eventId)) {
-        return;
-    }
+if (isSharedEvent) {
+    history.scrollRestoration = "manual";
+}
+
+// ページ表示時点からグレー背景を表示
+document.addEventListener("DOMContentLoaded", function () {
+    if (!isSharedEvent) return;
+
+    const overlay = document.createElement("div");
+    overlay.className = "shared-event-overlay";
+    overlay.id = "shared-event-overlay";
+    overlay.style.animation = "none";
+    document.body.appendChild(overlay);
+
+    window.scrollTo({ top: 0, behavior: "instant" });
+});
+
+window.addEventListener("load", function () {
+    if (!isSharedEvent) return;
 
     const targetEvent = document.querySelector(
-        `.event-row[data-event-id="${eventId}"]`
+        `.event-row[data-event-id="${sharedEventId}"]`
     );
 
-    if (!targetEvent) {
-        return;
-    }
+    if (!targetEvent) return;
 
-    // 対象月の先頭を表示
     const monthStart = document.querySelector(".schedule-area");
+    if (!monthStart) return;
 
-    if (monthStart) {
-        window.scrollTo({
-            top: window.scrollY + monthStart.getBoundingClientRect().top,
-            behavior: "instant"
-        });
-    }
+    const monthTop = window.scrollY
+        + monthStart.getBoundingClientRect().top;
 
-    // 0.8秒待ってから対象イベントへスクロール
+    // 月の先頭を表示
+    window.scrollTo({
+        top: monthTop,
+        behavior: "instant"
+    });
+
+    // 0.8秒待機
     setTimeout(function () {
         const startY = window.scrollY;
 
@@ -4439,7 +4456,7 @@ window.addEventListener("load", function () {
                 ? 1
                 : Math.min(elapsed / duration, 1);
 
-            // 最初と最後の15%で滑らかに加減速
+            // 滑らかな加速・減速
             const ramp = 0.15;
             const speed = 1 / (1 - ramp);
 
@@ -4454,23 +4471,31 @@ window.addEventListener("load", function () {
                 eased = speed * (progress - ramp / 2);
             }
 
-            window.scrollTo(0, startY + distance * eased);
-            
+            window.scrollTo({
+                top: startY + distance * eased,
+                behavior: "instant"
+            });
+
             if (progress < 1) {
                 requestAnimationFrame(animateScroll);
             } else {
-                window.scrollTo(0, targetY);
+                window.scrollTo({
+                    top: targetY,
+                    behavior: "instant"
+                });
 
-                // スクロール停止後に強調表示
-                const overlay = document.createElement("div");
-                overlay.className = "shared-event-overlay";
-                document.body.appendChild(overlay);
-
+                // 到着したら黄色枠を表示
                 targetEvent.classList.add("shared-event-highlight");
 
-                // 3秒後に強調表示を解除
+                // グレー背景を3秒かけて解除
+                const overlay = document.getElementById("shared-event-overlay");
+
+                if (overlay) {
+                    overlay.style.animation = "shared-overlay-fade 3s forwards";
+                }
+
                 setTimeout(function () {
-                    overlay.remove();
+                    if (overlay) overlay.remove();
                     targetEvent.classList.remove("shared-event-highlight");
                 }, 3000);
             }
@@ -4481,7 +4506,7 @@ window.addEventListener("load", function () {
     }, 800);
 });
 
-
+    
 // イベント情報を右スワイプして共有ボタンを表示
 document.querySelectorAll(".event-info").forEach(function (eventInfo) {
     let startX = 0;
