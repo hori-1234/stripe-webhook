@@ -1391,9 +1391,22 @@ def schedule():
     if event_name_keyword:
         query += " AND event_name ILIKE %s"
         params.append(f"%{event_name_keyword}%")
-
+    
     if performer_keyword:
-        query += " AND performers ILIKE %s"
+        query += """
+            AND (
+                performers ILIKE %s
+                OR EXISTS (
+                    SELECT 1
+                    FROM event_schedule_changes c
+                    WHERE c.event_id = event_schedules.id
+                      AND c.change_type = 'addition'
+                      AND c.is_active = TRUE
+                      AND c.performer_name ILIKE %s
+                )
+            )
+        """
+        params.append(f"%{performer_keyword}%")
         params.append(f"%{performer_keyword}%")
 
     query += " ORDER BY event_date, start_time, id"
@@ -1438,9 +1451,40 @@ def schedule():
 
             if performer:
                 registered_performers.add(performer)
-    
+
+    addition_query = """
+        SELECT DISTINCT c.performer_name
+        FROM event_schedule_changes c
+        JOIN event_schedules e ON e.id = c.event_id
+        WHERE c.change_type = 'addition'
+          AND c.is_active = TRUE
+          AND e.event_date >= CURRENT_DATE
+    """
+
+    addition_params = []
+
+    if genre:
+        addition_query += " AND e.genre = %s"
+        addition_params.append(genre)
+
+    if selected_locations:
+        placeholders = ", ".join(["%s"] * len(selected_locations))
+        addition_query += f" AND e.location IN ({placeholders})"
+        addition_params.extend(selected_locations)
+
+    if event_name_keyword:
+        addition_query += " AND e.event_name ILIKE %s"
+        addition_params.append(f"%{event_name_keyword}%")
+
+    cur.execute(addition_query, addition_params)
+
+    for row in cur.fetchall():
+        if row[0]:
+            registered_performers.add(row[0])
+
     favorite_performers = set()
 
+    
     memo_user_id = session.get("memo_user_id")
 
     if memo_user_id:
@@ -1629,6 +1673,7 @@ def schedule():
         matched_favorites = event_performers & favorite_performers
 
         display_events.append({
+        
             "id": event[0],
             "event_date": event[1],
             "start_time": start_time,
@@ -1703,6 +1748,16 @@ def schedule():
 
     cur.close()
     conn.close()
+
+    for event in display_events:
+        added_performers = {
+            change["performer_name"]
+            for change in event_changes.get(event["id"], [])
+            if change["change_type"] == "addition"
+        }
+
+        if added_performers & favorite_performers:
+            event["has_favorite_performer"] = True
 
     if "schedule_csrf_token" not in session:
         session["schedule_csrf_token"] = secrets.token_urlsafe(32)
