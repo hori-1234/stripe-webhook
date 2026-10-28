@@ -4662,14 +4662,9 @@ document.querySelectorAll(".event-share-button").forEach(function (button) {
     });
 });
 
-// 共有ボタン以外をクリック・タップしたらキャンセルして閉じる
+// 共有ボタン以外をクリック・タップしたら閉じる
 document.addEventListener("click", function (e) {
     if (e.target.closest(".event-share-button")) {
-        return;
-    }
-
-    // PCのドラッグ終了直後は閉じない
-    if (e.detail > 0 && e.target.closest(".event-info")) {
         return;
     }
 
@@ -4677,7 +4672,6 @@ document.addEventListener("click", function (e) {
         opened.classList.remove("share-open");
     });
 });
-
 
 </script>
 
