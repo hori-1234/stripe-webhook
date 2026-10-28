@@ -3448,7 +3448,18 @@ def schedule_admin_stats():
     methods=["POST"]
 )
 @admin_required
+
 def schedule_admin_block_ip():
+    submitted_token = request.form.get("csrf_token", "")
+    expected_token = session.get("admin_ip_csrf_token", "")
+
+    if (
+        not submitted_token
+        or not expected_token
+        or not secrets.compare_digest(submitted_token, expected_token)
+    ):
+        return "不正なリクエストです", 403
+
     ip_address = request.form.get("ip_address", "").strip()
 
     if not ip_address:
@@ -3483,6 +3494,16 @@ def schedule_admin_block_ip():
 )
 @admin_required
 def schedule_admin_unblock_ip():
+    submitted_token = request.form.get("csrf_token", "")
+    expected_token = session.get("admin_ip_csrf_token", "")
+
+    if (
+        not submitted_token
+        or not expected_token
+        or not secrets.compare_digest(submitted_token, expected_token)
+    ):
+        return "不正なリクエストです", 403
+
     ip_address = request.form.get("ip_address", "").strip()
 
     if not ip_address:
