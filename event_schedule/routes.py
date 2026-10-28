@@ -1305,7 +1305,33 @@ def schedule():
 
     year = request.args.get("year", today.year, type=int)
     month = request.args.get("month", today.month, type=int)
+
+    # 共有URLからイベントIDが指定された場合、開催年月を取得
+    shared_event_id = request.args.get("event_id", type=int)
+
+    if shared_event_id is not None and shared_event_id > 0:
+        conn = psycopg2.connect(DATABASE_URL)
+        cur = conn.cursor()
+
+        try:
+            cur.execute("""
+                SELECT event_date
+                FROM event_schedules
+                WHERE id = %s
+            """, (shared_event_id,))
+
+            shared_event = cur.fetchone()
+
+            if shared_event:
+                year = shared_event[0].year
+                month = shared_event[0].month
+
+        finally:
+            cur.close()
+            conn.close()
+
     genre = request.args.get("genre", "").strip()
+
     selected_locations = request.args.getlist("location")
     event_name_keyword = request.args.get("event_name", "").strip()
     performer_keyword = request.args.get("performer", "").strip()
