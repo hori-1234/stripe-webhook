@@ -617,7 +617,7 @@
         /* イベント右スワイプ時の共有ボタン */
         .event-share-button {
             position: absolute;
-            left: -55px;
+            left: 0;
             top: 50%;
             transform: translateY(-50%);
             width: 45px;
@@ -4484,6 +4484,18 @@ document.querySelectorAll(".event-share-button").forEach(function (button) {
         }
     });
 });
+
+// 共有ボタン以外をタップしたらキャンセルして閉じる
+document.addEventListener("click", function (e) {
+    if (e.target.closest(".event-share-button")) {
+        return;
+    }
+
+    document.querySelectorAll(".event-info.share-open").forEach(function (opened) {
+        opened.classList.remove("share-open");
+    });
+});
+
 
 </script>
 
