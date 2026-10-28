@@ -615,26 +615,38 @@
             z-index: 3;
         }
 
-        /* イベント右スワイプ時の共有ボタン */
+
+        /* イベント共有ボタン：白地＋青アイコン */
         .event-share-button {
             position: absolute;
             left: 0;
             top: 50%;
             transform: translateY(-50%);
-            width: 45px;
+            width: 54px;
             height: 60px;
-            border: 1px solid #1767bd;
-            border-radius: 4px;
-            background: #0879d7;
-            color: #fff;
-            font-size: 15px;
+            border: 1px solid #b7c5d5;
+            border-radius: 8px;
+            background: #fff;
+            color: #1767bd;
+            font-size: 12px;
             font-weight: bold;
             cursor: pointer;
             display: none;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            writing-mode: vertical-rl;
+            gap: 3px;
+            writing-mode: horizontal-tb;
             z-index: 5;
+        }
+
+        .event-share-button::before {
+            content: "";
+            width: 22px;
+            height: 22px;
+            background: currentColor;
+            -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='18' cy='5' r='3'/%3E%3Ccircle cx='6' cy='12' r='3'/%3E%3Ccircle cx='18' cy='19' r='3'/%3E%3Cpath d='m8.7 13.5 6.6 4m0-11-6.6 4'/%3E%3C/svg%3E") center / contain no-repeat;
+            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='18' cy='5' r='3'/%3E%3Ccircle cx='6' cy='12' r='3'/%3E%3Ccircle cx='18' cy='19' r='3'/%3E%3Cpath d='m8.7 13.5 6.6 4m0-11-6.6 4'/%3E%3C/svg%3E") center / contain no-repeat;
         }
 
         .event-info.share-open .event-share-button {
