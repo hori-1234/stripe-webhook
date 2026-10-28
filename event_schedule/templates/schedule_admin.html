@@ -179,6 +179,79 @@
             </tr>
             {% endfor %}
         </tbody>
+
+        </table>
+
+    <h2 style="margin-top: 40px;">出演変更連絡 IP履歴（最新200件）</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>日程</th>
+                <th>イベント名</th>
+                <th>変更内容</th>
+                <th>出演者</th>
+                <th>操作</th>
+                <th>操作IP</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for log in change_ip_logs %}
+            <tr>
+                <td>{{ log.event_date or "削除済み" }}</td>
+                <td>{{ log.event_name or "削除済みイベント" }}</td>
+
+                <td>
+                    {% if log.change_type == "addition" %}
+                        出演追加
+                    {% elif log.change_type == "withdrawal" %}
+                        出演辞退
+                    {% elif log.change_type == "cancellation" %}
+                        開催中止
+                    {% endif %}
+                </td>
+
+                <td>{{ log.performer_name or "－" }}</td>
+
+                <td>
+                    {% if log.action == "activate" %}
+                        登録
+                    {% elif log.action == "deactivate" %}
+                        取消
+                    {% endif %}
+                </td>
+
+                <td>
+                    {{ log.ip_address }}
+
+                    {% if log.is_blocked %}
+                        <form method="POST"
+                              action="{{ url_for('event_schedule.schedule_admin_unblock_ip') }}"
+                              style="margin-top: 6px;">
+                            <input type="hidden"
+                                   name="ip_address"
+                                   value="{{ log.ip_address }}">
+                            <button type="submit">ブロック解除</button>
+                        </form>
+                    {% else %}
+                        <form method="POST"
+                              action="{{ url_for('event_schedule.schedule_admin_block_ip') }}"
+                              style="margin-top: 6px;">
+                            <input type="hidden"
+                                   name="ip_address"
+                                   value="{{ log.ip_address }}">
+                            <button type="submit">ブロック</button>
+                        </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6">変更連絡の履歴はありません。</td>
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
 
 </body>
