@@ -577,16 +577,17 @@
                 opacity: 0;
             }
         }
-
+        
         @keyframes shared-highlight-fade {
-            0%, 65% {
+            0%, 20%, 40%, 60%, 80% {
                 outline-color: #ffcc00;
             }
 
-            100% {
+            10%, 30%, 50%, 70%, 90%, 100% {
                 outline-color: transparent;
             }
         }
+        
 
         .event-row:nth-of-type(even) {
             background: #eaf7ff;
