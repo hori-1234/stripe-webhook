@@ -617,32 +617,28 @@
         /* イベント右スワイプ時の共有ボタン */
         .event-share-button {
             position: absolute;
-            left: 0;
+            left: -55px;
             top: 50%;
             transform: translateY(-50%);
-            width: 70px;
-            min-height: 36px;
+            width: 45px;
+            height: 60px;
             border: 1px solid #1767bd;
             border-radius: 4px;
             background: #0879d7;
             color: #fff;
-            font-size: 13px;
+            font-size: 15px;
             font-weight: bold;
             cursor: pointer;
             display: none;
             align-items: center;
             justify-content: center;
+            writing-mode: vertical-rl;
             z-index: 5;
         }
 
         .event-info.share-open .event-share-button {
             display: flex;
         }
-
-        .event-info.share-open .event-genre,
-        .event-info.share-open .event-location {
-            transform: translateX(75px);
-        }         
 
         .event-genre {
             font-weight: bold;
@@ -1927,7 +1923,7 @@ body.vertical-mode .event-bar-time {
                                     class="event-share-button"
                                     data-event-id="{{ event.id }}"
                                 >
-                                    共有リンクをコピー
+                                    共有
                                 </button>
 
                                 <span class="event-genre
