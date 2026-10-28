@@ -2448,7 +2448,7 @@ body.vertical-mode .event-bar-time {
                                 class="event-share-button"
                                 data-event-id="{{ event.id }}"
                             >
-                                共有リンクをコピー
+                                共有
                             </button>
 
                             <span class="event-genre
@@ -4457,11 +4457,60 @@ document.querySelectorAll(".event-info").forEach(function (eventInfo) {
             // 左スワイプで元に戻す
             eventInfo.classList.remove("share-open");
         }
+    
     }, { passive: true });
+});
+
+// PC：イベント情報を左右にドラッグして共有ボタンを開閉
+document.querySelectorAll(".event-info").forEach(function (eventInfo) {
+    let mouseStartX = null;
+    let mouseStartY = null;
+
+    eventInfo.addEventListener("mousedown", function (e) {
+        if (e.button !== 0 || e.target.closest(".event-share-button")) {
+            return;
+        }
+
+        mouseStartX = e.clientX;
+        mouseStartY = e.clientY;
+    });
+
+    eventInfo.addEventListener("mouseup", function (e) {
+        if (mouseStartX === null) {
+            return;
+        }
+
+        const diffX = e.clientX - mouseStartX;
+        const diffY = e.clientY - mouseStartY;
+
+        mouseStartX = null;
+        mouseStartY = null;
+
+        if (Math.abs(diffY) >= Math.abs(diffX)) {
+            return;
+        }
+
+        if (diffX > 50) {
+            document.querySelectorAll(".event-info.share-open").forEach(function (opened) {
+                opened.classList.remove("share-open");
+            });
+
+            eventInfo.classList.add("share-open");
+
+        } else if (diffX < -50) {
+            eventInfo.classList.remove("share-open");
+        }
+    });
+
+    eventInfo.addEventListener("mouseleave", function () {
+        mouseStartX = null;
+        mouseStartY = null;
+    });
 });
 
 // イベント専用の共有URLをコピー
 document.querySelectorAll(".event-share-button").forEach(function (button) {
+
     button.addEventListener("click", async function () {
         const eventId = button.dataset.eventId;
 
