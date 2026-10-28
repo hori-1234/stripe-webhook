@@ -2585,6 +2585,36 @@ def schedule_admin():
         row[0] for row in cur.fetchall()
     }
 
+    cur.execute("""
+        SELECT
+            l.event_id,
+            e.event_date,
+            e.event_name,
+            l.change_type,
+            l.performer_name,
+            l.action,
+            l.ip_address
+        FROM event_schedule_change_logs l
+        LEFT JOIN event_schedules e
+            ON e.id = l.event_id
+        ORDER BY l.id DESC
+        LIMIT 200
+    """)
+
+    change_ip_logs = []
+
+    for row in cur.fetchall():
+        change_ip_logs.append({
+            "event_id": row[0],
+            "event_date": row[1],
+            "event_name": row[2],
+            "change_type": row[3],
+            "performer_name": row[4],
+            "action": row[5],
+            "ip_address": row[6],
+            "is_blocked": row[6] in blocked_ips
+        })
+
     cur.close()
     conn.close()
 
