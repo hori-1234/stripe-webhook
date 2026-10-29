@@ -455,6 +455,10 @@
         #videoBox.mobile-fullscreen #fullscreenCloseButton {
             display: block !important;
         }
+
+        #videoBox.expanded #fullscreenCloseButton {
+            display: none !important;
+        }
         
         #adjustControls summary {
             padding: 12px 14px;
@@ -714,6 +718,17 @@ function toggleCompareLayout() {
         button.style.background = "#168bff";
         button.style.color = "white";
         button.style.border = "1px solid #0875df";
+
+        videoBox.classList.remove("expanded");
+        videoBox.classList.remove("mobile-fullscreen");
+
+        const expandButton = document.getElementById("expandButton");
+        expandButton.textContent = "⛶";
+        expandButton.classList.remove("expanded-button");
+
+        if (document.fullscreenElement) {
+            document.exitFullscreen();
+        }
 
         videoBox.classList.add("vertical-compare");
 
@@ -1363,10 +1378,15 @@ async function toggleCompareMode() {
             return;
         }
     }
-    
+
     compareMode = !compareMode;
 
+    if (!compareMode) {
+        await closeVideoFullscreen();
+    }
+
     if (compareMode) {
+
         clearTimeout(normalPlayTimer);
         normalPlayTimer = null;
         normalPlayWaiting = false;
