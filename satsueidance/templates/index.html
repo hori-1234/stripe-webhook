@@ -1426,7 +1426,69 @@ async function replayCompareVideos() {
 
 const compareVideoElement = document.getElementById("compareVideo");
 
+const fullscreenComparePlayButton =
+    document.getElementById("fullscreenComparePlayButton");
+
+compareVideoElement.addEventListener("play", () => {
+    if (fullscreenComparePlayButton) {
+        fullscreenComparePlayButton.textContent = "Ⅱ";
+    }
+});
+
+compareVideoElement.addEventListener("pause", () => {
+    if (fullscreenComparePlayButton) {
+        fullscreenComparePlayButton.textContent = "▶";
+    }
+});
+
+compareVideoElement.addEventListener("ended", () => {
+    if (fullscreenComparePlayButton) {
+        fullscreenComparePlayButton.textContent = "▶";
+    }
+
+    const videoBox = document.getElementById("videoBox");
+
+    const isFullscreen =
+        document.fullscreenElement === videoBox ||
+        videoBox.classList.contains("mobile-fullscreen");
+
+    if (!compareMode ||
+        compareLayout !== "overlay" ||
+        !isFullscreen) {
+        return;
+    }
+
+    const sourceVideo = document.getElementById("sourceVideo");
+    const player = document.getElementById("youtubePlayer");
+
+    const isLocalVideo =
+        sourceVideo &&
+        sourceVideo.style.display !== "none" &&
+        sourceVideo.src;
+
+    const isNico =
+        player &&
+        player.tagName === "IFRAME" &&
+        player.src.startsWith("https://embed.nicovideo.jp/");
+
+    if (isLocalVideo) {
+        sourceVideo.pause();
+    } else if (isNico) {
+        sendNicoCommand("pause");
+        nicoPlayerStatus = 3;
+    } else if (
+        youtubePlayerApi &&
+        typeof youtubePlayerApi.pauseVideo === "function"
+    ) {
+        youtubePlayerApi.pauseVideo();
+    }
+
+    document.getElementById("comparePlayButton").textContent = "▶";
+    document.getElementById("status").textContent = "一時停止中";
+});
+    
 compareVideoElement.addEventListener("timeupdate", () => {
+
     if (!compareMode) {
         return;
     }
@@ -1481,10 +1543,6 @@ compareVideoElement.addEventListener("timeupdate", () => {
     }
 });
 
-compareVideoElement.addEventListener("ended", () => {
-    // 録画動画の終了では元動画を停止しない。
-    // 停止の基準はYouTube・ニコニコ・端末動画の終了。
-});
 
 async function toggleCompareMode() { 
     const button = document.getElementById("compareButton");
