@@ -824,10 +824,48 @@ let recordingCanvas = null;
 let recordingContext = null;
 let recordingStream = null;
 let recordingAnimationId = null;
+
 let compareMode = false;
 let screenAdjustMode = false;
 
+const compareTopButtons = [
+    "compareModeVisibility",
+    "comparePlayButton",
+    "compareReplayButton",
+    "expandButton"
+].map(id => {
+    const element = document.getElementById(id);
+    const marker = document.createComment(id + "-original-position");
+
+    element.parentNode.insertBefore(marker, element);
+
+    return { element, marker };
+});
+
+function updateCompareTopControls() {
+    const top = document.getElementById("compareTopControls");
+
+    const mobileLandscape = window.matchMedia(
+        "(max-width: 1000px) and (orientation: landscape) and (pointer: coarse)"
+    ).matches;
+
+    const moveToTop = compareMode && mobileLandscape;
+
+    compareTopButtons.forEach(({ element, marker }) => {
+        if (moveToTop) {
+            top.appendChild(element);
+        } else {
+            marker.parentNode.insertBefore(element, marker.nextSibling);
+        }
+    });
+
+    top.style.display = moveToTop ? "flex" : "none";
+}
+
+window.addEventListener("resize", updateCompareTopControls);
+
 function updateCompareVisibility() {
+
     const sourceVideo = document.getElementById("sourceVideo");
     const youtubePlayer = document.getElementById("youtubePlayer");
 
@@ -1884,6 +1922,7 @@ async function toggleCompareMode() {
         : "通常モード";
 
     updateCompareVisibility();
+    updateCompareTopControls();
 }
 
 let youtubePlayerApi = null;
