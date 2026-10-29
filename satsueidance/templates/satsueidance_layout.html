@@ -178,6 +178,22 @@
         onclick="document.getElementById('comparePlayButton').click()"
         style="display:none;"
     >▶ / Ⅱ</button>
+
+    <div id="fullscreenCompareProgress" style="display:none;">
+        <span id="fullscreenCompareCurrent">0:00</span>
+
+        <input
+            type="range"
+            id="fullscreenCompareProgressBar"
+            min="0"
+            max="0"
+            step="0.1"
+            value="0"
+            oninput="seekFullscreenCompareVideo(this.value)"
+        >
+
+        <span id="fullscreenCompareDuration">0:00</span>
+    </div>
 </div>
 
     </div>
