@@ -1754,6 +1754,7 @@ async function toggleCompareMode() {
     compareStartControls.style.display = compareMode ? "block" : "none";
 
     document.getElementById("sourceVideoHeading").style.display = compareMode ? "none" : "block";
+document.getElementById("sourceVideoNotice").style.display = compareMode ? "none" : "block";
 
     const flipButton = document.getElementById("flipButton");
     flipButton.style.display = compareMode ? "none" : "inline-block";
@@ -2928,6 +2929,10 @@ document.addEventListener('fullscreenchange', () => {
         }
     }, 30000);
 })();
+
+document.getElementById("compareModeTop").appendChild(
+    document.getElementById("compareModeVisibility")
+);
 </script>
 
 <script src="https://www.youtube.com/iframe_api"></script>
