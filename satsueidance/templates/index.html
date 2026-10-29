@@ -418,12 +418,14 @@
             color: #1d4ed8;
             font-weight: 600;
         }
-
-        @media screen and (max-width: 1000px) and (pointer: coarse) {
-            body:has(#compareButton.compare-active) #compareSpeedControls > div:first-child,
-            body:has(#compareButton.compare-active) #compareStartControls > p:first-child,
-            body:has(#compareButton.compare-active) #compareStartControls > p:not(:first-child):not(:last-child) {
+        
+        @media screen and (pointer: coarse) {
+            #compareModeVisibility > span,
+            #compareSpeedControls > details > summary,
+            #compareControls > div:first-child > span,
+            #compareStartControls > p:first-child {
                 font-size: 16px !important;
+                font-weight: normal !important;
             }
         }
 
