@@ -1771,6 +1771,12 @@ async function toggleCompareMode() {
     const uploadControls = document.getElementById("uploadControls");
     uploadControls.style.display = compareMode ? "none" : "block";
 
+    document.getElementById("sourceVideoHeading").style.display =
+        compareMode ? "none" : "block";
+
+    document.getElementById("sourceVideoNotice").style.display =
+        compareMode ? "none" : "block";
+
     const compareVideo = document.getElementById("compareVideo");
     
     if (compareMode) {
