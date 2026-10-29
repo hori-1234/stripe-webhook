@@ -723,11 +723,15 @@ function toggleCompareLayout() {
         button.style.background = "#25a58d";
         button.style.color = "white";
         button.style.border = "1px solid #1f907b";
-
+        
         videoBox.classList.remove("vertical-compare");
     }
-}
 
+    const expandButton = document.getElementById("expandButton");
+    expandButton.style.display =
+        compareLayout === "overlay" ? "inline-block" : "none";
+}
+    
 function toggleScreenAdjustMode() {
     screenAdjustMode = !screenAdjustMode;
 
@@ -1420,9 +1424,10 @@ async function toggleCompareMode() {
 
     compareSpeedControls.style.display =
         (isSourceVideo || isYouTube) ? "block" : "none";
-
+    
     const expandButton = document.getElementById("expandButton");
-    expandButton.style.display = compareMode ? "none" : "inline-block";
+    expandButton.style.display =
+        (!compareMode || compareLayout === "overlay") ? "inline-block" : "none";
     
     const compareStartControls = document.getElementById("compareStartControls");
     compareStartControls.style.display = compareMode ? "block" : "none";
@@ -2468,7 +2473,9 @@ async function closeVideoFullscreen() {
     box.classList.remove('expanded');
 
     const expandButton = document.getElementById('expandButton');
-    expandButton.textContent = '拡大';
+    expandButton.textContent = '⛶';
+    expandButton.title = 'ﾌﾙ';
+    expandButton.setAttribute('aria-label', 'ﾌﾙ');
     expandButton.classList.remove('expanded-button');
 }
 
@@ -2488,7 +2495,9 @@ document.addEventListener('fullscreenchange', () => {
         box.classList.remove('mobile-fullscreen');
 
         const expandButton = document.getElementById('expandButton');
-        expandButton.textContent = '拡大';
+        expandButton.textContent = '⛶';
+        expandButton.title = 'ﾌﾙ';
+        expandButton.setAttribute('aria-label', 'ﾌﾙ');
         expandButton.classList.remove('expanded-button');
     }
 });
