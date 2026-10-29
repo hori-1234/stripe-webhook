@@ -1753,6 +1753,8 @@ async function toggleCompareMode() {
     const compareStartControls = document.getElementById("compareStartControls");
     compareStartControls.style.display = compareMode ? "block" : "none";
 
+    document.getElementById("sourceVideoHeading").style.display = compareMode ? "none" : "block";
+
     const flipButton = document.getElementById("flipButton");
     flipButton.style.display = compareMode ? "none" : "inline-block";
 
