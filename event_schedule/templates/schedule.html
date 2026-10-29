@@ -1802,16 +1802,20 @@ body.vertical-mode .event-bar-time {
                     font-size: 14px;
                     line-height: 1.8;
                 ">
-                    
+                
                     <div style="color: #666; font-size: 12px;">
                         {{ news.registered_at }}
                         {% if news.type == "出演者追加" %}
                             追加
+                        {% elif news.type == "出演者辞退" %}
+                            辞退
+                        {% elif news.type == "開催中止" %}
+                            中止
                         {% else %}
                             登録
                         {% endif %}
                     </div>
-
+            
                     <div>
                         <strong>【{{ news.type }}】</strong>
                         <a href="/schedule?event_id={{ news.id }}"
@@ -1824,6 +1828,10 @@ body.vertical-mode .event-bar-time {
                     {% if news.type == "出演者追加" %}
                         <div>
                             追加出演者：{{ news.performer_name }}
+                        </div>
+                    {% elif news.type == "出演者辞退" %}
+                        <div>
+                            辞退出演者：{{ news.performer_name }}
                         </div>
                     {% endif %}
 
