@@ -219,7 +219,7 @@
     </div>
 </div>
 
-<button id="expandButton" onclick="
+<button id="expandButton" title="ﾌﾙ" aria-label="ﾌﾙ" onclick="
 
     const box = document.getElementById('videoBox');
 
@@ -255,14 +255,14 @@
         }
 
     } else {
-
         box.classList.toggle('expanded');
         const expanded = box.classList.contains('expanded');
-        this.textContent = expanded ? '戻す' : '拡大';
+        this.textContent = expanded ? '×' : '⛶';
+        this.title = expanded ? '閉じる' : 'ﾌﾙ';
+        this.setAttribute('aria-label', expanded ? '閉じる' : 'ﾌﾙ');
         this.classList.toggle('expanded-button', expanded);
-
     }
-">拡大</button>
+">⛶</button>
     
 <div id="compareStartControls" style="display:none;">
     
