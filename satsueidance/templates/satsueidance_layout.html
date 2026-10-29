@@ -163,14 +163,21 @@
         preload="metadata"
         style="display:none;"
     ></video>
-
+    
     <button
         id="fullscreenCloseButton"
         type="button"
         onclick="closeVideoFullscreen()"
         style="display:none;"
-    
+
     >×</button>
+
+    <button
+        id="fullscreenComparePlayButton"
+        type="button"
+        onclick="document.getElementById('comparePlayButton').click()"
+        style="display:none;"
+    >▶ / Ⅱ</button>
 </div>
 
     </div>
@@ -222,11 +229,15 @@
 <button id="expandButton" title="ﾌﾙ" aria-label="ﾌﾙ" onclick="
 
     const box = document.getElementById('videoBox');
-
+    
     if (!compareMode || compareLayout === 'overlay') {
 
+        box.classList.toggle(
+            'compare-overlay-active',
+            compareMode && compareLayout === 'overlay'
+        );
+
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    
 
         if (isIOS) {
 
