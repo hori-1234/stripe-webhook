@@ -86,11 +86,13 @@
 
     <details id="adjustControls">
         
-        <summary>調整</summary>
+        <summary>比較動画調整</summary>
 
-        <details>
+        <div id="compareAdjustTabs">
+
+         <details name="compareAdjustTab">
         
-            <summary>撮影動画の透明度：<span id="opacityValue">50%</span></summary>
+            <summary><span>▣</span><span>透過</span></summary>
 
             <input
                 type="range"
@@ -100,10 +102,11 @@
                 value="50"
                 oninput="changeCompareOpacity(this.value)"
             >
+            <span id="opacityValue">50%</span>
         </details>
 
-        <details>
-            <summary>横方向（X軸）</summary>
+        <details name="compareAdjustTab">
+            <summary><span>↔</span><span>移:横</span></summary>
             <input
                 type="range"
                 id="compareX"
@@ -114,8 +117,8 @@
             >
         </details>
 
-        <details>
-            <summary>縦方向（Y軸）</summary>
+        <details name="compareAdjustTab">
+            <summary><span>↕</span><span>移:縦</span></summary>
             <input
                 type="range"
                 id="compareY"
@@ -126,8 +129,8 @@
             >
         </details>
 
-        <details>
-            <summary>撮影動画のサイズ：<span id="compareSizeValue">100%</span></summary>
+        <details name="compareAdjustTab">
+            <summary><span>⤢</span><span>縮尺</span></summary>
             <input
                 type="range"
                 id="compareSize"
@@ -136,7 +139,11 @@
                 value="100"
                 oninput="updateComparePosition()"
             >
+            <span id="compareSizeValue">100%</span>
         </details>
+            
+        </div>
+
     </details>
 
 </div>
