@@ -61,6 +61,19 @@
             #sourceLandscapeVideo {
                 display: none;
             }
+
+            body #recordedVideo {
+                display: none;
+            }
+
+            #recordingResultControls summary {
+                display: none;
+            }
+
+            #recordingResultControls details {
+                border-top: 1px solid #ccc;
+                padding-top: 12px;
+            }
             
             body:not(.mobile-record-selected) #cameraControls,
             body:not(.mobile-record-selected):not(.mobile-record-completed) #recordingResultControls,
@@ -883,13 +896,40 @@
 <script>
 
 function selectMobileRecording() {
+    if (recorder && recorder.state === "recording") {
+        return;
+    }
+
     document.body.classList.add("mobile-record-selected");
     document.body.classList.remove("mobile-upload-selected");
     document.body.classList.remove("mobile-record-completed");
 
-    if (!compareMode && !recorder?.state?.includes("recording")) {
-        document.getElementById("startButton").disabled = false;
+    if (recordingUrl) {
+        URL.revokeObjectURL(recordingUrl);
+        recordingUrl = null;
     }
+
+    const recordedVideo = document.getElementById("recordedVideo");
+    recordedVideo.removeAttribute("src");
+    recordedVideo.load();
+
+    const recordingInfo = document.getElementById("recordingInfo");
+    if (recordingInfo) {
+        recordingInfo.textContent = "";
+    }
+
+    const fileInfo = document.getElementById("recordingFileInfo");
+    if (fileInfo) {
+        fileInfo.style.display = "none";
+    }
+
+    const downloadLink = document.getElementById("downloadLink");
+    downloadLink.removeAttribute("href");
+    downloadLink.style.display = "none";
+
+    document.getElementById("startButton").disabled = !mobileRecordingOrientation;
+
+    updateCompareVisibility();
 }
 
 function selectMobileUpload() {
@@ -937,6 +977,45 @@ function updateMobileSourceUrlDetails() {
 
 updateMobileSourceUrlDetails();
 window.addEventListener("resize", updateMobileSourceUrlDetails);
+
+const compareSourceElement = document.getElementById("compareSourceVisibility");
+const compareModeElement = document.getElementById("compareModeVisibility");
+const recordingResultElement = document.getElementById("recordingResultControls");
+
+const compareSourceOriginalPosition = document.createComment("compare-source-original-position");
+const recordingResultOriginalPosition = document.createComment("recording-result-original-position");
+
+compareSourceElement.parentNode.insertBefore(
+    compareSourceOriginalPosition,
+    compareSourceElement
+);
+
+recordingResultElement.parentNode.insertBefore(
+    recordingResultOriginalPosition,
+    recordingResultElement
+);
+
+function updateMobileCompareSourcePosition() {
+    const recordingResult = document.getElementById("recordingResultControls");
+
+    if (window.matchMedia("(max-width: 768px) and (orientation: portrait)").matches) {
+        compareModeElement.insertAdjacentElement("afterend", compareSourceElement);
+        compareSourceElement.insertAdjacentElement("afterend", recordingResult);
+    } else {
+        compareSourceOriginalPosition.parentNode.insertBefore(
+            compareSourceElement,
+            compareSourceOriginalPosition.nextSibling
+        );
+
+        recordingResultOriginalPosition.parentNode.insertBefore(
+            recordingResultElement,
+            recordingResultOriginalPosition.nextSibling
+        );
+    }
+}
+
+updateMobileCompareSourcePosition();
+window.addEventListener("resize", updateMobileCompareSourcePosition);
 
 function showVideoLoading() {
     document.getElementById("videoLoadingOverlay").style.display = "flex";
@@ -1106,9 +1185,19 @@ function updateCompareVisibility() {
              typeof youtubePlayerApi.getVideoData === "function" &&
              youtubePlayerApi.getVideoData().video_id)
         );
-
+    
     const hasCompareVideo =
         !!recordingUrl || !!uploadedVideoUrl;
+
+    if (window.matchMedia("(max-width: 768px)").matches && !compareMode) {
+        if (recordingUrl && !uploadedVideoUrl && compareVideoSource !== "recording") {
+            changeCompareSource("0");
+            document.getElementById("compareSourceSwitch").value = "0";
+        } else if (uploadedVideoUrl && !recordingUrl && compareVideoSource !== "upload") {
+            changeCompareSource("1");
+            document.getElementById("compareSourceSwitch").value = "1";
+        }
+    }
 
     const compareModeVisibility =
         document.getElementById("compareModeVisibility");
@@ -1120,10 +1209,14 @@ function updateCompareVisibility() {
         compareModeVisibility.style.display =
             (hasSourceVideo && hasCompareVideo) ? "inline" : "none";
     }
-
+    
     if (compareSourceVisibility) {
+        const isMobile = window.matchMedia("(max-width: 768px)").matches;
+
         compareSourceVisibility.style.display =
-            (hasSourceVideo && !compareMode) ? "block" : "none";
+            (hasSourceVideo && !compareMode &&
+             (!isMobile || (recordingUrl && uploadedVideoUrl)))
+                ? "block" : "none";
     }
 }
 
