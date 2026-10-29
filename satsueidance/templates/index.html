@@ -21,11 +21,20 @@
                 margin-right: auto;
             }
         }
-
+        
         @media screen and (max-width: 768px) {
             #mobileIntro {
                 display: block !important;
             }
+
+            body:not(.mobile-source-ready) #normalPlayButton,
+            body:not(.mobile-source-ready) #normalPlayDelay,
+            body:not(.mobile-source-ready) #normalPlayDelay + span,
+            body:not(.mobile-source-ready) #expandButton,
+            body:not(.mobile-source-ready) #flipButton {
+                display: none !important;
+            }
+            
 
             #sourceVideoHeading,
             #sourceVideoNotice {
