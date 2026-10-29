@@ -1655,10 +1655,42 @@ def schedule():
             (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo')::date
     """)
 
-
     today_views = cur.fetchone()[0]
 
+    # 直近7日間の出演者追加情報を取得
+    cur.execute("""
+        SELECT
+            c.event_id,
+            e.event_date,
+            e.location,
+            e.event_name,
+            c.performer_name,
+            c.updated_at
+        FROM event_schedule_changes c
+        JOIN event_schedules e
+            ON e.id = c.event_id
+        WHERE c.change_type = 'addition'
+          AND c.is_active = TRUE
+          AND c.updated_at >= CURRENT_TIMESTAMP - INTERVAL '7 days'
+        ORDER BY c.updated_at DESC
+        LIMIT 100
+    
+    """)
+
+    addition_news = [
+        {
+            "id": row[0],
+            "event_date": row[1],
+            "location": row[2],
+            "event_name": row[3],
+            "performer_name": row[4],
+            "updated_at": row[5]
+        }
+        for row in cur.fetchall()
+    ]
+
     # 直近7日間に新規登録されたイベントを取得
+    
     cur.execute("""
         SELECT
             id,
@@ -1668,7 +1700,8 @@ def schedule():
             TO_CHAR(
                 created_at AT TIME ZONE 'Asia/Tokyo',
                 'MM/DD HH24:MI'
-            )
+            ),
+            created_at
         FROM event_schedules
         WHERE created_at >= CURRENT_TIMESTAMP - INTERVAL '7 days'
         ORDER BY created_at DESC, id DESC
@@ -1682,9 +1715,37 @@ def schedule():
             "location": row[2],
             "event_name": row[3],
             "registered_at": row[4]
+            "sort_at": row[5]
         }
         for row in cur.fetchall()
     ]
+
+    # 新規登録イベントを新着情報形式に変換
+    for news in schedule_news:
+        news["type"] = "新規登録"
+        news["performer_name"] = ""
+
+    # 出演者追加情報を新着一覧へ追加
+    for news in addition_news:
+        schedule_news.append({
+            "id": news["id"],
+            "event_date": news["event_date"],
+            "location": news["location"],
+            "event_name": news["event_name"],
+            "registered_at": news["updated_at"].astimezone(
+                ZoneInfo("Asia/Tokyo")
+            ).strftime("%m/%d %H:%M"),
+            "type": "出演者追加",
+            "sort_at": news["updated_at"],
+            
+            "performer_name": news["performer_name"]
+        })
+
+    # 新規登録と出演者追加を日時の新しい順に並べる
+    schedule_news.sort(
+        key=lambda news: news["sort_at"],
+        reverse=True
+    )
 
     cur.close()
     conn.close()
