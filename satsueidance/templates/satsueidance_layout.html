@@ -223,9 +223,10 @@
 
     const box = document.getElementById('videoBox');
 
-    if (!compareMode) {
+    if (!compareMode || compareLayout === 'overlay') {
 
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    
 
         if (isIOS) {
 
