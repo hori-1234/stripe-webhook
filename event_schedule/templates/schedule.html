@@ -1772,6 +1772,21 @@ body.vertical-mode .event-bar-time {
     </div>
 </div>
 
+<style>
+    @keyframes schedule-news-blink {
+        0%, 100% {
+            background-color: #fff;
+        }
+        50% {
+            background-color: #ffeb3b;
+        }
+    }
+
+    #schedule-news > summary {
+        animation: schedule-news-blink 3s ease-in-out infinite;
+    }
+</style>
+
 <details id="schedule-news" style="margin: 10px 0 15px;">
     <summary style="
         display: inline-block;
