@@ -455,12 +455,12 @@
         #videoBox.mobile-fullscreen #fullscreenCloseButton {
             display: block !important;
         }
-
+        
         #videoBox:fullscreen.compare-overlay-active #fullscreenComparePlayButton,
         #videoBox.mobile-fullscreen.compare-overlay-active #fullscreenComparePlayButton {
             display: block !important;
             position: absolute;
-            bottom: 20px;
+            bottom: 65px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 10002;
@@ -472,6 +472,35 @@
             font-size: 18px;
             cursor: pointer;
         }
+
+        #videoBox:fullscreen.compare-overlay-active #fullscreenCompareProgress,
+        #videoBox.mobile-fullscreen.compare-overlay-active #fullscreenCompareProgress {
+            display: flex !important;
+            position: absolute;
+            bottom: 10px;
+            left: 2%;
+            width: 96%;
+            box-sizing: border-box;
+            align-items: center;
+            gap: 10px;
+            z-index: 10002;
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, 0.75);
+            color: white;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        #fullscreenCompareProgressBar {
+            flex: 1;
+            min-width: 0;
+            width: auto;
+            margin: 0;
+            padding: 0;
+            accent-color: #25a58d;
+            cursor: pointer;
+        }
+        
 
         #videoBox.expanded #fullscreenCloseButton {
             display: none !important;
@@ -1062,8 +1091,61 @@ function changeCompareSpeed(speed) {
 
     status.textContent = "再生速度：" + actualSpeed + "倍";
 }
-        
+
+function seekFullscreenCompareVideo(value) {
+    if (!compareMode || compareLayout !== "overlay") {
+        return;
+    }
+
+    const compareVideo = document.getElementById("compareVideo");
+    const sourceVideo = document.getElementById("sourceVideo");
+    const player = document.getElementById("youtubePlayer");
+
+    const duration = compareVideo.duration;
+
+    if (!Number.isFinite(duration) || duration <= 0) {
+        return;
+    }
+
+    const newTime = Math.max(0, Math.min(Number(value), duration));
+
+    if (!Number.isFinite(newTime)) {
+        return;
+    }
+
+    // 録画動画を移動
+    compareVideo.currentTime = newTime;
+
+    // 本家動画も同じ秒数だけ移動
+    if (sourceVideo &&
+        sourceVideo.style.display !== "none" &&
+        sourceVideo.src) {
+
+        sourceVideo.currentTime = Math.min(
+            newTime,
+            Number.isFinite(sourceVideo.duration)
+                ? sourceVideo.duration
+                : newTime
+        );
+
+    } else if (
+        player &&
+        player.src.startsWith("https://embed.nicovideo.jp/")
+    ) {
+
+        sendNicoCommand("seek", { time: newTime });
+
+    } else if (
+        youtubePlayerApi &&
+        typeof youtubePlayerApi.seekTo === "function"
+    ) {
+
+        youtubePlayerApi.seekTo(newTime, true);
+    }
+}
+
 function setCompareStartTime() {
+
     const compareVideo = document.getElementById("compareVideo");
     const slider = document.getElementById("compareStartTime");
     const startValue = document.getElementById("compareStartValue");
@@ -1365,12 +1447,38 @@ compareVideoElement.addEventListener("timeupdate", () => {
 
     startValue.textContent =
         startTime.toFixed(1) + "秒 / " + duration.toFixed(1) + "秒";
-
+    
     progressSlider.max = duration;
     progressSlider.value = currentTime;
 
     currentValue.textContent =
         currentTime.toFixed(1) + "秒 / " + duration.toFixed(1) + "秒";
+
+    const fullscreenProgressBar =
+        document.getElementById("fullscreenCompareProgressBar");
+
+    const fullscreenCurrent =
+        document.getElementById("fullscreenCompareCurrent");
+
+    const fullscreenDuration =
+        document.getElementById("fullscreenCompareDuration");
+
+    if (fullscreenProgressBar && fullscreenCurrent && fullscreenDuration) {
+
+        fullscreenProgressBar.max = duration;
+        fullscreenProgressBar.value = currentTime;
+
+        const formatTime = (seconds) => {
+            const total = Math.floor(seconds);
+            const minutes = Math.floor(total / 60);
+            const remainingSeconds = total % 60;
+
+            return minutes + ":" + String(remainingSeconds).padStart(2, "0");
+        };
+
+        fullscreenCurrent.textContent = formatTime(currentTime);
+        fullscreenDuration.textContent = formatTime(duration);
+    }
 });
 
 compareVideoElement.addEventListener("ended", () => {
