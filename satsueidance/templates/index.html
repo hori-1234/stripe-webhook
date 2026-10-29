@@ -32,7 +32,6 @@
                 display: none !important;
             }
 
-        @media screen and (max-width: 768px) and (orientation: portrait) {
             #mobileIntro {
                 display: block !important;
             }
@@ -48,6 +47,12 @@
                 margin: 12px 0;
                 font-size: 18px;
                 color: #24483f;
+            }
+
+            body.mobile-source-ready #mobileSourceHeading,
+            body.mobile-source-ready #youtubeUrlControls,
+            body.mobile-source-ready #mobileIntro {
+                display: none !important;
             }
 
             #sourceUrlDetails > summary {
@@ -69,7 +74,7 @@
                 display: none;
             }
             
-            #sourceLandscapeVideo {
+            body:not(.mobile-source-ready) #sourceLandscapeVideo {
                 display: none;
             }
 
@@ -86,12 +91,16 @@
                 padding-top: 12px;
             }
             
-            body:not(.mobile-record-selected) #cameraControls,
+            body:not(.mobile-record-selected):not(.mobile-record-completed) #cameraControls,
             body:not(.mobile-record-selected):not(.mobile-record-completed) #recordingResultControls,
             body:not(.mobile-upload-selected) #uploadControls,
             body:not(.mobile-source-ready) #compareSourceVisibility,
             body:not(.mobile-source-ready) #compareModeVisibility {
                 display: none !important;
+            }
+
+            body.mobile-upload-selected #uploadControls {
+                display: block !important;
             }
 
             body.mobile-source-ready #mobileCompareHeading {
@@ -105,6 +114,13 @@
                 display: flex !important;
                 gap: 12px;
                 margin: 12px 0 20px;
+            }
+
+            body.mobile-record-selected #mobileCompareHeading,
+            body.mobile-record-selected #mobileCompareSelection,
+            body.mobile-upload-selected #mobileCompareHeading,
+            body.mobile-upload-selected #mobileCompareSelection {
+                display: none !important;
             }
 
             #mobileCompareSelection button {
@@ -128,7 +144,7 @@
             }
             
             body.mobile-record-selected #cameraLandscapeVideo {
-                display: none !important;
+                display: block !important;
             }
             
             body.mobile-record-selected #cameraButton {
@@ -965,6 +981,8 @@ function selectMobileRecordingOrientation(orientation) {
 
     document.getElementById("mobileLandscapeButton").style.background =
         orientation === "landscape" ? "#2563eb" : "#25a58d";
+
+    document.getElementById("startButton").disabled = false;
 }
 
 function isMobileRecordingOrientationValid() {
@@ -1000,8 +1018,14 @@ const compareSourceElement = document.getElementById("compareSourceVisibility");
 const compareModeElement = document.getElementById("compareModeVisibility");
 const recordingResultElement = document.getElementById("recordingResultControls");
 
+const compareHeadingElement = document.getElementById("mobileCompareHeading");
+const compareSelectionElement = document.getElementById("mobileCompareSelection");
+const sourceVideoElement = document.getElementById("sourceLandscapeVideo");
+
 const compareSourceOriginalPosition = document.createComment("compare-source-original-position");
 const recordingResultOriginalPosition = document.createComment("recording-result-original-position");
+const compareHeadingOriginalPosition = document.createComment("compare-heading-original-position");
+const compareSelectionOriginalPosition = document.createComment("compare-selection-original-position");
 
 compareSourceElement.parentNode.insertBefore(
     compareSourceOriginalPosition,
@@ -1013,13 +1037,39 @@ recordingResultElement.parentNode.insertBefore(
     recordingResultElement
 );
 
+compareHeadingElement.parentNode.insertBefore(
+    compareHeadingOriginalPosition,
+    compareHeadingElement
+);
+
+compareSelectionElement.parentNode.insertBefore(
+    compareSelectionOriginalPosition,
+    compareSelectionElement
+);
+
 function updateMobileCompareSourcePosition() {
     const recordingResult = document.getElementById("recordingResultControls");
 
     if (window.matchMedia("(max-width: 768px) and (orientation: portrait)").matches) {
+
+        sourceVideoElement.insertAdjacentElement("beforebegin", compareHeadingElement);
+        compareHeadingElement.insertAdjacentElement("afterend", compareSelectionElement);
+
         compareModeElement.insertAdjacentElement("afterend", compareSourceElement);
         compareSourceElement.insertAdjacentElement("afterend", recordingResult);
+
     } else {
+
+        compareHeadingOriginalPosition.parentNode.insertBefore(
+            compareHeadingElement,
+            compareHeadingOriginalPosition.nextSibling
+        );
+
+        compareSelectionOriginalPosition.parentNode.insertBefore(
+            compareSelectionElement,
+            compareSelectionOriginalPosition.nextSibling
+        );
+
         compareSourceOriginalPosition.parentNode.insertBefore(
             compareSourceElement,
             compareSourceOriginalPosition.nextSibling
@@ -3219,7 +3269,6 @@ async function startRecording() {
                 cameraButton.classList.remove("camera-active");
             }
 
-            document.body.classList.remove("mobile-record-selected");
             document.body.classList.add("mobile-record-completed");
         }
     };
