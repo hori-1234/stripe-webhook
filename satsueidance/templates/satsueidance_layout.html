@@ -8,6 +8,15 @@
     >使用方法</a>
 </h2>
 
+<div id="mobileIntro" style="display:none;">
+    <p style="font-weight:bold; margin:8px 0;">
+        お手本動画と自分の動きを重ねて、ダンスをチェック！
+    </p>
+    <p style="font-size:13px; margin:4px 0 16px;">
+        インカメラで撮影した動画や、端末に保存した動画を使って比較できます。
+    </p>
+</div>
+
 <div id="compareTopControls" style="display:none; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:12px;"></div>
 
 <div id="sourceLandscapeLayout">
@@ -21,9 +30,13 @@
     ※本家動画を選択してください。
 </p>
 
+<h3 id="mobileSourceHeading" style="display:none;">
+    本家動画を選択してください
+</h3>
+
 <div id="youtubeUrlControls">
 
-    <details>
+    <details id="sourceUrlDetails">
 
         <summary>YouTube・ニコニコ動画のURL</summary>
 
@@ -32,9 +45,9 @@
         <button onclick="document.getElementById('youtubeUrl').value = ''">クリア</button>
         <button onclick="copyYoutubeUrl()">URLコピー</button>
     </details>
-
-    <details>
-        <summary>端末から</summary>
+    
+    <details id="sourceFileDetails">
+        <summary>端末からアップロード動画</summary>
 
         <input
             type="file"
@@ -364,7 +377,22 @@
 
 <hr class="compare-divider" style="border:0; border-top:2px solid #b8dcd0; margin:24px 0 16px;">
 
+<h3 id="mobileCompareHeading" style="display:none;">
+    比較動画を選択してください
+</h3>
+
+<div id="mobileCompareSelection" style="display:none;">
+    <button type="button" id="mobileRecordSelectButton" onclick="selectMobileRecording()">
+        録画
+    </button>
+
+    <button type="button" id="mobileUploadSelectButton" onclick="selectMobileUpload()">
+        端末
+    </button>
+</div>
+
 <div id="cameraControls">
+
     <div id="cameraLandscapeControls">
         <h3 style="background:linear-gradient(to bottom, #ffffff, #2563eb); color:#222; padding:10px 12px; border-radius:6px;">
             比較動画
@@ -379,18 +407,32 @@
          </h3>
 
         <button id="cameraButton" onclick="toggleCamera()">カメラ起動</button>
+
     <button id="cameraFlipButton" onclick="
         const camera = document.getElementById('camera');
         const flipped = camera.style.transform !== 'scaleX(-1)';
         camera.style.transform = flipped ? 'scaleX(-1)' : 'scaleX(1)';
-        this.textContent = flipped ? '反転中' : '通常';
-        
-        this.classList.toggle('is-flipped', flipped);
-    ">通常</button>
-    </div>
+        this.textContent = flipped ? 'カメラ反転中' : 'カメラ反転';
 
+        this.classList.toggle('is-flipped', flipped);
+    ">カメラ反転</button>
+
+    </div>
+    
     <div id="cameraRecordingControls">
+
+        <div id="mobileRecordingOrientation" style="display:none;">
+            <button type="button" id="mobilePortraitButton" onclick="selectMobileRecordingOrientation('portrait')">
+                縦型撮影
+            </button>
+
+            <button type="button" id="mobileLandscapeButton" onclick="selectMobileRecordingOrientation('landscape')">
+                横型撮影
+            </button>
+        </div>
+
         <div id="recordingControls">
+        
 
         <button id="startButton" onclick="startRecording()" disabled>録画開始</button>
 
@@ -410,12 +452,35 @@
 </div>
 
 <p id="status">待機中</p>
-        
+
 <div id="recordingResultControls">
     <details>
         <summary>録画結果</summary>
 
         <video id="recordedVideo" controls playsinline></video>
+
+        <div id="recordingFileInfo" style="display:none; margin:12px 0;">
+
+            <div style="display:flex; gap:8px; text-align:center;">
+
+                <div style="flex:1;">
+                    <div>容量</div>
+                    <strong id="recordingFileSize">-- MB</strong>
+                </div>
+
+                <div style="flex:1;">
+                    <div>時間</div>
+                    <strong id="recordingDuration">--:--</strong>
+                </div>
+
+                <div style="flex:1;">
+                    <div>速度</div>
+                    <strong id="recordingBitrate">-- Mbps</strong>
+                </div>
+
+            </div>
+
+        </div>
 
         <a id="downloadLink" style="display:none;color:#8bc6ff;" download="dance-recording.mp4">録画動画をダウンロード</a>
     </details>
