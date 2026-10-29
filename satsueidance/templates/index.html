@@ -338,11 +338,16 @@
             #sourceLandscapeVideo {
                 padding-top: 76px;
             }
-
+            
             body:has(#compareButton.compare-active) #sourceLandscapeVideo {
                 padding-top: 0;
                 margin-top: 0;
                 transform: translateY(-90px);
+            }
+
+            body:has(#videoBox.mobile-fullscreen) #sourceLandscapeVideo,
+            body:has(#videoBox:fullscreen) #sourceLandscapeVideo {
+                transform: none;
             }
 
             #sourceLandscapeVideo .video-box {
