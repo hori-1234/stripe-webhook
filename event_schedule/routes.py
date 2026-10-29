@@ -1655,8 +1655,37 @@ def schedule():
             (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo')::date
     """)
 
+
     today_views = cur.fetchone()[0]
-                
+
+    # 直近7日間に新規登録されたイベントを取得
+    cur.execute("""
+        SELECT
+            id,
+            event_date,
+            location,
+            event_name,
+            TO_CHAR(
+                created_at AT TIME ZONE 'Asia/Tokyo',
+                'MM/DD HH24:MI'
+            )
+        FROM event_schedules
+        WHERE created_at >= CURRENT_TIMESTAMP - INTERVAL '7 days'
+        ORDER BY created_at DESC, id DESC
+        LIMIT 100
+    """)
+
+    schedule_news = [
+        {
+            "id": row[0],
+            "event_date": row[1],
+            "location": row[2],
+            "event_name": row[3],
+            "registered_at": row[4]
+        }
+        for row in cur.fetchall()
+    ]
+
     cur.close()
     conn.close()
         
@@ -1807,6 +1836,7 @@ def schedule():
         saved_date_memos=saved_date_memos,
         saved_diary_event_ids=saved_diary_event_ids,
         today_views=today_views,
+        schedule_news=schedule_news,
         memo_login_email=get_logged_in_memo_email(),
         show_google_link_prompt=should_show_google_link_prompt(),
         google_link_csrf_token=get_google_link_csrf_token(),
