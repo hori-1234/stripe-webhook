@@ -66,63 +66,6 @@
     </p>
 </div>
 
-
-    </div>
-
-    <div id="sourceLandscapeVideo">
-
-<div class="video-box" id="videoBox">
-    <iframe id="youtubePlayer" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>
-
-    <video
-        id="sourceVideo"
-        controls
-        playsinline
-        preload="metadata"
-        style="display:none;"
-    ></video>
-
-    <video
-        id="compareVideo"
-        muted
-        playsinline
-        preload="metadata"
-        style="display:none;"
-    ></video>
-    
-    <button
-        id="fullscreenCloseButton"
-        type="button"
-        onclick="closeVideoFullscreen()"
-        style="display:none;"
-
-    >×</button>
-
-    <button
-        id="fullscreenComparePlayButton"
-        type="button"
-        onclick="document.getElementById('comparePlayButton').click()"
-        style="display:none;"
-    >▶</button>
-
-
-    <div id="fullscreenCompareProgress" style="display:none;">
-        <span id="fullscreenCompareCurrent">0:00</span>
-
-        <input
-            type="range"
-            id="fullscreenCompareProgressBar"
-            min="0"
-            max="0"
-            step="0.1"
-            value="0"
-            oninput="seekFullscreenCompareVideo(this.value)"
-        >
-
-        <span id="fullscreenCompareDuration">0:00</span>
-    </div>
-</div>
-
 <div id="compareControls" style="display:none;">
 
     <div style="display:flex; align-items:center; justify-content:flex-start; gap:8px; margin:10px 0;">
@@ -205,6 +148,61 @@
 
 </div>
 
+    </div>
+
+    <div id="sourceLandscapeVideo">
+
+<div class="video-box" id="videoBox">
+    <iframe id="youtubePlayer" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>
+
+    <video
+        id="sourceVideo"
+        controls
+        playsinline
+        preload="metadata"
+        style="display:none;"
+    ></video>
+
+    <video
+        id="compareVideo"
+        muted
+        playsinline
+        preload="metadata"
+        style="display:none;"
+    ></video>
+    
+    <button
+        id="fullscreenCloseButton"
+        type="button"
+        onclick="closeVideoFullscreen()"
+        style="display:none;"
+
+    >×</button>
+
+    <button
+        id="fullscreenComparePlayButton"
+        type="button"
+        onclick="document.getElementById('comparePlayButton').click()"
+        style="display:none;"
+    >▶</button>
+
+
+    <div id="fullscreenCompareProgress" style="display:none;">
+        <span id="fullscreenCompareCurrent">0:00</span>
+
+        <input
+            type="range"
+            id="fullscreenCompareProgressBar"
+            min="0"
+            max="0"
+            step="0.1"
+            value="0"
+            oninput="seekFullscreenCompareVideo(this.value)"
+        >
+
+        <span id="fullscreenCompareDuration">0:00</span>
+    </div>
+</div>
 
     </div>
 </div>
