@@ -1768,9 +1768,79 @@ body.vertical-mode .event-bar-time {
         <a href="/schedule/request" class="add-button">
             追加依頼
         </a>
+    
     </div>
 </div>
-    
+
+<details id="schedule-news" style="margin: 10px 0 15px;">
+    <summary style="
+        display: inline-block;
+        padding: 10px 20px;
+        border: 1px solid #333;
+        border-radius: 4px;
+        background: #fff;
+        color: #222;
+        font-size: 16px;
+        cursor: pointer;
+    ">
+        ▽ 新着情報
+    </summary>
+
+    <div style="
+        margin-top: 10px;
+        padding: 12px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        background: #fff;
+    ">
+        {% if schedule_news %}
+
+            {% for news in schedule_news %}
+                <div style="
+                    padding: 10px 0;
+                    border-bottom: 1px solid #ddd;
+                    font-size: 14px;
+                    line-height: 1.8;
+                ">
+                    
+                    <div style="color: #666; font-size: 12px;">
+                        {{ news.registered_at }}
+                        {% if news.type == "出演者追加" %}
+                            追加
+                        {% else %}
+                            登録
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <strong>【{{ news.type }}】</strong>
+                        <a href="/schedule?event_id={{ news.id }}"
+                            
+                           style="color: #1767bd;">
+                            {{ news.event_name }}
+                        </a>
+                    </div>
+
+                    {% if news.type == "出演者追加" %}
+                        <div>
+                            追加出演者：{{ news.performer_name }}
+                        </div>
+                    {% endif %}
+
+                    <div>
+                        開催日：{{ news.event_date.strftime('%Y/%m/%d') }}
+                        　場所：{{ news.location }}
+                    </div>
+
+                </div>
+            {% endfor %}
+
+        {% else %}
+            <div>直近7日間の新着情報はありません。</div>
+        {% endif %}
+    </div>
+</details>
+
 <div class="schedule-area">
 
         <div class="time-header">
