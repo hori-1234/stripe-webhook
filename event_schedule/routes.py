@@ -1714,7 +1714,7 @@ def schedule():
             "event_date": row[1],
             "location": row[2],
             "event_name": row[3],
-            "registered_at": row[4]
+            "registered_at": row[4],
             "sort_at": row[5]
         }
         for row in cur.fetchall()
