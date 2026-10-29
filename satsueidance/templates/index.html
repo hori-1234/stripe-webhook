@@ -22,19 +22,21 @@
             }
         }
         
-        @media screen and (max-width: 768px) {
-            #mobileIntro {
-                display: block !important;
-            }
-
+        @media screen and (max-width: 768px) and (orientation: portrait) {
             body:not(.mobile-source-ready) #normalPlayButton,
             body:not(.mobile-source-ready) #normalPlayDelay,
             body:not(.mobile-source-ready) #normalPlayDelay + span,
             body:not(.mobile-source-ready) #expandButton,
-            body:not(.mobile-source-ready) #flipButton {
+            body:not(.mobile-source-ready) #flipButton,
+            body:not(.mobile-source-ready) #flipNotice {
                 display: none !important;
             }
-            
+
+        @media screen and (max-width: 768px) and (orientation: portrait) {
+            #mobileIntro {
+                display: block !important;
+            }
+
 
             #sourceVideoHeading,
             #sourceVideoNotice {
@@ -75,7 +77,7 @@
                 display: none;
             }
 
-            #recordingResultControls summary {
+            body:not(.mobile-source-ready) #sourceLandscapeVideo {
                 display: none;
             }
 
@@ -575,10 +577,10 @@
             color: #1d4ed8;
             font-weight: 600;
         }
-
+        
         @media screen and (max-width: 768px) and (orientation: portrait) {
-            #status,
-            .compare-divider {
+            body:not(.mobile-source-ready) #status,
+            body:not(.mobile-source-ready) .compare-divider {
                 display: none !important;
             }
         }
