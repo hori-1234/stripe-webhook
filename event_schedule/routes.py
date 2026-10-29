@@ -1691,9 +1691,27 @@ def schedule():
         for row in cur.fetchall()
     ]
 
-    # 直近7日間に新規登録されたイベントを取得
-    
+    # 直近7日間に編集されたイベントを取得
     cur.execute("""
+        SELECT
+            id,
+            event_date,
+            location,
+            event_name,
+            updated_at
+        FROM event_schedules
+        WHERE updated_at >= CURRENT_TIMESTAMP - INTERVAL '7 days'
+          AND updated_at > created_at
+        ORDER BY updated_at DESC
+        LIMIT 100
+    """)
+
+    updated_events = cur.fetchall()
+
+    # 直近7日間に新規登録されたイベントを取得
+
+    cur.execute("""
+
         SELECT
             id,
             event_date,
@@ -1721,13 +1739,29 @@ def schedule():
         }
         for row in cur.fetchall()
     ]
-
+    
     # 新規登録イベントを新着情報形式に変換
     for news in schedule_news:
         news["type"] = "新規登録"
         news["performer_name"] = ""
 
+    # 編集されたイベントを新着一覧へ追加
+    for row in updated_events:
+        schedule_news.append({
+            "id": row[0],
+            "event_date": row[1],
+            "location": row[2],
+            "event_name": row[3],
+            "registered_at": row[4].astimezone(
+                ZoneInfo("Asia/Tokyo")
+            ).strftime("%m/%d %H:%M"),
+            "type": "イベント更新",
+            "sort_at": row[4],
+            "performer_name": ""
+        })
+
     # 出演者追加情報を新着一覧へ追加
+
     for news in addition_news:
         schedule_news.append({
             "id": news["id"],
