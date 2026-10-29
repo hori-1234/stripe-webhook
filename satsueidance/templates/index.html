@@ -121,13 +121,6 @@
                 margin: 12px 0 20px;
             }
 
-            body.mobile-record-selected #mobileCompareHeading,
-            body.mobile-record-selected #mobileCompareSelection,
-            body.mobile-upload-selected #mobileCompareHeading,
-            body.mobile-upload-selected #mobileCompareSelection {
-                display: none !important;
-            }
-
             #mobileCompareSelection button {
                 flex: 1;
                 min-width: 0;
@@ -1057,7 +1050,7 @@ function updateMobileCompareSourcePosition() {
 
     if (window.matchMedia("(max-width: 768px) and (orientation: portrait)").matches) {
 
-        sourceVideoElement.insertAdjacentElement("beforebegin", compareHeadingElement);
+        sourceVideoElement.insertAdjacentElement("afterend", compareHeadingElement);
         compareHeadingElement.insertAdjacentElement("afterend", compareSelectionElement);
 
         compareModeElement.insertAdjacentElement("afterend", compareSourceElement);
