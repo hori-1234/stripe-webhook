@@ -1701,6 +1701,7 @@ def schedule():
             updated_at
         FROM event_schedules
         WHERE updated_at >= CURRENT_TIMESTAMP - INTERVAL '7 days'
+          AND created_at < CURRENT_TIMESTAMP - INTERVAL '7 days'
           AND updated_at > created_at
         ORDER BY updated_at DESC
         LIMIT 100
@@ -2553,8 +2554,34 @@ def schedule_edit_update(event_id):
                 streaming_available = %s,
                 flyer_thumbnail_key = %s,
                 flyer_image_key = %s,
+
                 updated_at = CURRENT_TIMESTAMP
             WHERE id = %s
+              AND (
+                  event_date,
+                  start_time,
+                  end_time,
+                  location,
+                  event_name,
+                  genre,
+                  performers,
+                  organizer_sns_url,
+                  streaming_available,
+                  flyer_thumbnail_key,
+                  flyer_image_key
+              ) IS DISTINCT FROM (
+                  %s::date,
+                  %s::time,
+                  %s::time,
+                  %s,
+                  %s,
+                  %s,
+                  %s,
+                  %s,
+                  %s::boolean,
+                  %s,
+                  %s
+              )
         """, (
             event_date,
             start_time,
@@ -2567,7 +2594,18 @@ def schedule_edit_update(event_id):
             streaming_available,
             new_thumbnail_key,
             new_image_key,
-            event_id
+            event_id,
+            event_date,
+            start_time,
+            end_time,
+            location,
+            event_name,
+            genre,
+            performers,
+            organizer_sns_url,
+            streaming_available,
+            new_thumbnail_key,
+            new_image_key
         ))
 
         conn.commit()
