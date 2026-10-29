@@ -1820,15 +1820,19 @@ body.vertical-mode .event-bar-time {
                 
                     <div style="color: #666; font-size: 12px;">
                         {{ news.registered_at }}
+                        
                         {% if news.type == "出演者追加" %}
                             追加
                         {% elif news.type == "出演者辞退" %}
                             辞退
                         {% elif news.type == "開催中止" %}
                             中止
+                        {% elif news.type == "イベント更新" %}
+                            更新
                         {% else %}
                             登録
                         {% endif %}
+                        
                     </div>
             
                     <div>
