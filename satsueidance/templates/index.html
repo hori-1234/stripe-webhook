@@ -409,10 +409,24 @@
             margin-top: 0;
             object-fit: contain;
         }
-
+        
         #status {
             color: #1d4ed8;
             font-weight: 600;
+        }
+
+        @media screen and (max-width: 1000px) and (pointer: coarse) {
+            body:has(#compareButton.compare-active) #compareSpeedControls > div:first-child,
+            body:has(#compareButton.compare-active) #compareStartControls > p:first-child,
+            body:has(#compareButton.compare-active) #compareStartControls > p:not(:first-child):not(:last-child) {
+                font-size: 16px !important;
+            }
+        }
+
+        @media screen and (max-width: 1000px) and (pointer: coarse) {
+            body:has(#compareButton.compare-active) #status {
+                display: none;
+            }
         }
 
         #expandButton.expanded-button {
