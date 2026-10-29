@@ -12,7 +12,7 @@
             color: #24483f;
             font-family: sans-serif;
         }
-
+        
         @media screen and (min-width: 769px) {
             body {
                 box-sizing: border-box;
@@ -21,7 +21,135 @@
                 margin-right: auto;
             }
         }
-        
+
+        @media screen and (max-width: 768px) {
+            #mobileIntro {
+                display: block !important;
+            }
+
+            #sourceVideoHeading,
+            #sourceVideoNotice {
+                display: none !important;
+            }
+
+            #mobileSourceHeading {
+                display: block !important;
+                margin: 12px 0;
+                font-size: 18px;
+                color: #24483f;
+            }
+
+            #sourceUrlDetails > summary {
+                pointer-events: none;
+                list-style: none;
+                font-weight: bold;
+            }
+
+            #sourceUrlDetails > summary::-webkit-details-marker {
+                display: none;
+            }
+            #sourceFileDetails > summary {
+                pointer-events: none;
+                list-style: none;
+                font-weight: bold;
+            }
+            
+            #sourceFileDetails > summary::-webkit-details-marker {
+                display: none;
+            }
+            
+            #sourceLandscapeVideo {
+                display: none;
+            }
+            
+            body:not(.mobile-record-selected) #cameraControls,
+            body:not(.mobile-record-selected):not(.mobile-record-completed) #recordingResultControls,
+            body:not(.mobile-upload-selected) #uploadControls,
+            body:not(.mobile-source-ready) #compareSourceVisibility,
+            body:not(.mobile-source-ready) #compareModeVisibility {
+                display: none !important;
+            }
+
+            body.mobile-source-ready #mobileCompareHeading {
+                display: block !important;
+                margin: 16px 0 12px;
+                font-size: 18px;
+                color: #24483f;
+            }
+
+            body.mobile-source-ready #mobileCompareSelection {
+                display: flex !important;
+                gap: 12px;
+                margin: 12px 0 20px;
+            }
+
+            #mobileCompareSelection button {
+                flex: 1;
+                min-width: 0;
+                padding: 14px 12px;
+                font-size: 18px;
+            }
+
+            body.mobile-record-selected #mobileRecordingOrientation {
+                display: flex !important;
+                gap: 12px;
+                margin: 12px 0;
+            }
+            
+            #mobileRecordingOrientation button {
+                flex: 1;
+                min-width: 0;
+                padding: 14px 12px;
+                font-size: 16px;
+            }
+            
+            body.mobile-record-selected #cameraLandscapeVideo {
+                display: none !important;
+            }
+            
+            body.mobile-record-selected #cameraButton {
+                display: none !important;
+            }
+
+            body.mobile-record-selected #cameraControls {
+                display: block !important;
+            }
+
+            body.mobile-record-selected #cameraLandscapeControls {
+                display: block !important;
+            }
+
+            body.mobile-record-selected #cameraLandscapeControls h3,
+            body.mobile-record-selected #cameraLandscapeControls p {
+                display: none !important;
+            }
+
+            body.mobile-record-selected #cameraFlipButton {
+                display: inline-block !important;
+            }
+
+            body.mobile-record-selected #cameraFlipButton {
+                display: inline-block !important;
+            }
+            
+
+            body.mobile-record-selected #recordingControls {
+                display: flex;
+                gap: 8px;
+                width: 100%;
+                margin-top: 12px;
+            }
+
+            body.mobile-record-selected #recordingControls button {
+                flex: 1;
+                min-width: 0;
+                margin: 0;
+                padding: 14px 8px;
+                font-size: 16px;
+            }
+            
+        }
+       
         h2 {
             text-align: center;
             color: #168978;
@@ -754,9 +882,66 @@
 
 <script>
 
+function selectMobileRecording() {
+    document.body.classList.add("mobile-record-selected");
+    document.body.classList.remove("mobile-upload-selected");
+    document.body.classList.remove("mobile-record-completed");
+
+    if (!compareMode && !recorder?.state?.includes("recording")) {
+        document.getElementById("startButton").disabled = false;
+    }
+}
+
+function selectMobileUpload() {
+    document.body.classList.add("mobile-upload-selected");
+    document.body.classList.remove("mobile-record-selected");
+}
+
+let mobileRecordingOrientation = null;
+
+function selectMobileRecordingOrientation(orientation) {
+    mobileRecordingOrientation = orientation;
+
+    document.getElementById("mobilePortraitButton").style.background =
+        orientation === "portrait" ? "#2563eb" : "#25a58d";
+
+    document.getElementById("mobileLandscapeButton").style.background =
+        orientation === "landscape" ? "#2563eb" : "#25a58d";
+}
+
+function isMobileRecordingOrientationValid() {
+    if (!mobileRecordingOrientation) {
+        return false;
+    }
+
+    const isLandscape = window.matchMedia("(orientation: landscape)").matches;
+
+    return mobileRecordingOrientation ===
+        (isLandscape ? "landscape" : "portrait");
+}
+
+function updateMobileSourceUrlDetails() {
+
+    const urlDetails = document.getElementById("sourceUrlDetails");
+    const fileDetails = document.getElementById("sourceFileDetails");
+
+    if (!urlDetails || !fileDetails) {
+        return;
+    }
+
+    if (window.matchMedia("(max-width: 768px)").matches) {
+        urlDetails.open = true;
+        fileDetails.open = true;
+    }
+}
+
+updateMobileSourceUrlDetails();
+window.addEventListener("resize", updateMobileSourceUrlDetails);
+
 function showVideoLoading() {
     document.getElementById("videoLoadingOverlay").style.display = "flex";
 }
+
 
 function hideVideoLoading() {
     document.getElementById("videoLoadingOverlay").style.display = "none";
@@ -2204,10 +2389,15 @@ function loadSourceVideo(input) {
     
     status.textContent = "動画を読み込み中…";
     showVideoLoading();
-
+    
     sourceVideo.onloadeddata = function() {
         status.textContent = "動画の読み込みが完了しました";
         hideVideoLoading();
+
+        if (window.matchMedia("(max-width: 768px)").matches) {
+            document.body.classList.add("mobile-source-ready");
+            document.getElementById("sourceLandscapeVideo").style.display = "block";
+        }
     };
 
     sourceVideo.onerror = function() {
@@ -2474,12 +2664,18 @@ function loadYoutube() {
             
             events: {
                 
-                onReady: function(event) {
+                    onReady: function(event) {
                     document.getElementById("status").textContent =
                         "YouTube再生可能";
 
+                    if (window.matchMedia("(max-width: 768px)").matches) {
+                        document.body.classList.add("mobile-source-ready");
+                        document.getElementById("sourceLandscapeVideo").style.display = "block";
+                    }
+
                     updateCompareVisibility();
 
+                
                     const compareSpeedControls =
                         document.getElementById("compareSpeedControls");
 
@@ -2553,10 +2749,15 @@ function loadYoutube() {
         newPlayer.allow =
             "autoplay; encrypted-media; picture-in-picture; fullscreen";
         newPlayer.allowFullscreen = true;
-
+        
         newPlayer.src = embedUrl;
 
         oldPlayer.replaceWith(newPlayer);
+
+        if (window.matchMedia("(max-width: 768px)").matches) {
+            document.body.classList.add("mobile-source-ready");
+            document.getElementById("sourceLandscapeVideo").style.display = "block";
+        }
 
         updateCompareVisibility();
 
@@ -2628,8 +2829,34 @@ async function startCamera() {
     }
 }
 
-function startRecording() {
+async function startRecording() {
+    if (window.matchMedia("(max-width: 768px)").matches) {
+        if (!isMobileRecordingOrientationValid()) {
+            document.getElementById("status").textContent =
+                "撮影とスマホの向きを合わせてください";
+            return;
+        }
+
+        if (!cameraStream || !cameraStream.active) {
+            await startCamera();
+
+            if (!cameraStream || !cameraStream.active) {
+                return;
+            }
+
+            const camera = document.getElementById("camera");
+
+            if (camera.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) {
+                await new Promise(resolve => {
+                    camera.addEventListener("loadeddata", resolve, { once: true });
+                    setTimeout(resolve, 3000);
+                });
+            }
+        }
+    }
+
     if (!cameraStream || !window.MediaRecorder) {
+        
         document.getElementById("status").textContent =
             "このブラウザでは録画できません";
         return;
@@ -2761,7 +2988,7 @@ function startRecording() {
     recorder.ondataavailable = event => {
         if (event.data.size > 0) chunks.push(event.data);
     };
-
+    
     recorder.onstop = () => {
         if (recordingAnimationId !== null) {
             cancelAnimationFrame(recordingAnimationId);
@@ -2799,7 +3026,7 @@ function startRecording() {
         const sizeMB = (blob.size / 1024 / 1024).toFixed(1);
 
         recordingInfo.textContent = "容量：" + sizeMB + " MB";
-
+        
         recordedVideo.onloadedmetadata = () => {
             const duration = recordedVideo.duration;
 
@@ -2815,20 +3042,75 @@ function startRecording() {
                     "録画時間：" + minutes + "分" + seconds + "秒" +
                     "　｜　容量：" + sizeMB + " MB" +
                     "　｜　実測：" + actualMbps + " Mbps";
+
+                if (window.matchMedia("(max-width: 768px)").matches) {
+                    const fileInfo = document.getElementById("recordingFileInfo");
+
+                    if (fileInfo) {
+                        document.getElementById("recordingFileSize").textContent =
+                            sizeMB + " MB";
+
+                        document.getElementById("recordingDuration").textContent =
+                            minutes + ":" + String(Math.floor(duration % 60)).padStart(2, "0");
+
+                        document.getElementById("recordingBitrate").textContent =
+                            actualMbps + " Mbps";
+
+                        fileInfo.style.display = "block";
+                        recordingInfo.style.display = "none";
+                    }
+                } else {
+                    recordingInfo.style.display = "block";
+                }
             }
         };
-
+        
         const link = document.getElementById("downloadLink");
 
         const extension = type.includes("mp4") ? "mp4" : "webm";
         link.href = recordingUrl;
         link.download = "dance-recording." + extension;
         link.style.display = "inline-block";
-        
+
+        if (window.matchMedia("(max-width: 768px)").matches) {
+            const recordingDetails = document.querySelector(
+                "#recordingResultControls details"
+            );
+
+            if (recordingDetails) {
+                recordingDetails.open = true;
+            }
+        }
+
         document.getElementById("status").textContent =
             "録画完了：" + Math.round(blob.size / 1024) + " KB";
 
         updateCompareVisibility();
+
+        // スマホ版のみ、録画データ確定後にカメラを停止
+        if (window.matchMedia("(max-width: 768px)").matches) {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+                cameraStream = null;
+            }
+
+            const camera = document.getElementById("camera");
+
+            if (camera) {
+                camera.pause();
+                camera.srcObject = null;
+            }
+
+            const cameraButton = document.getElementById("cameraButton");
+
+            if (cameraButton) {
+                cameraButton.textContent = "カメラ起動";
+                cameraButton.classList.remove("camera-active");
+            }
+
+            document.body.classList.remove("mobile-record-selected");
+            document.body.classList.add("mobile-record-completed");
+        }
     };
 
     recorder.onerror = event => {
@@ -2851,7 +3133,6 @@ function stopRecording() {
 
     document.getElementById("startButton").disabled = false;
     document.getElementById("stopButton").disabled = true;
-
 }
 
 let fullscreenControlsTimer = null;
