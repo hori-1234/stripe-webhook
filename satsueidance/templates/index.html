@@ -425,6 +425,13 @@
             color: #1d4ed8;
             font-weight: 600;
         }
+
+        #videoBox.fullscreen-controls-hidden #fullscreenCloseButton,
+        #videoBox.fullscreen-controls-hidden #fullscreenComparePlayButton,
+        #videoBox.fullscreen-controls-hidden #fullscreenCompareProgress {
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
         
         @media screen and (pointer: coarse) {
             #compareModeVisibility > span,
@@ -2840,10 +2847,63 @@ function stopRecording() {
 
     document.getElementById("startButton").disabled = false;
     document.getElementById("stopButton").disabled = true;
+
 }
+
+let fullscreenControlsTimer = null;
+
+function showFullscreenControls() {
+    const box = document.getElementById("videoBox");
+
+    const isFullscreen =
+        document.fullscreenElement === box ||
+        box.classList.contains("mobile-fullscreen");
+
+    if (!compareMode || compareLayout !== "overlay" || !isFullscreen) {
+        return;
+    }
+
+    clearTimeout(fullscreenControlsTimer);
+
+    box.classList.remove("fullscreen-controls-hidden");
+
+    fullscreenControlsTimer = setTimeout(() => {
+        box.classList.add("fullscreen-controls-hidden");
+    }, 2000);
+}
+
+document.getElementById("videoBox").addEventListener("pointerdown", () => {
+    showFullscreenControls();
+});
+
+document.addEventListener("fullscreenchange", () => {
+    showFullscreenControls();
+});
+
+const fullscreenVideoBox = document.getElementById("videoBox");
+
+let wasMobileFullscreen =
+    fullscreenVideoBox.classList.contains("mobile-fullscreen");
+
+const fullscreenObserver = new MutationObserver(() => {
+    const isMobileFullscreen =
+        fullscreenVideoBox.classList.contains("mobile-fullscreen");
+
+    if (isMobileFullscreen && !wasMobileFullscreen) {
+        showFullscreenControls();
+    }
+
+    wasMobileFullscreen = isMobileFullscreen;
+});
+
+fullscreenObserver.observe(fullscreenVideoBox, {
+    attributes: true,
+    attributeFilter: ["class"]
+});
 
 
 async function closeVideoFullscreen() {
+
     const box = document.getElementById('videoBox');
 
     if (document.fullscreenElement) {
