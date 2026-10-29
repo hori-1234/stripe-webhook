@@ -1657,7 +1657,7 @@ def schedule():
 
     today_views = cur.fetchone()[0]
 
-    # 直近7日間の出演者追加情報を取得
+    # 直近7日間の出演者追加・辞退・イベント中止情報を取得
     cur.execute("""
         SELECT
             c.event_id,
@@ -1665,17 +1665,18 @@ def schedule():
             e.location,
             e.event_name,
             c.performer_name,
-            c.updated_at
+            c.updated_at,
+            c.change_type
         FROM event_schedule_changes c
         JOIN event_schedules e
             ON e.id = c.event_id
-        WHERE c.change_type = 'addition'
+        WHERE c.change_type IN ('addition', 'withdrawal', 'cancellation')
           AND c.is_active = TRUE
           AND c.updated_at >= CURRENT_TIMESTAMP - INTERVAL '7 days'
         ORDER BY c.updated_at DESC
-        LIMIT 100
-    
+        LIMIT 100    
     """)
+
 
     addition_news = [
         {
@@ -1684,7 +1685,8 @@ def schedule():
             "location": row[2],
             "event_name": row[3],
             "performer_name": row[4],
-            "updated_at": row[5]
+            "updated_at": row[5],
+            "change_type": row[6]
         }
         for row in cur.fetchall()
     ]
@@ -1735,7 +1737,11 @@ def schedule():
             "registered_at": news["updated_at"].astimezone(
                 ZoneInfo("Asia/Tokyo")
             ).strftime("%m/%d %H:%M"),
-            "type": "出演者追加",
+            "type": {
+                "addition": "出演者追加",
+                "withdrawal": "出演者辞退",
+                "cancellation": "開催中止"
+            }.get(news["change_type"], "変更情報"),
             "sort_at": news["updated_at"],
             
             "performer_name": news["performer_name"]
