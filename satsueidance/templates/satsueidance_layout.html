@@ -380,24 +380,21 @@
         <p style="font-size: 13px; color: #aaa; margin: 4px 0;">
         ※比較動画は1,録画か2,動画アップロードのどちらか選択
         </p>
-        
-         <h3 style="display:table; background:#ffeb3b; color:#000000; padding:6px 1em; border-radius:6px;">
-            1,録画
-         </h3>
-        
+
         <div style="display:flex; align-items:center; gap:8px;">
-            <span style="font-weight:bold;">録画</span>
+            <h3 style="background:#ffeb3b; color:#000000; padding:6px 1em; border-radius:6px; margin:5px 0;">
+                1,録画
+            </h3>
 
-    <button id="cameraFlipButton" onclick="
-        const camera = document.getElementById('camera');
-        const flipped = camera.style.transform !== 'scaleX(-1)';
-        camera.style.transform = flipped ? 'scaleX(-1)' : 'scaleX(1)';
-        this.textContent = flipped ? '反転中' : '通常';
+            <button id="cameraFlipButton" onclick="
+                const camera = document.getElementById('camera');
+                const flipped = camera.style.transform !== 'scaleX(-1)';
+                camera.style.transform = flipped ? 'scaleX(-1)' : 'scaleX(1)';
+                this.textContent = flipped ? '反転中' : '通常';
 
-        this.classList.toggle('is-flipped', flipped);
-    ">通常</button>
+                this.classList.toggle('is-flipped', flipped);
+            ">通常</button>
         </div>
-    </div>
 
     <div id="cameraRecordingControls">
         <div id="recordingControls">
@@ -419,7 +416,7 @@
     </p>
     </div>
 
-    <div id="cameraLandscapeVideo">
+    <div id="cameraLandscapeVideo" style="display:none;">
         <video id="camera" autoplay muted playsinline></video>
     </div>
 
