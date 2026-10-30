@@ -914,7 +914,7 @@ function updateCompareTopControls() {
     if (compareMode && mobilePortrait) {
         startControls.before(speedControls);
     } else if (!compareMode) {
-        document.getElementById("compareSourceVisibility")
+        document.querySelector("#cameraLandscapeControls > h3")
             .before(speedControls);
     } else {
         youtubeUrlControls.after(speedControls);
