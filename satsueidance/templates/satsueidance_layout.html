@@ -422,11 +422,46 @@
     <div id="cameraLandscapeVideo">
         <video id="camera" autoplay muted playsinline></video>
     </div>
+
+</div>
+
+<div id="orientationDialog" style="
+    display:none;
+    position:fixed;
+    inset:0;
+    z-index:20001;
+    background:rgba(0,0,0,0.6);
+    align-items:center;
+    justify-content:center;
+">
+    <div style="
+        background:white;
+        color:#24483f;
+        padding:24px 20px;
+        border-radius:12px;
+        width:85%;
+        max-width:320px;
+        box-sizing:border-box;
+        text-align:center;
+    ">
+        <p id="orientationMessage" style="font-size:17px; font-weight:bold;">
+            スマホの向きを合わせてください
+        </p>
+
+        <button type="button" id="orientationOkButton" style="width:100%;">
+            OK
+        </button>
+
+        <button type="button" id="orientationCancelButton" style="width:100%; background:#777; border-color:#666;">
+            キャンセル
+        </button>
+    </div>
 </div>
 
 <p id="status">待機中</p>
-        
+
 <div id="recordingResultControls">
+
     <details>
         <summary>録画結果</summary>
 
