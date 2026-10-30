@@ -6,9 +6,37 @@
         rel="noopener noreferrer"
         style="position:absolute; right:0; top:50%; transform:translateY(-50%); font-size:14px; font-weight:normal; color:#168978; text-decoration:underline;"
     >使用方法</a>
+
 </h2>
 
+<div id="mobileMainTabs" role="tablist" aria-label="動画操作タブ" style="display:none;">
+    <button type="button" id="mobileTabSource"
+            class="mobile-main-tab active"
+            onclick="switchMobileTab('source')">
+        ①本家動画
+    </button>
+
+    <button type="button" id="mobileTabRecording"
+            class="mobile-main-tab"
+            onclick="switchMobileTab('recording')">
+        ②比較動画
+    </button>
+
+    <button type="button" id="mobileTabCompare"
+            class="mobile-main-tab"
+            onclick="switchMobileTab('compare')">
+        ③比較
+    </button>
+</div>
+
+</div>
+
+<div id="mobileSourcePanel" class="mobile-tab-panel"></div>
+<div id="mobileRecordingPanel" class="mobile-tab-panel"></div>
+<div id="mobileComparePanel" class="mobile-tab-panel"></div>
+
 <div id="mobileIntro" style="display:none;">
+    
     <p style="font-weight:bold; margin:8px 0;">
         お手本動画と自分の動きを重ねてチェック！
     </p>
