@@ -1429,14 +1429,19 @@ function updateCompareTopControls() {
             const isMobileTab = window.matchMedia(
                 "(max-width: 1000px) and (pointer: coarse)"
             ).matches;
-
-            const mobileComparePanel = document.getElementById("mobileComparePanel");
             
-            if (isMobileTab && mobileComparePanel) {
-                if (element.parentNode !== mobileComparePanel) {
-                    mobileComparePanel.appendChild(element);
+            const mobileComparePanel = document.getElementById("mobileComparePanel");
+            const mobileSourcePanel = document.getElementById("mobileSourcePanel");
+            const targetPanel = element.id === "expandButton"
+                ? mobileSourcePanel
+                : mobileComparePanel;
+
+            if (isMobileTab && targetPanel) {
+                if (element.parentNode !== targetPanel) {
+                    targetPanel.appendChild(element);
                 }
             } else {
+            
                 const originalMarker = element.mobileTabOriginalMarker || marker;
 
                 if (element.parentNode !== originalMarker.parentNode ||
