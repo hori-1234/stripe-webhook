@@ -902,6 +902,20 @@ function updateCompareTopControls() {
     });
 
     top.style.display = moveToTop ? "flex" : "none";
+
+    const speedControls = document.getElementById("compareSpeedControls");
+    const startControls = document.getElementById("compareStartControls");
+    const youtubeUrlControls = document.getElementById("youtubeUrlControls");
+
+    const mobilePortrait = window.matchMedia(
+        "(max-width: 1000px) and (orientation: portrait) and (pointer: coarse)"
+    ).matches;
+
+    if (compareMode && mobilePortrait) {
+        startControls.before(speedControls);
+    } else {
+        youtubeUrlControls.after(speedControls);
+    }
 }
 
 window.addEventListener("resize", updateCompareTopControls);
