@@ -930,15 +930,24 @@ function updateCompareVisibility() {
 
     const compareSourceVisibility =
         document.getElementById("compareSourceVisibility");
-    
+
+    const compareHeading = document.querySelector(
+        "#cameraLandscapeControls > h3"
+    );
+
+    if (compareSourceVisibility && compareHeading) {
+        compareHeading.after(compareSourceVisibility);
+    }
+
     if (compareModeVisibility) {
+    
         compareModeVisibility.style.display =
             (hasSourceVideo && hasCompareVideo) ? "inline" : "none";
     }
 
     if (compareSourceVisibility) {
         compareSourceVisibility.style.display =
-            (hasSourceVideo && !compareMode) ? "block" : "none";
+            (recordingUrl && uploadedVideoUrl && !compareMode) ? "block" : "none";
     }
 }
 
