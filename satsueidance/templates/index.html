@@ -55,6 +55,12 @@
 
         
         @media screen and (max-width: 768px) and (orientation: portrait) {
+            body:has(#mobileTabSource.active) #normalPlayDelay + span,
+            body:has(#mobileTabRecording.active) #normalPlayDelay + span,
+            body:has(#mobileTabRecording.active) #compareSpeedControls {
+                display: none !important;
+            }
+
             body:not(.mobile-source-ready) #normalPlayButton,
             body:not(.mobile-source-ready) #normalPlayDelay,
             body:not(.mobile-source-ready) #normalPlayDelay + span,
@@ -1004,6 +1010,18 @@ function switchMobileTab(tab) {
                 : "none";
         }
     });
+
+    if (isMobile) {
+        const video = document.getElementById("sourceLandscapeVideo");
+        const target = document.getElementById(
+            tab === "source" ? "mobileSourcePanel" : "mobileComparePanel"
+        );
+
+        if (video && target &&
+            !document.getElementById("compareButton")?.classList.contains("compare-active")) {
+            target.appendChild(video);
+        }
+    }
 }
 
 function updateMobileTabLayout() {
