@@ -223,7 +223,7 @@
 <span id="compareModeVisibility" style="display:none;">
 
     <span style="margin-right:8px;">比較</span>
-    <button id="compareButton" onclick="toggleCompareMode()">OFF</button>
+    <button id="compareButton" onclick="toggleCompareMode()" style="padding:12px 8px;">OFF</button>
 </span>
 
 <button
@@ -364,10 +364,6 @@
     this.textContent = flipped ? '反転中' : '通常';
     this.classList.toggle('is-flipped', flipped);
 ">通常</button>
-
-<p id="flipNotice" style="font-size: 12px; color: #aaa; margin: 4px 0;">
-    ※左右反転すると、動画内の文字や操作ボタンも反転して表示されます。
-</p>
 
 <hr class="compare-divider" style="border:0; border-top:2px solid #b8dcd0; margin:24px 0 16px;">
 
