@@ -452,6 +452,13 @@
             }
         }
 
+        @media screen and (max-width: 1000px) and (orientation: landscape) and (pointer: coarse) {
+            #compareModeVisibility > span,
+            #compareSpeedControls > details > summary {
+                font-size: 13px !important;
+            }
+        }
+
         @media screen and (max-width: 1000px) and (pointer: coarse) {
             body:has(#compareButton.compare-active) #status {
                 display: none;
