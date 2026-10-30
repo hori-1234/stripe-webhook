@@ -2908,6 +2908,8 @@ function startRecording() {
 
     recorder.start(1000);
 
+    document.getElementById("cameraLandscapeVideo").style.display = "block";
+
     document.getElementById("startButton").disabled = true;
     document.getElementById("stopButton").disabled = false;
 
@@ -2944,6 +2946,8 @@ function stopRecording() {
     const camera = document.getElementById("camera");
     camera.pause();
     camera.srcObject = null;
+
+    document.getElementById("cameraLandscapeVideo").style.display = "none";
 
     document.getElementById("startButton").disabled = true;
     document.getElementById("stopButton").disabled = true;
