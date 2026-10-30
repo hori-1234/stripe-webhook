@@ -1005,14 +1005,16 @@ function switchMobileTab(tab) {
     
         if (isMobile) {
         const video = document.getElementById("sourceLandscapeVideo");
-        const target = document.getElementById("mobileSourcePanel");
+        const target = document.getElementById(
+            tab === "compare" ? "mobileComparePanel" : "mobileSourcePanel"
+        );
 
-        if (video && target &&
-            video.parentNode !== target &&
-            !document.getElementById("compareButton")?.classList.contains("compare-active")) {
+        if (video && target && video.parentNode !== target) {
             target.appendChild(video);
         }
     }
+    
+    updateCompareTopControls();
 }
 
 function updateMobileTabLayout() {
@@ -1425,13 +1427,16 @@ function updateCompareTopControls() {
             const mobileComparePanel = document.getElementById("mobileComparePanel");
             const mobileSourcePanel = document.getElementById("mobileSourcePanel");
             const targetPanel = element.id === "expandButton"
-                ? mobileSourcePanel
+                ? (currentMobileTab === "compare"
+                    ? mobileComparePanel
+                    : mobileSourcePanel)
                 : mobileComparePanel;
 
             if (isMobileTab && targetPanel) {
                 if (element.parentNode !== targetPanel) {
                     targetPanel.appendChild(element);
                 }
+                
             } else {
             
                 const originalMarker = element.mobileTabOriginalMarker || marker;
