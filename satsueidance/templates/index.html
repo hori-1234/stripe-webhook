@@ -2566,12 +2566,37 @@ function loadYoutube() {
 async function confirmRecordingOrientation(orientation) {
     const isPortrait = orientation === "portrait";
 
+    const dialog = document.getElementById("orientationDialog");
+    const message = document.getElementById("orientationMessage");
+    const okButton = document.getElementById("orientationOkButton");
+    const cancelButton = document.getElementById("orientationCancelButton");
+
+    if (dialog.style.display === "flex") {
+        return;
+    }
+
+    const confirmOrientation = () => {
+        return new Promise(resolve => {
+            okButton.onclick = () => {
+                dialog.style.display = "none";
+                resolve(true);
+            };
+
+            cancelButton.onclick = () => {
+                dialog.style.display = "none";
+                resolve(false);
+            };
+
+            message.textContent = isPortrait
+                ? "スマホを縦向きにしてください"
+                : "スマホを横向きにしてください";
+
+            dialog.style.display = "flex";
+        });
+    };
+
     while (true) {
-        const confirmed = window.confirm(
-            "スマホの向きを合わせてください\n\n" +
-            (isPortrait ? "縦向きで録画します。" : "横向きで録画します。") +
-            "\n\nOKを押すと向きを確認します。"
-        );
+        const confirmed = await confirmOrientation();
 
         if (!confirmed) {
             return;
@@ -2586,13 +2611,25 @@ async function confirmRecordingOrientation(orientation) {
         }
     }
 
-    await startCamera();
+    try {
+        if (compareMode) {
+            document.getElementById("status").textContent =
+                "比較モード中は録画できません";
+            return;
+        }
 
-    if (!cameraStream || !cameraStream.active) {
-        return;
+        await startCamera();
+
+        if (!cameraStream || !cameraStream.active) {
+            return;
+        }
+
+        startRecording();
+
+    } catch (error) {
+        document.getElementById("status").textContent =
+            "録画開始に失敗しました: " + error.message;
     }
-
-    startRecording();
 }
 
 document.getElementById("portraitRecordButton").onclick = () => {
