@@ -1106,7 +1106,7 @@ function refreshMobileTabLayout() {
 }
 
 window.addEventListener("resize", refreshMobileTabLayout);
-refreshMobileTabLayout();
+window.addEventListener("load", refreshMobileTabLayout);
 
 function selectMobileRecording() {
     
