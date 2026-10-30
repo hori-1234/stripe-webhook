@@ -68,6 +68,16 @@
             transition: background 0.2s ease;
         }
 
+        @media screen and (max-width: 1000px) and (orientation: landscape) and (pointer: coarse) {
+            #compareModeVisibility button,
+            #normalPlayButton,
+            #expandButton,
+            #flipButton {
+                margin-left: 1px;
+                margin-right: 1px;
+            }
+        }
+
         button:hover {
             background: #1d8c77;
         }
