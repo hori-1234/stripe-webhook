@@ -12,6 +12,7 @@
             color: #24483f;
             font-family: sans-serif;
         }
+
         
         @media screen and (min-width: 769px) {
             body {
@@ -21,6 +22,37 @@
                 margin-right: auto;
             }
         }
+
+        @media screen and (max-width: 1000px) and (pointer: coarse) {
+            #mobileMainTabs {
+                display: grid !important;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 6px;
+                width: 100%;
+                margin: 12px 0 20px;
+            }
+
+            #mobileMainTabs .mobile-main-tab {
+                min-width: 0;
+                min-height: 52px;
+                margin: 0;
+                padding: 10px 4px;
+                font-size: 16px;
+                font-weight: bold;
+                white-space: nowrap;
+                background: #d7f3e8;
+                color: #167763;
+                border: 2px solid #25a58d;
+                border-radius: 8px;
+            }
+
+            #mobileMainTabs .mobile-main-tab.active {
+                background: #168978;
+                color: #ffffff;
+                border-color: #116b5e;
+            }
+        }
+
         
         @media screen and (max-width: 768px) and (orientation: portrait) {
             body:not(.mobile-source-ready) #normalPlayButton,
@@ -50,7 +82,6 @@
             }
 
             body.mobile-source-ready #mobileSourceHeading,
-            body.mobile-source-ready #youtubeUrlControls,
             body.mobile-source-ready #mobileIntro {
                 display: none !important;
             }
@@ -78,11 +109,11 @@
                 display: none;
             }
 
-            body #recordedVideo {
-                display: none;
+            body:not(.mobile-source-ready) #mobileComparePanel #sourceLandscapeVideo {
+                display: block;
             }
 
-            body:not(.mobile-source-ready) #sourceLandscapeVideo {
+            body #recordedVideo {
                 display: none;
             }
 
@@ -93,7 +124,10 @@
             
             body:not(.mobile-record-selected):not(.mobile-record-completed) #cameraControls,
             body:not(.mobile-record-selected):not(.mobile-record-completed) #recordingResultControls,
-            body:not(.mobile-upload-selected) #uploadControls,
+            body:not(.mobile-upload-selected) #uploadControls {
+                display: none !important;
+            }
+
             body:not(.mobile-source-ready) #compareSourceVisibility,
             body:not(.mobile-source-ready) #compareModeVisibility {
                 display: none !important;
@@ -103,9 +137,14 @@
                 display: block !important;
             }
 
-            body:not(.mobile-source-ready) #mobileCompareHeading,
-            body:not(.mobile-source-ready) #mobileCompareSelection {
+            body:not(.mobile-source-ready) #mobileCompareHeading {
                 display: none !important;
+            }
+
+            body #mobileCompareSelection {
+                display: flex !important;
+                gap: 12px;
+                margin: 12px 0 20px;
             }
 
             body.mobile-source-ready #mobileCompareHeading {
@@ -114,8 +153,8 @@
                 font-size: 18px;
                 color: #24483f;
             }
-
-            body.mobile-source-ready #mobileCompareSelection {
+            
+            #mobileRecordingPanel #mobileCompareSelection {
                 display: flex !important;
                 gap: 12px;
                 margin: 12px 0 20px;
@@ -927,7 +966,156 @@
 
 <script>
 
+let currentMobileTab = "source";
+
+function switchMobileTab(tab) {
+    const tabs = {
+        source: "mobileTabSource",
+        recording: "mobileTabRecording",
+        compare: "mobileTabCompare"
+    };
+
+    const panels = {
+        source: "mobileSourcePanel",
+        recording: "mobileRecordingPanel",
+        compare: "mobileComparePanel"
+    };
+
+    if (!tabs[tab]) {
+        return;
+    }
+
+    currentMobileTab = tab;
+
+    Object.entries(tabs).forEach(([name, id]) => {
+        const button = document.getElementById(id);
+
+        if (button) {
+            button.classList.toggle("active", name === tab);
+            button.setAttribute("aria-selected", name === tab ? "true" : "false");
+        }
+    });
+
+    const isMobile = window.matchMedia(
+        "(max-width: 1000px) and (pointer: coarse)"
+    ).matches;
+
+    Object.entries(panels).forEach(([name, id]) => {
+        const panel = document.getElementById(id);
+
+        if (panel) {
+            panel.style.display = !isMobile || name === tab
+                ? "block"
+                : "none";
+        }
+    });
+}
+
+function updateMobileTabLayout() {
+    const isMobile = window.matchMedia(
+        "(max-width: 1000px) and (pointer: coarse)"
+    ).matches;
+
+    const groups = [
+        {
+            panel: "mobileSourcePanel",
+            ids: [
+                "mobileIntro",
+                "mobileSourceHeading",
+                "youtubeUrlControls"
+            ]
+        },
+        {
+            panel: "mobileRecordingPanel",
+            ids: [
+                "mobileCompareHeading",
+                "mobileCompareSelection",
+                "cameraControls",
+                "recordingResultControls",
+                "uploadControls",
+                "compareSourceVisibility"
+            ]
+        },
+        {
+            panel: "mobileComparePanel",
+            ids: [
+                "sourceLandscapeVideo",
+                "compareModeVisibility",
+                "normalPlayButton",
+                "normalPlayDelay",
+                "comparePlayButton",
+                "compareReplayButton",
+                "expandButton",
+                "compareStartControls",
+                "flipButton",
+                "flipNotice"
+            ]
+        }
+    ];
+
+    groups.forEach(group => {
+        const panel = document.getElementById(group.panel);
+        if (!panel) return;
+
+        group.ids.forEach(id => {
+            const element = document.getElementById(id);
+            if (!element) return;
+
+            if (!element.mobileTabOriginalMarker) {
+                const marker = document.createComment(
+                    id + "-mobile-tab-original"
+                );
+                element.parentNode.insertBefore(marker, element);
+                element.mobileTabOriginalMarker = marker;
+            }
+    
+            if (isMobile) {
+                const isCompareTopButton = [
+                    "compareModeVisibility",
+                    "comparePlayButton",
+                    "compareReplayButton",
+                    "expandButton"
+                ].includes(id);
+
+                const keepAtTop = isCompareTopButton &&
+                    document.getElementById("compareButton")?.classList.contains("compare-active") &&
+                    window.matchMedia(
+                        "(max-width: 1000px) and (orientation: landscape) and (pointer: coarse)"
+                    ).matches;
+
+                if (!keepAtTop && element.parentNode !== panel) {
+                    panel.appendChild(element);
+                }
+            } else {
+            
+                const marker = element.mobileTabOriginalMarker;
+
+                if (element.parentNode !== marker.parentNode ||
+                    element.previousSibling !== marker) {
+                    marker.parentNode.insertBefore(
+                        element,
+                        marker.nextSibling
+                    );
+                }
+            }
+        });
+    });
+}
+
+function refreshMobileTabLayout() {
+    updateMobileTabLayout();
+    switchMobileTab(currentMobileTab);
+
+    if (typeof updateCompareTopControls === "function") {
+        updateCompareTopControls();
+    }
+}
+
+window.addEventListener("resize", refreshMobileTabLayout);
+refreshMobileTabLayout();
+
 function selectMobileRecording() {
+    
     if (recorder && recorder.state === "recording") {
         return;
     }
@@ -1047,6 +1235,10 @@ compareSelectionElement.parentNode.insertBefore(
 
 function updateMobileCompareSourcePosition() {
     const recordingResult = document.getElementById("recordingResultControls");
+
+    if (window.matchMedia("(max-width: 1000px) and (pointer: coarse)").matches) {
+        return;
+    }
 
     if (window.matchMedia("(max-width: 768px) and (orientation: portrait)").matches) {
 
@@ -1221,10 +1413,28 @@ function updateCompareTopControls() {
 
     compareTopButtons.forEach(({ element, marker }) => {
         if (moveToTop) {
-            top.appendChild(element);
+            if (element.parentNode !== top) {
+                top.appendChild(element);
+            }
         } else {
-            marker.parentNode.insertBefore(element, marker.nextSibling);
+            const isMobileTab = window.matchMedia(
+                "(max-width: 1000px) and (pointer: coarse)"
+            ).matches;
+
+            const mobileComparePanel = document.getElementById("mobileComparePanel");
+            
+            if (isMobileTab && mobileComparePanel) {
+                if (element.parentNode !== mobileComparePanel) {
+                    mobileComparePanel.appendChild(element);
+                }
+            } else {
+                if (element.parentNode !== marker.parentNode ||
+                    element.previousSibling !== marker) {
+                    marker.parentNode.insertBefore(element, marker.nextSibling);
+                }
+            }
         }
+    
     });
 
     top.style.display = moveToTop ? "flex" : "none";
