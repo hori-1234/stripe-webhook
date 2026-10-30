@@ -55,7 +55,6 @@
 
         
         @media screen and (max-width: 768px) and (orientation: portrait) {
-            body:has(#mobileTabSource.active) #normalPlayDelayUnit,
             body:has(#mobileTabRecording.active) #normalPlayDelayUnit,
             body:has(#mobileTabRecording.active) #compareSpeedControls {
                 display: none !important;
@@ -63,7 +62,7 @@
 
             body:not(.mobile-source-ready) #normalPlayButton,
             body:not(.mobile-source-ready) #normalPlayDelay,
-            body:not(.mobile-source-ready) #normalPlayDelay + span,
+            body:not(.mobile-source-ready) #normalPlayDelayUnit,
             body:not(.mobile-source-ready) #expandButton,
             body:not(.mobile-source-ready) #flipButton,
             body:not(.mobile-source-ready) #flipNotice {
@@ -1030,14 +1029,20 @@ function updateMobileTabLayout() {
     ).matches;
 
     const groups = [
+
         {
             panel: "mobileSourcePanel",
             ids: [
                 "mobileIntro",
                 "mobileSourceHeading",
-                "youtubeUrlControls"
+                "youtubeUrlControls",
+                "normalPlayButton",
+                "normalPlayDelay",
+                "normalPlayDelayUnit",
+                "expandButton"
             ]
         },
+        
         {
             panel: "mobileRecordingPanel",
             ids: [
@@ -1045,23 +1050,14 @@ function updateMobileTabLayout() {
                 "mobileCompareSelection",
                 "cameraControls",
                 "recordingResultControls",
-                "uploadControls",
-                "compareSourceVisibility"
+                "uploadControls"
             ]
         },
         {
             panel: "mobileComparePanel",
             ids: [
-                "sourceLandscapeVideo",
                 "compareModeVisibility",
-                "normalPlayButton",
-                "normalPlayDelay",
-                "comparePlayButton",
-                "compareReplayButton",
-                "expandButton",
-                "compareStartControls",
-                "flipButton",
-                "flipNotice"
+                "compareSourceVisibility"
             ]
         }
     ];
