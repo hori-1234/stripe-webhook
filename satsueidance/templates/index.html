@@ -913,10 +913,12 @@ function updateCompareTopControls() {
 
     if (compareMode && mobilePortrait) {
         startControls.before(speedControls);
+    } else if (!compareMode) {
+        document.getElementById("normalPlayButton")
+            .parentElement.after(speedControls);
     } else {
         youtubeUrlControls.after(speedControls);
     }
-}
 
 window.addEventListener("resize", updateCompareTopControls);
 
