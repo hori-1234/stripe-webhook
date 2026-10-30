@@ -13,7 +13,6 @@
             font-family: sans-serif;
         }
 
-        
         @media screen and (min-width: 769px) {
             body {
                 box-sizing: border-box;
@@ -22,204 +21,7 @@
                 margin-right: auto;
             }
         }
-
-        @media screen and (max-width: 1000px) and (pointer: coarse) {
-            #mobileMainTabs {
-                display: grid !important;
-                grid-template-columns: repeat(3, minmax(0, 1fr));
-                gap: 6px;
-                width: 100%;
-                margin: 12px 0 20px;
-            }
-
-            #mobileMainTabs .mobile-main-tab {
-                min-width: 0;
-                min-height: 52px;
-                margin: 0;
-                padding: 10px 4px;
-                font-size: 16px;
-                font-weight: bold;
-                white-space: nowrap;
-                background: #d7f3e8;
-                color: #167763;
-                border: 2px solid #25a58d;
-                border-radius: 8px;
-            }
-
-            #mobileMainTabs .mobile-main-tab.active {
-                background: #168978;
-                color: #ffffff;
-                border-color: #116b5e;
-            }
-        }
-
-        @media screen and (max-width: 768px) and (orientation: portrait) {
-            body:not(.mobile-source-ready) #normalPlayButton,
-            body:not(.mobile-source-ready) #normalPlayDelay,
-            body:not(.mobile-source-ready) #normalPlayDelayUnit,
-            body:not(.mobile-source-ready) #expandButton,
-            body:not(.mobile-source-ready) #flipButton,
-            body:not(.mobile-source-ready) #flipNotice {
-                display: none !important;
-            }
-
-            #mobileIntro {
-                display: block !important;
-            }
-
-
-            #sourceVideoHeading,
-            #sourceVideoNotice {
-                display: none !important;
-            }
-
-            #mobileSourceHeading {
-                display: block !important;
-                margin: 12px 0;
-                font-size: 18px;
-                color: #24483f;
-            }
-
-            body.mobile-source-ready #mobileSourceHeading,
-            body.mobile-source-ready #mobileIntro {
-                display: none !important;
-            }
-
-            #sourceUrlDetails > summary {
-                pointer-events: none;
-                list-style: none;
-                font-weight: bold;
-            }
-
-            #sourceUrlDetails > summary::-webkit-details-marker {
-                display: none;
-            }
-            #sourceFileDetails > summary {
-                pointer-events: none;
-                list-style: none;
-                font-weight: bold;
-            }
-            
-            #sourceFileDetails > summary::-webkit-details-marker {
-                display: none;
-            }
-            
-            body:not(.mobile-source-ready) #sourceLandscapeVideo {
-                display: none;
-            }
-
-            body:has(#mobileTabCompare.active) #mobileComparePanel #sourceLandscapeVideo {
-                display: block !important;
-            }
-
-            body #recordedVideo {
-                display: none;
-            }
-
-            #recordingResultControls details {
-                border-top: 1px solid #ccc;
-                padding-top: 12px;
-            }
-            
-            body:not(.mobile-record-selected):not(.mobile-record-completed) #cameraControls,
-            body:not(.mobile-record-selected):not(.mobile-record-completed) #recordingResultControls,
-            body:not(.mobile-upload-selected) #uploadControls {
-                display: none !important;
-            }
-
-            body:not(.mobile-source-ready) #compareSourceVisibility {
-                display: none !important;
-            }
-            
-            body.mobile-upload-selected #uploadControls {
-                display: block !important;
-            }
-
-            body:not(.mobile-source-ready) #mobileCompareHeading {
-                display: none !important;
-            }
-
-            body #mobileCompareSelection {
-                display: flex !important;
-                gap: 12px;
-                margin: 12px 0 20px;
-            }
-
-            body.mobile-source-ready #mobileCompareHeading {
-                display: block !important;
-                margin: 16px 0 12px;
-                font-size: 18px;
-                color: #24483f;
-            }
-            
-            #mobileRecordingPanel #mobileCompareSelection {
-                display: flex !important;
-                gap: 12px;
-                margin: 12px 0 20px;
-            }
-
-            #mobileCompareSelection button {
-                flex: 1;
-                min-width: 0;
-                padding: 14px 12px;
-                font-size: 18px;
-            }
-
-            body.mobile-record-selected #mobileRecordingOrientation {
-                display: flex !important;
-                gap: 12px;
-                margin: 12px 0;
-            }
-            
-            #mobileRecordingOrientation button {
-                flex: 1;
-                min-width: 0;
-                padding: 14px 12px;
-                font-size: 16px;
-            }
-            
-            body.mobile-record-selected #cameraLandscapeVideo {
-                display: block !important;
-            }
-            
-            body.mobile-record-selected #cameraButton {
-                display: none !important;
-            }
-
-            body.mobile-record-selected #cameraControls {
-                display: block !important;
-            }
-
-            body.mobile-record-selected #cameraLandscapeControls {
-                display: block !important;
-            }
-
-            body.mobile-record-selected #cameraLandscapeControls h3,
-            body.mobile-record-selected #cameraLandscapeControls p {
-                display: none !important;
-            }
-
-            body.mobile-record-selected #cameraFlipButton {
-                display: inline-block !important;
-            }            
-
-            body.mobile-record-selected #recordingControls {
-                display: flex;
-                gap: 8px;
-                width: 100%;
-                margin-top: 12px;
-            }
-
-            body.mobile-record-selected #recordingControls button {
-                flex: 1;
-                min-width: 0;
-                margin: 0;
-                padding: 14px 8px;
-                font-size: 16px;
-            }
-            
-        }
-       
+        
         h2 {
             text-align: center;
             color: #168978;
@@ -623,13 +425,6 @@
             color: #1d4ed8;
             font-weight: 600;
         }
-        
-        @media screen and (max-width: 768px) and (orientation: portrait) {
-            body:not(.mobile-source-ready) #status,
-            body:not(.mobile-source-ready) .compare-divider {
-                display: none !important;
-            }
-        }
 
         body:has(#compareButton.compare-active) .compare-divider {
             display: none;
@@ -959,329 +754,9 @@
 
 <script>
 
-let currentMobileTab = "source";
-
-function switchMobileTab(tab) {
-    const tabs = {
-        source: "mobileTabSource",
-        recording: "mobileTabRecording",
-        compare: "mobileTabCompare"
-    };
-
-    const panels = {
-        source: "mobileSourcePanel",
-        recording: "mobileRecordingPanel",
-        compare: "mobileComparePanel"
-    };
-
-    if (!tabs[tab]) {
-        return;
-    }
-
-    currentMobileTab = tab;
-
-    Object.entries(tabs).forEach(([name, id]) => {
-        const button = document.getElementById(id);
-
-        if (button) {
-            button.classList.toggle("active", name === tab);
-            button.setAttribute("aria-selected", name === tab ? "true" : "false");
-        }
-    });
-
-    const isMobile = window.matchMedia(
-        "(max-width: 1000px) and (pointer: coarse)"
-    ).matches;
-
-    Object.entries(panels).forEach(([name, id]) => {
-        const panel = document.getElementById(id);
-
-        if (panel) {
-            panel.style.display = !isMobile || name === tab
-                ? "block"
-                : "none";
-        }
-    });
-    
-        if (isMobile) {
-        const video = document.getElementById("sourceLandscapeVideo");
-        const target = document.getElementById(
-            tab === "compare" ? "mobileComparePanel" : "mobileSourcePanel"
-        );
-
-        if (video && target && video.parentNode !== target) {
-            target.appendChild(video);
-        }
-    }
-    
-    updateCompareTopControls();
-}
-
-function updateMobileTabLayout() {
-    const isMobile = window.matchMedia(
-        "(max-width: 1000px) and (pointer: coarse)"
-    ).matches;
-
-    const groups = [
-
-        {
-            panel: "mobileSourcePanel",
-            ids: [
-                "mobileIntro",
-                "mobileSourceHeading",
-                "youtubeUrlControls",
-                "normalPlayButton",
-                "normalPlayDelay",
-                "normalPlayDelayUnit",
-                "expandButton",
-                "flipButton"
-            ]
-        },
-        
-        {
-            panel: "mobileRecordingPanel",
-            ids: [
-                "mobileCompareHeading",
-                "mobileCompareSelection",
-                "cameraControls",
-                "recordingResultControls",
-                "uploadControls"
-            ]
-        },
-        {
-            panel: "mobileComparePanel",
-            ids: [
-                "compareModeVisibility",
-                "compareSourceVisibility"
-            ]
-        }
-    ];
-
-    groups.forEach(group => {
-        const panel = document.getElementById(group.panel);
-        if (!panel) return;
-
-        group.ids.forEach(id => {
-            const element = document.getElementById(id);
-            if (!element) return;
-
-            if (!element.mobileTabOriginalMarker) {
-                const marker = document.createComment(
-                    id + "-mobile-tab-original"
-                );
-                element.parentNode.insertBefore(marker, element);
-                element.mobileTabOriginalMarker = marker;
-            }
-    
-            if (isMobile) {
-                const isCompareTopButton = [
-                    "compareModeVisibility",
-                    "comparePlayButton",
-                    "compareReplayButton",
-                    "expandButton"
-                ].includes(id);
-
-                const keepAtTop = isCompareTopButton &&
-                    document.getElementById("compareButton")?.classList.contains("compare-active") &&
-                    window.matchMedia(
-                        "(max-width: 1000px) and (orientation: landscape) and (pointer: coarse)"
-                    ).matches;
-
-                if (!keepAtTop && element.parentNode !== panel) {
-                    panel.appendChild(element);
-                }
-            } else {
-                const originalMarker = element.mobileTabOriginalMarker || marker;
-
-                if (element.parentNode !== originalMarker.parentNode ||
-                    element.previousSibling !== originalMarker) {
-                    originalMarker.parentNode.insertBefore(
-                        element,
-                        originalMarker.nextSibling
-                    );
-                }
-            }
-        });
-    });
-}
-
-function refreshMobileTabLayout() {
-    updateMobileTabLayout();
-    switchMobileTab(currentMobileTab);
-
-    if (typeof compareTopButtons !== "undefined") {
-        updateCompareTopControls();
-    }
-}
-
-window.addEventListener("resize", refreshMobileTabLayout);
-window.addEventListener("load", refreshMobileTabLayout);
-
-function selectMobileRecording() {
-    
-    if (recorder && recorder.state === "recording") {
-        return;
-    }
-
-    document.body.classList.add("mobile-record-selected");
-    document.body.classList.remove("mobile-upload-selected");
-    document.body.classList.remove("mobile-record-completed");
-
-    if (recordingUrl) {
-        URL.revokeObjectURL(recordingUrl);
-        recordingUrl = null;
-    }
-
-    const recordedVideo = document.getElementById("recordedVideo");
-    recordedVideo.removeAttribute("src");
-    recordedVideo.load();
-
-    const recordingInfo = document.getElementById("recordingInfo");
-    if (recordingInfo) {
-        recordingInfo.textContent = "";
-    }
-
-    const fileInfo = document.getElementById("recordingFileInfo");
-    if (fileInfo) {
-        fileInfo.style.display = "none";
-    }
-
-    const downloadLink = document.getElementById("downloadLink");
-    downloadLink.removeAttribute("href");
-    downloadLink.style.display = "none";
-
-    document.getElementById("startButton").disabled = !mobileRecordingOrientation;
-
-    updateCompareVisibility();
-}
-
-function selectMobileUpload() {
-    document.body.classList.add("mobile-upload-selected");
-    document.body.classList.remove("mobile-record-selected");
-}
-
-let mobileRecordingOrientation = null;
-
-function selectMobileRecordingOrientation(orientation) {
-    mobileRecordingOrientation = orientation;
-
-    document.getElementById("mobilePortraitButton").style.background =
-        orientation === "portrait" ? "#2563eb" : "#25a58d";
-
-    document.getElementById("mobileLandscapeButton").style.background =
-        orientation === "landscape" ? "#2563eb" : "#25a58d";
-
-    document.getElementById("startButton").disabled = false;
-}
-
-function isMobileRecordingOrientationValid() {
-    if (!mobileRecordingOrientation) {
-        return false;
-    }
-
-    const isLandscape = window.matchMedia("(orientation: landscape)").matches;
-
-    return mobileRecordingOrientation ===
-        (isLandscape ? "landscape" : "portrait");
-}
-
-function updateMobileSourceUrlDetails() {
-
-    const urlDetails = document.getElementById("sourceUrlDetails");
-    const fileDetails = document.getElementById("sourceFileDetails");
-
-    if (!urlDetails || !fileDetails) {
-        return;
-    }
-
-    if (window.matchMedia("(max-width: 768px)").matches) {
-        urlDetails.open = true;
-        fileDetails.open = true;
-    }
-}
-
-updateMobileSourceUrlDetails();
-window.addEventListener("resize", updateMobileSourceUrlDetails);
-
-const compareSourceElement = document.getElementById("compareSourceVisibility");
-const compareModeElement = document.getElementById("compareModeVisibility");
-const recordingResultElement = document.getElementById("recordingResultControls");
-
-const compareHeadingElement = document.getElementById("mobileCompareHeading");
-const compareSelectionElement = document.getElementById("mobileCompareSelection");
-const sourceVideoElement = document.getElementById("sourceLandscapeVideo");
-
-const compareSourceOriginalPosition = document.createComment("compare-source-original-position");
-const recordingResultOriginalPosition = document.createComment("recording-result-original-position");
-const compareHeadingOriginalPosition = document.createComment("compare-heading-original-position");
-const compareSelectionOriginalPosition = document.createComment("compare-selection-original-position");
-
-compareSourceElement.parentNode.insertBefore(
-    compareSourceOriginalPosition,
-    compareSourceElement
-);
-
-recordingResultElement.parentNode.insertBefore(
-    recordingResultOriginalPosition,
-    recordingResultElement
-);
-
-compareHeadingElement.parentNode.insertBefore(
-    compareHeadingOriginalPosition,
-    compareHeadingElement
-);
-
-compareSelectionElement.parentNode.insertBefore(
-    compareSelectionOriginalPosition,
-    compareSelectionElement
-);
-
-function updateMobileCompareSourcePosition() {
-    const recordingResult = document.getElementById("recordingResultControls");
-
-    if (window.matchMedia("(max-width: 1000px) and (pointer: coarse)").matches) {
-        return;
-    }
-
-    if (window.matchMedia("(max-width: 768px) and (orientation: portrait)").matches) {
-
-        sourceVideoElement.insertAdjacentElement("afterend", compareHeadingElement);
-        compareHeadingElement.insertAdjacentElement("afterend", compareSelectionElement);
-
-        compareModeElement.insertAdjacentElement("afterend", compareSourceElement);
-        compareSourceElement.insertAdjacentElement("afterend", recordingResult);
-
-    } else {
-
-        compareHeadingOriginalPosition.parentNode.insertBefore(
-            compareHeadingElement,
-            compareHeadingOriginalPosition.nextSibling
-        );
-
-        compareSelectionOriginalPosition.parentNode.insertBefore(
-            compareSelectionElement,
-            compareSelectionOriginalPosition.nextSibling
-        );
-
-        compareSourceOriginalPosition.parentNode.insertBefore(
-            compareSourceElement,
-            compareSourceOriginalPosition.nextSibling
-        );
-
-        recordingResultOriginalPosition.parentNode.insertBefore(
-            recordingResultElement,
-            recordingResultOriginalPosition.nextSibling
-        );
-    }
-}
-
-updateMobileCompareSourcePosition();
-window.addEventListener("resize", updateMobileCompareSourcePosition);
-
 function showVideoLoading() {
     document.getElementById("videoLoadingOverlay").style.display = "flex";
 }
-
 
 function hideVideoLoading() {
     document.getElementById("videoLoadingOverlay").style.display = "none";
@@ -1416,41 +891,10 @@ function updateCompareTopControls() {
 
     compareTopButtons.forEach(({ element, marker }) => {
         if (moveToTop) {
-            if (element.parentNode !== top) {
-                top.appendChild(element);
-            }
+            top.appendChild(element);
         } else {
-            const isMobileTab = window.matchMedia(
-                "(max-width: 1000px) and (pointer: coarse)"
-            ).matches;
-            
-            const mobileComparePanel = document.getElementById("mobileComparePanel");
-            const mobileSourcePanel = document.getElementById("mobileSourcePanel");
-            const targetPanel = element.id === "expandButton"
-                ? (currentMobileTab === "compare"
-                    ? mobileComparePanel
-                    : mobileSourcePanel)
-                : mobileComparePanel;
-
-            if (isMobileTab && targetPanel) {
-                if (element.parentNode !== targetPanel) {
-                    targetPanel.appendChild(element);
-                }
-                
-            } else {
-            
-                const originalMarker = element.mobileTabOriginalMarker || marker;
-
-                if (element.parentNode !== originalMarker.parentNode ||
-                    element.previousSibling !== originalMarker) {
-                    originalMarker.parentNode.insertBefore(
-                        element,
-                        originalMarker.nextSibling
-                    );
-                }
-            }
+            marker.parentNode.insertBefore(element, marker.nextSibling);
         }
-    
     });
 
     top.style.display = moveToTop ? "flex" : "none";
@@ -1477,19 +921,9 @@ function updateCompareVisibility() {
              typeof youtubePlayerApi.getVideoData === "function" &&
              youtubePlayerApi.getVideoData().video_id)
         );
-    
+
     const hasCompareVideo =
         !!recordingUrl || !!uploadedVideoUrl;
-
-    if (window.matchMedia("(max-width: 768px)").matches && !compareMode) {
-        if (recordingUrl && !uploadedVideoUrl && compareVideoSource !== "recording") {
-            changeCompareSource("0");
-            document.getElementById("compareSourceSwitch").value = "0";
-        } else if (uploadedVideoUrl && !recordingUrl && compareVideoSource !== "upload") {
-            changeCompareSource("1");
-            document.getElementById("compareSourceSwitch").value = "1";
-        }
-    }
 
     const compareModeVisibility =
         document.getElementById("compareModeVisibility");
@@ -1501,14 +935,10 @@ function updateCompareVisibility() {
         compareModeVisibility.style.display =
             (hasSourceVideo && hasCompareVideo) ? "inline" : "none";
     }
-    
-    if (compareSourceVisibility) {
-        const isMobile = window.matchMedia("(max-width: 768px)").matches;
 
+    if (compareSourceVisibility) {
         compareSourceVisibility.style.display =
-            (hasSourceVideo && !compareMode &&
-             (!isMobile || (recordingUrl && uploadedVideoUrl)))
-                ? "block" : "none";
+            (hasSourceVideo && !compareMode) ? "block" : "none";
     }
 }
 
@@ -2774,15 +2204,10 @@ function loadSourceVideo(input) {
     
     status.textContent = "動画を読み込み中…";
     showVideoLoading();
-    
+
     sourceVideo.onloadeddata = function() {
         status.textContent = "動画の読み込みが完了しました";
         hideVideoLoading();
-
-        if (window.matchMedia("(max-width: 768px)").matches) {
-            document.body.classList.add("mobile-source-ready");
-            document.getElementById("sourceLandscapeVideo").style.display = "block";
-        }
     };
 
     sourceVideo.onerror = function() {
@@ -3049,18 +2474,12 @@ function loadYoutube() {
             
             events: {
                 
-                    onReady: function(event) {
+                onReady: function(event) {
                     document.getElementById("status").textContent =
                         "YouTube再生可能";
 
-                    if (window.matchMedia("(max-width: 768px)").matches) {
-                        document.body.classList.add("mobile-source-ready");
-                        document.getElementById("sourceLandscapeVideo").style.display = "block";
-                    }
-
                     updateCompareVisibility();
 
-                
                     const compareSpeedControls =
                         document.getElementById("compareSpeedControls");
 
@@ -3134,15 +2553,10 @@ function loadYoutube() {
         newPlayer.allow =
             "autoplay; encrypted-media; picture-in-picture; fullscreen";
         newPlayer.allowFullscreen = true;
-        
+
         newPlayer.src = embedUrl;
 
         oldPlayer.replaceWith(newPlayer);
-
-        if (window.matchMedia("(max-width: 768px)").matches) {
-            document.body.classList.add("mobile-source-ready");
-            document.getElementById("sourceLandscapeVideo").style.display = "block";
-        }
 
         updateCompareVisibility();
 
@@ -3214,34 +2628,8 @@ async function startCamera() {
     }
 }
 
-async function startRecording() {
-    if (window.matchMedia("(max-width: 768px)").matches) {
-        if (!isMobileRecordingOrientationValid()) {
-            document.getElementById("status").textContent =
-                "撮影とスマホの向きを合わせてください";
-            return;
-        }
-
-        if (!cameraStream || !cameraStream.active) {
-            await startCamera();
-
-            if (!cameraStream || !cameraStream.active) {
-                return;
-            }
-
-            const camera = document.getElementById("camera");
-
-            if (camera.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) {
-                await new Promise(resolve => {
-                    camera.addEventListener("loadeddata", resolve, { once: true });
-                    setTimeout(resolve, 3000);
-                });
-            }
-        }
-    }
-
+function startRecording() {
     if (!cameraStream || !window.MediaRecorder) {
-        
         document.getElementById("status").textContent =
             "このブラウザでは録画できません";
         return;
@@ -3373,7 +2761,7 @@ async function startRecording() {
     recorder.ondataavailable = event => {
         if (event.data.size > 0) chunks.push(event.data);
     };
-    
+
     recorder.onstop = () => {
         if (recordingAnimationId !== null) {
             cancelAnimationFrame(recordingAnimationId);
@@ -3411,7 +2799,7 @@ async function startRecording() {
         const sizeMB = (blob.size / 1024 / 1024).toFixed(1);
 
         recordingInfo.textContent = "容量：" + sizeMB + " MB";
-        
+
         recordedVideo.onloadedmetadata = () => {
             const duration = recordedVideo.duration;
 
@@ -3427,74 +2815,20 @@ async function startRecording() {
                     "録画時間：" + minutes + "分" + seconds + "秒" +
                     "　｜　容量：" + sizeMB + " MB" +
                     "　｜　実測：" + actualMbps + " Mbps";
-
-                if (window.matchMedia("(max-width: 768px)").matches) {
-                    const fileInfo = document.getElementById("recordingFileInfo");
-
-                    if (fileInfo) {
-                        document.getElementById("recordingFileSize").textContent =
-                            sizeMB + " MB";
-
-                        document.getElementById("recordingDuration").textContent =
-                            minutes + ":" + String(Math.floor(duration % 60)).padStart(2, "0");
-
-                        document.getElementById("recordingBitrate").textContent =
-                            actualMbps + " Mbps";
-
-                        fileInfo.style.display = "block";
-                        recordingInfo.style.display = "none";
-                    }
-                } else {
-                    recordingInfo.style.display = "block";
-                }
             }
         };
-        
+
         const link = document.getElementById("downloadLink");
 
         const extension = type.includes("mp4") ? "mp4" : "webm";
         link.href = recordingUrl;
         link.download = "dance-recording." + extension;
         link.style.display = "inline-block";
-
-        if (window.matchMedia("(max-width: 768px)").matches) {
-            const recordingDetails = document.querySelector(
-                "#recordingResultControls details"
-            );
-
-            if (recordingDetails) {
-                recordingDetails.open = true;
-            }
-        }
-
+        
         document.getElementById("status").textContent =
             "録画完了：" + Math.round(blob.size / 1024) + " KB";
 
         updateCompareVisibility();
-
-        // スマホ版のみ、録画データ確定後にカメラを停止
-        if (window.matchMedia("(max-width: 768px)").matches) {
-            if (cameraStream) {
-                cameraStream.getTracks().forEach(track => track.stop());
-                cameraStream = null;
-            }
-
-            const camera = document.getElementById("camera");
-
-            if (camera) {
-                camera.pause();
-                camera.srcObject = null;
-            }
-
-            const cameraButton = document.getElementById("cameraButton");
-
-            if (cameraButton) {
-                cameraButton.textContent = "カメラ起動";
-                cameraButton.classList.remove("camera-active");
-            }
-
-            document.body.classList.add("mobile-record-completed");
-        }
     };
 
     recorder.onerror = event => {
@@ -3517,6 +2851,7 @@ function stopRecording() {
 
     document.getElementById("startButton").disabled = false;
     document.getElementById("stopButton").disabled = true;
+
 }
 
 let fullscreenControlsTimer = null;
