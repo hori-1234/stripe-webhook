@@ -1009,7 +1009,7 @@ function switchMobileTab(tab) {
         }
     });
     
-    if (isMobile) {
+        if (isMobile) {
         const video = document.getElementById("sourceLandscapeVideo");
         const target = document.getElementById(
             tab === "source" ? "mobileSourcePanel" : "mobileComparePanel"
@@ -1021,7 +1021,7 @@ function switchMobileTab(tab) {
             target.appendChild(video);
         }
     }
-
+}
 
 function updateMobileTabLayout() {
     const isMobile = window.matchMedia(
