@@ -355,8 +355,13 @@
 <button id="flipButton" style="padding:12px 6px;" onclick="
 
     const player = document.getElementById('youtubePlayer');
+    const sourceVideo = document.getElementById('sourceVideo');
+
     const flipped = player.style.transform !== 'scaleX(-1)';
+
     player.style.transform = flipped ? 'scaleX(-1)' : 'scaleX(1)';
+    sourceVideo.style.transform = flipped ? 'scaleX(-1)' : 'scaleX(1)';
+
     this.textContent = flipped ? '反転中' : '通常';
     this.classList.toggle('is-flipped', flipped);
 ">通常</button>
