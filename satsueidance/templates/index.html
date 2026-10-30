@@ -63,7 +63,6 @@
             body:not(.mobile-source-ready) #normalPlayButton,
             body:not(.mobile-source-ready) #normalPlayDelay,
             body:not(.mobile-source-ready) #normalPlayDelayUnit,
-            body:not(.mobile-source-ready) #expandButton,
             body:not(.mobile-source-ready) #flipButton,
             body:not(.mobile-source-ready) #flipNotice {
                 display: none !important;
@@ -1009,7 +1008,7 @@ function switchMobileTab(tab) {
                 : "none";
         }
     });
-
+    
     if (isMobile) {
         const video = document.getElementById("sourceLandscapeVideo");
         const target = document.getElementById(
@@ -1017,11 +1016,12 @@ function switchMobileTab(tab) {
         );
 
         if (video && target &&
+            video.parentNode !== target &&
             !document.getElementById("compareButton")?.classList.contains("compare-active")) {
             target.appendChild(video);
         }
     }
-}
+
 
 function updateMobileTabLayout() {
     const isMobile = window.matchMedia(
