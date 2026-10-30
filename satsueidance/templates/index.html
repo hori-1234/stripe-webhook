@@ -2563,9 +2563,47 @@ function loadYoutube() {
     }
 }
 
-async function toggleCamera() {
-    const button = document.getElementById("cameraButton");
+async function confirmRecordingOrientation(orientation) {
+    const isPortrait = orientation === "portrait";
 
+    while (true) {
+        const confirmed = window.confirm(
+            "スマホの向きを合わせてください\n\n" +
+            (isPortrait ? "縦向きで録画します。" : "横向きで録画します。") +
+            "\n\nOKを押すと向きを確認します。"
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
+        const currentPortrait = window.matchMedia(
+            "(orientation: portrait)"
+        ).matches;
+
+        if (currentPortrait === isPortrait) {
+            break;
+        }
+    }
+
+    await startCamera();
+
+    if (!cameraStream || !cameraStream.active) {
+        return;
+    }
+
+    startRecording();
+}
+
+document.getElementById("portraitRecordButton").onclick = () => {
+    confirmRecordingOrientation("portrait");
+};
+
+document.getElementById("landscapeRecordButton").onclick = () => {
+    confirmRecordingOrientation("landscape");
+};
+
+async function toggleCamera() {
     if (compareMode && !cameraStream) {
         document.getElementById("status").textContent =
             "比較モード中はカメラを起動できません";
@@ -2588,9 +2626,6 @@ async function toggleCamera() {
 
         document.getElementById("startButton").disabled = true;
 
-        button.textContent = "カメラ起動";
-        button.classList.remove("camera-active");
-
         document.getElementById("status").textContent = "カメラ停止";
     } else {
         await startCamera();
@@ -2612,14 +2647,11 @@ async function startCamera() {
                 height: { ideal: 720 }
             }
         });
-
+        
         document.getElementById("camera").srcObject = cameraStream;
         document.getElementById("startButton").disabled = compareMode;
 
-        const button = document.getElementById("cameraButton");
-        button.textContent = "カメラ停止";
-        button.classList.add("camera-active");
-
+        document.getElementById("status").textContent = "カメラ起動成功";
         document.getElementById("status").textContent = "カメラ起動成功";
         
     } catch (error) {
@@ -2841,16 +2873,49 @@ function startRecording() {
 
     document.getElementById("startButton").disabled = true;
     document.getElementById("stopButton").disabled = false;
+
+    const portraitButton = document.getElementById("portraitRecordButton");
+    const landscapeButton = document.getElementById("landscapeRecordButton");
+
+    const isPortrait = window.matchMedia("(orientation: portrait)").matches;
+
+    portraitButton.disabled = true;
+    landscapeButton.disabled = true;
+
+    if (isPortrait) {
+        portraitButton.textContent = "🔴 縦";
+        landscapeButton.textContent = "横録画";
+    } else {
+        portraitButton.textContent = "縦録画";
+        landscapeButton.textContent = "🔴 横";
+    }
+
     document.getElementById("status").textContent = "録画中";
 }
 
+ 
 function stopRecording() {
     if (recorder && recorder.state === "recording") {
         recorder.stop();
     }
 
-    document.getElementById("startButton").disabled = false;
+    if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+        cameraStream = null;
+    }
+
+    const camera = document.getElementById("camera");
+    camera.pause();
+    camera.srcObject = null;
+
+    document.getElementById("startButton").disabled = true;
     document.getElementById("stopButton").disabled = true;
+
+    document.getElementById("portraitRecordButton").textContent = "縦録画";
+    document.getElementById("landscapeRecordButton").textContent = "横録画";
+
+    document.getElementById("portraitRecordButton").disabled = false;
+    document.getElementById("landscapeRecordButton").disabled = false;
 
 }
 
