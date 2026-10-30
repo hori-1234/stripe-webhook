@@ -108,8 +108,8 @@
                 display: none;
             }
 
-            body:not(.mobile-source-ready) #mobileComparePanel #sourceLandscapeVideo {
-                display: block;
+            body:has(#mobileTabCompare.active) #mobileComparePanel #sourceLandscapeVideo {
+                display: block !important;
             }
 
             body #recordedVideo {
