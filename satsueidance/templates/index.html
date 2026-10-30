@@ -55,6 +55,10 @@
 
         
         @media screen and (max-width: 768px) and (orientation: portrait) {
+            body.mobile-source-ready:has(#mobileTabSource.active) #expandButton {
+                display: inline-block !important;
+            }
+
             body:has(#mobileTabRecording.active) #normalPlayDelayUnit,
             body:has(#mobileTabRecording.active) #compareSpeedControls {
                 display: none !important;
@@ -132,11 +136,10 @@
                 display: none !important;
             }
 
-            body:not(.mobile-source-ready) #compareSourceVisibility,
-            body:not(.mobile-source-ready) #compareModeVisibility {
+            body:not(.mobile-source-ready) #compareSourceVisibility {
                 display: none !important;
             }
-
+            
             body.mobile-upload-selected #uploadControls {
                 display: block !important;
             }
@@ -1011,9 +1014,7 @@ function switchMobileTab(tab) {
     
         if (isMobile) {
         const video = document.getElementById("sourceLandscapeVideo");
-        const target = document.getElementById(
-            tab === "source" ? "mobileSourcePanel" : "mobileComparePanel"
-        );
+        const target = document.getElementById("mobileSourcePanel");
 
         if (video && target &&
             video.parentNode !== target &&
