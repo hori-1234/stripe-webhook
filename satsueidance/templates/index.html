@@ -901,30 +901,6 @@ const compareTopButtons = [
     return { element, marker };
 });
 
-const normalLandscapeControls = [
-    "compareModeVisibility",
-    "normalPlayButton",
-    "normalPlayDelay",
-    "expandButton",
-    "flipButton"
-].map(id => {
-    const element = document.getElementById(id);
-
-    return {
-        element,
-        marker: document.createComment(id + "-landscape-position")
-    };
-});
-
-normalLandscapeControls.push({
-    element: document.getElementById("normalPlayDelay").nextElementSibling,
-    marker: document.createComment("normalPlaySeconds-landscape-position")
-});
-
-normalLandscapeControls.forEach(({ element, marker }) => {
-    element.parentNode.insertBefore(marker, element);
-});
-
 function updateCompareTopControls() {
     const top = document.getElementById("compareTopControls");
 
@@ -942,39 +918,7 @@ function updateCompareTopControls() {
         }
     });
 
-    top.style.display = moveToTop ? "flex" : "none";
-
-    const mobileLandscapeOff = mobileLandscape && !compareMode;
-    const normalControlsTarget =
-        document.getElementById("mobileLandscapeNormalControls");
-
-    if (mobileLandscapeOff) {
-        const controls = [
-            "compareModeVisibility",
-            "normalPlayButton",
-            "normalPlayDelay",
-            "normalPlaySeconds",
-            "expandButton",
-            "flipButton"
-        ];
-
-        controls.forEach(id => {
-            const item = normalLandscapeControls.find(
-                ({ element, marker }) =>
-                    element.id === id ||
-                    (id === "normalPlaySeconds" &&
-                     marker.nodeValue === "normalPlaySeconds-landscape-position")
-            );
-
-            if (item) {
-                normalControlsTarget.appendChild(item.element);
-            }
-        });
-    } else {
-        normalLandscapeControls.forEach(({ element, marker }) => {
-            marker.parentNode.insertBefore(element, marker.nextSibling);
-        });
-    }
+    top.style.display = moveToTop ? "flex" : "none";    
 
     const speedControls = document.getElementById("compareSpeedControls");
     const startControls = document.getElementById("compareStartControls");
