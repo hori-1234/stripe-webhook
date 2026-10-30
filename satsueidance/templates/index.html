@@ -430,6 +430,11 @@
             display: none;
         }
 
+        body:has(#compareButton.compare-active) h2 + p,
+        body:has(#compareButton.compare-active) h2 + p + p {
+            display: none;
+        }
+
         #videoBox.fullscreen-controls-hidden #fullscreenCloseButton,
         #videoBox.fullscreen-controls-hidden #fullscreenComparePlayButton,
         #videoBox.fullscreen-controls-hidden #fullscreenCompareProgress {
