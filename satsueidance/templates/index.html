@@ -203,12 +203,7 @@
 
             body.mobile-record-selected #cameraFlipButton {
                 display: inline-block !important;
-            }
-
-            body.mobile-record-selected #cameraFlipButton {
-                display: inline-block !important;
-            }
-            
+            }            
 
             body.mobile-record-selected #recordingControls {
                 display: flex;
@@ -1087,14 +1082,13 @@ function updateMobileTabLayout() {
                     panel.appendChild(element);
                 }
             } else {
-            
-                const marker = element.mobileTabOriginalMarker;
+                const originalMarker = element.mobileTabOriginalMarker || marker;
 
-                if (element.parentNode !== marker.parentNode ||
-                    element.previousSibling !== marker) {
-                    marker.parentNode.insertBefore(
+                if (element.parentNode !== originalMarker.parentNode ||
+                    element.previousSibling !== originalMarker) {
+                    originalMarker.parentNode.insertBefore(
                         element,
-                        marker.nextSibling
+                        originalMarker.nextSibling
                     );
                 }
             }
@@ -1106,7 +1100,7 @@ function refreshMobileTabLayout() {
     updateMobileTabLayout();
     switchMobileTab(currentMobileTab);
 
-    if (typeof updateCompareTopControls === "function") {
+    if (typeof compareTopButtons !== "undefined") {
         updateCompareTopControls();
     }
 }
@@ -1428,9 +1422,14 @@ function updateCompareTopControls() {
                     mobileComparePanel.appendChild(element);
                 }
             } else {
-                if (element.parentNode !== marker.parentNode ||
-                    element.previousSibling !== marker) {
-                    marker.parentNode.insertBefore(element, marker.nextSibling);
+                const originalMarker = element.mobileTabOriginalMarker || marker;
+
+                if (element.parentNode !== originalMarker.parentNode ||
+                    element.previousSibling !== originalMarker) {
+                    originalMarker.parentNode.insertBefore(
+                        element,
+                        originalMarker.nextSibling
+                    );
                 }
             }
         }
