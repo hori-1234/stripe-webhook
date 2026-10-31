@@ -1666,7 +1666,8 @@ def schedule():
             e.event_name,
             c.performer_name,
             c.updated_at,
-            c.change_type
+            c.change_type,
+            e.genre
         FROM event_schedule_changes c
         JOIN event_schedules e
             ON e.id = c.event_id
@@ -1686,7 +1687,8 @@ def schedule():
             "event_name": row[3],
             "performer_name": row[4],
             "updated_at": row[5],
-            "change_type": row[6]
+            "change_type": row[6],
+            "genre": row[7]
         }
         for row in cur.fetchall()
     ]
@@ -1698,7 +1700,8 @@ def schedule():
             event_date,
             location,
             event_name,
-            updated_at
+            updated_at,
+            genre
         FROM event_schedules
         WHERE updated_at >= CURRENT_TIMESTAMP - INTERVAL '7 days'
           AND created_at < CURRENT_TIMESTAMP - INTERVAL '7 days'
@@ -1722,7 +1725,8 @@ def schedule():
                 created_at AT TIME ZONE 'Asia/Tokyo',
                 'MM/DD HH24:MI'
             ),
-            created_at
+            created_at,
+            genre
         FROM event_schedules
         WHERE created_at >= CURRENT_TIMESTAMP - INTERVAL '7 days'
         ORDER BY created_at DESC, id DESC
@@ -1735,6 +1739,7 @@ def schedule():
             "event_date": row[1],
             "location": row[2],
             "event_name": row[3],
+            "genre": row[6],
             "registered_at": row[4],
             "sort_at": row[5]
         }
@@ -1753,6 +1758,7 @@ def schedule():
             "event_date": row[1],
             "location": row[2],
             "event_name": row[3],
+            "genre": row[5],
             "registered_at": row[4].astimezone(
                 ZoneInfo("Asia/Tokyo")
             ).strftime("%m/%d %H:%M"),
@@ -1769,6 +1775,7 @@ def schedule():
             "event_date": news["event_date"],
             "location": news["location"],
             "event_name": news["event_name"],
+            "genre": news["genre"],
             "registered_at": news["updated_at"].astimezone(
                 ZoneInfo("Asia/Tokyo")
             ).strftime("%m/%d %H:%M"),
@@ -1778,7 +1785,7 @@ def schedule():
                 "cancellation": "開催中止"
             }.get(news["change_type"], "変更情報"),
             "sort_at": news["updated_at"],
-            
+
             "performer_name": news["performer_name"]
         })
 
