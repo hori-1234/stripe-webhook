@@ -1301,7 +1301,7 @@ def schedule():
         cur.close()
         conn.close()
 
-    today = datetime.now()
+    today = datetime.now(ZoneInfo("Asia/Tokyo"))
 
     year = request.args.get("year", today.year, type=int)
     month = request.args.get("month", today.month, type=int)
