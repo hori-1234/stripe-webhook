@@ -581,7 +581,7 @@
             display: none !important;
         }
         
-        @media screen and (max-width: 1000px) and (pointer: coarse) {
+        @media screen {
             #compareAdjustTabs {
                 display: grid;
                 grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -948,6 +948,8 @@ function updateCompareTopControls() {
     } else if (!compareMode) {
         document.querySelector(".compare-divider")
             .before(speedControls);
+    } else if (compareMode && !mobileLandscape) {
+        startControls.before(speedControls);
     } else {
         youtubeUrlControls.after(speedControls);
     }
