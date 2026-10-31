@@ -1837,10 +1837,12 @@ body.vertical-mode .event-bar-time {
             
                     <div>
                         <strong>【{{ news.type }}】</strong>
+                        {% if news.genre %}
+                            <span>{{ news.genre }}</span>
+                        {% endif %}
                         <a href="/schedule?event_id={{ news.id }}"
-                            onclick="document.getElementById('schedule-loading').style.display = 'flex';"
-                            
-                            style="color: #1767bd;">
+                           onclick="document.getElementById('schedule-loading').style.display = 'flex';"
+                           style="color: #1767bd;">
                             {{ news.event_name }}
                         </a>
                     </div>
