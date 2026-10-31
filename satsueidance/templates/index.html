@@ -2815,8 +2815,13 @@ function startRecording() {
         const camera = document.getElementById("camera");
 
         recordingCanvas = document.createElement("canvas");
-        recordingCanvas.width = camera.videoWidth || 1280;
-        recordingCanvas.height = camera.videoHeight || 720;
+
+        const isPortrait = window.matchMedia(
+            "(orientation: portrait)"
+        ).matches;
+
+        recordingCanvas.width = isPortrait ? 720 : 1280;
+        recordingCanvas.height = isPortrait ? 1280 : 720;
 
         recordingContext = recordingCanvas.getContext("2d");
 
@@ -2837,9 +2842,31 @@ function startRecording() {
                 recordingContext.translate(width, 0);
                 recordingContext.scale(-1, 1);
             }
-
+            
             if (camera.readyState >= 2) {
-                recordingContext.drawImage(camera, 0, 0, width, height);
+                const videoWidth = camera.videoWidth;
+                const videoHeight = camera.videoHeight;
+
+                if (videoWidth > 0 && videoHeight > 0) {
+                    const scale = Math.max(
+                        width / videoWidth,
+                        height / videoHeight
+                    );
+
+                    const drawWidth = videoWidth * scale;
+                    const drawHeight = videoHeight * scale;
+
+                    const drawX = (width - drawWidth) / 2;
+                    const drawY = (height - drawHeight) / 2;
+
+                    recordingContext.drawImage(
+                        camera,
+                        drawX,
+                        drawY,
+                        drawWidth,
+                        drawHeight
+                    );
+                }
             }
 
             recordingContext.restore();
