@@ -1838,7 +1838,31 @@ body.vertical-mode .event-bar-time {
                     <div>
                         <strong>【{{ news.type }}】</strong>
                         {% if news.genre %}
-                            <span>{{ news.genre }}</span>
+                            <span class="event-genre
+                                {% if news.genre == '歌' %}
+                                    genre-song
+                                {% elif news.genre == '踊' %}
+                                    genre-dance
+                                {% elif news.genre == '歌踊' %}
+                                    genre-song-dance
+                                {% elif news.genre == 'アイドル' %}
+                                    genre-idol
+                                {% elif news.genre == 'バトル' %}
+                                    genre-battle
+                                {% elif news.genre == 'WS' %}
+                                    genre-ws
+                                {% elif news.genre == 'オフ会' %}
+                                    genre-offkai
+                                {% elif news.genre == 'ｺｽﾌﾟﾚ' %}
+                                    genre-cosplay
+                                {% elif news.genre == '撮影会' %}
+                                    genre-photo
+                                {% else %}
+                                    genre-other
+                                {% endif %}
+                            ">
+                                {{ news.genre }}
+                            </span>
                         {% endif %}
                         <a href="/schedule?event_id={{ news.id }}"
                            onclick="document.getElementById('schedule-loading').style.display = 'flex';"
