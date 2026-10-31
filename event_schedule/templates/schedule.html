@@ -3139,9 +3139,19 @@ body.vertical-mode .event-bar-time {
     let isMyMemoMode =
         new URLSearchParams(window.location.search).get("mymemo") === "1";
 
-    
+
     function toggleMyMemoMode() {
+        const isLoggedIn = {{ (memo_login_email is not none) | tojson }};
+
+        if (!isLoggedIn) {
+            if (confirm("マイメモ表示は無料登録後に利用できます。\n\n無料登録・ログイン画面へ移動しますか？")) {
+                window.location.href = "/schedule/login";
+            }
+            return;
+        }
+
         const params = new URLSearchParams(window.location.search);
+        
 
         if (isMyMemoMode) {
             params.delete("mymemo");
@@ -3162,6 +3172,7 @@ body.vertical-mode .event-bar-time {
 
         window.location.href = "/schedule?" + params.toString();
     }
+
 
     function updateMyMemoButton() {
         const button = document.getElementById("mymemo-toggle-button");
@@ -3397,7 +3408,17 @@ body.vertical-mode .event-bar-time {
             return;
         }
 
+        const isLoggedIn = {{ (memo_login_email is not none) | tojson }};
+
+        if (!isLoggedIn) {
+            if (confirm("現在はマイメモのデモ版です。\nメモを保存するには無料登録が必要です。\n\n無料登録・ログイン画面へ移動しますか？")) {
+                window.location.href = "/schedule/login";
+            }
+            return;
+        }
+
         try {
+
             const response = await fetch("/schedule/memo/event/save", {
                 method: "POST",
                 headers: {
@@ -3429,13 +3450,6 @@ body.vertical-mode .event-bar-time {
     }
 
     function toggleMemo(eventId) {
-        const isLoggedIn = {{ (memo_login_email is not none) | tojson }};
-
-        if (!isLoggedIn) {
-            window.location.href = "/schedule/login";
-            return;
-        }
-
         const memoArea = document.getElementById("memo-" + eventId);
 
         if (!memoArea) {
@@ -3445,7 +3459,7 @@ body.vertical-mode .event-bar-time {
         memoArea.style.display =
             memoArea.style.display === "none" ? "block" : "none";
     }
-
+    
     function toggleMemoAlarm(eventId) {
         const alarmArea = document.getElementById("memo-alarm-" + eventId);
 
@@ -3456,15 +3470,8 @@ body.vertical-mode .event-bar-time {
         alarmArea.style.display =
             alarmArea.style.display === "none" ? "block" : "none";
     }
-
+    
     function toggleDateMemo(date) {
-        const isLoggedIn = {{ (memo_login_email is not none) | tojson }};
-
-        if (!isLoggedIn) {
-            window.location.href = "/schedule/login";
-            return;
-        }
-
         const memoArea = document.getElementById("date-memo-" + date);
 
         if (!memoArea) {
@@ -3474,6 +3481,7 @@ body.vertical-mode .event-bar-time {
         memoArea.style.display =
             memoArea.style.display === "none" ? "block" : "none";
     }
+
 
     function toggleDateMemoAlarm(date) {
         const alarmArea = document.getElementById("date-memo-alarm-" + date);
@@ -3654,7 +3662,7 @@ body.vertical-mode .event-bar-time {
     if (performerList && savedScrollTop !== null) {
         performerList.scrollTop = Number(savedScrollTop);
     }
-
+        
         async function saveDateMemo(dateKey) {
         const textarea = document.getElementById(`date-memo-text-${dateKey}`);
         const sticky = document.getElementById(`date-memo-sticky-${dateKey}`);
@@ -3663,6 +3671,15 @@ body.vertical-mode .event-bar-time {
 
         if (!textarea || !sticky || !color) {
             alert("日付メモの入力欄が見つかりません");
+            return;
+        }
+
+        const isLoggedIn = {{ (memo_login_email is not none) | tojson }};
+
+        if (!isLoggedIn) {
+            if (confirm("現在はマイメモのデモ版です。\nメモを保存するには無料登録が必要です。\n\n無料登録・ログイン画面へ移動しますか？")) {
+                window.location.href = "/schedule/login";
+            }
             return;
         }
 
