@@ -2740,6 +2740,10 @@ async function toggleCamera() {
 
 async function startCamera() {
     try {
+        const isPortrait = window.matchMedia(
+            "(orientation: portrait)"
+        ).matches;
+
         cameraStream = await navigator.mediaDevices.getUserMedia({
             audio: {
                 echoCancellation: false,
@@ -2748,9 +2752,9 @@ async function startCamera() {
             },
             video: {
                 facingMode: "user",
-                aspectRatio: { ideal: 16 / 9 },
-                width: { ideal: 1280 },
-                height: { ideal: 720 }
+                aspectRatio: { ideal: isPortrait ? 9 / 16 : 16 / 9 },
+                width: { ideal: isPortrait ? 720 : 1280 },
+                height: { ideal: isPortrait ? 1280 : 720 }
             }
         });
         
