@@ -2750,14 +2750,17 @@ async function startCamera() {
                 noiseSuppression: false,
                 autoGainControl: false
             },
-            video: {
-                facingMode: "user",
-                aspectRatio: isPortrait
-                    ? { exact: 9 / 16 }
-                    : { ideal: 16 / 9 },
-                width: { ideal: isPortrait ? 720 : 1280 },
-                height: { ideal: isPortrait ? 1280 : 720 }
-            }
+            video: isPortrait && window.matchMedia("(pointer: coarse)").matches
+                ? {
+                    facingMode: "user"
+                }
+                : {
+                    facingMode: "user",
+                    aspectRatio: { ideal: 16 / 9 },
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                }
+
         });
         
         const camera = document.getElementById("camera");
