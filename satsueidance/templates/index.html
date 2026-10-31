@@ -1882,7 +1882,9 @@ async function toggleCompareMode() {
     flipButton.style.display = compareMode ? "none" : "inline-block";
 
     const flipNotice = document.getElementById("flipNotice");
-    flipNotice.style.display = compareMode ? "none" : "block";
+    if (flipNotice) {
+        flipNotice.style.display = compareMode ? "none" : "block";
+    }
 
     const cameraControls = document.getElementById("cameraControls");
     cameraControls.style.display = compareMode ? "none" : "";    
@@ -1899,8 +1901,12 @@ async function toggleCompareMode() {
     document.getElementById("sourceVideoHeading").style.display =
         compareMode ? "none" : "block";
 
-    document.getElementById("sourceVideoNotice").style.display =
-        compareMode ? "none" : "block";
+    const sourceVideoNotice = document.getElementById("sourceVideoNotice");
+
+    if (sourceVideoNotice) {
+        sourceVideoNotice.style.display =
+            compareMode ? "none" : "block";
+    }
 
     const compareVideo = document.getElementById("compareVideo");
     
