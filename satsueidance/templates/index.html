@@ -2760,7 +2760,18 @@ async function startCamera() {
             }
         });
         
-        document.getElementById("camera").srcObject = cameraStream;
+        const camera = document.getElementById("camera");
+        camera.srcObject = cameraStream;
+
+        camera.onloadedmetadata = () => {
+            if (isPortrait) {
+                alert(
+                    "縦録画のカメラ映像：" +
+                    camera.videoWidth + " × " + camera.videoHeight
+                );
+            }
+        };
+
         document.getElementById("startButton").disabled = compareMode;
 
         document.getElementById("status").textContent = "カメラ起動成功";
