@@ -2848,9 +2848,9 @@ function startRecording() {
                 const videoHeight = camera.videoHeight;
 
                 if (videoWidth > 0 && videoHeight > 0) {
-                    const scale = Math.max(
-                        width / videoWidth,
-                        height / videoHeight
+                    const scale = isPortrait
+                        ? Math.min(width / videoWidth, height / videoHeight)
+                        : Math.max(width / videoWidth, height / videoHeight);
                     );
 
                     const drawWidth = videoWidth * scale;
