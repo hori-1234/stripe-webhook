@@ -397,10 +397,17 @@
     <div id="cameraRecordingControls">
         <div id="recordingControls">
 
-        <div style="display:flex; gap:8px;">
+        <div id="recordOrientationButtons" style="display:flex; gap:8px;">
             <button type="button" id="portraitRecordButton" style="flex:1;">縦録画</button>
             <button type="button" id="landscapeRecordButton" style="flex:1;">横録画</button>
         </div>
+
+        <button
+            type="button"
+            id="pcRecordButton"
+            style="display:none; width:100%;"
+            onclick="document.getElementById('landscapeRecordButton').click()"
+        >録画</button>
 
         <button id="stopButton" onclick="stopRecording()" disabled style="display:block; width:100%;">停止</button>
 
