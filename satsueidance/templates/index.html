@@ -20,6 +20,18 @@
                 margin-left: auto;
                 margin-right: auto;
             }
+
+            #normalPlayDelay {
+                width: 70px !important;
+            }
+
+            #recordOrientationButtons {
+                display: none !important;
+            }
+
+            #pcRecordButton {
+                display: block !important;
+            }
         }
         
         h2 {
@@ -472,9 +484,9 @@
             }
         }
 
-        @media screen and (max-width: 1000px) and (pointer: coarse) {
-            body:has(#compareButton.compare-active) #status {
-                display: none;
+        @media screen {
+            #compareAdjustTabs {
+                display: grid;
             }
         }
 
@@ -631,7 +643,7 @@
         }
     
         
-        @media screen and (max-width: 1000px) and (pointer: coarse) {
+        @media screen {
             #compareAdjustTabs > details:not([open]) > input,
             #compareAdjustTabs > details:not([open]) > span {
                 display: none;
@@ -673,7 +685,7 @@
             font-weight: 700;
         }
 
-        @media screen and (max-width: 1000px) and (pointer: coarse) {
+        @media screen {
             #adjustControls[open] #compareAdjustTabs > details:not([open]) > summary {
                 background: #f1f5f9;
                 color: #334155;
