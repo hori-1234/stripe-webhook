@@ -2752,7 +2752,10 @@ async function startCamera() {
             },
             video: isPortrait && window.matchMedia("(pointer: coarse)").matches
                 ? {
-                    facingMode: "user"
+                    facingMode: "user",
+                    aspectRatio: { ideal: 9 / 16 },
+                    width: { ideal: 720 },
+                    height: { ideal: 1280 }
                 }
                 : {
                     facingMode: "user",
@@ -2765,15 +2768,6 @@ async function startCamera() {
         
         const camera = document.getElementById("camera");
         camera.srcObject = cameraStream;
-
-        camera.onloadedmetadata = () => {
-            if (isPortrait) {
-                alert(
-                    "縦録画のカメラ映像：" +
-                    camera.videoWidth + " × " + camera.videoHeight
-                );
-            }
-        };
 
         document.getElementById("startButton").disabled = compareMode;
 
