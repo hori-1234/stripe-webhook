@@ -1139,7 +1139,8 @@ function initializeCompareTabLoop() {
 
     // 中央の本物のタブから開始
     requestAnimationFrame(() => {
-        tabs.scrollLeft = tabs.clientWidth * 2;
+        const sectionWidth = tabs.scrollWidth / 3;
+        tabs.scrollLeft = sectionWidth;
     });
 
     tabs.addEventListener("scroll", () => {
