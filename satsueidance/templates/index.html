@@ -587,7 +587,7 @@
                 flex-wrap: nowrap;
                 gap: 0;
                 position: relative;
-                padding-bottom: 48px;
+                padding-bottom: 0;
                 width: 100%;
                 min-width: 0;
                 box-sizing: border-box;
@@ -1117,18 +1117,18 @@ function initializeCompareSliderArea() {
         });
     });
 
+    function restoreControls() {
+        controls.forEach((control, details) => {
+            if (control.input) details.appendChild(control.input);
+            if (control.value) details.appendChild(control.value);
+        });
+    }
+
     detailsList.forEach(details => {
         details.addEventListener("toggle", () => {
-            if (!details.open) {
-                const control = controls.get(details);
+            restoreControls();
 
-                if (control.input && area.contains(control.input)) {
-                    area.replaceChildren();
-                }
-                return;
-            }
-
-            area.replaceChildren();
+            if (!details.open) return;
 
             const control = controls.get(details);
 
@@ -1138,7 +1138,7 @@ function initializeCompareSliderArea() {
     });
 }
 
-// initializeCompareSliderArea();
+initializeCompareSliderArea();
     
 
 function initializeCompareTabLoop() {
