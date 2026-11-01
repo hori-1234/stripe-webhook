@@ -580,58 +580,63 @@
         #videoBox.expanded #fullscreenCloseButton {
             display: none !important;
         }
-
-            @media screen {
+        
+        @media screen {
             #compareAdjustTabs {
-                display: flex;
-                flex-wrap: nowrap;
+                display: grid;
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+                grid-template-rows: auto;
                 gap: 0;
                 position: relative;
-                padding-bottom: 0;
-                height: 64px;
+                padding-bottom: 48px;
                 width: 100%;
                 min-width: 0;
                 box-sizing: border-box;
-                overflow-x: auto;
-                overflow-y: hidden;
-                -webkit-overflow-scrolling: touch;
-                scrollbar-width: none;
-                scroll-snap-type: x mandatory;
-            }
-
-            #compareAdjustTabs::-webkit-scrollbar {
-                display: none;
             }
 
             #compareAdjustTabs > details {
                 display: block;
-                flex: 0 0 25%;
-                min-width: 0;
-                max-width: 25%;
-                height: fit-content;
-                box-sizing: border-box;
-                scroll-snap-align: start;
-            }
-
-            #compareAdjustTabs > details > summary {
-                width: 100%;
-            }
-
-            #compareAdjustSliderArea > input[type="range"] {
-                display: block;
-                width: 100% !important;
                 min-width: 0;
                 max-width: 100%;
+                box-sizing: border-box;
+                grid-row: 1;
+            }
+
+            #compareAdjustTabs > details:nth-child(1) {
+                grid-column: 1;
+            }
+
+            #compareAdjustTabs > details:nth-child(2) {
+                grid-column: 3;
+            }
+
+            #compareAdjustTabs > details:nth-child(3) {
+                grid-column: 4;
+            }
+
+            #compareAdjustTabs > details:nth-child(4) {
+                grid-column: 2;
+            }            
+
+
+            #compareAdjustTabs > details > summary {
+                grid-row: 1;
+            }            
+
+            #compareAdjustTabs > details > input[type="range"] {
+                position: absolute;
+                left: 0;
+                bottom: 8px;
+                width: 100%;
                 box-sizing: border-box;
                 margin: 0;
                 padding: 0;
             }
         
-            #compareAdjustSliderArea > span {
-                display: block;
-                width: 100%;
-                text-align: right;
-                margin-top: 4px;
+            #compareAdjustTabs > details > span {
+                position: absolute;
+                right: 0;
+                bottom: 28px;
                 font-size: 12px;
                 color: #334155;
             }
@@ -1079,155 +1084,25 @@ function changeCompareOpacity(value) {
     opacityValue.textContent = value + "%";
 }
 
-function updateCompareFilters() {
+function updateComparePosition() {
     const compareVideo = document.getElementById("compareVideo");
 
-    const brightness = Number(document.getElementById("compareBrightness").value);
-    const lightness = Number(document.getElementById("compareLightness").value);
-    const hue = Number(document.getElementById("compareHue").value);
-    const contrast = Number(document.getElementById("compareContrast").value);
+    const x = Number(document.getElementById("compareX").value);
+    const y = Number(document.getElementById("compareY").value);
+    const size = Number(document.getElementById("compareSize").value);
 
-    compareVideo.style.filter =
-        `brightness(${brightness / 100}) ` +
-        `grayscale(${Math.max(0, 100 - lightness) / 100}) ` +
-        `hue-rotate(${hue}deg) ` +
-        `contrast(${contrast / 100})`;
+    compareVideo.style.transform =
+        `translate(${x}%, ${y}%) scale(${size / 100})`;
 
-    document.getElementById("compareBrightnessValue").textContent =
-        brightness + "%";
-
-    document.getElementById("compareLightnessValue").textContent =
-        lightness + "%";
-    
-    document.getElementById("compareHueValue").textContent =
-        hue + "°";
-    
-    document.getElementById("compareContrastValue").textContent =
-        contrast + "%";
+    document.getElementById("compareSizeValue").textContent =
+        size + "%";
 }
 
-function initializeCompareSliderArea() {
-    const tabs = document.getElementById("compareAdjustTabs");
-    const area = document.getElementById("compareAdjustSliderArea");
-    if (!tabs || !area) return;
-
-    const detailsList = Array.from(tabs.children);
-    const controls = new Map();
-
-    detailsList.forEach(details => {
-        controls.set(details, {
-            input: details.querySelector('input[type="range"]'),
-            value: details.querySelector("span[id]")
-        });
-    });
-
-    function restoreControls() {
-        controls.forEach((control, details) => {
-            if (control.input) details.appendChild(control.input);
-            if (control.value) details.appendChild(control.value);
-        });
-    }
-    
-    function updateSliderArea() {
-        restoreControls();
-
-        const activeDetails = detailsList.find(details => details.open);
-        if (!activeDetails) return;
-
-        const control = controls.get(activeDetails);
-
-        if (control.input) area.appendChild(control.input);
-        if (control.value) area.appendChild(control.value);
-    }
-
-    detailsList.forEach(details => {
-        details.addEventListener("toggle", updateSliderArea);
-    });
-
-    updateSliderArea();
-}
-
-
-initializeCompareSliderArea();
-    
-
-function initializeCompareTabLoop() {
-    const tabs = document.getElementById("compareAdjustTabs");
-    if (!tabs) return;
-
-    const originals = Array.from(tabs.children);
-    if (originals.length === 0) return;
-
-    const count = originals.length;
-
-    // 前後に同じタブを複製する
-    const createClone = (original, index) => {
-        const clone = original.cloneNode(true);
-        clone.removeAttribute("open");
-        clone.removeAttribute("name");
-
-        clone.querySelectorAll("[id]").forEach(element => {
-            element.removeAttribute("id");
-        });
-
-        // 複製タブのスライダーは操作させない
-        clone.querySelectorAll("input").forEach(input => {
-            input.disabled = true;
-            input.removeAttribute("oninput");
-        });
-
-        clone.dataset.originalIndex = index;
-        return clone;
-    };
-
-    const before = originals.map(createClone);
-    const after = originals.map(createClone);
-
-    before.forEach(clone => tabs.insertBefore(clone, originals[0]));
-    after.forEach(clone => tabs.appendChild(clone));
-
-    // 中央の本物のタブから開始
-    requestAnimationFrame(() => {
-        const sectionWidth = tabs.scrollWidth / 3;
-        tabs.scrollLeft = sectionWidth;
-    });
-    
-    // スクロール位置の自動補正を一時停止
-    // tabs.addEventListener("scroll", () => {
-    //     const sectionWidth = tabs.scrollWidth / 3;
-    //
-    //     if (tabs.scrollLeft < sectionWidth * 0.5) {
-    //         tabs.scrollLeft += sectionWidth;
-    //     } else if (tabs.scrollLeft > sectionWidth * 1.5) {
-    //         tabs.scrollLeft -= sectionWidth;
-    //     }
-    // });
-
-    // 複製タブを押したら本物のタブを開く
-    tabs.addEventListener("click", event => {
-        const clone = event.target.closest("[data-original-index]");
-        if (!clone) return;
-
-        event.preventDefault();
-
-        const index = Number(clone.dataset.originalIndex);
-        const original = originals[index];
-
-        original.open = true;
-        original.scrollIntoView({
-            behavior: "smooth",
-            block: "nearest",
-            inline: "center"
-        });
-    });
-}
-
-// initializeCompareTabLoop();
+let adjustDragStart = null;
 
 const adjustVideo = document.getElementById("compareVideo");
 
 let adjustPinchStart = null;
-
 const adjustPointers = new Map();
 
 function getAdjustPointerDistance() {
