@@ -1116,6 +1116,7 @@ function initializeCompareTabLoop() {
     const createClone = (original, index) => {
         const clone = original.cloneNode(true);
         clone.removeAttribute("open");
+        clone.removeAttribute("name");
 
         clone.querySelectorAll("[id]").forEach(element => {
             element.removeAttribute("id");
