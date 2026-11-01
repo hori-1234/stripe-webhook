@@ -1142,16 +1142,17 @@ function initializeCompareTabLoop() {
         const sectionWidth = tabs.scrollWidth / 3;
         tabs.scrollLeft = sectionWidth;
     });
-
-    tabs.addEventListener("scroll", () => {
-        const sectionWidth = tabs.scrollWidth / 3;
-
-        if (tabs.scrollLeft < sectionWidth * 0.5) {
-            tabs.scrollLeft += sectionWidth;
-        } else if (tabs.scrollLeft > sectionWidth * 1.5) {
-            tabs.scrollLeft -= sectionWidth;
-        }
-    });
+    
+    // スクロール位置の自動補正を一時停止
+    // tabs.addEventListener("scroll", () => {
+    //     const sectionWidth = tabs.scrollWidth / 3;
+    //
+    //     if (tabs.scrollLeft < sectionWidth * 0.5) {
+    //         tabs.scrollLeft += sectionWidth;
+    //     } else if (tabs.scrollLeft > sectionWidth * 1.5) {
+    //         tabs.scrollLeft -= sectionWidth;
+    //     }
+    // });
 
     // 複製タブを押したら本物のタブを開く
     tabs.addEventListener("click", event => {
