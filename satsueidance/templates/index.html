@@ -1127,20 +1127,26 @@ function initializeCompareSliderArea() {
             if (control.value) details.appendChild(control.value);
         });
     }
+    
+    function updateSliderArea() {
+        restoreControls();
+
+        const activeDetails = detailsList.find(details => details.open);
+        if (!activeDetails) return;
+
+        const control = controls.get(activeDetails);
+
+        if (control.input) area.appendChild(control.input);
+        if (control.value) area.appendChild(control.value);
+    }
 
     detailsList.forEach(details => {
-        details.addEventListener("toggle", () => {
-            restoreControls();
-
-            if (!details.open) return;
-
-            const control = controls.get(details);
-
-            if (control.input) area.appendChild(control.input);
-            if (control.value) area.appendChild(control.value);
-        });
+        details.addEventListener("toggle", updateSliderArea);
     });
+
+    updateSliderArea();
 }
+
 
 initializeCompareSliderArea();
     
