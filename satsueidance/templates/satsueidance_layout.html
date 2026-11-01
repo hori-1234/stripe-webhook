@@ -115,6 +115,19 @@
         </details>
 
         <details name="compareAdjustTab">
+            <summary><span>⤢</span><span>縮尺</span></summary>
+            <input
+                type="range"
+                id="compareSize"
+                min="0"
+                max="200"
+                value="100"
+                oninput="updateComparePosition()"
+            >
+            <span id="compareSizeValue">100%</span>
+        </details>
+
+        <details name="compareAdjustTab">
             <summary><span>↔</span><span>移:横</span></summary>
             <input
                 type="range"
@@ -139,24 +152,64 @@
         </details>
 
         <details name="compareAdjustTab">
-            <summary><span>⤢</span><span>縮尺</span></summary>
+            <summary><span>☀</span><span>明暗</span></summary>
             <input
                 type="range"
-                id="compareSize"
+                id="compareBrightness"
                 min="0"
                 max="200"
                 value="100"
-                oninput="updateComparePosition()"
+                oninput="updateCompareFilters()"
             >
-            <span id="compareSizeValue">100%</span>
+            <span id="compareBrightnessValue">100%</span>
         </details>
-            
+
+        <details name="compareAdjustTab">
+            <summary><span>◐</span><span>明度</span></summary>
+            <input
+                type="range"
+                id="compareLightness"
+                min="0"
+                max="200"
+                value="100"
+                oninput="updateCompareFilters()"
+            >
+            <span id="compareLightnessValue">100%</span>
+        </details>
+
+        <details name="compareAdjustTab">
+            <summary><span>◉</span><span>色調</span></summary>
+            <input
+                type="range"
+                id="compareHue"
+                min="-180"
+                max="180"
+                value="0"
+                oninput="updateCompareFilters()"
+            >
+            <span id="compareHueValue">0°</span>
+        </details>
+
+        <details name="compareAdjustTab">
+            <summary><span>◑</span><span>ｺﾝﾄﾗ</span></summary>
+            <input
+                type="range"
+                id="compareContrast"
+                min="0"
+                max="200"
+                value="100"
+                oninput="updateCompareFilters()"
+            >
+            <span id="compareContrastValue">100%</span>
+        </details>
+
         </div>
 
     </details>
 
 </div>
 
+        
     </div>
 
     <div id="sourceLandscapeVideo">
