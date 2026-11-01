@@ -615,21 +615,19 @@
                 width: 100%;
             }
 
-            #compareAdjustTabs > details > input[type="range"] {
-                position: absolute;
-                left: 0;
-                bottom: 8px;
+            #compareAdjustSliderArea > input[type="range"] {
+                display: block;
                 width: 100%;
                 box-sizing: border-box;
                 margin: 0;
                 padding: 0;
-                z-index: 1;
             }
         
-            #compareAdjustTabs > details > span {
-                position: absolute;
-                right: 0;
-                bottom: 28px;
+            #compareAdjustSliderArea > span {
+                display: block;
+                width: 100%;
+                text-align: right;
+                margin-top: 4px;
                 font-size: 12px;
                 color: #334155;
             }
@@ -1110,23 +1108,38 @@ function initializeCompareSliderArea() {
     if (!tabs || !area) return;
 
     const detailsList = Array.from(tabs.children);
+    const controls = new Map();
+
+    detailsList.forEach(details => {
+        controls.set(details, {
+            input: details.querySelector('input[type="range"]'),
+            value: details.querySelector("span[id]")
+        });
+    });
 
     detailsList.forEach(details => {
         details.addEventListener("toggle", () => {
-            if (!details.open) return;
+            if (!details.open) {
+                const control = controls.get(details);
+
+                if (control.input && area.contains(control.input)) {
+                    area.replaceChildren();
+                }
+                return;
+            }
 
             area.replaceChildren();
 
-            const input = details.querySelector('input[type="range"]');
-            const value = details.querySelector("span[id]");
+            const control = controls.get(details);
 
-            if (input) area.appendChild(input);
-            if (value) area.appendChild(value);
+            if (control.input) area.appendChild(control.input);
+            if (control.value) area.appendChild(control.value);
         });
     });
 }
 
 initializeCompareSliderArea();
+    
 
 function initializeCompareTabLoop() {
     const tabs = document.getElementById("compareAdjustTabs");
