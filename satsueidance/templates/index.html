@@ -1099,10 +1099,34 @@ function updateCompareFilters() {
     
     document.getElementById("compareHueValue").textContent =
         hue + "°";
-
+    
     document.getElementById("compareContrastValue").textContent =
         contrast + "%";
 }
+
+function initializeCompareSliderArea() {
+    const tabs = document.getElementById("compareAdjustTabs");
+    const area = document.getElementById("compareAdjustSliderArea");
+    if (!tabs || !area) return;
+
+    const detailsList = Array.from(tabs.children);
+
+    detailsList.forEach(details => {
+        details.addEventListener("toggle", () => {
+            if (!details.open) return;
+
+            area.replaceChildren();
+
+            const input = details.querySelector('input[type="range"]');
+            const value = details.querySelector("span[id]");
+
+            if (input) area.appendChild(input);
+            if (value) area.appendChild(value);
+        });
+    });
+}
+
+initializeCompareSliderArea();
 
 function initializeCompareTabLoop() {
     const tabs = document.getElementById("compareAdjustTabs");
