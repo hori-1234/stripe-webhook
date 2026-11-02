@@ -273,12 +273,22 @@ function showControlsTemporarily() {
 
     clearTimeout(controlsTimer);
 
+    const bandDetails = document.getElementById("bandSensitivityDetails");
+
+    if (bandDetails.open) return;
+
     controlsTimer = setTimeout(() => {
-        if (running) {
+        if (running && !bandDetails.open) {
             document.body.classList.add("controls-hidden");
         }
     }, 3000);
 }
+
+document.getElementById("bandSensitivityDetails").addEventListener("toggle", () => {
+    if (running) {
+        showControlsTemporarily();
+    }
+});
 
 opacitySlider.addEventListener("input", () => {
     opacityValue.textContent = opacitySlider.value + "%";
