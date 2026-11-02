@@ -280,7 +280,8 @@ function detectRhythm() {
         return;
     }
 
-    const currentLevel = getBandLevel(40, 250);
+    const sensitivity = Number(sensitivitySlider.value) / 100;
+    const currentLevel = getBandLevel(40, 250) * sensitivity;
     const now = performance.now();
 
     const increase = currentLevel - previousRhythmLevel;
@@ -391,6 +392,10 @@ function stopVisualizer() {
     running = false;
     clearTimeout(controlsTimer);
     document.body.classList.remove("camera-active", "controls-hidden");
+
+    previousRhythmLevel = 0;
+    lastRhythmTime = 0;
+    rhythmFlashUntil = 0;
 
     if (animationId) {
         cancelAnimationFrame(animationId);
