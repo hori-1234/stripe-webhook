@@ -108,6 +108,12 @@ input[type="range"] {
     </label>
     <input id="opacity" type="range" min="0" max="100" value="70">
 
+    <label>
+        マイク感度：
+        <span id="sensitivityValue">100%</span>
+    </label>
+    <input id="sensitivity" type="range" min="10" max="200" value="100" step="10">
+
     <p id="status">開始ボタンを押してください</p>
 </div>
 
@@ -119,6 +125,8 @@ const ctx = canvas.getContext("2d");
 const startButton = document.getElementById("startButton");
 const opacitySlider = document.getElementById("opacity");
 const opacityValue = document.getElementById("opacityValue");
+const sensitivitySlider = document.getElementById("sensitivity");
+const sensitivityValue = document.getElementById("sensitivityValue");
 const statusText = document.getElementById("status");
 
 let audioContext;
@@ -145,6 +153,10 @@ function showControlsTemporarily() {
 
 opacitySlider.addEventListener("input", () => {
     opacityValue.textContent = opacitySlider.value + "%";
+});
+
+sensitivitySlider.addEventListener("input", () => {
+    sensitivityValue.textContent = sensitivitySlider.value + "%";
 });
 
 document.querySelector(".stage").addEventListener("click", () => {
@@ -264,7 +276,11 @@ function draw() {
 
     bands.forEach((band, index) => {
         const level = getBandLevel(band.min, band.max);
-        const barHeight = Math.max(4, level * maxBarHeight * 2);
+        const sensitivity = Number(sensitivitySlider.value) / 100;
+        const barHeight = Math.min(
+            maxBarHeight,
+            Math.max(4, level * maxBarHeight * 2 * sensitivity)
+        );
 
         const x = startX + index * (barWidth + gap);
 
