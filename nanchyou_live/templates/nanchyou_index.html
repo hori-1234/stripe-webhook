@@ -109,6 +109,40 @@ input[type="range"]::-webkit-slider-runnable-track {
     background: #53647c;
     border-radius: 5px;
 }
+#bandSensitivityDetails {
+    margin: 12px 0;
+}
+
+#bandSensitivityDetails summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 13px 15px;
+    border-radius: 8px;
+    background: #287fe0;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    list-style: none;
+}
+
+#bandSensitivityDetails summary::-webkit-details-marker {
+    display: none;
+}
+
+#bandSensitivityDetails summary::after {
+    content: "▼";
+    font-size: 14px;
+}
+
+#bandSensitivityDetails[open] summary::after {
+    content: "▲";
+}
+
+#bandSensitivityDetails[open] summary {
+    margin-bottom: 12px;
+}
 
 #visualizerType {
     display: block;
@@ -142,7 +176,7 @@ input[type="range"]::-webkit-slider-runnable-track {
 
 <div class="controls">
     <button id="startButton">カメラ・マイク開始</button>
-
+    
     <label>
         透過度：
         <span id="opacityValue">70%</span>
@@ -156,24 +190,28 @@ input[type="range"]::-webkit-slider-runnable-track {
     
     <input id="sensitivity" type="range" min="10" max="200" value="100" step="10">
 
-    <label>
-        低音感度：
-        <span id="lowSensitivityValue">100%</span>
-    </label>
-    <input id="lowSensitivity" type="range" min="10" max="200" value="100" step="10">
+    <details id="bandSensitivityDetails">
+        <summary>音域別感度調整</summary>
 
-    <label>
-        中音感度：
-        <span id="midSensitivityValue">100%</span>
-    </label>
-    <input id="midSensitivity" type="range" min="10" max="200" value="100" step="10">
+        <label>
+            低音感度：
+            <span id="lowSensitivityValue">100%</span>
+        </label>
+        <input id="lowSensitivity" type="range" min="10" max="200" value="100" step="10">
 
-    <label>
-        高音感度：
-        <span id="highSensitivityValue">100%</span>
-    </label>
-    <input id="highSensitivity" type="range" min="10" max="200" value="100" step="10">
+        <label>
+            中音感度：
+            <span id="midSensitivityValue">100%</span>
+        </label>
+        <input id="midSensitivity" type="range" min="10" max="200" value="100" step="10">
 
+        <label>
+            高音感度：
+            <span id="highSensitivityValue">100%</span>
+        </label>
+        <input id="highSensitivity" type="range" min="10" max="200" value="100" step="10">
+    </details>
+    
     <label for="visualizerType">
         アナライザーの種類：
     </label>
