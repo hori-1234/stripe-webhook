@@ -17,6 +17,7 @@ h2 {
     font-size: 20px;
     margin: 14px 0;
 }
+
 .stage {
     position: relative;
     width: 100%;
@@ -24,6 +25,26 @@ h2 {
     max-height: 72dvh;
     background: #000;
     overflow: hidden;
+}
+
+body.camera-active .stage {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100dvh;
+    max-height: none;
+    aspect-ratio: auto;
+    z-index: 100;
+}
+
+body.camera-active .controls {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 101;
+    background: rgba(8, 13, 24, 0.8);
+    padding-bottom: max(15px, env(safe-area-inset-bottom));
 }
 #camera, #visualizer {
     position: absolute;
@@ -144,6 +165,7 @@ startButton.addEventListener("click", async () => {
         await audioContext.resume();
 
         running = true;
+        document.body.classList.add("camera-active");
         startButton.textContent = "停止";
         statusText.textContent = "音声解析中";
 
@@ -247,6 +269,7 @@ function draw() {
 
 function stopVisualizer() {
     running = false;
+    document.body.classList.remove("camera-active");
 
     if (animationId) {
         cancelAnimationFrame(animationId);
