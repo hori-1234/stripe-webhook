@@ -26,6 +26,7 @@ from oshikatsu.oshi_mokuteki import oshi_mokuteki_bp
 from oshikatsu.oshi_db import init_oshi_db
 from satsueidance.satsueidance_keiro import satsueidance_bp
 from satsueidance.koukoku.koukokukeiro import koukoku_bp
+from nanchyou_live.nanchyou_keiro import nanchyou_bp
 from product import process_products
 from ticket_check import (
     check_ticket,
