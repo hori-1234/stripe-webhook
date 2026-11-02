@@ -84,7 +84,7 @@ app.register_blueprint(privacy_bp)
 app.register_blueprint(kuri_move_sarch_bp)
 app.register_blueprint(satsueidance_bp)
 app.register_blueprint(koukoku_bp)
-
+app.register_blueprint(nanchyou_bp)
 
 @app.before_request
 def redirect_old_schedule_domain():
