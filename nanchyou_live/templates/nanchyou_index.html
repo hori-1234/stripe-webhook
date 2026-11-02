@@ -58,6 +58,11 @@ body.camera-active.controls-hidden .controls {
 }
 #camera {
     object-fit: cover;
+    z-index: 0;
+}
+
+#visualizer {
+    z-index: 2;
 }
 #visualizer {
     pointer-events: none;
@@ -163,13 +168,154 @@ input[type="range"]::-webkit-slider-runnable-track {
     font-size: 13px;
     text-align: center;
 }
+
+/* LFe タイトル演出 */
+#lfeIntro {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    pointer-events: none;
+    background: radial-gradient(
+        ellipse at center,
+        #17244a 0%,
+        #080d18 55%,
+        #03050b 100%
+    );
+    overflow: hidden;
+}
+
+.lfeIntroContent {
+    width: 100%;
+    padding: 24px;
+    text-align: center;
+    animation: lfeAppear 1.4s ease-out both;
+}
+
+.lfeIntroEnglish {
+    color: #80dfff;
+    font-size: 11px;
+    letter-spacing: 4px;
+    margin-bottom: 20px;
+}
+
+.lfeIntroCatch {
+    color: #ffffff;
+    font-size: clamp(24px, 7vw, 38px);
+    font-weight: 900;
+    text-shadow: 0 0 24px rgba(52, 201, 255, 0.55);
+    white-space: nowrap;
+}
+
+.lfeIntroWave {
+    height: 75px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    margin: 16px 0;
+}
+
+.lfeIntroWave span {
+    width: 5px;
+    height: 16px;
+    border-radius: 8px;
+    background: linear-gradient(
+        to top,
+        #7c3aed,
+        #34c9ff
+    );
+    box-shadow: 0 0 12px rgba(52, 201, 255, 0.6);
+    animation: lfeWave 1s ease-in-out infinite alternate;
+}
+
+.lfeIntroWave span:nth-child(3n) {
+    animation-delay: -0.3s;
+}
+
+.lfeIntroWave span:nth-child(3n + 1) {
+    animation-delay: -0.7s;
+}
+
+.lfeIntroWave span:nth-child(4n) {
+    animation-duration: 0.65s;
+}
+
+.lfeIntroLogo {
+    color: #ffffff;
+    font-size: clamp(76px, 22vw, 130px);
+    font-weight: 900;
+    letter-spacing: -7px;
+    line-height: 1.1;
+    text-shadow:
+        0 0 25px rgba(52, 201, 255, 0.65),
+        0 0 55px rgba(124, 58, 237, 0.45);
+}
+
+.lfeIntroSub {
+    color: #a9b8d6;
+    font-size: 13px;
+    letter-spacing: 2px;
+    margin-top: 18px;
+}
+
+body.camera-active #lfeIntro {
+    display: none;
+}
+
+@keyframes lfeAppear {
+    from {
+        opacity: 0;
+        transform: translateY(25px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes lfeWave {
+    from {
+        height: 8px;
+    }
+    to {
+        height: 65px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .lfeIntroContent,
+    .lfeIntroWave span {
+        animation: none;
+    }
+}
+
 </style>
+
 </head>
 <body>
 
-<h2>Lfe</h2>
-
 <div class="stage">
+    <div id="lfeIntro">
+        <div class="lfeIntroContent">
+            <div class="lfeIntroEnglish">LIVE FEEL EXPANSION</div>
+
+            <div class="lfeIntroCatch">音楽を目で聴く!!</div>
+
+            <div class="lfeIntroWave">
+                <span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span>
+                <span></span>
+            </div>
+
+            <div class="lfeIntroLogo">LFe</div>
+        </div>
+    </div>
+
     <video id="camera" autoplay muted playsinline></video>
     <canvas id="visualizer"></canvas>
 </div>
