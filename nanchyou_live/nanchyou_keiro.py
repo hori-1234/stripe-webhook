@@ -96,6 +96,18 @@ def nanchyou_live():
 
     response = make_response(render_template("nanchyou_index.html"))
 
+    response.set_cookie(
+        "nanchyou_visitor_id",
+        visitor_id,
+        max_age=60 * 60 * 24 * 365,
+        secure=True,
+        httponly=True,
+        samesite="Lax"
+    )
+
+    return response
+
+
 @nanchyou_bp.route("/nanchyou_live/admin/stats")
 def nanchyou_admin_stats():
     from admin_auth import admin_required
