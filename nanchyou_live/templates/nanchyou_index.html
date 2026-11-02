@@ -504,20 +504,43 @@ function draw() {
 
     ctx.globalAlpha = 1;
 
+
     if (rhythmEnabled.checked && performance.now() < rhythmFlashUntil) {
         ctx.save();
 
-        ctx.strokeStyle = "#ffdd00";
-        ctx.lineWidth = 12;
-        ctx.shadowColor = "#ffdd00";
-        ctx.shadowBlur = 25;
+        const glowWidth = Math.min(width, height) * 0.18;
 
-        ctx.strokeRect(
-            6,
-            6,
-            width - 12,
-            height - 12
+        const topGlow = ctx.createLinearGradient(0, 0, 0, glowWidth);
+        topGlow.addColorStop(0, "rgba(255, 221, 0, 0.85)");
+        topGlow.addColorStop(1, "rgba(255, 221, 0, 0)");
+
+        ctx.fillStyle = topGlow;
+        ctx.fillRect(0, 0, width, glowWidth);
+
+        const bottomGlow = ctx.createLinearGradient(
+            0, height, 0, height - glowWidth
         );
+        bottomGlow.addColorStop(0, "rgba(255, 221, 0, 0.85)");
+        bottomGlow.addColorStop(1, "rgba(255, 221, 0, 0)");
+
+        ctx.fillStyle = bottomGlow;
+        ctx.fillRect(0, height - glowWidth, width, glowWidth);
+
+        const leftGlow = ctx.createLinearGradient(0, 0, glowWidth, 0);
+        leftGlow.addColorStop(0, "rgba(255, 221, 0, 0.85)");
+        leftGlow.addColorStop(1, "rgba(255, 221, 0, 0)");
+
+        ctx.fillStyle = leftGlow;
+        ctx.fillRect(0, 0, glowWidth, height);
+
+        const rightGlow = ctx.createLinearGradient(
+            width, 0, width - glowWidth, 0
+        );
+        rightGlow.addColorStop(0, "rgba(255, 221, 0, 0.85)");
+        rightGlow.addColorStop(1, "rgba(255, 221, 0, 0)");
+
+        ctx.fillStyle = rightGlow;
+        ctx.fillRect(width - glowWidth, 0, glowWidth, height);
 
         ctx.restore();
     }
