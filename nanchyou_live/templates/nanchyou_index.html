@@ -46,6 +46,10 @@ body.camera-active .controls {
     background: rgba(8, 13, 24, 0.8);
     padding-bottom: max(15px, env(safe-area-inset-bottom));
 }
+
+body.camera-active.controls-hidden .controls {
+    display: none;
+}
 #camera, #visualizer {
     position: absolute;
     inset: 0;
@@ -123,9 +127,28 @@ let frequencyData;
 let stream;
 let animationId;
 let running = false;
+let controlsTimer;
+
+function showControlsTemporarily() {
+    if (!running) return;
+
+    document.body.classList.remove("controls-hidden");
+
+    clearTimeout(controlsTimer);
+
+    controlsTimer = setTimeout(() => {
+        if (running) {
+            document.body.classList.add("controls-hidden");
+        }
+    }, 3000);
+}
 
 opacitySlider.addEventListener("input", () => {
     opacityValue.textContent = opacitySlider.value + "%";
+});
+
+canvas.addEventListener("click", () => {
+    showControlsTemporarily();
 });
 
 startButton.addEventListener("click", async () => {
@@ -169,6 +192,7 @@ startButton.addEventListener("click", async () => {
         startButton.textContent = "停止";
         statusText.textContent = "音声解析中";
 
+        showControlsTemporarily();
         draw();
 
     } catch (error) {
@@ -269,7 +293,8 @@ function draw() {
 
 function stopVisualizer() {
     running = false;
-    document.body.classList.remove("camera-active");
+    clearTimeout(controlsTimer);
+    document.body.classList.remove("camera-active", "controls-hidden");
 
     if (animationId) {
         cancelAnimationFrame(animationId);
