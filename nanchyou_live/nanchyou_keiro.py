@@ -8,4 +8,4 @@ nanchyou_bp = Blueprint(
 
 @nanchyou_bp.route("/nanchyou_live")
 def nanchyou_live():
-    return render_template("index.html")
+    return render_template("nanchyou_index.html")
