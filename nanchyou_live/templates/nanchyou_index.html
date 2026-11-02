@@ -378,6 +378,7 @@ body.camera-active #lfeIntro {
         <option value="spectrum">スペクトラム</option>
         <option value="wave">波形</option>
         <option value="circle">円形</option>
+        <option value="particles">パーティクル</option>
     </select>
 
     <label>
@@ -778,6 +779,30 @@ function draw() {
         }
     }
 
+    if (visualizerType.value === "particles") {
+        const sensitivity = Number(sensitivitySlider.value) / 100;
+
+        const low = Math.min(1,
+            getBandLevel(40, 250) *
+            sensitivity *
+            Number(lowSensitivitySlider.value) / 100 * 3
+        );
+
+        const mid = Math.min(1,
+            getBandLevel(250, 2000) *
+            sensitivity *
+            Number(midSensitivitySlider.value) / 100 * 3
+        );
+
+        const high = Math.min(1,
+            getBandLevel(2000, 8000) *
+            sensitivity *
+            Number(highSensitivitySlider.value) / 100 * 3
+        );
+
+        drawParticles(width, height, low, mid, high);
+    }
+
     ctx.globalAlpha = 1;
 
 
@@ -820,11 +845,117 @@ function draw() {
 
         ctx.restore();
     }
-
+    
     animationId = requestAnimationFrame(draw);
 }
 
+
+// パーティクル用データ
+const particles = [];
+let particlePreviousLow = 0;
+let particleLastBurst = 0;
+
+for (let i = 0; i < 90; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const radius = Math.sqrt(Math.random()) * 45;
+
+    particles.push({
+        x: Math.cos(angle) * radius,
+        y: Math.sin(angle) * radius,
+        homeX: Math.cos(angle) * radius,
+        homeY: Math.sin(angle) * radius,
+        vx: 0,
+        vy: 0,
+        size: 1 + Math.random() * 2.3,
+        phase: Math.random() * Math.PI * 2,
+        color: ["#45dfff", "#a48aff", "#ff72c5", "#75f3d0"][i % 4]
+    });
+}
+
+function drawParticles(width, height, low, mid, high) {
+    const now = performance.now();
+    const time = now / 1000;
+    const energy = Math.min(1, low * 0.5 + mid * 0.3 + high * 0.2);
+
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const scale = Math.min(width, height) / 350;
+
+    // 低音の急な上昇で粒子を拡散
+    if (
+        low > 0.25 &&
+        low - particlePreviousLow > 0.12 &&
+        now - particleLastBurst > 250
+    ) {
+        particleLastBurst = now;
+
+        particles.forEach(p => {
+            const angle = Math.atan2(p.y, p.x);
+            const speed = 4 + Math.random() * 12;
+
+            p.vx += Math.cos(angle) * speed;
+            p.vy += Math.sin(angle) * speed;
+        });
+    }
+
+    particlePreviousLow = low;
+
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+
+    particles.forEach(p => {
+        const spread = 1 + energy * 1.8;
+
+        const targetX =
+            p.homeX * spread +
+            Math.sin(time * 0.8 + p.phase) * 8;
+
+        const targetY =
+            p.homeY * spread +
+            Math.cos(time * 0.7 + p.phase) * 8;
+
+        // 元の位置へ戻る力
+        p.vx += (targetX - p.x) * 0.015;
+        p.vy += (targetY - p.y) * 0.015;
+
+        p.vx *= 0.94;
+        p.vy *= 0.94;
+
+        p.x += p.vx;
+        p.y += p.vy;
+
+        const x = centerX + p.x * scale;
+        const y = centerY + p.y * scale;
+
+        const radius = p.size * (0.8 + energy) * scale;
+
+        // 粒子の発光
+        const glow = ctx.createRadialGradient(
+            x, y, 0,
+            x, y, radius * 5
+        );
+
+        glow.addColorStop(0, "#ffffff");
+        glow.addColorStop(0.2, p.color);
+        glow.addColorStop(1, "rgba(0,0,0,0)");
+
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(x, y, radius * 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.arc(x, y, Math.max(0.5, radius * 0.4), 0, Math.PI * 2);
+        ctx.fill();
+    });
+
+    ctx.restore();
+}
+
+
 function stopVisualizer() {
+
     running = false;
     clearTimeout(controlsTimer);
     document.body.classList.remove("camera-active", "controls-hidden");
