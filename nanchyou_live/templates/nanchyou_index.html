@@ -156,6 +156,24 @@ input[type="range"]::-webkit-slider-runnable-track {
     
     <input id="sensitivity" type="range" min="10" max="200" value="100" step="10">
 
+    <label>
+        低音感度：
+        <span id="lowSensitivityValue">100%</span>
+    </label>
+    <input id="lowSensitivity" type="range" min="10" max="200" value="100" step="10">
+
+    <label>
+        中音感度：
+        <span id="midSensitivityValue">100%</span>
+    </label>
+    <input id="midSensitivity" type="range" min="10" max="200" value="100" step="10">
+
+    <label>
+        高音感度：
+        <span id="highSensitivityValue">100%</span>
+    </label>
+    <input id="highSensitivity" type="range" min="10" max="200" value="100" step="10">
+
     <label for="visualizerType">
         アナライザーの種類：
     </label>
@@ -184,6 +202,16 @@ const opacitySlider = document.getElementById("opacity");
 const opacityValue = document.getElementById("opacityValue");
 const sensitivitySlider = document.getElementById("sensitivity");
 const sensitivityValue = document.getElementById("sensitivityValue");
+
+const lowSensitivitySlider = document.getElementById("lowSensitivity");
+const lowSensitivityValue = document.getElementById("lowSensitivityValue");
+
+const midSensitivitySlider = document.getElementById("midSensitivity");
+const midSensitivityValue = document.getElementById("midSensitivityValue");
+
+const highSensitivitySlider = document.getElementById("highSensitivity");
+const highSensitivityValue = document.getElementById("highSensitivityValue");
+
 const visualizerType = document.getElementById("visualizerType");
 const rhythmEnabled = document.getElementById("rhythmEnabled");
 const statusText = document.getElementById("status");
@@ -220,6 +248,18 @@ opacitySlider.addEventListener("input", () => {
 
 sensitivitySlider.addEventListener("input", () => {
     sensitivityValue.textContent = sensitivitySlider.value + "%";
+});
+
+lowSensitivitySlider.addEventListener("input", () => {
+    lowSensitivityValue.textContent = lowSensitivitySlider.value + "%";
+});
+
+midSensitivitySlider.addEventListener("input", () => {
+    midSensitivityValue.textContent = midSensitivitySlider.value + "%";
+});
+
+highSensitivitySlider.addEventListener("input", () => {
+    highSensitivityValue.textContent = highSensitivitySlider.value + "%";
 });
 
 document.querySelector(".stage").addEventListener("click", () => {
@@ -307,7 +347,8 @@ function detectRhythm() {
     }
 
     const sensitivity = Number(sensitivitySlider.value) / 100;
-    const currentLevel = getBandLevel(40, 250) * sensitivity;
+    const lowSensitivity = Number(lowSensitivitySlider.value) / 100;
+    const currentLevel = getBandLevel(40, 250) * sensitivity * lowSensitivity;
     const now = performance.now();
 
     const increase = currentLevel - previousRhythmLevel;
@@ -367,9 +408,16 @@ function draw() {
         bands.forEach((band, index) => {
             const level = getBandLevel(band.min, band.max);
             const sensitivity = Number(sensitivitySlider.value) / 100;
+
+            const bandSensitivity = [
+                Number(lowSensitivitySlider.value) / 100,
+                Number(midSensitivitySlider.value) / 100,
+                Number(highSensitivitySlider.value) / 100
+            ][index];
+
             const barHeight = Math.min(
                 maxBarHeight,
-                Math.max(4, level * maxBarHeight * 2 * sensitivity)
+                Math.max(4, level * maxBarHeight * 2 * sensitivity * bandSensitivity)
             );
 
         const x = startX + index * (barWidth + gap);
@@ -403,11 +451,22 @@ function draw() {
             const minHz = 40 * Math.pow(200, i / barCount);
             const maxHz = 40 * Math.pow(200, (i + 1) / barCount);
 
+            let bandSensitivity;
+
+            if (maxHz <= 250) {
+                bandSensitivity = Number(lowSensitivitySlider.value) / 100;
+            } else if (maxHz <= 2000) {
+                bandSensitivity = Number(midSensitivitySlider.value) / 100;
+            } else {
+                bandSensitivity = Number(highSensitivitySlider.value) / 100;
+            }
+
             const level = getBandLevel(minHz, maxHz);
             const barHeight = Math.min(
                 maxBarHeight,
-                Math.max(3, level * maxBarHeight * 2 * sensitivity)
+                Math.max(3, level * maxBarHeight * 2 * sensitivity * bandSensitivity)
             );
+
 
             if (maxHz <= 250) {
                 ctx.fillStyle = "#ff4c77";
@@ -472,11 +531,22 @@ function draw() {
             const minHz = 40 * Math.pow(200, i / lineCount);
             const maxHz = 40 * Math.pow(200, (i + 1) / lineCount);
 
+            let bandSensitivity;
+
+            if (maxHz <= 250) {
+                bandSensitivity = Number(lowSensitivitySlider.value) / 100;
+            } else if (maxHz <= 2000) {
+                bandSensitivity = Number(midSensitivitySlider.value) / 100;
+            } else {
+                bandSensitivity = Number(highSensitivitySlider.value) / 100;
+            }
+
             const level = getBandLevel(minHz, maxHz);
             const lineLength = Math.min(
                 maxLength,
-                Math.max(3, level * maxLength * 2 * sensitivity)
+                Math.max(3, level * maxLength * 2 * sensitivity * bandSensitivity)
             );
+
 
             const innerX = centerX + Math.cos(angle) * radius;
             const innerY = centerY + Math.sin(angle) * radius;
