@@ -67,9 +67,21 @@ body.camera-active.controls-hidden .controls {
 #visualizer {
     pointer-events: none;
 }
+
 .controls {
     padding: 15px;
 }
+
+/* 初期画面では設定項目を非表示 */
+.controls > :not(#startButton) {
+    display: none;
+}
+
+/* カメラ起動後に設定項目を表示 */
+body.camera-active .controls > :not(#startButton) {
+    display: revert;
+}
+
 button {
     width: 100%;
     padding: 13px;
