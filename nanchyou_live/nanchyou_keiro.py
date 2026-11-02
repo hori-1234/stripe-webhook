@@ -55,6 +55,12 @@ def nanchyou_live():
     if not visitor_id:
         visitor_id = secrets.token_urlsafe(32)
 
+    from event_schedule.memo_auth import is_schedule_operator
+
+    if is_schedule_operator():
+        response = make_response(render_template("nanchyou_index.html"))
+        return response
+
     conn = psycopg2.connect(DATABASE_URL)
     cur = conn.cursor()
 
@@ -150,12 +156,49 @@ def nanchyou_admin_stats():
                     COUNT(DISTINCT visitor_id)
                 FROM nanchyou_unique_visitors
             """)
+
             today_unique, month_unique, total_unique = cur.fetchone()
+
+            cur.execute("""
+                SELECT
+                    d.view_date,
+                    COALESCE(p.view_count, 0) AS pv,
+                    COALESCE(u.uu, 0) AS uu
+                FROM (
+                    SELECT view_date
+                    FROM nanchyou_page_views
+                    UNION
+                    SELECT visit_date
+                    FROM nanchyou_unique_visitors
+                ) AS d
+                LEFT JOIN nanchyou_page_views AS p
+                    ON p.view_date = d.view_date
+                LEFT JOIN (
+                    SELECT visit_date, COUNT(*) AS uu
+                    FROM nanchyou_unique_visitors
+                    GROUP BY visit_date
+                ) AS u
+                    ON u.visit_date = d.view_date
+                ORDER BY d.view_date DESC
+            """)
+
+            daily_stats = cur.fetchall()
 
         finally:
             cur.close()
             conn.close()
-    
+            
+        daily_rows = ""
+
+        for day, pv, uu in daily_stats:
+            daily_rows += (
+                "<tr>"
+                f"<td>{day.strftime('%Y/%m/%d')}</td>"
+                f"<td>{pv}</td>"
+                f"<td>{uu}</td>"
+                "</tr>"
+            )
+
         return (
             "<h2>Lfe アクセス統計</h2>"
             f"<p>今日のPV：{today_views}</p>"
@@ -164,8 +207,12 @@ def nanchyou_admin_stats():
             f"<p>今日のUU：{today_unique}</p>"
             f"<p>今月のUU：{month_unique}</p>"
             f"<p>累計UU：{total_unique}</p>"
+            "<h3>日別アクセス数</h3>"
+            "<table border='1' cellpadding='8' style='border-collapse:collapse;'>"
+            "<tr><th>日付</th><th>PV</th><th>UU</th></tr>"
+            f"{daily_rows}"
+            "</table>"
         )
 
-    return show_stats()
 
-    return response
+    return show_stats()
