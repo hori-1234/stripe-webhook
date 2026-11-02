@@ -141,6 +141,11 @@ input[type="range"]::-webkit-slider-runnable-track {
     </label>
     <input id="sensitivity" type="range" min="10" max="200" value="100" step="10">
 
+    <label>
+        <input id="rhythmEnabled" type="checkbox">
+        リズム表示 ON／OFF
+    </label>
+
     <p id="status">開始ボタンを押してください</p>
 </div>
 
@@ -154,6 +159,7 @@ const opacitySlider = document.getElementById("opacity");
 const opacityValue = document.getElementById("opacityValue");
 const sensitivitySlider = document.getElementById("sensitivity");
 const sensitivityValue = document.getElementById("sensitivityValue");
+const rhythmEnabled = document.getElementById("rhythmEnabled");
 const statusText = document.getElementById("status");
 
 let audioContext;
@@ -163,6 +169,10 @@ let stream;
 let animationId;
 let running = false;
 let controlsTimer;
+
+let previousRhythmLevel = 0;
+let lastRhythmTime = 0;
+let rhythmFlashUntil = 0;
 
 function showControlsTemporarily() {
     if (!running) return;
@@ -264,6 +274,29 @@ function getBandLevel(minHz, maxHz) {
     return count ? total / count / 255 : 0;
 }
 
+function detectRhythm() {
+    if (!rhythmEnabled.checked) {
+        previousRhythmLevel = 0;
+        return;
+    }
+
+    const currentLevel = getBandLevel(40, 250);
+    const now = performance.now();
+
+    const increase = currentLevel - previousRhythmLevel;
+
+    if (
+        currentLevel > 0.15 &&
+        increase > 0.08 &&
+        now - lastRhythmTime > 180
+    ) {
+        lastRhythmTime = now;
+        rhythmFlashUntil = now + 120;
+    }
+
+    previousRhythmLevel = currentLevel;
+}
+
 function draw() {
     if (!running) return;
 
@@ -283,6 +316,8 @@ function draw() {
     ctx.clearRect(0, 0, width, height);
 
     analyser.getByteFrequencyData(frequencyData);
+
+    detectRhythm();
 
     const bands = [
         { label: "低音", min: 40, max: 250, color: "#ff4c77" },
@@ -330,6 +365,24 @@ function draw() {
     });
 
     ctx.globalAlpha = 1;
+
+    if (rhythmEnabled.checked && performance.now() < rhythmFlashUntil) {
+        ctx.save();
+
+        ctx.strokeStyle = "#ffdd00";
+        ctx.lineWidth = 12;
+        ctx.shadowColor = "#ffdd00";
+        ctx.shadowBlur = 25;
+
+        ctx.strokeRect(
+            6,
+            6,
+            width - 12,
+            height - 12
+        );
+
+        ctx.restore();
+    }
 
     animationId = requestAnimationFrame(draw);
 }
