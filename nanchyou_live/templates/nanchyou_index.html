@@ -119,7 +119,7 @@ input[type="range"]::-webkit-slider-runnable-track {
 </head>
 <body>
 
-<h2>Live Feel expansion</h2>
+<h2>Lfe</h2>
 
 <div class="stage">
     <video id="camera" autoplay muted playsinline></video>
@@ -139,7 +139,18 @@ input[type="range"]::-webkit-slider-runnable-track {
         マイク感度：
         <span id="sensitivityValue">100%</span>
     </label>
+    
     <input id="sensitivity" type="range" min="10" max="200" value="100" step="10">
+
+    <label for="visualizerType">
+        アナライザーの種類：
+    </label>
+    <select id="visualizerType">
+        <option value="bars">3本バー</option>
+        <option value="spectrum">スペクトラム</option>
+        <option value="wave">波形</option>
+        <option value="circle">円形</option>
+    </select>
 
     <label>
         <input id="rhythmEnabled" type="checkbox">
@@ -159,6 +170,7 @@ const opacitySlider = document.getElementById("opacity");
 const opacityValue = document.getElementById("opacityValue");
 const sensitivitySlider = document.getElementById("sensitivity");
 const sensitivityValue = document.getElementById("sensitivityValue");
+const visualizerType = document.getElementById("visualizerType");
 const rhythmEnabled = document.getElementById("rhythmEnabled");
 const statusText = document.getElementById("status");
 
@@ -337,13 +349,14 @@ function draw() {
     const baseY = height * 0.88;
     const maxBarHeight = height * 0.48;
 
-    bands.forEach((band, index) => {
-        const level = getBandLevel(band.min, band.max);
-        const sensitivity = Number(sensitivitySlider.value) / 100;
-        const barHeight = Math.min(
-            maxBarHeight,
-            Math.max(4, level * maxBarHeight * 2 * sensitivity)
-        );
+    if (visualizerType.value === "bars") {
+        bands.forEach((band, index) => {
+            const level = getBandLevel(band.min, band.max);
+            const sensitivity = Number(sensitivitySlider.value) / 100;
+            const barHeight = Math.min(
+                maxBarHeight,
+                Math.max(4, level * maxBarHeight * 2 * sensitivity)
+            );
 
         const x = startX + index * (barWidth + gap);
 
@@ -363,7 +376,117 @@ function draw() {
             x + barWidth / 2,
             baseY + 25
         );
-    });
+        });
+    }
+
+    if (visualizerType.value === "spectrum") {
+        const barCount = 48;
+        const spectrumGap = 2;
+        const spectrumBarWidth = width / barCount;
+        const sensitivity = Number(sensitivitySlider.value) / 100;
+
+        for (let i = 0; i < barCount; i++) {
+            const minHz = 40 * Math.pow(200, i / barCount);
+            const maxHz = 40 * Math.pow(200, (i + 1) / barCount);
+
+            const level = getBandLevel(minHz, maxHz);
+            const barHeight = Math.min(
+                maxBarHeight,
+                Math.max(3, level * maxBarHeight * 2 * sensitivity)
+            );
+
+            if (maxHz <= 250) {
+                ctx.fillStyle = "#ff4c77";
+            } else if (maxHz <= 2000) {
+                ctx.fillStyle = "#34c9ff";
+            } else {
+                ctx.fillStyle = "#d783ff";
+            }
+            
+            ctx.fillRect(
+                i * spectrumBarWidth,
+                baseY - barHeight,
+                spectrumBarWidth - spectrumGap,
+                barHeight
+            );
+        }
+    }
+
+    if (visualizerType.value === "wave") {
+        const waveData = new Uint8Array(analyser.fftSize);
+        analyser.getByteTimeDomainData(waveData);
+
+        const sensitivity = Number(sensitivitySlider.value) / 100;
+        const centerY = height * 0.5;
+        const amplitude = height * 0.35 * sensitivity;
+
+        ctx.beginPath();
+        ctx.strokeStyle = "#34c9ff";
+        ctx.lineWidth = 3;
+        ctx.lineJoin = "round";
+
+        for (let i = 0; i < waveData.length; i++) {
+            const x = i / (waveData.length - 1) * width;
+            const value = (waveData[i] - 128) / 128;
+            const y = Math.max(
+                0,
+                Math.min(height, centerY - value * amplitude)
+            );
+
+            if (i === 0) {
+                ctx.moveTo(x, y);
+            } else {
+                ctx.lineTo(x, y);
+            }
+        }
+
+        ctx.stroke();
+    }
+
+    if (visualizerType.value === "circle") {
+        const sensitivity = Number(sensitivitySlider.value) / 100;
+
+        const centerX = width / 2;
+        const centerY = height / 2;
+        const radius = Math.min(width, height) * 0.22;
+        const maxLength = Math.min(width, height) * 0.18;
+        const lineCount = 72;
+
+        for (let i = 0; i < lineCount; i++) {
+            const angle = (i / lineCount) * Math.PI * 2 - Math.PI / 2;
+
+            const minHz = 40 * Math.pow(200, i / lineCount);
+            const maxHz = 40 * Math.pow(200, (i + 1) / lineCount);
+
+            const level = getBandLevel(minHz, maxHz);
+            const lineLength = Math.min(
+                maxLength,
+                Math.max(3, level * maxLength * 2 * sensitivity)
+            );
+
+            const innerX = centerX + Math.cos(angle) * radius;
+            const innerY = centerY + Math.sin(angle) * radius;
+
+            const outerX = centerX + Math.cos(angle) * (radius + lineLength);
+            const outerY = centerY + Math.sin(angle) * (radius + lineLength);
+
+            if (maxHz <= 250) {
+                ctx.strokeStyle = "#ff4c77";
+            } else if (maxHz <= 2000) {
+                ctx.strokeStyle = "#34c9ff";
+            } else {
+                ctx.strokeStyle = "#d783ff";
+            }
+
+            ctx.lineWidth = 3;
+            ctx.lineCap = "round";
+
+            ctx.beginPath();
+            ctx.moveTo(innerX, innerY);
+            ctx.lineTo(outerX, outerY);
+            ctx.stroke();
+        }
+    }
 
     ctx.globalAlpha = 1;
 
