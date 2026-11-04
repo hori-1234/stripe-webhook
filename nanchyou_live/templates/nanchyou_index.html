@@ -528,7 +528,25 @@ speechButton.addEventListener("click", () => {
             }
         };
 
+        speechRecognition.onstart = () => {
+            console.log("音声認識：開始");
+        };
+
+        speechRecognition.onaudiostart = () => {
+            console.log("音声認識：音声取得開始");
+        };
+
+        speechRecognition.onspeechstart = () => {
+            console.log("音声認識：発話検出");
+        };
+
+        speechRecognition.onspeechend = () => {
+            console.log("音声認識：発話終了");
+        };
+
         speechRecognition.onend = () => {
+            console.log("音声認識：終了");
+
             if (speechEnabled && running && !document.hidden) {
                 try {
                     speechRecognition.start();
