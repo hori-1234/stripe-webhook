@@ -97,7 +97,7 @@ body.camera-active.controls-hidden .controls {
 }
 
 /* 初期画面では設定項目を非表示 */
-.controls > :not(#startButton):not(#speechButton) {
+.controls > :not(#startButton) {
     display: none;
 }
 
@@ -414,8 +414,6 @@ body.camera-active #lfeIntro {
 
     <button id="speechButton" type="button">音声認識 OFF</button>
 
-    <p id="speechDebug" style="color:#ffcc00; font-size:14px; text-align:center; white-space:pre-wrap;">診断欄：表示確認</p>
-
     <p id="status">開始ボタンを押してください</p>
 
 </div>
@@ -492,8 +490,6 @@ speechButton.addEventListener("click", () => {
     }
 
 
-    // 【診断用】カメラ・マイク開始前でも音声認識をONにできるようにする
-
     if (!speechRecognition) {
         speechRecognition = new SpeechRecognitionAPI();
         speechRecognition.lang = "ja-JP";
@@ -527,39 +523,12 @@ speechButton.addEventListener("click", () => {
                 speechSubtitle.textContent = "";
             }
         };
-
-        const speechDebug = document.getElementById("speechDebug");
-
-        function addSpeechDebug(message) {
-            console.log(message);
-            speechDebug.textContent += message + "\n";
-        }
-
-        speechRecognition.onstart = () => {
-            addSpeechDebug("音声認識：開始");
-        };
-
-        speechRecognition.onaudiostart = () => {
-            addSpeechDebug("音声認識：音声取得開始");
-        };
-
-        speechRecognition.onspeechstart = () => {
-            addSpeechDebug("音声認識：発話検出");
-        };
-
-        speechRecognition.onspeechend = () => {
-            addSpeechDebug("音声認識：発話終了");
-        };
-
         speechRecognition.onend = () => {
-            addSpeechDebug("音声認識：終了");
-
             if (speechEnabled && running && !document.hidden) {
                 try {
                     speechRecognition.start();
                 } catch (error) {
                     console.warn("音声認識の再開に失敗:", error);
-                    addSpeechDebug("再開失敗：" + error.message);
                 }
             }
         };
