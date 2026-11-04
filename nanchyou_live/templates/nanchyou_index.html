@@ -68,6 +68,30 @@ body.camera-active.controls-hidden .controls {
     pointer-events: none;
 }
 
+/* 音声認識の字幕表示 */
+#speechSubtitle {
+    display: none;
+    position: absolute;
+    left: 3%;
+    bottom: 8%;
+    width: 94%;
+    z-index: 5;
+    padding: 12px 16px;
+    background: rgba(0, 0, 0, 0.75);
+    color: #ffffff;
+    font-size: clamp(20px, 5vw, 30px);
+    font-weight: bold;
+    text-align: center;
+    line-height: 1.5;
+    border-radius: 6px;
+    overflow-wrap: anywhere;
+    pointer-events: none;
+}
+
+#speechSubtitle:not(:empty) {
+    display: block;
+}
+
 .controls {
     padding: 15px;
 }
@@ -330,6 +354,8 @@ body.camera-active #lfeIntro {
 
     <video id="camera" autoplay muted playsinline></video>
     <canvas id="visualizer"></canvas>
+
+    <div id="speechSubtitle" aria-live="polite"></div>
 </div>
 
 <div class="controls">
@@ -380,13 +406,16 @@ body.camera-active #lfeIntro {
         <option value="circle">円形</option>
         <option value="particles">パーティクル</option>
     </select>
-
+    
     <label>
         <input id="rhythmEnabled" type="checkbox">
         リズム表示 ON／OFF
     </label>
 
+    <button id="speechButton" type="button">音声認識 OFF</button>
+
     <p id="status">開始ボタンを押してください</p>
+
 </div>
 
 <script>
@@ -413,6 +442,15 @@ const visualizerType = document.getElementById("visualizerType");
 const rhythmEnabled = document.getElementById("rhythmEnabled");
 const statusText = document.getElementById("status");
 
+const speechButton = document.getElementById("speechButton");
+const speechSubtitle = document.getElementById("speechSubtitle");
+
+const SpeechRecognitionAPI =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
+
+let speechRecognition = null;
+let speechEnabled = false;
+
 let audioContext;
 let analyser;
 let frequencyData;
@@ -424,6 +462,75 @@ let controlsTimer;
 let previousRhythmLevel = 0;
 let lastRhythmTime = 0;
 let rhythmFlashUntil = 0;
+
+// 音声認識 ON/OFF
+speechButton.addEventListener("click", () => {
+    if (!SpeechRecognitionAPI) {
+        alert("このブラウザは音声認識に対応していません");
+        return;
+    }
+
+    if (speechEnabled) {
+        speechEnabled = false;
+        speechRecognition?.stop();
+        speechButton.textContent = "音声認識 OFF";
+        speechSubtitle.textContent = "";
+        return;
+    }
+
+    if (!running) {
+        alert("先にカメラ・マイクを開始してください");
+        return;
+    }
+
+    if (!speechRecognition) {
+        speechRecognition = new SpeechRecognitionAPI();
+        speechRecognition.lang = "ja-JP";
+        speechRecognition.continuous = true;
+        speechRecognition.interimResults = true;
+
+        speechRecognition.onresult = (event) => {
+            const latestResult = event.results[event.results.length - 1];
+            const transcript = latestResult[0].transcript.trim();
+
+            if (transcript) {
+                speechSubtitle.textContent = transcript;
+            }
+        };
+
+        speechRecognition.onerror = (event) => {
+            console.warn("音声認識エラー:", event.error);
+
+            if (event.error === "not-allowed" ||
+                event.error === "service-not-allowed") {
+                speechEnabled = false;
+                speechButton.textContent = "音声認識 OFF";
+            }
+        };
+
+        speechRecognition.onend = () => {
+            if (speechEnabled && running && !document.hidden) {
+                try {
+                    speechRecognition.start();
+                } catch (error) {
+                    console.warn("音声認識の再開に失敗:", error);
+                }
+            }
+        };
+    }
+
+    speechEnabled = true;
+    speechButton.textContent = "音声認識 ON";
+    speechSubtitle.textContent = "";
+
+    try {
+        speechRecognition.start();
+    } catch (error) {
+        console.error(error);
+        speechEnabled = false;
+        speechButton.textContent = "音声認識 OFF";
+    }
+});
 
 function showControlsTemporarily() {
     if (!running) return;
@@ -955,6 +1062,16 @@ function drawParticles(width, height, low, mid, high) {
 
 
 function stopVisualizer() {
+
+    // 音声認識も停止する
+    speechEnabled = false;
+
+    if (speechRecognition) {
+        speechRecognition.abort();
+    }
+
+    speechButton.textContent = "音声認識 OFF";
+    speechSubtitle.textContent = "";
 
     running = false;
     clearTimeout(controlsTimer);
