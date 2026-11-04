@@ -532,35 +532,36 @@ speechButton.addEventListener("click", () => {
 
         const speechDebug = document.getElementById("speechDebug");
 
+        function addSpeechDebug(message) {
+            console.log(message);
+            speechDebug.textContent += message + "\n";
+        }
+
         speechRecognition.onstart = () => {
-            console.log("音声認識：開始");
-            speechDebug.textContent = "音声認識：開始";
+            addSpeechDebug("音声認識：開始");
         };
 
         speechRecognition.onaudiostart = () => {
-            console.log("音声認識：音声取得開始");
-            speechDebug.textContent = "音声認識：音声取得開始";
+            addSpeechDebug("音声認識：音声取得開始");
         };
 
         speechRecognition.onspeechstart = () => {
-            console.log("音声認識：発話検出");
-            speechDebug.textContent = "音声認識：発話検出";
+            addSpeechDebug("音声認識：発話検出");
         };
 
         speechRecognition.onspeechend = () => {
-            console.log("音声認識：発話終了");
-            speechDebug.textContent = "音声認識：発話終了";
+            addSpeechDebug("音声認識：発話終了");
         };
 
         speechRecognition.onend = () => {
-            console.log("音声認識：終了");
-            speechDebug.textContent = "音声認識：終了";
+            addSpeechDebug("音声認識：終了");
 
             if (speechEnabled && running && !document.hidden) {
                 try {
                     speechRecognition.start();
                 } catch (error) {
                     console.warn("音声認識の再開に失敗:", error);
+                    addSpeechDebug("再開失敗：" + error.message);
                 }
             }
         };
