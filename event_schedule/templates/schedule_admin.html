@@ -82,7 +82,47 @@
             ">
                 データバックアップ
             </button>
+        あああ
         </form>
+    </div>
+
+    <h2>未来のイベント登録状況</h2>
+
+    <div style="
+        padding: 15px;
+        margin-bottom: 20px;
+        border: 1px solid #999;
+        border-radius: 5px;
+    ">
+        <div style="font-size: 18px; margin-bottom: 15px;">
+            未来の登録件数：
+            <strong style="font-size: 26px;">
+                {{ future_event_count }}件
+            </strong>
+        </div>
+
+        <h3>ジャンル別登録件数</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ジャンル</th>
+                    <th>件数</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for genre, count in future_genre_counts %}
+                <tr>
+                    <td>{{ genre }}</td>
+                    <td>{{ count }}件</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="2">未来の登録イベントはありません。</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 
     <table>
