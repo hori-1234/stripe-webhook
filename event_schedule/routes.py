@@ -2778,6 +2778,28 @@ def schedule_admin():
 
     events = cur.fetchall()
 
+    # 本日以降のイベント登録件数
+    cur.execute("""
+        SELECT COUNT(*)
+        FROM event_schedules
+        WHERE event_date >= (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo')::date
+    """)
+
+    future_event_count = cur.fetchone()[0]
+
+    # 本日以降のジャンル別登録件数
+    cur.execute("""
+        SELECT
+            COALESCE(NULLIF(TRIM(genre), ''), '未設定') AS genre_name,
+            COUNT(*) AS event_count
+        FROM event_schedules
+        WHERE event_date >= (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo')::date
+        GROUP BY genre_name
+        ORDER BY event_count DESC, genre_name
+    """)
+
+    future_genre_counts = cur.fetchall()
+
     cur.execute("""
         SELECT ip_address
         FROM event_schedule_blocked_ips
@@ -2854,6 +2876,8 @@ def schedule_admin():
         "schedule_admin.html",
         events=admin_events,
         change_ip_logs=change_ip_logs,
+        future_event_count=future_event_count,
+        future_genre_counts=future_genre_counts,
         admin_backup_csrf_token=session["admin_backup_csrf_token"],
         admin_ip_csrf_token=session["admin_ip_csrf_token"]
     )
