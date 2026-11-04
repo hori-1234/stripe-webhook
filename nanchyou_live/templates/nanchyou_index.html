@@ -571,6 +571,11 @@ speechButton.addEventListener("click", () => {
     updateSpeechButton();
     speechSubtitle.textContent = "";
 
+    // 【診断用】ビジュアライザー側のマイクだけ停止
+    if (stream) {
+        stream.getAudioTracks().forEach(track => track.stop());
+    }
+
     try {
         speechRecognition.start();
     } catch (error) {
