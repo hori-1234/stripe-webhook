@@ -463,6 +463,17 @@ let previousRhythmLevel = 0;
 let lastRhythmTime = 0;
 let rhythmFlashUntil = 0;
 
+// 音声認識ボタンの表示更新
+function updateSpeechButton() {
+    speechButton.textContent = speechEnabled
+        ? "● 音声認識 ON（認識中）"
+        : "音声認識 OFF（停止中）";
+
+    speechButton.style.backgroundColor = speechEnabled
+        ? "#16803c"
+        : "#287fe0";
+}
+
 // 音声認識 ON/OFF
 speechButton.addEventListener("click", () => {
     if (!SpeechRecognitionAPI) {
@@ -473,7 +484,7 @@ speechButton.addEventListener("click", () => {
     if (speechEnabled) {
         speechEnabled = false;
         speechRecognition?.stop();
-        speechButton.textContent = "音声認識 OFF";
+        updateSpeechButton();
         speechSubtitle.textContent = "";
         return;
     }
@@ -489,12 +500,20 @@ speechButton.addEventListener("click", () => {
         speechRecognition.continuous = true;
         speechRecognition.interimResults = true;
 
+        let subtitleTimer = null;
+
         speechRecognition.onresult = (event) => {
             const latestResult = event.results[event.results.length - 1];
             const transcript = latestResult[0].transcript.trim();
 
-            if (transcript) {
+            if (transcript && speechEnabled) {
                 speechSubtitle.textContent = transcript;
+
+                clearTimeout(subtitleTimer);
+
+                subtitleTimer = setTimeout(() => {
+                    speechSubtitle.textContent = "";
+                }, 2000);
             }
         };
 
@@ -504,7 +523,8 @@ speechButton.addEventListener("click", () => {
             if (event.error === "not-allowed" ||
                 event.error === "service-not-allowed") {
                 speechEnabled = false;
-                speechButton.textContent = "音声認識 OFF";
+                updateSpeechButton();
+                speechSubtitle.textContent = "";
             }
         };
 
@@ -520,7 +540,7 @@ speechButton.addEventListener("click", () => {
     }
 
     speechEnabled = true;
-    speechButton.textContent = "音声認識 ON";
+    updateSpeechButton();
     speechSubtitle.textContent = "";
 
     try {
@@ -528,7 +548,8 @@ speechButton.addEventListener("click", () => {
     } catch (error) {
         console.error(error);
         speechEnabled = false;
-        speechButton.textContent = "音声認識 OFF";
+        updateSpeechButton();
+        speechSubtitle.textContent = "";
     }
 });
 
@@ -1070,7 +1091,7 @@ function stopVisualizer() {
         speechRecognition.abort();
     }
 
-    speechButton.textContent = "音声認識 OFF";
+    updateSpeechButton();
     speechSubtitle.textContent = "";
 
     running = false;
