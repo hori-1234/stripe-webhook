@@ -491,10 +491,8 @@ speechButton.addEventListener("click", () => {
         return;
     }
 
-    if (!running) {
-        alert("先にカメラ・マイクを開始してください");
-        return;
-    }
+
+    // 【診断用】カメラ・マイク開始前でも音声認識をONにできるようにする
 
     if (!speechRecognition) {
         speechRecognition = new SpeechRecognitionAPI();
