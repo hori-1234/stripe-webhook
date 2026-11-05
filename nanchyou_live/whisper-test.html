@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Whisper 歌詞認識テスト（PC）</title>
+<style>
+body{font-family:system-ui,sans-serif;background:#101827;color:#f6f8ff;margin:0;padding:24px}main{max-width:760px;margin:auto}button{padding:12px 18px;margin:6px 6px 6px 0;border:0;border-radius:8px;background:#3488ef;color:white;font-size:16px;cursor:pointer}button:disabled{opacity:.45;cursor:default}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#1d2a40;padding:16px;border-radius:8px;min-height:70px}small{color:#c0cee2}
+</style>
+</head>
+<body>
+<main>
+<h1>Whisper 歌詞認識テスト（PC）</h1>
+<p>最初にモデルを読み込み、次にマイクから5秒録音して日本語の文字起こしを試します。</p>
+<button id="load">① モデル読み込み</button>
+<button id="record" disabled>② 5秒録音して認識</button>
+<p id="status" role="status">準備中</p>
+<h2>認識結果</h2><pre id="result">（まだありません）</pre>
+<small>無料のブラウザ内処理。モデルの初回ダウンロードには時間と通信量が必要です。HTTPSまたはlocalhostで開いてください。歌詞の精度は保証されません。</small>
+</main>
+<script type="module">
+import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1';
+const loadButton = document.getElementById('load');
+const recordButton = document.getElementById('record');
+const status = document.getElementById('status');
+const result = document.getElementById('result');
+let transcriber;
+const setStatus = s => status.textContent = s;
+setStatus('モデルを読み込んでください');
+loadButton.addEventListener('click', async () => {
+  loadButton.disabled = true;
+  try {
+    setStatus('Whisperモデルを読み込み中（初回は時間がかかります）…');
+    env.allowLocalModels = false;
+    transcriber = await pipeline('automatic-speech-recognition', 'onnx-community/whisper-tiny', {device:'wasm'});
+    setStatus('モデル準備完了。5秒録音を開始できます');
+    recordButton.disabled = false;
+  } catch (e) {
+    setStatus('モデル読み込み失敗: ' + e.message);
+    loadButton.disabled = false;
+  }
+});
+recordButton.addEventListener('click', async () => {
+  recordButton.disabled = true;
+  let stream;
+  let context;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+    context = new AudioContext();
+    const source = context.createMediaStreamSource(stream);
+    const processor = context.createScriptProcessor(4096,1,1);
+    const silence = context.createGain(); silence.gain.value=0;
+    const chunks=[];
+    processor.onaudioprocess = e => chunks.push(new Float32Array(e.inputBuffer.getChannelData(0)));
+    source.connect(processor);processor.connect(silence);silence.connect(context.destination);
+    setStatus('5秒録音中…');
+    await new Promise(resolve => setTimeout(resolve,5000));
+    processor.disconnect();source.disconnect();silence.disconnect();
+    stream.getTracks().forEach(t=>t.stop());stream=null;
+    const sampleCount=chunks.reduce((n,c)=>n+c.length,0);
+    const audio=new Float32Array(sampleCount);
+    let offset=0;for(const chunk of chunks){audio.set(chunk,offset);offset+=chunk.length;}
+    const sampleRate=context.sampleRate;
+    await context.close();context=null;
+    // Whisper expects mono PCM at 16 kHz; offline resample when needed.
+    let pcm=audio;
+    if(sampleRate!==16000){
+      const offline=new OfflineAudioContext(1,Math.ceil(audio.length*16000/sampleRate),16000);
+      const buffer=offline.createBuffer(1,audio.length,sampleRate);
+      buffer.copyToChannel(audio,0);
+      const node=offline.createBufferSource();node.buffer=buffer;node.connect(offline.destination);node.start();
+      const rendered=await offline.startRendering();pcm=rendered.getChannelData(0);
+    }
+    setStatus('認識処理中…');
+    const start=performance.now();
+    const output=await transcriber(pcm,{language:'japanese',task:'transcribe'});
+    const elapsed=((performance.now()-start)/1000).toFixed(1);
+    result.textContent=output.text?.trim() || '（認識結果なし）';
+    setStatus('完了：認識処理 '+elapsed+' 秒（録音5秒は別）');
+  }catch(e){setStatus('エラー: '+e.message);}finally{
+    stream?.getTracks().forEach(t=>t.stop());
+    if(context && context.state!=='closed') await context.close();
+    recordButton.disabled=!transcriber;
+  }
+});
+</script>
+</body>
+</html>
