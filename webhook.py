@@ -101,16 +101,26 @@ def redirect_old_schedule_domain():
 
         return redirect(new_url, code=301)
 
+def get_artist_r2_client():
+    return boto3.client(
+        "s3",
+        endpoint_url=os.environ["R2_ENDPOINT"],
+        aws_access_key_id=os.environ["ARTIST_R2_ACCESS_KEY_ID"],
+        aws_secret_access_key=os.environ["ARTIST_R2_SECRET_ACCESS_KEY"],
+        region_name="auto"
+    )
 
-r2 = boto3.client(
-    "s3",
-    endpoint_url=os.environ["R2_ENDPOINT"],
-    aws_access_key_id=os.environ["R2_ACCESS_KEY_ID"],
-    aws_secret_access_key=os.environ["R2_SECRET_ACCESS_KEY"]
-)
+def get_artist_r2_bucket():
+    return os.environ["ARTIST_R2_BUCKET_NAME"]
 
-R2_BUCKET = os.environ["R2_BUCKET_NAME"]
 
+def test_artist_r2_connection():
+    client = get_artist_r2_client()
+    bucket = get_artist_r2_bucket()
+
+    client.head_bucket(Bucket=bucket)
+
+    print("アー写R2接続成功:", bucket)
 
 stripe.api_key = os.environ["STRIPE_SECRET_KEY"]
 resend.api_key = os.environ["RESEND_API_KEY"]
