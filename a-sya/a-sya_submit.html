@@ -1,1 +1,183 @@
 
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>アー写提出フォーム</title>
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #f2f5fa;
+            font-family: sans-serif;
+            color: #222;
+        }
+
+        .container {
+            max-width: 550px;
+            margin: 0 auto;
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+        }
+
+        h2 { text-align: center; }
+
+        .field { margin-top: 24px; }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        input[type="text"],
+        input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        .note {
+            font-size: 13px;
+            color: #666;
+            margin-top: 6px;
+        }
+
+        .member {
+            padding: 12px;
+            margin-top: 10px;
+            background: #f2f5fa;
+            border-radius: 8px;
+        }
+
+        .member input { margin-bottom: 8px; }
+
+        button {
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .add-btn {
+            background: #e4ebf7;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .submit-btn {
+            background: #1765bd;
+            color: white;
+            width: 100%;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>アー写提出フォーム</h2>
+        <p>必要事項を入力してください。</p>
+
+        <form id="artistForm">
+            <div class="field">
+                <label>① 画像を選択してください</label>
+                <input type="file" name="image"
+                       accept="image/*" required>
+                <p class="note">画像は保存時に420pxへ縮小します。</p>
+            </div>
+
+            <div class="field">
+                <label>② 活動名</label>
+                <input type="text" name="artist_name"
+                       placeholder="活動名" required>
+
+                <p>活動形態</p>
+                <label>
+                    <input type="radio" name="artist_type"
+                           value="solo" checked
+                           onchange="toggleMembers()">
+                    ソロ
+                </label>
+                <label>
+                    <input type="radio" name="artist_type"
+                           value="group"
+                           onchange="toggleMembers()">
+                    グループ
+                </label>
+
+                <div id="membersArea" style="display:none;">
+                    <p class="note">
+                        グループの場合はメンバーを入力してください。
+                    </p>
+                    <div id="membersList"></div>
+                    <button type="button" class="add-btn"
+                            onclick="addMember()">
+                        ＋ メンバー追加
+                    </button>
+                </div>
+            </div>
+
+            <div class="field" id="soloColor">
+                <label>③ イメージカラー</label>
+                <input type="text" name="image_color"
+                       placeholder="例：赤、青、ピンク">
+            </div>
+
+            <button type="submit" class="submit-btn">
+                送信する
+            </button>
+        </form>
+    </div>
+
+    <script>
+        function toggleMembers() {
+            const isGroup = document.querySelector(
+                'input[name="artist_type"]:checked'
+            ).value === "group";
+
+            document.getElementById("membersArea").style.display =
+                isGroup ? "block" : "none";
+
+            document.getElementById("soloColor").style.display =
+                isGroup ? "none" : "block";
+
+            if (isGroup &&
+                document.getElementById("membersList").children.length === 0) {
+                addMember();
+            }
+        }
+
+        function addMember() {
+            const div = document.createElement("div");
+            div.className = "member";
+
+            div.innerHTML = `
+                <input type="text" name="member_name[]"
+                       placeholder="メンバー名">
+                <input type="text" name="member_color[]"
+                       placeholder="イメージカラー（例：赤）">
+                <button type="button"
+                        onclick="this.parentElement.remove()">
+                    削除
+                </button>
+            `;
+
+            document.getElementById("membersList").appendChild(div);
+        }
+
+        document.getElementById("artistForm")
+            .addEventListener("submit", function(event) {
+                event.preventDefault();
+                alert("フォーム表示確認用です。送信機能は未実装です。");
+            });
+    </script>
+</body>
+</html>
+
