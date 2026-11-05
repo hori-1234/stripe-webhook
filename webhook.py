@@ -38,6 +38,22 @@ from ticket_check import (
 
 app = Flask(__name__)
 
+import importlib.util
+from pathlib import Path
+
+artist_file = Path(__file__).resolve().parent / "a-sya" / "a-sya_keiro.py"
+
+artist_spec = importlib.util.spec_from_file_location(
+    "a_sya_keiro",
+    artist_file
+)
+
+artist_module = importlib.util.module_from_spec(artist_spec)
+artist_spec.loader.exec_module(artist_module)
+
+app.register_blueprint(artist_module.a_sya_bp)
+
+
 from werkzeug.middleware.proxy_fix import ProxyFix
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=2)
 
