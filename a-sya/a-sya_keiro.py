@@ -7,6 +7,17 @@ from PIL import Image, ImageOps, UnidentifiedImageError
 from botocore.config import Config
 from flask import Blueprint, send_from_directory, request, current_app
 from pathlib import Path
+import importlib.util
+
+artist_db_path = Path(__file__).resolve().parent / "a-sya_db.py"
+artist_db_spec = importlib.util.spec_from_file_location(
+    "a_sya_db",
+    artist_db_path
+)
+artist_db_module = importlib.util.module_from_spec(artist_db_spec)
+artist_db_spec.loader.exec_module(artist_db_module)
+
+save_artist_submission = artist_db_module.save_artist_submission
 
 a_sya_bp = Blueprint(
     "a_sya",
@@ -69,6 +80,57 @@ def a_sya_submit():
         current_app.logger.exception("アー写のR2保存に失敗")
         return "画像の保存に失敗しました", 500
 
+    
+    # DB保存用の情報を整理
+    members = []
+
+    if artist_type == "group":
+        for name, color in zip(member_names, member_colors):
+            members.append({
+                "name": name.strip(),
+                "color": color.strip()
+            })
+
+        image_color = None
+
+    # PostgreSQLに保存
+    try:
+        submission_id = save_artist_submission(
+            artist_name=artist_name,
+            artist_type=artist_type,
+            image_color=image_color,
+            image_key=file_key,
+            members=members
+        )
+
+    except Exception:
+        current_app.logger.exception("アー写のDB保存に失敗")
+
+        # DB保存失敗時はR2に保存した画像も削除
+        try:
+            client = boto3.client(
+                "s3",
+                endpoint_url=os.environ["R2_ENDPOINT"],
+                aws_access_key_id=os.environ["ARTIST_R2_ACCESS_KEY_ID"],
+                aws_secret_access_key=os.environ["ARTIST_R2_SECRET_ACCESS_KEY"],
+                region_name="auto",
+                config=Config(signature_version="s3v4")
+            )
+
+            client.delete_object(
+                Bucket=os.environ["ARTIST_R2_BUCKET_NAME"],
+                Key=file_key
+            )
+
+        except Exception:
+            current_app.logger.exception("アー写のR2後処理に失敗")
+
+        return "登録情報の保存に失敗しました", 500
+
+    return f"アー写の提出が完了しました（受付番号：{submission_id}）", 200
+
+
+    
     return f"画像の保存が完了しました：{file_key}", 200
 
 
