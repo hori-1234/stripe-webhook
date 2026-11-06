@@ -1,4 +1,3 @@
-
 import os
 import psycopg2
 
@@ -88,3 +87,62 @@ def save_artist_submission(
     finally:
         conn.close()
 
+
+def get_artist_submissions():
+    conn = psycopg2.connect(os.environ["DATABASE_URL"])
+
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT
+                    id,
+                    artist_name,
+                    artist_type,
+                    image_color,
+                    image_key,
+                    created_at
+                FROM artist_submissions
+                ORDER BY created_at DESC, id DESC
+            """)
+
+            submissions = []
+
+            for row in cur.fetchall():
+                submission_id = row[0]
+
+                submissions.append({
+                    "id": submission_id,
+                    "artist_name": row[1],
+                    "artist_type": row[2],
+                    "image_color": row[3],
+                    "image_key": row[4],
+                    "created_at": row[5].isoformat(),
+                    "members": []
+                })
+
+            cur.execute("""
+                SELECT
+                    submission_id,
+                    member_name,
+                    member_color
+                FROM artist_members
+                ORDER BY id
+            """)
+
+            member_map = {}
+
+            for submission_id, name, color in cur.fetchall():
+                member_map.setdefault(submission_id, []).append({
+                    "name": name,
+                    "color": color
+                })
+
+            for submission in submissions:
+                submission["members"] = member_map.get(
+                    submission["id"], []
+                )
+
+            return submissions
+
+    finally:
+        conn.close()
