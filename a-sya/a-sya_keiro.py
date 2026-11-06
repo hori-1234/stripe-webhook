@@ -142,12 +142,37 @@ def a_sya_admin_download(submission_id):
             Key=row[0]
         )
 
+        # R2のWebP画像を読み込む
+        image_data = result["Body"].read()
+
+        with Image.open(io.BytesIO(image_data)) as img:
+            # JPEGは透過非対応なので白背景に変換
+            img = img.convert("RGBA")
+
+            background = Image.new(
+                "RGB",
+                img.size,
+                (255, 255, 255)
+            )
+
+            background.paste(img, mask=img.getchannel("A"))
+
+            # JPEG形式に変換
+            output = io.BytesIO()
+            background.save(
+                output,
+                format="JPEG",
+                quality=90
+            )
+            output.seek(0)
+
         return send_file(
-            io.BytesIO(result["Body"].read()),
-            mimetype="image/webp",
+            output,
+            mimetype="image/jpeg",
             as_attachment=True,
-            download_name=f"artist_{submission_id}.webp"
+            download_name=f"artist_{submission_id}.jpg"
         )
+
 
     except Exception:
         current_app.logger.exception("アー写のダウンロードに失敗")
