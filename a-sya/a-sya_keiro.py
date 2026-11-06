@@ -23,6 +23,7 @@ artist_db_spec.loader.exec_module(artist_db_module)
 
 save_artist_submission = artist_db_module.save_artist_submission
 get_artist_submissions = artist_db_module.get_artist_submissions
+delete_artist_submission = artist_db_module.delete_artist_submission
 
 a_sya_bp = Blueprint(
     "a_sya",
@@ -153,8 +154,52 @@ def a_sya_admin_download(submission_id):
         return "ダウンロードに失敗しました", 500
 
 
+
+@a_sya_bp.route("/admin/delete/<int:submission_id>", methods=["POST"])
+@admin_required
+def a_sya_admin_delete(submission_id):
+
+    def delete_r2_image(image_key):
+        client = boto3.client(
+            "s3",
+            endpoint_url=os.environ["R2_ENDPOINT"],
+            aws_access_key_id=os.environ["ARTIST_R2_ACCESS_KEY_ID"],
+            aws_secret_access_key=os.environ["ARTIST_R2_SECRET_ACCESS_KEY"],
+            region_name="auto",
+            config=Config(signature_version="s3v4")
+        )
+
+        client.delete_object(
+            Bucket=os.environ["ARTIST_R2_BUCKET_NAME"],
+            Key=image_key
+        )
+
+    try:
+        deleted = delete_artist_submission(
+            submission_id,
+            delete_r2_image
+        )
+
+        if not deleted:
+            return jsonify({
+                "error": "対象データが見つかりません"
+            }), 404
+
+        return jsonify({
+            "success": True,
+            "message": "削除しました"
+        })
+
+    except Exception:
+        current_app.logger.exception("アー写の削除に失敗")
+        return jsonify({
+            "error": "削除に失敗しました"
+        }), 500
+
+
 @a_sya_bp.route("/", methods=["GET", "POST"])
 def a_sya_submit():
+
 
     if request.method == "GET":
         return send_from_directory(
