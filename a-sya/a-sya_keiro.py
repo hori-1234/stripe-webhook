@@ -5,7 +5,7 @@ import boto3
 
 from PIL import Image, ImageOps, UnidentifiedImageError
 from botocore.config import Config
-from flask import Blueprint, send_from_directory, request, current_app
+from flask import Blueprint, send_from_directory, request, current_app, jsonify
 from pathlib import Path
 from admin_auth import admin_required
 import importlib.util
@@ -19,6 +19,7 @@ artist_db_module = importlib.util.module_from_spec(artist_db_spec)
 artist_db_spec.loader.exec_module(artist_db_module)
 
 save_artist_submission = artist_db_module.save_artist_submission
+get_artist_submissions = artist_db_module.get_artist_submissions
 
 a_sya_bp = Blueprint(
     "a_sya",
@@ -28,6 +29,7 @@ a_sya_bp = Blueprint(
 
 ARTIST_DIR = Path(__file__).resolve().parent
 
+
 @a_sya_bp.route("/admin/", methods=["GET"])
 @admin_required
 def a_sya_admin():
@@ -35,6 +37,28 @@ def a_sya_admin():
         str(ARTIST_DIR),
         "a-sya_admin.html"
     )
+
+
+@a_sya_bp.route("/admin/list", methods=["GET"])
+@admin_required
+def a_sya_admin_list():
+    try:
+        submissions = get_artist_submissions()
+
+        for submission in submissions:
+            submission.pop("image_key", None)
+
+        return jsonify({
+            "count": len(submissions),
+            "submissions": submissions
+        })
+
+    except Exception:
+        current_app.logger.exception("アー写一覧取得に失敗")
+        return jsonify({
+            "error": "一覧の取得に失敗しました"
+        }), 500
+
 
 @a_sya_bp.route("/", methods=["GET", "POST"])
 def a_sya_submit():
