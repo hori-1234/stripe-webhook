@@ -146,3 +146,37 @@ def get_artist_submissions():
 
     finally:
         conn.close()
+
+
+def delete_artist_submission(submission_id, delete_image):
+    conn = psycopg2.connect(os.environ["DATABASE_URL"])
+
+    try:
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT image_key
+                    FROM artist_submissions
+                    WHERE id = %s
+                    FOR UPDATE
+                """, (submission_id,))
+
+                row = cur.fetchone()
+
+                if row is None:
+                    return False
+
+                image_key = row[0]
+
+                # R2画像の削除に成功した場合のみDBを削除
+                delete_image(image_key)
+
+                cur.execute("""
+                    DELETE FROM artist_submissions
+                    WHERE id = %s
+                """, (submission_id,))
+
+        return True
+
+    finally:
+        conn.close()
