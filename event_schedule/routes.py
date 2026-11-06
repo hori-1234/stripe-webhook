@@ -1955,6 +1955,7 @@ def schedule():
         saved_date_memos=saved_date_memos,
         saved_diary_event_ids=saved_diary_event_ids,
         today_views=today_views,
+        today_unique_visitors=today_unique_visitors,
         schedule_news=schedule_news,
         memo_login_email=get_logged_in_memo_email(),
         show_google_link_prompt=should_show_google_link_prompt(),
