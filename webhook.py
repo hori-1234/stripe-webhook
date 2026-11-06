@@ -37,6 +37,7 @@ from ticket_check import (
 
 
 app = Flask(__name__)
+app.json.ensure_ascii = False
 
 import importlib.util
 from pathlib import Path
