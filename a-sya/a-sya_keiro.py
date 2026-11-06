@@ -7,6 +7,7 @@ from PIL import Image, ImageOps, UnidentifiedImageError
 from botocore.config import Config
 from flask import Blueprint, send_from_directory, request, current_app
 from pathlib import Path
+from admin_auth import admin_required
 import importlib.util
 
 artist_db_path = Path(__file__).resolve().parent / "a-sya_db.py"
@@ -27,6 +28,13 @@ a_sya_bp = Blueprint(
 
 ARTIST_DIR = Path(__file__).resolve().parent
 
+@a_sya_bp.route("/admin/", methods=["GET"])
+@admin_required
+def a_sya_admin():
+    return send_from_directory(
+        str(ARTIST_DIR),
+        "a-sya_admin.html"
+    )
 
 @a_sya_bp.route("/", methods=["GET", "POST"])
 def a_sya_submit():
