@@ -102,10 +102,55 @@ def a_sya_admin_image(submission_id):
             io.BytesIO(image_data),
             mimetype="image/webp"
         )
+    
+    except Exception:
+    current_app.logger.exception("アー写の画像取得に失敗")
+        return "画像の取得に失敗しました", 500
+
+
+@a_sya_bp.route("/admin/download/<int:submission_id>", methods=["GET"])
+@admin_required
+def a_sya_admin_download(submission_id):
+    try:
+        conn = psycopg2.connect(os.environ["DATABASE_URL"])
+        try:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT image_key
+                    FROM artist_submissions
+                    WHERE id = %s
+                """, (submission_id,))
+                row = cur.fetchone()
+        finally:
+            conn.close()
+
+        if row is None:
+            return "画像が見つかりません", 404
+
+        client = boto3.client(
+            "s3",
+            endpoint_url=os.environ["R2_ENDPOINT"],
+            aws_access_key_id=os.environ["ARTIST_R2_ACCESS_KEY_ID"],
+            aws_secret_access_key=os.environ["ARTIST_R2_SECRET_ACCESS_KEY"],
+            region_name="auto",
+            config=Config(signature_version="s3v4")
+        )
+
+        result = client.get_object(
+            Bucket=os.environ["ARTIST_R2_BUCKET_NAME"],
+            Key=row[0]
+        )
+
+        return send_file(
+            io.BytesIO(result["Body"].read()),
+            mimetype="image/webp",
+            as_attachment=True,
+            download_name=f"artist_{submission_id}.webp"
+        )
 
     except Exception:
-        current_app.logger.exception("アー写の画像取得に失敗")
-        return "画像の取得に失敗しました", 500
+        current_app.logger.exception("アー写のダウンロードに失敗")
+        return "ダウンロードに失敗しました", 500
 
 
 @a_sya_bp.route("/", methods=["GET", "POST"])
