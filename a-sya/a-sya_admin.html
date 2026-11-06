@@ -242,10 +242,33 @@
             return;
         }
 
-        // Python側の削除APIを後で接続
-        alert("削除機能は準備中です。");
+        try {
+            const response = await fetch(
+                `/a-sya/admin/delete/${id}`,
+                {
+                    method: "POST",
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest"
+                    }
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.error || "削除に失敗しました");
+            }
+
+            alert("削除しました。");
+            await loadArtists();
+
+        } catch (error) {
+            console.error(error);
+            alert(error.message || "削除に失敗しました。");
+        }
     }
 
+    
     loadArtists();
 </script>
 
