@@ -1258,12 +1258,35 @@ def schedule():
 
     if not visitor_id:
         visitor_id = secrets.token_urlsafe(32)
+        
+    user_agent = request.user_agent.string.lower()
+
+    bot_keywords = (
+        "bot",
+        "crawler",
+        "spider",
+        "slurp",
+        "semrush",
+        "qlyze",
+        "bytespider",
+        "facebookexternalhit",
+        "facebookcatalog",
+        "twitterbot",
+        "preview",
+    )
+
+    is_bot = (
+        not user_agent.strip()
+        or any(keyword in user_agent for keyword in bot_keywords)
+    )
 
     if (
         request.args.get("performer_refresh") != "1"
         and not is_schedule_operator()
+        and not is_bot
     ):
         user_agent = request.user_agent.string.lower()
+
 
         if "mobile" in user_agent or "iphone" in user_agent or "android" in user_agent:
             device_type = "スマホ"
