@@ -137,8 +137,36 @@
     async function loadArtists() {
         const list = document.getElementById("artistList");
 
-        list.innerHTML =
-            '<div class="empty">一覧取得機能は準備中です。</div>';
+        try {
+            const response = await fetch("/a-sya/admin/list");
+
+            if (!response.ok) {
+                throw new Error("一覧取得失敗");
+            }
+
+            const data = await response.json();
+
+            document.getElementById("submissionCount").textContent =
+                data.count;
+
+            list.replaceChildren();
+
+            if (data.submissions.length === 0) {
+                list.innerHTML =
+                    '<div class="empty">提出データはありません。</div>';
+                return;
+            }
+
+            data.submissions.forEach(artist => {
+                list.appendChild(createArtistCard(artist));
+            });
+
+        } catch (error) {
+            console.error(error);
+
+            list.innerHTML =
+                '<div class="empty">一覧の取得に失敗しました。</div>';
+        }
     }
 
     function createArtistCard(artist) {
