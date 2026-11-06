@@ -65,6 +65,21 @@ app.secret_key = os.environ.get("kuri_SECRET_KEY")
 from syuwa.syuwa_db import init_syuwa_db
 init_syuwa_db()
 
+import importlib.util
+from pathlib import Path
+
+artist_db_file = Path(__file__).resolve().parent / "a-sya" / "a-sya_db.py"
+
+artist_db_spec = importlib.util.spec_from_file_location(
+    "a_sya_db",
+    artist_db_file
+)
+
+artist_db_module = importlib.util.module_from_spec(artist_db_spec)
+artist_db_spec.loader.exec_module(artist_db_module)
+
+artist_db_module.init_artist_db()
+
 from syuwa.syuwa_keiro import syuwa_bp
 app.register_blueprint(syuwa_bp)
 
