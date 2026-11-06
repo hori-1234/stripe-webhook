@@ -168,11 +168,49 @@
                     削除
                 </button>
             `;
-
+            
             document.getElementById("membersList").appendChild(div);
         }
+
+        document.getElementById("artistForm").addEventListener(
+            "submit",
+            async function(event) {
+                event.preventDefault();
+
+                const form = this;
+                const submitButton = form.querySelector(".submit-btn");
+
+                submitButton.disabled = true;
+                submitButton.textContent = "送信中...";
+
+                try {
+                    const response = await fetch(form.action, {
+                        method: "POST",
+                        body: new FormData(form)
+                    });
+
+                    const message = await response.text();
+
+                    if (!response.ok) {
+                        throw new Error(message);
+                    }
+
+                    alert("アー写の送信が完了しました。");
+
+                    form.reset();
+                    document.getElementById("membersList").innerHTML = "";
+                    toggleMembers();
+
+                } catch (error) {
+                    alert("送信に失敗しました。\n" + error.message);
+
+                } finally {
+                    submitButton.disabled = false;
+                    submitButton.textContent = "送信する";
+                }
+            }
+        );
 
     </script>
 </body>
 </html>
-
