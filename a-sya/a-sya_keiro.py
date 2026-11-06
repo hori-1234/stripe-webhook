@@ -105,7 +105,7 @@ def a_sya_admin_image(submission_id):
         )
     
     except Exception:
-    current_app.logger.exception("アー写の画像取得に失敗")
+        current_app.logger.exception("アー写の画像取得に失敗")
         return "画像の取得に失敗しました", 500
 
 
