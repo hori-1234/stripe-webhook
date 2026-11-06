@@ -117,7 +117,7 @@ def a_sya_admin_download(submission_id):
         try:
             with conn.cursor() as cur:
                 cur.execute("""
-                    SELECT image_key
+                    SELECT image_key, artist_name
                     FROM artist_submissions
                     WHERE id = %s
                 """, (submission_id,))
@@ -165,14 +165,21 @@ def a_sya_admin_download(submission_id):
                 quality=90
             )
             output.seek(0)
+        
+        safe_name = "".join(
+            "_" if c in '/\\:*?"<>|\r\n' or ord(c) < 32 else c
+            for c in row[1]
+        ).strip().strip(".")
+
+        if not safe_name:
+            safe_name = f"artist_{submission_id}"
 
         return send_file(
             output,
             mimetype="image/jpeg",
             as_attachment=True,
-            download_name=f"artist_{submission_id}.jpg"
+            download_name=f"{safe_name}.jpg"
         )
-
 
     except Exception:
         current_app.logger.exception("アー写のダウンロードに失敗")
