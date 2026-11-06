@@ -2,7 +2,10 @@ import io
 import os
 import uuid
 import boto3
+import psycopg2
 
+from botocore.exceptions import ClientError
+from flask import send_file
 from PIL import Image, ImageOps, UnidentifiedImageError
 from botocore.config import Config
 from flask import Blueprint, send_from_directory, request, current_app, jsonify
@@ -58,6 +61,51 @@ def a_sya_admin_list():
         return jsonify({
             "error": "一覧の取得に失敗しました"
         }), 500
+
+
+@a_sya_bp.route("/admin/image/<int:submission_id>", methods=["GET"])
+@admin_required
+def a_sya_admin_image(submission_id):
+    try:
+        conn = psycopg2.connect(os.environ["DATABASE_URL"])
+        try:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT image_key
+                    FROM artist_submissions
+                    WHERE id = %s
+                """, (submission_id,))
+                row = cur.fetchone()
+        finally:
+            conn.close()
+
+        if row is None:
+            return "画像が見つかりません", 404
+
+        client = boto3.client(
+            "s3",
+            endpoint_url=os.environ["R2_ENDPOINT"],
+            aws_access_key_id=os.environ["ARTIST_R2_ACCESS_KEY_ID"],
+            aws_secret_access_key=os.environ["ARTIST_R2_SECRET_ACCESS_KEY"],
+            region_name="auto",
+            config=Config(signature_version="s3v4")
+        )
+
+        result = client.get_object(
+            Bucket=os.environ["ARTIST_R2_BUCKET_NAME"],
+            Key=row[0]
+        )
+
+        image_data = result["Body"].read()
+
+        return send_file(
+            io.BytesIO(image_data),
+            mimetype="image/webp"
+        )
+
+    except Exception:
+        current_app.logger.exception("アー写の画像取得に失敗")
+        return "画像の取得に失敗しました", 500
 
 
 @a_sya_bp.route("/", methods=["GET", "POST"])
