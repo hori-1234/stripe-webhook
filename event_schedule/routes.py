@@ -1657,7 +1657,17 @@ def schedule():
 
     today_views = cur.fetchone()[0]
 
+    cur.execute("""
+        SELECT COUNT(*)
+        FROM schedule_unique_visitors
+        WHERE visit_date =
+            (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tokyo')::date
+    """)
+
+    today_unique_visitors = cur.fetchone()[0]
+
     # 直近7日間の出演者追加・辞退・イベント中止情報を取得
+
     cur.execute("""
         SELECT
             c.event_id,
