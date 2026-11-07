@@ -27,6 +27,7 @@ from oshikatsu.oshi_db import init_oshi_db
 from satsueidance.satsueidance_keiro import satsueidance_bp
 from satsueidance.koukoku.koukokukeiro import koukoku_bp
 from nanchyou_live.nanchyou_keiro import nanchyou_bp
+from nanchyou_live.test import app as camera_test_app
 from product import process_products
 from ticket_check import (
     check_ticket,
@@ -117,6 +118,9 @@ app.register_blueprint(kuri_move_sarch_bp)
 app.register_blueprint(satsueidance_bp)
 app.register_blueprint(koukoku_bp)
 app.register_blueprint(nanchyou_bp)
+
+from nanchyou_live.test import camera_test_bp
+app.register_blueprint(camera_test_bp)
 
 @app.before_request
 def redirect_old_schedule_domain():
