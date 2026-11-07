@@ -118,9 +118,6 @@ app.register_blueprint(satsueidance_bp)
 app.register_blueprint(koukoku_bp)
 app.register_blueprint(nanchyou_bp)
 
-from nanchyou_live.test import camera_test_bp
-app.register_blueprint(camera_test_bp)
-
 @app.before_request
 def redirect_old_schedule_domain():
 
