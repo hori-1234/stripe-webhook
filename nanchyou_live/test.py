@@ -1,8 +1,8 @@
-from flask import Flask, render_template_string
+from flask import Blueprint, render_template_string
 
-app = Flask(__name__)
+camera_test_bp = Blueprint("camera_test", __name__)
 
-@app.route("/test")
+@camera_test_bp.route("/camera-test")
 def camera_test():
     return render_template_string("""
 <!DOCTYPE html>
